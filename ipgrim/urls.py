@@ -1,0 +1,96 @@
+"""ipgrim URL Configuration
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/3.0/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+from django.contrib import admin
+from django.urls import path, re_path, include
+from django.views.decorators.csrf import csrf_exempt  # post일 경우 필요
+
+from search.views import (
+    get_searchs,
+    get_searchs_num,
+    get_query,
+    get_search,
+    get_search_quote,
+    get_search_family,
+    get_search_legal,
+    get_search_registerfee,
+    get_search_rightfullorder,
+    get_search_rightholder,
+    get_search_applicant,
+    get_search_applicant_trend,
+    get_wordcloud,
+    get_topic,
+    get_vec,
+    get_news,
+    get_matrix,
+)
+from company.views import (
+    get_companies, get_companies_query, get_companies_num, get_company)
+from users.views import (do_auth, do_auth_start, do_verify,
+                         do_access_token, do_register, do_update)
+from callback.views import (redirect_google_login, google_callback)
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
+    re_path(r"^api/auth$", csrf_exempt(do_auth)),
+    re_path(r"^api/auth_start$", csrf_exempt(do_auth_start)),
+    re_path(r"^api/auth/verify$", csrf_exempt(do_auth_start)),
+    re_path(r"^api/auth/access-token$", csrf_exempt(do_access_token)),
+    re_path(r"^api/auth/register$", csrf_exempt(do_register)),
+    re_path(r"^api/auth/user/update$", csrf_exempt(do_update)),
+    path("api/auth/verify/<str:code>/", do_verify),
+    path("auth/google/login", redirect_google_login),
+    path("auth/google", google_callback),
+    re_path(r"^api/search-app/searchs$", csrf_exempt(get_searchs)),
+    re_path(r"^api/search-app/searchs_num$", get_searchs_num),
+    re_path(r"^api/search-app/query$", get_query),
+    re_path(r"^api/search-app/searchs/wordcloud$", get_wordcloud),
+    re_path(r"^api/search-app/searchs/vec$", get_vec),
+    re_path(r"^api/search-app/searchs/topic$", get_topic),
+    re_path(r"^api/search-app/searchs/news$", get_news),
+    re_path(r"^api/search-app/searchs/matrix$", get_matrix),
+    # path("api/search-app/thsrs/<str:keyword>/", get_thsrs),
+    # path("api/search-app/applicant", get_applicant),
+    # path("api/search-app/applicant/<str:keyword>/", get_applicant),
+    # path("api/search-app/test/<str:keyword>/", test),
+    path("api/search-app/search", get_search),
+    path("api/search-app/search/<str:patNo>/", get_search),
+    path("api/search-app/search-quote/<str:patNo>/", get_search_quote),
+    path("api/search-app/search-family/<str:patNo>/", get_search_family),
+    path("api/search-app/search-legal/<str:patNo>/", get_search_legal),
+    path("api/search-app/search-registerfee/<str:rgNo>/", get_search_registerfee),
+    path("api/search-app/search-rightfullorder/<str:patNo>/",
+         get_search_rightfullorder),
+    path("api/search-app/search-rightholder/<str:rgNo>/", get_search_rightholder),
+    path("api/search-app/search-applicant/<str:cusNo>/", get_search_applicant),
+    path("api/search-app/search-applicant-trend/<str:cusNo>/",
+         get_search_applicant_trend),
+    re_path(r"^api/company-app/searchs$", get_companies),
+    re_path(r"^api/company-app/searchs_num$", get_companies_num),
+    re_path(r"^api/company-app/query$", get_companies_query),
+    re_path(r"^api/company-app/searchs/wordcloud$", get_wordcloud),
+    re_path(r"^api/company-app/searchs/vec$", get_vec),
+    re_path(r"^api/company-app/searchs/topic$", get_topic),
+    path("api/company-app/search", get_company),
+    path("api/company-app/search/<str:krxCode>/", get_company),
+    # path("api/extract-app/extract_topic/<str:keyword>/", get_extract_topic),
+    # path("api/extract-app/extract_count/<str:keyword>/", get_extract_count),
+    # path("api/extract-app/extract_vec/<str:keyword>/<str:keywordre>/", get_extract_vec),
+    # path("api/extract-app/morp/<str:patNo>/<str:mode>", get_morp),
+    # path("api/extract-app/tag/<str:mode>", get_tag),
+    # path("api/classify-app/category", category),
+    # path("api/classify-app/dictionary/<str:value>", dictionary),
+]
