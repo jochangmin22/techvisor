@@ -2,17 +2,8 @@ import * as Actions from '../actions';
 
 const initialState = {
 	search: null,
-	quote: null,
-	family: null,
-	legal: null,
-	registerFee: null,
-	rightfullOrder: null,
-	rightHolder: null,
-	applicant: null,
-	applicantTrend: null
+	stock: null,
 };
-
-// const initialState = null;
 
 const searchReducer = function (state = initialState, action) {
 	switch (action.type) {
@@ -27,6 +18,12 @@ const searchReducer = function (state = initialState, action) {
 		case Actions.RESET_SEARCH: {
 			return null;
 		}
+		case Actions.GET_STOCK: {
+			return {
+				...state,
+				stock: action.payload
+			};
+		}		
 		default:
 			return state;
 	}

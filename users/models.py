@@ -4,6 +4,7 @@ import uuid
 
 # Create your models here.
 class users(models.Model):
+    # objects = models.Manager()
     id = models.UUIDField(
         primary_key = True,
         default = uuid.uuid4,
@@ -26,6 +27,7 @@ class users(models.Model):
 #   @OneToOne(type => UserProfile, profile => profile.user)
         
 class user_profiles(models.Model):
+    # objects = models.Manager()
     id = models.UUIDField(
         primary_key=True,
         default = uuid.uuid4,
@@ -49,6 +51,7 @@ class user_profiles(models.Model):
         db_table = '"user_profiles"'
 
 class auth_tokens(models.Model):
+    # objects = models.Manager()
     id = models.UUIDField(
         primary_key = True,
         default = uuid.uuid4,
@@ -64,6 +67,7 @@ class auth_tokens(models.Model):
     
 
 class email_auth(models.Model):
+    # objects = models.Manager()
     id = models.UUIDField(
         primary_key = True,
         default = uuid.uuid4,
@@ -79,6 +83,7 @@ class email_auth(models.Model):
         db_table = '"email_auth"'    
 
 class social_accounts(models.Model):
+    # objects = models.Manager()
     id = models.UUIDField(
         primary_key=True,
         default = uuid.uuid4,
@@ -95,6 +100,7 @@ class social_accounts(models.Model):
         db_table = '"social_accounts"'     
 
 class admin_users(models.Model):
+    # objects = models.Manager()
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,

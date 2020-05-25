@@ -13,7 +13,6 @@ import FusePageCarded from '@fuse/core/FusePageCarded';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import withReducer from 'app/store/withReducer';
 import { Link } from 'react-router-dom';
-import Highlighter from 'react-highlight-words';
 import reducer from '../store/reducers';
 import * as Actions from '../store/actions';
 import searchData from './components/searchData';
@@ -50,6 +49,7 @@ function SearchDetails(props) {
 	const [search, setSearch] = useState(searchData);
 
 	useEffect(() => {
+		dispatch(Actions.getStock({kiscode : '005930'}));
 		// dispatch(Actions.getSearch(companyId));
 		// dispatch(Actions.getQuote(companyId));
 		// dispatch(Actions.getFamily(companyId));

@@ -1,13 +1,16 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
+*__pycache__*
+*.pyc
 *.py[cod]
 *$py.class
 
 
 .vscode
 
-users/migrations
-search/migrations
+
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
 
 ui/.env
 ui/build

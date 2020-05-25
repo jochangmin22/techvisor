@@ -2,14 +2,7 @@ import axios from 'axios';
 import { setClickedSearchId } from './searchs.actions';
 export const GET_SEARCH = '[COMPANY APP] GET SEARCH';
 export const RESET_SEARCH = '[COMPANY APP] RESET SEARCH';
-export const GET_SEARCH_QUOTE = '[COMPANY APP] GET SEARCH QUOTE';
-export const GET_SEARCH_FAMILY = '[COMPANY APP] GET SEARCH FAMILY';
-export const GET_SEARCH_LEGAL = '[COMPANY APP] GET SEARCH LEGAL';
-export const GET_SEARCH_REGISTER_FEE = '[COMPANY APP] GET SEARCH REGISTER FEE';
-export const GET_SEARCH_RIGHTFULL_ORDER = '[COMPANY APP] GET SEARCH RIGHTFULL ORDER';
-export const GET_SEARCH_RIGHT_HOLDER = '[COMPANY APP] GET SEARCH RIGHT HOLDER';
-export const GET_SEARCH_APPLICANT = '[COMPANY APP] GET SEARCH APPLICANT';
-export const GET_SEARCH_APPLICANT_TREND = '[COMPANY APP] GET SEARCH APPLICANT_TREND';
+export const GET_STOCK = '[COMPANY APP] GET STOCK';
 
 export function getSearch(params) {
 	const request = axios({
@@ -23,7 +16,6 @@ export function getSearch(params) {
 			dispatch({
 				type: GET_SEARCH,
 				payload: response.data
-				// routeParams
 			});
 		});
 }
@@ -32,4 +24,16 @@ export function resetSearch() {
 	return {
 		type: RESET_SEARCH
 	};
+}
+
+export function getStock(params) {
+	const request = axios.post(`${process.env.REACT_APP_API_URL}/api/company-app/stock`, params);
+
+	return dispatch =>
+		request.then(response => {
+			dispatch({
+				type: GET_STOCK,
+				payload: response.data
+			});
+		});
 }
