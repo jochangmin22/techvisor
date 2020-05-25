@@ -21,9 +21,10 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
+
 def kr_nlp(request, category=""):
     """ konlpy 관련 기능 """
-    
+
     # keyword 모든 조합 구하기 (permutations) - 참고 https://ourcstory.tistory.com/414
 
     params = {}
@@ -41,37 +42,42 @@ def kr_nlp(request, category=""):
         "status",
         "ipType",
     ]:
-        params[value] = request.GET.get(value) if request.GET.get(value) else ""
-    apiParams = "¶".join(params.values()) if params['searchNum'] == '' else params['searchNum']
+        params[value] = request.GET.get(
+            value) if request.GET.get(value) else ""
+    apiParams = "¶".join(
+        params.values()) if params['searchNum'] == '' else params['searchNum']
 
     # Redis {
     context = cache.get(apiParams)
 
     if context:
-        _keywordvec = request.GET.get("keywordvec") if request.GET.get("keywordvec") else None
+        _keywordvec = request.GET.get(
+            "keywordvec") if request.GET.get("keywordvec") else None
         if category == "topic" and context['topic']:
             return HttpResponse(context['topic'], content_type="text/plain; charset=utf-8")
         elif category == "wordcloud" and context['wordcloud']:
-            return HttpResponse(context['wordcloud'])            
+            return HttpResponse(context['wordcloud'])
         elif category == "vec" and context['vec'] and not _keywordvec:
             return HttpResponse(json.dumps(context['vec'], ensure_ascii=False))
     # Redis }
 
     taged_docs = []
-    
-    nlp_raw = []
-  
-    nlp_raw = parse_searchs(request, mode="nlp") if params['searchNum'] == '' else parse_searchs_num(request, mode="nlp")        
 
-    try: # handle NoneType error
+    nlp_raw = []
+
+    nlp_raw = parse_searchs(
+        request, mode="nlp") if params['searchNum'] == '' else parse_searchs_num(request, mode="nlp")
+
+    try:  # handle NoneType error
         taged_docs = nlp_raw.split()
-        tuple_taged_docs = tuple(taged_docs) # list to tuble
+        tuple_taged_docs = tuple(taged_docs)  # list to tuble
     except:
         if category == "vec":
             res = '{"topic":[], "vec":[]}'
         elif category == "wordcloud":
             res = "[]"
-        return HttpResponse(res, content_type="text/plain; charset=utf-8") # break 
+        # break
+        return HttpResponse(res, content_type="text/plain; charset=utf-8")
 
     res = ""
     if taged_docs == [] or taged_docs == [[]]:  # result is empty
@@ -79,7 +85,8 @@ def kr_nlp(request, category=""):
             res = '{"topic":[], "vec":[]}'
         elif category == "wordcloud":
             res = "[]"
-        return HttpResponse(res, content_type="text/plain; charset=utf-8") # break           
+        # break
+        return HttpResponse(res, content_type="text/plain; charset=utf-8")
 
     # if category == "topic":
     #     """ 빈도수 """
@@ -115,32 +122,73 @@ def kr_nlp(request, category=""):
 
     #         return HttpResponse( context['topic'], content_type="text/plain; charset=utf-8")
 
+    # elif category == "wordcloud":
+    #     """ 워드 클라우드 """
+    #     if context and context['wordcloud']: # redis ?
+    #         return HttpResponse(context['wordcloud'])
+    #     else:
+    #         # 방법 1. tupe 형식 처리 {
+    #         count = Counter(tuple_taged_docs)  ## Counter를 쓰기 위해 hashable 한 tuple를 가져옴
+    #         _sublist = count.most_common(50)  # 상위 50개
+    #         sublist = dict(_sublist)
+    #         # return HttpResponse(tuple_taged_docs, content_type="application/json; charset=utf-8");
+
+    #         #### react-tagcloud 용 {
+    #         # 폰트 size 12~ 70 이내로 조정하기 - react-tagcloud 만 해당 : 현재 react Wordcloud 사용중이라 필요없음 {
+    #         # OldMin = min(sublist.values())
+    #         # OldMax = max(sublist.values())
+    #         # NewMax = 70
+    #         # NewMin = 12
+
+    #         # for k, v in sublist.items():
+    #         #     NewValue = (((v - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+    #         #     sublist[k] = round(NewValue)
+    #         # 폰트 size 12~ 70 이내로 조정하기 - react-tagcloud 만 해당 : 현재 react Wordcloud 사용중이라 필요없음 }
+    #         #### react-tagcloud 용 }
+
+    #         # sublist = sorted(sublist.items(), key=operator.itemgetter(1), reverse=True)[
+    #         # sublist = sorted(sublist.items(), key=itemgetter(1), reverse=True)[:50]  # 상위 50개
+    #         sublist = sorted(sublist.items(), key=itemgetter(1), reverse=True)
+
+    #         # field name 넣기
+    #         # https://stackoverflow.com/questions/20540871/python-tuple-to-dict-with-additional-list-of-keys
+    #         fields = ["text", "value"]
+    #         dicts = [dict(zip(fields, d)) for d in sublist]
+
+    #         # json 형태로 출력
+    #         # sublist = json.dumps(sublist, ensure_ascii=False, indent="\t")
+    #         dicts = json.dumps(dicts, ensure_ascii=False, indent="\t")
+    #         if dicts is None:
+    #             return HttpResponse("[]", content_type="text/plain; charset=utf-8")
+
+    #         # Redis {
+    #         if context is not None:
+    #             context['wordcloud'] = dicts
+    #             cache.set(apiParams, context, CACHE_TTL)
+    #         # Redis }
+
+    #         return HttpResponse(dicts)
     elif category == "wordcloud":
         """ 워드 클라우드 """
-        if context and context['wordcloud']: # redis ?
+        if context and context['wordcloud']:  # redis ?
             return HttpResponse(context['wordcloud'])
-        else:        
-            # 방법 1. tupe 형식 처리 {
-            count = Counter(tuple_taged_docs)  ## Counter를 쓰기 위해 hashable 한 tuple를 가져옴
-            _sublist = count.most_common(50)  # 상위 50개
-            sublist = dict(_sublist)
+        else:
+            import operator
+            # off_list = []
+            # for a in tuple_taged_docs:  # 리트스풀기
+            #     for b in a:
+            #         off_list.append(b)
 
-            #### react-tagcloud 용 {
-            # 폰트 size 12~ 70 이내로 조정하기 - react-tagcloud 만 해당 : 현재 react Wordcloud 사용중이라 필요없음 {
-            # OldMin = min(sublist.values())
-            # OldMax = max(sublist.values())
-            # NewMax = 70
-            # NewMin = 12
+            sublist = dict()
 
-            # for k, v in sublist.items():
-            #     NewValue = (((v - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-            #     sublist[k] = round(NewValue)
-            # 폰트 size 12~ 70 이내로 조정하기 - react-tagcloud 만 해당 : 현재 react Wordcloud 사용중이라 필요없음 }
-            #### react-tagcloud 용 }
+            for word in taged_docs:
+                if word in sublist:
+                    sublist[word] += 1
+                else:
+                    sublist[word] = 1
 
-            # sublist = sorted(sublist.items(), key=operator.itemgetter(1), reverse=True)[
-            # sublist = sorted(sublist.items(), key=itemgetter(1), reverse=True)[:50]  # 상위 50개
-            sublist = sorted(sublist.items(), key=itemgetter(1), reverse=True)
+            sublist = sorted(
+                sublist.items(), key=operator.itemgetter(1), reverse=True)[:50]
 
             # field name 넣기
             # https://stackoverflow.com/questions/20540871/python-tuple-to-dict-with-additional-list-of-keys
@@ -150,7 +198,7 @@ def kr_nlp(request, category=""):
             # json 형태로 출력
             # sublist = json.dumps(sublist, ensure_ascii=False, indent="\t")
             dicts = json.dumps(dicts, ensure_ascii=False, indent="\t")
-            if dicts is None: 
+            if dicts is None:
                 return HttpResponse("[]", content_type="text/plain; charset=utf-8")
 
             # Redis {
@@ -159,7 +207,7 @@ def kr_nlp(request, category=""):
                 cache.set(apiParams, context, CACHE_TTL)
             # Redis }
 
-            return HttpResponse(dicts)           
+            return HttpResponse(dicts)
 
     elif category == "vec":
         """ wordCloud 처리 -> 연관 단어 추출 """
@@ -167,7 +215,7 @@ def kr_nlp(request, category=""):
         # if context['vec'] and not _keywordvec: # redis ?
         #     # return HttpResponse(json.dumps(context['vec'], ensure_ascii=False))
         #     return HttpResponse(_keywordvec, ensure_ascii=False)
-        # else:     
+        # else:
         # wordCloud 처리 {
         count = Counter(tuple_taged_docs)
         _sublist = count.most_common(20)
@@ -197,21 +245,22 @@ def kr_nlp(request, category=""):
         # workers-CPU쿼드 코어 사용, iter-학습 횟수, sg-분석방법론 [0]CBOW / [1]Skip-Gram
         model = Word2Vec(
             sentences=[taged_docs],
-            size=100, # 500,
+            size=100,  # 500,
             window=3,
-            min_count=5, # 2,
+            min_count=5,  # 2,
             workers=4,
-            iter=100, # 300,
+            iter=100,  # 300,
             sg=1,
         )
 
         # wordtovec_result = model.wv.similarity('actor', 'actress') #similarity: 두 단어의 유사도를 계산
-        try: 
+        try:
             wordtovec_result = model.wv.most_similar(
                 keywordvec, topn=10
             )  # most_similar: 가장 유사한 단어를 출력
         except:
-            return HttpResponse('{"vec":[{"label":"없음","value":0}]}', content_type="text/plain; charset=utf-8") # break               
+            # break
+            return HttpResponse('{"vec":[{"label":"없음","value":0}]}', content_type="text/plain; charset=utf-8")
         # window_wordtovec_result = "[" + keywordvec + "]", " 연관 단어 : ", wordtovec_result
         # return HttpResponse(window_wordtovec_result)  # 워드투백 결과
         # return HttpResponse(wordtovec_result)  # 워드투백 결과
@@ -234,7 +283,8 @@ def kr_nlp(request, category=""):
         # convert list of lists (wordtovec_result) to list of dictionaries
         keys = ["label", "value"]
         # handle wordtovec_result is empty
-        d = [dict(zip(keys, l)) for l in wordtovec_result] if wordtovec_result != [] else [{"label":"없음","value":0}]
+        d = [dict(zip(keys, l)) for l in wordtovec_result] if wordtovec_result != [
+        ] else [{"label": "없음", "value": 0}]
 
         sublist_result_remove = []  # --- topic 반복 횟수는 여기서 불필요하므로 제거
         for key in sublist.keys():
@@ -254,6 +304,7 @@ def kr_nlp(request, category=""):
         # Redis }
 
         return HttpResponse(json.dumps(res, ensure_ascii=False))
+
 
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"

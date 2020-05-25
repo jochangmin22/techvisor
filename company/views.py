@@ -15,8 +15,8 @@ def get_companies_num(request):
     return parse_companies_num(request)
 
 
-def get_company(request, patNo=""):
-    return parse_company(request, patNo)
+def get_company(request, companyId=""):
+    return parse_company(request, companyId)
 
 def get_wordcloud(request):
     return kr_nlp(request, "wordcloud")

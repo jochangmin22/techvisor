@@ -19,11 +19,10 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-client_id = "738LZ1tTaFPcENRfVM5K"
-client_secret = "zuVt3xKs77"
+client_id = settings.NAVER_NEWS_CLIENT_ID
+client_secret = settings.NAVER_NEWS_CLIENT_SECRET
+API_URL = settings.NAVER_NEWS_API_URL
 
-
-API_URL = "https://openapi.naver.com/v1/search/news.json?query="
 
 keyword_1 = ['강아지', '고양이']
 keyword_2 = ['토끼', '공원']
@@ -78,7 +77,7 @@ def parse_news(request, mode="begin"): # mode : begin, query
         "&dispay=" + str(display) + "&sort=sim"
 
     request = urllib.request.Request(url)
-    request.add_header("X-Naver-Client-Id",client_id)
+    request.add_header("X-Naver-Client-Id", client_id)
     request.add_header("X-Naver-Client-Secret",client_secret)        
 
     response = urllib.request.urlopen(request)

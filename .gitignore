@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+.vscode
+
+users/migrations
+search/migrations
+
+ui/.env
+ui/build
+ui/node_modules
+ui/yarn-error.log*
+ui/src/styles/tailwind.css
+
+secrets.json
+client_secrets.json

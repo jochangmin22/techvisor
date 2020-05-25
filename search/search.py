@@ -28,7 +28,6 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 # from itertools import repeat
 # for api }
 
-
 def parse_search(request, patNo=""):
     """ searchDetails용 검색 """
     patNo = patNo.replace("-", "")

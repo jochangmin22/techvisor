@@ -1,6 +1,7 @@
 /* eslint-disable */
 import React, { useContext } from 'react';
 import Typography from '@material-ui/core/Typography';
+import { Link } from 'react-router-dom';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import SubjectContext from '../SubjectContext';
 import clsx from 'clsx';
@@ -29,8 +30,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const sampleData = [
-	{ title: '현대' },
 	{ title: '삼성전자' },
+	{ title: '현대' },
 	{ title: '셀트리온' },
 	{ title: '기아자동차' },
 	{ title: '코오롱플라스틱' },
@@ -55,15 +56,17 @@ function NewsArticles(props) {
 			<div className="flex flex-row p-12 pb-0 h-48 flex-wrap items-center">
 				<Typography className="text-14 font-bold">관련기업</Typography>
 				{data.map(row => (
-					<Typography
+					<Link
 						key={row.title}
+						style={{ textDecoration: 'none' }}
 						className={clsx(
 							'inline text-14 font-400 m-4 px-8 py-4 rounded-4 cursor-pointer hover:bg-indigo-400 focus:outline-none focus:shadow-outline active:bg-indigo-600',
 							classes.word
 						)}
+						to={`/apps/company/${row.title}`}
 					>
 						{row.title}
-					</Typography>
+					</Link>
 				))}
 			</div>
 		</FuseScrollbars>

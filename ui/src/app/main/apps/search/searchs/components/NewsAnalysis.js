@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
 
 function NewsAnalysis(props) {
 	const classes = useStyles();
-	const news = useSelector(({ searchApp }) => searchApp.searchs.news);
+	const newsDescription = useSelector(({ searchApp }) => searchApp.searchs.news.description);
 	const { searchText } = props;
 
 	const { setShowLoading } = useContext(SubjectContext);

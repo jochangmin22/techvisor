@@ -85,7 +85,7 @@ urlpatterns = [
     re_path(r"^api/company-app/searchs/vec$", get_vec),
     re_path(r"^api/company-app/searchs/topic$", get_topic),
     path("api/company-app/search", get_company),
-    path("api/company-app/search/<str:krxCode>/", get_company),
+    path("api/company-app/search/<str:companyId>/", get_company),
     # path("api/extract-app/extract_topic/<str:keyword>/", get_extract_topic),
     # path("api/extract-app/extract_count/<str:keyword>/", get_extract_count),
     # path("api/extract-app/extract_vec/<str:keyword>/<str:keywordre>/", get_extract_vec),

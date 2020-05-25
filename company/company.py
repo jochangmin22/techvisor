@@ -1,3 +1,4 @@
+import requests
 from django.db import connection
 from django.http import JsonResponse
 from django.http import HttpResponse
@@ -21,24 +22,23 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 # pynori python 3.6과 호환되는지 확인해야함
 # from pynori.korean_analyzer import KoreanAnalyzer
 
-### for settings {
-import requests
+# for api {
 # import urllib.parse
 # from collections import OrderedDict
 # from itertools import repeat
-### for settings }
+# for api }
 
-def parse_company(request, krxCode=""):
+def parse_company(request, companyId=""):
     """ searchDetails용 검색 """
-    krxCode = krxCode.replace("-", "")
+    companyId = companyId.replace("-", "")
 
-    redisKey = krxCode + "¶" # Add delimiter to distinguish from searchs's searchNum
+    redisKey = companyId + "¶" # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'raw')
     # Redis }  
 
     with connection.cursor() as cursor:
-        whereAppNo = "" if krxCode == "" else 'WHERE "출원번호" = $$' + krxCode + "$$"
+        whereAppNo = "" if companyId == "" else 'WHERE "출원번호" = $$' + companyId + "$$"
         # regexp_replace(초록, E'<[^>]+>', '', 'gi') 
         # regexp_replace(regexp_replace(청구항,E'<?/?br>',E'\r\n', 'gi'),E'<DP[^<]+?>', ' ', 'gi')
         # TODO : 공개공보에 발명자4~10 넣어버리기 - crosstab 속도문제
@@ -106,17 +106,17 @@ def parse_company(request, krxCode=""):
     return JsonResponse(row[0], safe=False)
     # return HttpResponse(row, content_type="text/plain; charset=utf-8")
 
-def parse_company_quote(request, krxCode=""):
+def parse_company_quote(request, companyId=""):
     """ searchDetails용 인용 검색 """
-    krxCode = krxCode.replace("-", "")
+    companyId = companyId.replace("-", "")
 
-    redisKey = krxCode + "¶" # Add delimiter to distinguish from searchs's searchNum
+    redisKey = companyId + "¶" # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'quote')
     # Redis }  
 
     with connection.cursor() as cursor:
-        whereAppNo = "" if krxCode == "" else 'WHERE "출원번호" = $$' + krxCode + "$$"
+        whereAppNo = "" if companyId == "" else 'WHERE "출원번호" = $$' + companyId + "$$"
         cursor.execute(
             "SELECT A.*, B.* FROM (SELECT *, split_part(\"인용문헌출원번호_국내\", ',', 1)::numeric AS 인용문헌번호1 FROM 특허실용심사인용문헌 "
             + whereAppNo
@@ -131,15 +131,15 @@ def parse_company_quote(request, krxCode=""):
 
     return JsonResponse(row, safe=False)
 
-def parse_company_family(request, krxCode=""):
+def parse_company_family(request, companyId=""):
     """ searchDetails용 패밀리 검색 """
-    krxCode = krxCode.replace("-", "")
-    redisKey = krxCode + "¶" # Add delimiter to distinguish from searchs's searchNum
+    companyId = companyId.replace("-", "")
+    redisKey = companyId + "¶" # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'family')
     # Redis }  
     with connection.cursor() as cursor:
-        whereAppNo = "" if krxCode == "" else 'WHERE "출원번호" = $$' + krxCode + "$$"
+        whereAppNo = "" if companyId == "" else 'WHERE "출원번호" = $$' + companyId + "$$"
         cursor.execute(
             "SELECT A.*, B.* FROM (SELECT *, case when 패밀리국가코드 = 'KR' then split_part(패밀리출원번호, ',', 1)::numeric else null end 패밀리출원번호1 FROM 특허패밀리 "
             + whereAppNo
@@ -154,15 +154,15 @@ def parse_company_family(request, krxCode=""):
 
     return JsonResponse(row, safe=False)
 
-def parse_company_legal(request, krxCode=""):
+def parse_company_legal(request, companyId=""):
     """ searchDetails용 법적상태이력 검색 """
-    krxCode = krxCode.replace("-", "")
-    redisKey = krxCode + "¶" # Add delimiter to distinguish from searchs's searchNum
+    companyId = companyId.replace("-", "")
+    redisKey = companyId + "¶" # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'legal')
     # Redis }    
     with connection.cursor() as cursor:
-        whereAppNo = "" if krxCode == "" else 'WHERE "출원번호" = $$' + krxCode + "$$"
+        whereAppNo = "" if companyId == "" else 'WHERE "출원번호" = $$' + companyId + "$$"
         cursor.execute(
             "SELECT * FROM 법적상태이력 "
             + whereAppNo
@@ -198,15 +198,15 @@ def parse_company_registerfee(request, rgNo=""):
 
     return JsonResponse(row, safe=False)
 
-def parse_company_rightfullorder(request, krxCode=""):
+def parse_company_rightfullorder(request, companyId=""):
     """ searchDetails용 권리순위 검색 """
-    krxCode = krxCode.replace("-", "")
-    redisKey = krxCode + "¶" # Add delimiter to distinguish from searchs's searchNum
+    companyId = companyId.replace("-", "")
+    redisKey = companyId + "¶" # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'rightfullorder')
     # Redis }     
     with connection.cursor() as cursor:
-        whereAppNo = "" if krxCode == "" else 'WHERE "출원번호" = $$' + krxCode + "$$"
+        whereAppNo = "" if companyId == "" else 'WHERE "출원번호" = $$' + companyId + "$$"
         cursor.execute(
             "SELECT * FROM 권리순위 "
             + whereAppNo

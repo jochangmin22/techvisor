@@ -42,6 +42,11 @@ SECRET_KEY = get_secret("SECRET_KEY")
 KIPRIS_SERVICE_KEY = get_secret("KIPRIS_SERVICE_KEY")
 KIPRIS_REST_URL = get_secret("KIPRIS_REST_URL")
 
+
+NAVER_NEWS_API_URL = get_secret("NAVER_NEWS_API_URL")
+NAVER_NEWS_CLIENT_ID = get_secret("NAVER_NEWS_CLIENT_ID")
+NAVER_NEWS_CLIENT_SECRET = get_secret("NAVER_NEWS_CLIENT_SECRET")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -67,8 +72,10 @@ CORS_ORIGIN_WHITELIST = [
     "http://btowin.iptime.org:8000",
     "http://btowin.synology.me:1000",
     "http://btowin.synology.me:3000",
+    "http://btowin.synology.me:4000",
     "http://btowin.synology.me:8000",
-    "http://v.ipgrim.com",
+    "http://v.ipgrim.com:8000",
+    "http://v.ipgrim.com:8001",
     "https://v.ipgrim.com",
     "http://14.63.15.149",  # company
     "https://14.63.15.149",

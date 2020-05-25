@@ -23,7 +23,7 @@ const CompanyAppConfig = {
 		{
 			// path: "/apps/company/:patId/:productHandle?",
 			path: '/apps/company/:companyId',
-			component: React.lazy(() => import('./search/CompanyDetails'))
+			component: React.lazy(() => import('./search/SearchDetails'))
 		}
 	]
 };
