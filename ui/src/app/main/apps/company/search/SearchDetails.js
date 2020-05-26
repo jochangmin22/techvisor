@@ -3,8 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import Hidden from '@material-ui/core/Hidden';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
@@ -20,13 +18,6 @@ import searchData from './components/searchData';
 import CompanyInfo from './components/CompanyInfo';
 import StockChart from './components/StockChart';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-// import PatInfo from './tabs/PatInfo';
-// import Specification from './tabs/Specification';
-// import Keyword from './tabs/Keyword';
-// import Applicant from './tabs/Applicant';
-// import Similar from './tabs/Similar';
-// import Grade from './tabs/Grade';
-// import Associate from './tabs/Associate';
 
 const useStyles = makeStyles(theme => ({
 	contentCard: {
@@ -49,26 +40,9 @@ function SearchDetails(props) {
 	const [search, setSearch] = useState(searchData);
 
 	useEffect(() => {
-		dispatch(Actions.getStock({kiscode : '005930'}));
-		// dispatch(Actions.getSearch(companyId));
-		// dispatch(Actions.getQuote(companyId));
-		// dispatch(Actions.getFamily(companyId));
-		// dispatch(Actions.getLegal(companyId));
-		// if (search && search.출원인코드1 !== null && search.출원인코드1 !== undefined) {
-		// 	dispatch(Actions.getApplicant(search.출원인코드1));
-		// 	dispatch(Actions.getApplicantTrend(search.출원인코드1));
-		// }
-		// if (search && search.등록번호 !== null && search.등록번호 !== undefined) {
-		// 	dispatch(Actions.getRegisterFee(search.등록번호));
-		// 	dispatch(Actions.getRightHolder(search.등록번호));
-		// }
-		// dispatch(Actions.getRightfullOrder(companyId));
+		dispatch(Actions.getStock({ kiscode: '005930' }));
 		// eslint-disable-next-line
 	}, [dispatch, props.match.params]);
-
-	function handleChangeTab(event, tabValue) {
-		setTabValue(tabValue);
-	}
 
 	function onDownload() {
 		setTimeout(() => {
@@ -161,28 +135,28 @@ function SearchDetails(props) {
 				</div>
 			}
 			// contentToolbar={
-				// search && (
-				// 	<Tabs
-				// 		value={tabValue}
-				// 		onChange={handleChangeTab}
-				// 		indicatorColor="primary"
-				// 		textColor="inherit"
-				// 		variant="scrollable"
-				// 		scrollButtons="auto"
-				// 		// className="w-full border-b-1 px-24"
-				// 		classes={{ root: 'max-w-3xl h-48' }}
-				// 	>
-				// 		<Tab label="기업상세" className="h-48 min-w-128" />
-				// 		{/* <Tab label="청구항" className="h-48 min-w-128" />
-				// 		<Tab label="발명의 설명" className="h-48 min-w-128" /> */}
-				// 		<Tab label="명세서" className="h-48 min-w-128" />
-				// 		<Tab label="키워드" className="h-48 min-w-128" />
-				// 		<Tab label="출원인" className="h-48 min-w-128" />
-				// 		<Tab label="유사특허" className="h-48 min-w-128" />
-				// 		<Tab label="기술등급" className="h-48 min-w-128" />
-				// 		<Tab label="연관기업" className="h-48 min-w-128" />
-				// 	</Tabs>
-				// )
+			// search && (
+			// 	<Tabs
+			// 		value={tabValue}
+			// 		onChange={handleChangeTab}
+			// 		indicatorColor="primary"
+			// 		textColor="inherit"
+			// 		variant="scrollable"
+			// 		scrollButtons="auto"
+			// 		// className="w-full border-b-1 px-24"
+			// 		classes={{ root: 'max-w-3xl h-48' }}
+			// 	>
+			// 		<Tab label="기업상세" className="h-48 min-w-128" />
+			// 		{/* <Tab label="청구항" className="h-48 min-w-128" />
+			// 		<Tab label="발명의 설명" className="h-48 min-w-128" /> */}
+			// 		<Tab label="명세서" className="h-48 min-w-128" />
+			// 		<Tab label="키워드" className="h-48 min-w-128" />
+			// 		<Tab label="출원인" className="h-48 min-w-128" />
+			// 		<Tab label="유사특허" className="h-48 min-w-128" />
+			// 		<Tab label="기술등급" className="h-48 min-w-128" />
+			// 		<Tab label="연관기업" className="h-48 min-w-128" />
+			// 	</Tabs>
+			// )
 			// }
 			content={
 				search && (

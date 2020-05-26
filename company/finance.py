@@ -103,11 +103,11 @@ def crawl_stock(request):
                         fourth = srlists[i].find_all("td",class_="num")[3].text
                         fifth = srlists[i].find_all("td",class_="num")[5].text
 
-                        first = float(first.replace(',',''))
-                        second = float(second.replace(',',''))
-                        third = float(third.replace(',',''))
-                        fourth = float(fourth.replace(',',''))
-                        fifth = float(fifth.replace(',',''))
+                        first = int(first.replace(',',''))
+                        second = int(second.replace(',',''))
+                        third = int(third.replace(',',''))
+                        fourth = int(fourth.replace(',',''))
+                        fifth = int(fifth.replace(',',''))
                         
                         newUid = str(uuid.uuid4())
                         newStock = {

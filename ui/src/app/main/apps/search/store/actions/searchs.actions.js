@@ -23,6 +23,7 @@ export const SET_SELECTED_INDEX = '[SEARCH APP] SET SELECTED INDEX';
 
 export const GET_TOPIC_CHIPS = '[SEARCH APP] GET TOPIC CHIPS';
 export const GET_NEWS = '[SEARCH APP] GET NEWS';
+export const GET_RELATED_COMPANY = '[SEARCH APP] GET RELATED COMPANY';
 export const GET_MATRIX = '[SEARCH APP] GET MATRIX';
 export const UPDATE_MATRIX_CATEGORY = '[SEARCH APP] UPDATE MATRIX CATEGORY';
 
@@ -171,6 +172,27 @@ export function getNews(params) {
 			.then(response =>
 				dispatch({
 					type: GET_NEWS,
+					payload: response.data
+				})
+			)
+			.catch(err => {
+				console.log(err.code);
+				console.log(err.message);
+			});
+}
+
+export function getRelatedCompany(params) {
+	const request = axios.get(
+		`${process.env.REACT_APP_API_URL}/api/search-app/searchs/related-company`,
+		{ params },
+		{ timeout: 1000 * 60 * 0.5 } // 0.5 minute
+	);
+
+	return dispatch =>
+		request
+			.then(response =>
+				dispatch({
+					type: GET_RELATED_COMPANY,
 					payload: response.data
 				})
 			)

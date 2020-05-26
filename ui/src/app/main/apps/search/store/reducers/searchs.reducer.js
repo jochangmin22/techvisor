@@ -30,6 +30,7 @@ const initialState = {
 	selectedSearchIds: [],
 	topicChips: [],
 	news: [],
+	relatedCompany: [],
 	matrix: [],
 	wordCloud: [],
 	subjectRelation: [],
@@ -122,6 +123,12 @@ const searchsReducer = function (state = initialState, action) {
 			return {
 				...state,
 				news: action.payload
+			};
+		}
+		case Actions.GET_RELATED_COMPANY: {
+			return {
+				...state,
+				relatedCompany: action.payload
 			};
 		}
 		case Actions.GET_MATRIX: {

@@ -5,11 +5,12 @@ import PropTypes from 'prop-types';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
-// import TableFooter from '@material-ui/core/TableFooter';
-// import TableHead from '@material-ui/core/TableHead';
-// import TablePagination from '@material-ui/core/TablePagination';
+import TableFooter from '@material-ui/core/TableFooter';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TablePaginationActions from './TablePaginationActions';
 import TableRow from '@material-ui/core/TableRow';
-// import TableSortLabel from '@material-ui/core/TableSortLabel';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
 import clsx from 'clsx';
 // import ContactsTablePaginationActions from './ContactsTablePaginationActions';
@@ -29,15 +30,15 @@ import clsx from 'clsx';
 // 	);
 // });
 
-const EnhancedTable = ({ columns, data, onRowClick }) => {
+const EnhancedTable = ({ columns, data, height, showHeader = true, onRowClick }) => {
 	const {
 		getTableProps,
-		// headerGroups,
+		headerGroups,
 		prepareRow,
-		page
-		// gotoPage,
-		// setPageSize
-		//state: { pageIndex, pageSize }
+		page,
+		gotoPage,
+		setPageSize,
+		state: { pageIndex, pageSize }
 	} = useTable(
 		{
 			columns,
@@ -81,24 +82,24 @@ const EnhancedTable = ({ columns, data, onRowClick }) => {
 		// }
 	);
 
-	// const handleChangePage = (event, newPage) => {
-	// 	gotoPage(newPage);
-	// };
+	const handleChangePage = (event, newPage) => {
+		gotoPage(newPage);
+	};
 
-	// const handleChangeRowsPerPage = event => {
-	// 	setPageSize(Number(event.target.value));
-	// };
+	const handleChangeRowsPerPage = event => {
+		setPageSize(Number(event.target.value));
+	};
 
 	// Render the UI for your table
 	return (
-		<TableContainer className="max-h-160">
+		<TableContainer className={height}>
 			<MaUTable {...getTableProps()} size="small">
-				{/* <TableHead>
+				<TableHead className={showHeader ? '' : 'hidden'}>
 					{headerGroups.map(headerGroup => (
 						<TableRow {...headerGroup.getHeaderGroupProps()}>
 							{headerGroup.headers.map(column => (
 								<TableCell
-									className="whitespace-no-wrap p-12"
+									className="whitespace-no-wrap px-12"
 									{...(!column.sortable
 										? column.getHeaderProps()
 										: column.getHeaderProps(column.getSortByToggleProps()))}
@@ -115,7 +116,7 @@ const EnhancedTable = ({ columns, data, onRowClick }) => {
 							))}
 						</TableRow>
 					))}
-				</TableHead> */}
+				</TableHead>
 				<TableBody>
 					{page.map((row, i) => {
 						prepareRow(row);
@@ -140,15 +141,15 @@ const EnhancedTable = ({ columns, data, onRowClick }) => {
 					})}
 				</TableBody>
 
-				{/* <TableFooter>
+				<TableFooter>
 					<TableRow>
 						<TablePagination
 							classes={{
 								root: 'overflow-hidden',
 								spacer: 'w-0 max-w-0'
 							}}
-							rowsPerPageOptions={[5, 10, 25, { label: 'All', value: data.length + 1 }]}
-							colSpan={5}
+							rowsPerPageOptions={[5, 10, 25, { label: 'All', value: data.length }]}
+							colSpan={9}
 							count={data.length}
 							rowsPerPage={pageSize}
 							page={pageIndex}
@@ -158,10 +159,10 @@ const EnhancedTable = ({ columns, data, onRowClick }) => {
 							}}
 							onChangePage={handleChangePage}
 							onChangeRowsPerPage={handleChangeRowsPerPage}
-							ActionsComponent={ContactsTablePaginationActions}
+							ActionsComponent={TablePaginationActions}
 						/>
 					</TableRow>
-				</TableFooter> */}
+				</TableFooter>
 			</MaUTable>
 		</TableContainer>
 	);

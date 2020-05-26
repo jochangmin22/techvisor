@@ -2,7 +2,7 @@
 import React, { useContext, useState } from 'react';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import EnhancedTable from './components/EnhancedTable';
+import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import SubjectContext from '../SubjectContext';
 import { useSelector } from 'react-redux';
 import CircularLoading from '../../components/CircularLoading';
@@ -39,27 +39,22 @@ function NewsArticles(props) {
 	const columns = React.useMemo(
 		() => [
 			{
-				Header: 'Name',
-				columns: [
-					{
-						Header: '제목',
-						accessor: 'title',
-						Cell: row => (
-							<span>
-								<span
-									style={{
-										color: theme.palette.primary.main,
-										transition: 'all .3s ease'
-									}}
-								>
-									&#10625;
-								</span>{' '}
-								{row.value}
-							</span>
-						),
-						className: 'text-14'
-					}
-				]
+				Header: '제목',
+				accessor: 'title',
+				Cell: row => (
+					<span>
+						<span
+							style={{
+								color: theme.palette.primary.main,
+								transition: 'all .3s ease'
+							}}
+						>
+							&#10625;
+						</span>{' '}
+						{row.value}
+					</span>
+				),
+				className: 'text-15'
 			}
 		],
 		[]
@@ -81,6 +76,8 @@ function NewsArticles(props) {
 				columns={columns}
 				data={data}
 				size="small"
+				height="max-h-160"
+				showHeader={false}
 				onRowClick={(ev, row) => {
 					if (row) {
 						window.open(row.original.link, '_blank');

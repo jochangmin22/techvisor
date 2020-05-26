@@ -41,6 +41,262 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 # IPC요약(IPCM)
 # 출원인 대표명화 코드(WAP)
 
+def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
+    """ 쿼리 실행 및 결과 저장 """
+    # redis key define
+    params = {}
+    for value in [
+        "searchText",
+        "searchNum",
+        "searchVolume",
+        "dateType",
+        "startDate",
+        "endDate",
+        "inventor",
+        "assignee",
+        "patentOffice",
+        "language",
+        "status",
+        "ipType",
+    ]:
+        params[value] = request.GET.get(
+            value) if request.GET.get(value) else ""
+    apiParams = "¶".join(
+        params.values()) if params['searchNum'] == '' else params['searchNum']
+
+    # if apiParams == '¶¶¶¶¶¶¶¶¶':
+    #     return "[]"
+    # return HttpResponse(params["assignee"], content_type="text/plain; charset=utf-8")
+
+    context = cache.get(apiParams)
+
+    if context and context['raw'] and mode == "begin":
+        return JsonResponse(context['raw'], safe=False)
+
+    if context and context['nlp_raw'] and mode == 'nlp':
+        return context['nlp_raw']
+
+    if context and context['mtx_raw'] and mode == 'matrix':
+        return context['mtx_raw']
+
+    with connection.cursor() as cursor:
+
+        # 검색범위 선택
+        if params['searchVolume'] == 'SUMA':
+            searchVolume = '중'
+        elif params['searchVolume'] == 'ALL':
+            searchVolume = '대'
+        else:
+            searchVolume = '소'
+        # to_tsquery 형태로 parse
+        whereTermsA = tsquery_keywords(
+            params["searchText"], '전문' + searchVolume)
+        # whereTermsB = like_keywords(params["searchText"], "출원인1")
+        # 출원인 포함은 db 성능 개선하고 나중에
+        # whereTermsAll = ("((" + whereTermsA + ") or " if whereTermsA else "") + ("("+ whereTermsB + ")) and " if whereTermsB else "")
+        whereTermsAll = ("((" + whereTermsA + ")) and " if whereTermsA else "")
+
+        whereInventor = (
+            like_keywords(params["inventor"],
+                          "발명자1") if params["inventor"] else ""
+        )
+        whereAssignee = (
+            like_keywords(params["assignee"],
+                          "출원인1") if params["assignee"] else ""
+        )
+        whereOther = parse_Others(
+            params["dateType"],
+            params["startDate"],
+            params["endDate"],
+            params["status"],
+            params["ipType"],
+        )
+
+        query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE ' + \
+            whereTermsAll + ("(" + whereInventor + ") and " if whereInventor else "") + (
+                "(" + whereAssignee + ") and " if whereAssignee else "") + whereOther
+
+        if query.endswith(" and "):
+            query = query[:-5]
+
+        if mode == "query":  # mode가 query면 여기서 분기
+            return query
+
+        cursor.execute(
+            "SET work_mem to '100MB';"
+            # + "SET statement_timeout TO 20000;"
+            + query
+            # + ' and (등록사항 <> ALL (\'{"소멸","거절","취하"}\'::varchar[]))'
+            # + " GROUP BY 특허고객대표번호"
+            # + " order by 출원번호 DESC"
+            # + " limit 1000"
+        )
+        row = dictfetchall(cursor)
+    # return HttpResponse(query, content_type="text/plain; charset=utf-8")
+
+    nlp_raw = ""
+    mtx_raw = []
+    # tsv_content = ""
+    # x = []
+    if row:
+        # 사용안함 { 아래로 대체
+        # 초록부분만 DB 저장 - token처리 ; 시간걸림
+        # ids = [y["초록"] for y in row]
+        # nlp_raw = kr_taged(HttpResponse(ids))
+        # nlp_raw = json.dumps(nlp_raw, ensure_ascii=False)
+        # memory 절약을 위해 10번째 초록부분만 제외 - row는 list of dictionaries 형태임
+        # for i in range(len(row)):
+        #     del row[i]["요약token"]
+        # 사용안함 }
+        # matrix list 생성
+        mtx_raw = deepcopy(row)
+
+        # npl and mtx parse
+        for i in range(len(row)):
+            # x += row[i]["요약token"].split()
+            nlp_raw += row[i]["요약token"] if row[i]["요약token"] else "" + " "
+            # grid에는 초록 안쓰므로 nlp_raw에 저장하고 바로 제거 - row는 list of dictionaries 형태임
+            del row[i]["요약token"]
+
+            # matrix는 출원번호, 출원일자, 출원인1, ipc요약, 요약token만 사용
+            mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]
+            # del mtx_raw[i]["rows_count"]
+            del mtx_raw[i]["등록사항"]
+            del mtx_raw[i]["발명의명칭(국문)"]
+            del mtx_raw[i]["발명의명칭(영문)"]
+            del mtx_raw[i]["출원인코드1"]
+            del mtx_raw[i]["출원인국가코드1"]
+            del mtx_raw[i]["발명자1"]
+            del mtx_raw[i]["발명자국가코드1"]
+            del mtx_raw[i]["등록일자"]
+            del mtx_raw[i]["공개일자"]
+
+            # del mtx_raw[i][:4]
+            # del mtx_raw[i][6:12]
+
+        # tsv_content = json.dumps(x, ensure_ascii=False)
+        # if nlp_raw.endswith(" "):
+        #     nlp_raw = nlp_raw[:-1]
+
+        # 요약token tokenizer
+        nlp_raw = ' '.join(tokenizer(nlp_raw) if nlp_raw else '')
+    else:  # 결과값 없을 때 처리
+        row = []
+
+    # redis 저장 {
+    new_context = {}
+    new_context['nlp_raw'] = nlp_raw
+    new_context['mtx_raw'] = mtx_raw
+    new_context['raw'] = row
+    new_context['wordcloud'] = []
+    new_context['vec'] = []
+    new_context['matrix'] = []
+    cache.set(apiParams, new_context, CACHE_TTL)
+    # redis 저장 }
+
+    if mode == "begin":
+        return JsonResponse(row, safe=False)
+    elif mode == "nlp":
+        return nlp_raw
+    elif mode == "matrix":
+        return mtx_raw
+
+
+def parse_searchs_num(request, mode="begin"):  # mode : begin, nlp, query
+    """ 쿼리 실행 및 결과 저장 ; 번호검색 """
+    # api 저장용 params
+    params = {}
+    params["searchNum"] = request.GET.get(
+        "searchNum") if request.GET.get("searchNum") else ""
+    params["searchNumNoHyphens"] = params["searchNum"].replace(
+        "-", "") if params["searchNum"] else ""
+    apiParams = params["searchNum"]  # apiParams = "¶".join(params.values())
+
+    context = cache.get(apiParams)
+    if context and context['raw'] and mode == "begin":
+        return JsonResponse(context['raw'], safe=False)
+
+    if context and context['nlp_raw'] and mode == 'nlp':
+        return context['nlp_raw']
+
+    with connection.cursor() as cursor:
+        whereNum = ""
+        # fields without "-"
+        for value in ["출원번호", "공개번호", "등록번호"]:
+            whereNum += value + "::text like '%" + \
+                params["searchNumNoHyphens"] + "%' or "
+
+        # TODO : hyphen refine
+        # fields with "-"
+        for value in ["우선권주장출원번호1", "우선권주장출원번호2", "우선권주장출원번호3", "우선권주장출원번호4", "우선권주장출원번호5", "우선권주장출원번호6", "우선권주장출원번호7", "우선권주장출원번호8", "우선권주장출원번호9", "우선권주장출원번호10"]:
+            whereNum += value + "::text like '%" + \
+                params["searchNum"] + "%' or "
+        if whereNum.endswith(" or "):
+            whereNum = whereNum[:-4]
+
+        query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE ' + whereNum
+
+        if mode == "query":  # mode가 query면 여기서 분기
+            return query
+
+        cursor.execute(
+            "SET work_mem to '100MB';"
+            + query
+        )
+        row = dictfetchall(cursor)
+
+    # return HttpResponse(query, content_type="text/plain; charset=utf-8")
+
+    nlp_raw = ""
+    mtx_raw = []
+    # x = []
+    if row:
+
+        mtx_raw = deepcopy(row)
+        # nlp, mtx parse
+        for i in range(len(row)):
+            # x += row[i]["요약token"].split()
+            nlp_raw += row[i]["요약token"] + " "
+            # grid에는 초록 안쓰므로 nlp_raw에 저장하고 바로 제거 - row는 list of dictionaries 형태임
+            del row[i]["요약token"]
+
+            # matrix는 출원일자, 출원인1, ipc요약, 요약token만 사용
+            mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]
+            del mtx_raw[i]["등록사항"]
+            del mtx_raw[i]["발명의명칭(국문)"]
+            del mtx_raw[i]["발명의명칭(영문)"]
+            del mtx_raw[i]["출원인코드1"]
+            del mtx_raw[i]["출원인국가코드1"]
+            del mtx_raw[i]["발명자1"]
+            del mtx_raw[i]["발명자국가코드1"]
+            del mtx_raw[i]["등록일자"]
+            del mtx_raw[i]["공개일자"]
+            # del mtx_raw[i][:4]
+            # del mtx_raw[i][6:12]
+
+        if nlp_raw.endswith(" "):
+            nlp_raw = nlp_raw[:-1]
+    else:  # 결과값 없을 때 처리
+        row = []
+
+    # Redis 저장 {
+    new_context = {}
+    new_context['nlp_raw'] = nlp_raw
+    new_context['mtx_raw'] = mtx_raw
+    new_context['raw'] = row
+    new_context['wordcloud'] = []
+    new_context['vec'] = []
+    new_context['matrix'] = []
+    cache.set(apiParams, new_context, CACHE_TTL)
+    # Redis 저장 }
+
+    if mode == "begin":
+        return JsonResponse(row, safe=False)
+    elif mode == "nlp":
+        return nlp_raw
+    elif mode == "matrix":
+        return mtx_raw
+
 
 def parse_keywords(keyword="", fieldName=""):
     """ keyword를 split 해서 순열로 like query 생성 """
@@ -297,263 +553,6 @@ def tsquery_keywords(keyword="", fieldName=""):
 def parse_query(request):
     """ 쿼리 확인용 """
     return HttpResponse(parse_searchs(request, mode="query"), content_type="text/plain; charset=utf-8")
-
-
-def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
-    """ 쿼리 실행 및 결과 저장 """
-    # redis key define
-    params = {}
-    for value in [
-        "searchText",
-        "searchNum",
-        "searchVolume",
-        "dateType",
-        "startDate",
-        "endDate",
-        "inventor",
-        "assignee",
-        "patentOffice",
-        "language",
-        "status",
-        "ipType",
-    ]:
-        params[value] = request.GET.get(
-            value) if request.GET.get(value) else ""
-    apiParams = "¶".join(
-        params.values()) if params['searchNum'] == '' else params['searchNum']
-
-    # if apiParams == '¶¶¶¶¶¶¶¶¶':
-    #     return "[]"
-    # return HttpResponse(params["assignee"], content_type="text/plain; charset=utf-8")
-
-    context = cache.get(apiParams)
-
-    if context and context['raw'] and mode == "begin":
-        return JsonResponse(context['raw'], safe=False)
-
-    if context and context['nlp_raw'] and mode == 'nlp':
-        return context['nlp_raw']
-
-    if context and context['mtx_raw'] and mode == 'matrix':
-        return context['mtx_raw']
-
-    with connection.cursor() as cursor:
-
-        # 검색범위 선택
-        if params['searchVolume'] == 'SUMA':
-            searchVolume = '중'
-        elif params['searchVolume'] == 'ALL':
-            searchVolume = '대'
-        else:
-            searchVolume = '소'
-        # to_tsquery 형태로 parse
-        whereTermsA = tsquery_keywords(
-            params["searchText"], '전문' + searchVolume)
-        # whereTermsB = like_keywords(params["searchText"], "출원인1")
-        # 출원인 포함은 db 성능 개선하고 나중에
-        # whereTermsAll = ("((" + whereTermsA + ") or " if whereTermsA else "") + ("("+ whereTermsB + ")) and " if whereTermsB else "")
-        whereTermsAll = ("((" + whereTermsA + ")) and " if whereTermsA else "")
-
-        whereInventor = (
-            like_keywords(params["inventor"],
-                          "발명자1") if params["inventor"] else ""
-        )
-        whereAssignee = (
-            like_keywords(params["assignee"],
-                          "출원인1") if params["assignee"] else ""
-        )
-        whereOther = parse_Others(
-            params["dateType"],
-            params["startDate"],
-            params["endDate"],
-            params["status"],
-            params["ipType"],
-        )
-
-        query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE ' + \
-            whereTermsAll + ("(" + whereInventor + ") and " if whereInventor else "") + (
-                "(" + whereAssignee + ") and " if whereAssignee else "") + whereOther
-
-        if query.endswith(" and "):
-            query = query[:-5]
-
-        if mode == "query":  # mode가 query면 여기서 분기
-            return query
-
-        cursor.execute(
-            "SET work_mem to '100MB';"
-            # + "SET statement_timeout TO 20000;"
-            + query
-            # + ' and (등록사항 <> ALL (\'{"소멸","거절","취하"}\'::varchar[]))'
-            # + " GROUP BY 특허고객대표번호"
-            # + " order by 출원번호 DESC"
-            # + " limit 1000"
-        )
-        row = dictfetchall(cursor)
-    # return HttpResponse(query, content_type="text/plain; charset=utf-8")
-
-    nlp_raw = ""
-    mtx_raw = []
-    # tsv_content = ""
-    # x = []
-    if row:
-        # 사용안함 { 아래로 대체
-        # 초록부분만 DB 저장 - token처리 ; 시간걸림
-        # ids = [y["초록"] for y in row]
-        # nlp_raw = kr_taged(HttpResponse(ids))
-        # nlp_raw = json.dumps(nlp_raw, ensure_ascii=False)
-        # memory 절약을 위해 10번째 초록부분만 제외 - row는 list of dictionaries 형태임
-        # for i in range(len(row)):
-        #     del row[i]["요약token"]
-        # 사용안함 }
-        # matrix list 생성
-        mtx_raw = deepcopy(row)
-
-        # npl and mtx parse
-        for i in range(len(row)):
-            # x += row[i]["요약token"].split()
-            nlp_raw += row[i]["요약token"] if row[i]["요약token"] else "" + " "
-            # grid에는 초록 안쓰므로 nlp_raw에 저장하고 바로 제거 - row는 list of dictionaries 형태임
-            del row[i]["요약token"]
-
-            # matrix는 출원번호, 출원일자, 출원인1, ipc요약, 요약token만 사용
-            mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]
-            # del mtx_raw[i]["rows_count"]
-            del mtx_raw[i]["등록사항"]
-            del mtx_raw[i]["발명의명칭(국문)"]
-            del mtx_raw[i]["발명의명칭(영문)"]
-            del mtx_raw[i]["출원인코드1"]
-            del mtx_raw[i]["출원인국가코드1"]
-            del mtx_raw[i]["발명자1"]
-            del mtx_raw[i]["발명자국가코드1"]
-            del mtx_raw[i]["등록일자"]
-            del mtx_raw[i]["공개일자"]
-
-            # del mtx_raw[i][:4]
-            # del mtx_raw[i][6:12]
-
-        # tsv_content = json.dumps(x, ensure_ascii=False)
-        # if nlp_raw.endswith(" "):
-        #     nlp_raw = nlp_raw[:-1]
-
-        # 요약token tokenizer
-        nlp_raw = ' '.join(tokenizer(nlp_raw) if nlp_raw else '')
-    else:  # 결과값 없을 때 처리
-        row = []
-
-    # redis 저장 {
-    new_context = {}
-    new_context['nlp_raw'] = nlp_raw
-    new_context['mtx_raw'] = mtx_raw
-    new_context['raw'] = row
-    new_context['wordcloud'] = []
-    new_context['vec'] = []
-    new_context['matrix'] = []
-    cache.set(apiParams, new_context, CACHE_TTL)
-    # redis 저장 }
-
-    if mode == "begin":
-        return JsonResponse(row, safe=False)
-    elif mode == "nlp":
-        return nlp_raw
-    elif mode == "matrix":
-        return mtx_raw
-
-
-def parse_searchs_num(request, mode="begin"):  # mode : begin, nlp, query
-    """ 쿼리 실행 및 결과 저장 ; 번호검색 """
-    # api 저장용 params
-    params = {}
-    params["searchNum"] = request.GET.get(
-        "searchNum") if request.GET.get("searchNum") else ""
-    params["searchNumNoHyphens"] = params["searchNum"].replace(
-        "-", "") if params["searchNum"] else ""
-    apiParams = params["searchNum"]  # apiParams = "¶".join(params.values())
-
-    context = cache.get(apiParams)
-    if context and context['raw'] and mode == "begin":
-        return JsonResponse(context['raw'], safe=False)
-
-    if context and context['nlp_raw'] and mode == 'nlp':
-        return context['nlp_raw']
-
-    with connection.cursor() as cursor:
-        whereNum = ""
-        # fields without "-"
-        for value in ["출원번호", "공개번호", "등록번호"]:
-            whereNum += value + "::text like '%" + \
-                params["searchNumNoHyphens"] + "%' or "
-
-        # TODO : hyphen refine
-        # fields with "-"
-        for value in ["우선권주장출원번호1", "우선권주장출원번호2", "우선권주장출원번호3", "우선권주장출원번호4", "우선권주장출원번호5", "우선권주장출원번호6", "우선권주장출원번호7", "우선권주장출원번호8", "우선권주장출원번호9", "우선권주장출원번호10"]:
-            whereNum += value + "::text like '%" + \
-                params["searchNum"] + "%' or "
-        if whereNum.endswith(" or "):
-            whereNum = whereNum[:-4]
-
-        query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE ' + whereNum
-
-        if mode == "query":  # mode가 query면 여기서 분기
-            return query
-
-        cursor.execute(
-            "SET work_mem to '100MB';"
-            + query
-        )
-        row = dictfetchall(cursor)
-
-    # return HttpResponse(query, content_type="text/plain; charset=utf-8")
-
-    nlp_raw = ""
-    mtx_raw = []
-    # x = []
-    if row:
-
-        mtx_raw = deepcopy(row)
-        # nlp, mtx parse
-        for i in range(len(row)):
-            # x += row[i]["요약token"].split()
-            nlp_raw += row[i]["요약token"] + " "
-            # grid에는 초록 안쓰므로 nlp_raw에 저장하고 바로 제거 - row는 list of dictionaries 형태임
-            del row[i]["요약token"]
-
-            # matrix는 출원일자, 출원인1, ipc요약, 요약token만 사용
-            mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]
-            del mtx_raw[i]["등록사항"]
-            del mtx_raw[i]["발명의명칭(국문)"]
-            del mtx_raw[i]["발명의명칭(영문)"]
-            del mtx_raw[i]["출원인코드1"]
-            del mtx_raw[i]["출원인국가코드1"]
-            del mtx_raw[i]["발명자1"]
-            del mtx_raw[i]["발명자국가코드1"]
-            del mtx_raw[i]["등록일자"]
-            del mtx_raw[i]["공개일자"]
-            # del mtx_raw[i][:4]
-            # del mtx_raw[i][6:12]
-
-        if nlp_raw.endswith(" "):
-            nlp_raw = nlp_raw[:-1]
-    else:  # 결과값 없을 때 처리
-        row = []
-
-    # Redis 저장 {
-    new_context = {}
-    new_context['nlp_raw'] = nlp_raw
-    new_context['mtx_raw'] = mtx_raw
-    new_context['raw'] = row
-    new_context['wordcloud'] = []
-    new_context['vec'] = []
-    new_context['matrix'] = []
-    cache.set(apiParams, new_context, CACHE_TTL)
-    # Redis 저장 }
-
-    if mode == "begin":
-        return JsonResponse(row, safe=False)
-    elif mode == "nlp":
-        return nlp_raw
-    elif mode == "matrix":
-        return mtx_raw
 
 # def kr_taged(rawdata=""):
 #     """ 형태소 처리 """

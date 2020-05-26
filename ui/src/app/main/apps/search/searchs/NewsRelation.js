@@ -23,7 +23,9 @@ function NewsRelation(props) {
 	const showLoadingValue = useMemo(() => ({ showLoading, setShowLoading }), [showLoading, setShowLoading]);
 
 	useEffect(() => {
-		dispatch(Actions.getNews({ searchText: searchText }));
+		dispatch(Actions.getNews({ searchText: searchText })).then(() => {
+			dispatch(Actions.getRelatedCompany({ searchText: searchText }));
+		});
 	}, [searchText]);
 	// useEffect(() => {
 	// 	if (newsAnalysis === null) {

@@ -3,7 +3,7 @@ import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import EnhancedTable from './components/EnhancedTable';
+import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import { useSelector, useDispatch } from 'react-redux';
 import CircularLoading from '../components/CircularLoading';
 // import { Draggable } from 'react-beautiful-dnd';
@@ -36,20 +36,20 @@ function MatrixAnalysis(props) {
 						{
 							Header: selectedCategory,
 							accessor: selectedCategory,
-							className: 'text-11'
+							className: 'text-11 text-center'
 						}
 				  ].concat(
 						Object.keys(matrix).map(item => ({
 							Header: item,
 							accessor: item,
-							className: 'text-11'
+							className: 'text-11 text-center'
 						}))
 				  )
 				: [
 						{
 							Header: selectedCategory,
 							accessor: selectedCategory,
-							className: 'text-11'
+							className: 'text-11 text-center'
 						}
 				  ],
 		// eslint-disable-next-line
@@ -183,6 +183,7 @@ function MatrixAnalysis(props) {
 				columns={columns}
 				data={data}
 				size="small"
+				height="max-h-288 px-16"
 				onRowClick={(ev, row) => {
 					if (row) {
 						// window.open(row.original.link, '_blank');

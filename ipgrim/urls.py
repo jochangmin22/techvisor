@@ -34,6 +34,8 @@ from search.views import (
     get_topic,
     get_vec,
     get_news,
+    get_news_nlp,
+    get_related_company,
     get_matrix,
 )
 from company.views import (
@@ -60,6 +62,8 @@ urlpatterns = [
     re_path(r"^api/search-app/searchs/vec$", get_vec),
     re_path(r"^api/search-app/searchs/topic$", get_topic),
     re_path(r"^api/search-app/searchs/news$", get_news),
+    re_path(r"^api/search-app/searchs/news_nlp$", csrf_exempt(get_news_nlp)),
+    re_path(r"^api/search-app/searchs/related-company$", csrf_exempt(get_related_company)),
     re_path(r"^api/search-app/searchs/matrix$", get_matrix),
     # path("api/search-app/thsrs/<str:keyword>/", get_thsrs),
     # path("api/search-app/applicant", get_applicant),
