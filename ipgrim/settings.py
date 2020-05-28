@@ -68,6 +68,7 @@ CORS_ORIGIN_WHITELIST = [
     "http://localhost:3001",
     "http://127.0.0.1:8000",
     "http://btowin.iptime.org:1000",
+    "http://btowin.iptime.org:1111",
     "http://btowin.iptime.org:3000",
     "http://btowin.iptime.org:8000",
     "http://btowin.synology.me:1000",
