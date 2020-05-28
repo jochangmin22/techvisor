@@ -1,22 +1,23 @@
 # Byte-compiled / optimized / DLL files
-*__pycache__*
-*.pyc
+__pycache__/
 *.py[cod]
 *$py.class
 
-
+# C extensions
+*.so
 .vscode
 
 
-**/migrations/**
-!**/migrations
-!**/migrations/__init__.py
+migrations
+.env
 
-ui/.env
-ui/build
-ui/node_modules
-ui/yarn-error.log*
-ui/src/styles/tailwind.css
+
+build
+node_modules
+yarn-error.log*
+tailwind.css
 
 secrets.json
 client_secrets.json
+
+# git rm --cached brabrabra [is folder add this: -r]
