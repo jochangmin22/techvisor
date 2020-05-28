@@ -10923,9 +10923,9 @@ raw-loader@4.0.1:
     schema-utils "^2.6.5"
 
 rc-easyui@^1.0.53:
-  version "1.1.15"
-  resolved "https://registry.yarnpkg.com/rc-easyui/-/rc-easyui-1.1.15.tgz#db1424e1986d53e4fa6bf40a2bb9d0a13dc1dddc"
-  integrity sha512-JRm41H6OBMXJs8bY9CjCBVWwCHMQU6grsE0JcRoBlIJMTEMV8obpVKTgGsSslsemz9DzAAE5QsNdqdYTNy8jWw==
+  version "1.1.16"
+  resolved "https://registry.yarnpkg.com/rc-easyui/-/rc-easyui-1.1.16.tgz#f75de240176330d815ba59ea4f5b915b6b497331"
+  integrity sha512-SM0uDZzPa2YhEkqrWifmXCpIaGjADfrP3Poycv9bnXF8us6nEtRvGHYcl0AGMPoz39NdUOrNw5maQTxjqxtq0w==
 
 rc-progress@^2.5.2:
   version "2.6.1"
