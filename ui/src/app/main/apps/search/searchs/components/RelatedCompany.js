@@ -1,45 +1,12 @@
 /* eslint-disable */
 import React, { useContext } from 'react';
 import Typography from '@material-ui/core/Typography';
-import { Link } from 'react-router-dom';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import SubjectContext from '../SubjectContext';
-import clsx from 'clsx';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import { useSelector } from 'react-redux';
-
-const useStyles = makeStyles(theme => ({
-	root: {
-		display: 'flex',
-		justifyContent: 'center',
-		height: '68px',
-		flexWrap: 'wrap',
-		'& > *': {
-			margin: theme.spacing(0.5)
-		}
-	},
-	popover: {
-		pointerEvents: 'none'
-	},
-	paper: {
-		padding: theme.spacing(1)
-	},
-	word: {
-		backgroundColor: theme.palette.primary.main,
-		color: theme.palette.getContrastText(theme.palette.primary.main)
-	}
-}));
-
-// const sampleData = [
-// 	{ title: '삼성전자' },
-// 	{ title: '현대' },
-// 	{ title: '셀트리온' },
-// 	{ title: '기아자동차' },
-// 	{ title: '코오롱플라스틱' },
-// 	{ title: '우정바이오' },
-// 	{ title: 'SK텔레콤' },
-// 	{ title: '흥국에프엔비' }
-// ];
+import Chip from '@material-ui/core/Chip';
+import { withRouter } from 'react-router-dom';
+import SubjectContext from '../SubjectContext';
+import { useSelector, useDispatch } from 'react-redux';
+import * as Actions from '../../../company/store/actions';
 
 // const sampleData2 = {
 // 	corpName: ['나노', '나노', '오스코', '오스코', '유한양행', '이노', '코로나', '한양'],
@@ -47,38 +14,50 @@ const useStyles = makeStyles(theme => ({
 // 	stockCode: [null, '187790', null, null, '100', null, null, null]
 // };
 
-function NewsArticles(props) {
-	// const { searchNum, topic } = props;
-	const classes = useStyles();
-	const theme = useTheme();
-	const relatedCompany = useSelector(({ searchApp }) => searchApp.searchs.relatedCompany);
+const defaultChipData = { corpName: '삼성전자', corpCode: '126380', stockCode: '005930' };
 
+function NewsArticles(props) {
+	const dispatch = useDispatch();
+	const relatedCompany = useSelector(({ searchApp }) => searchApp.searchs.relatedCompany);
+	const { corpName, corpCode, stockCode } = relatedCompany;
 	// const { setShowLoading } = useContext(SubjectContext);
 
-	const data = React.useMemo(() => relatedCompany['corpName'], [relatedCompany]);
+	function handleClick(e, companyInfo) {
+		e.preventDefault();
+		dispatch(Actions.setCompanyCode(companyInfo));
+		props.history.push(`/apps/company/${companyInfo.corpName}`);
+	}
+
+	const data = React.useMemo(() => corpName, [corpName]);
 
 	return (
 		<FuseScrollbars className="flex items-center overflow-x-auto">
 			<div className="flex flex-row p-12 pb-0 h-48 flex-wrap items-center">
 				<Typography className="text-14 font-bold">관련기업</Typography>
+				<Chip
+					key={defaultChipData.corpCode}
+					label={defaultChipData.corpName}
+					size="small"
+					className="mx-4"
+					onClick={e => handleClick(e, defaultChipData)}
+				/>
 				{data &&
 					data.length > 0 &&
-					data.map((row, i) => (
-						<Link
-							key={row}
-							style={{ textDecoration: 'none' }}
-							className={clsx(
-								'inline text-14 font-400 m-4 px-8 py-4 rounded-4 cursor-pointer hover:bg-indigo-400 focus:outline-none focus:shadow-outline active:bg-indigo-600',
-								classes.word
-							)}
-							to={`/apps/company/${row}`}
-						>
-							{row}
-						</Link>
-					))}
+					data.map((row, i) => {
+						const companyInfo = { corpName: corpName[i], corpCode: corpCode[i], stockCode: stockCode[i] };
+						return (
+							<Chip
+								key={companyInfo.corpCode}
+								label={companyInfo.corpName}
+								size="small"
+								className="mx-4"
+								onClick={e => handleClick(e, companyInfo)}
+							/>
+						);
+					})}
 			</div>
 		</FuseScrollbars>
 	);
 }
 
-export default NewsArticles;
+export default withRouter(NewsArticles);
