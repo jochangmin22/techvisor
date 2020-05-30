@@ -87,13 +87,13 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
         # return JsonResponse(title_link, safe=False)                
         # return JsonResponse(link_description, safe=False)                
 
-        # redis 저장 {
+        # redis save {
         new_context = {}
         new_context['news'] = response_body['items']
         new_context['news_nlp'] = []
         new_context['company'] = {}
         cache.set(apiParams, new_context, CACHE_TTL)
-        # redis 저장 }
+        # redis save }
         if mode == "needJson":
             return JsonResponse(response_body['items'], safe=False)
         elif mode == "noJson":
@@ -133,17 +133,18 @@ def parse_news_nlp(request, mode="needJson"):
         # news_nlp = ' '.join(tokenizer(news_nlp) if news_nlp else '')
         news_nlp = tokenizer(news_nlp) if news_nlp else ''
     else:
-        news_nlp = []  
+        news_nlp = []
 
-    news_nlp= remove_duplicate(news_nlp)
+    # sorting on bais of frequency of elements 
+    news_nlp = sorted(news_nlp, key = news_nlp.count, reverse = True)           
 
-    # redis 저장 {
+    # redis save {
     new_context = {}
     new_context['news'] = news
     new_context['news_nlp'] = news_nlp
     new_context['company'] = {}
     cache.set(apiParams, new_context, CACHE_TTL)
-    # redis 저장 }      
+    # redis save }      
          
     if mode == "needJson":
         return JsonResponse(news_nlp, safe=False)
@@ -173,20 +174,22 @@ def parse_related_company(request, mode="needJson"):
     news_nlp = context['news_nlp'] if context and context['news_nlp'] else parse_news_nlp(request, mode="noJson")
     # return JsonResponse(news, safe=False)
 
-    # redis 저장 {
+    # redis save {
     new_context = {}
     new_context['news'] = news
     new_context['news_nlp'] = news_nlp
     new_context['company'] = {}
     cache.set(apiParams, new_context, CACHE_TTL)
-    # redis 저장 }       
-
+    # redis save }       
+    
+    unique_news_nlp= remove_duplicate(news_nlp)
+    
     try:
-        isExist = disclosure.objects.filter(corp_name__in=news_nlp).exists()
+        isExist = disclosure.objects.filter(corp_name__in=unique_news_nlp).exists()
         if not isExist:
             return HttpResponse('Not Found', status=404)
 
-        disClosure = disclosure.objects.filter(corp_name__in=news_nlp)
+        disClosure = disclosure.objects.filter(corp_name__in=unique_news_nlp)
 
         myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('corp_name'))
         myCorpCode = list(disClosure.values_list('corp_code', flat=True).order_by('corp_name'))
@@ -206,12 +209,12 @@ def parse_related_company(request, mode="needJson"):
 
     # ob_list = data.objects.filter(name__in=my_list)
 
-    # redis 저장 {
+    # redis save {
     new_context = {}
     new_context['news'] = news
     new_context['news_nlp'] = news_nlp
     cache.set(apiParams, new_context, CACHE_TTL)
-    # redis 저장 }            
+    # redis save }            
     return JsonResponse(news_nlp, safe=False)    
 
 

@@ -83,7 +83,7 @@ function NewsAnalysis(props) {
 					disableRestoreFocus
 				>
 					<Typography variant="body2">
-						검색어와 관련하여 머신러닝 기술을 기반으로 최근 50건의 뉴스의 긍정부정을 판단합니다.
+						검색어와 관련하여 머신러닝 기술을 기반으로 최근 100건의 뉴스의 긍정부정을 판단합니다.
 					</Typography>
 				</Popover>
 			</div>

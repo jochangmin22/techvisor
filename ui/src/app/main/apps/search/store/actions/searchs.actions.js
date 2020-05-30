@@ -18,8 +18,6 @@ export const GET_WORDCLOUD = '[SEARCH APP] GET WORDCLOUD';
 export const GET_SUBJECT_RELATION = '[SEARCH APP] GET SUBJECT RELATION';
 export const UPDATE_SUBJECT_RELATION = '[SEARCH APP] UPDATE SUBJECT RELATION';
 export const RESET_SUBJECT_RELATION_VEC = '[SEARCH APP] RESET SUBJECT RELATION VEC';
-export const SAVE_VISUALTAB = '[SEARCH APP] SAVE VISUALTAB';
-export const SET_SELECTED_INDEX = '[SEARCH APP] SET SELECTED INDEX';
 
 export const GET_TOPIC_CHIPS = '[SEARCH APP] GET TOPIC CHIPS';
 export const GET_NEWS = '[SEARCH APP] GET NEWS';
@@ -313,13 +311,6 @@ export function updateSubjectRelation(params) {
 				console.log(err.code);
 				console.log(err.message);
 			});
-}
-
-export function setSelectedIndex(data) {
-	return {
-		type: SET_SELECTED_INDEX,
-		selectedIndex: data.selectedIndex
-	};
 }
 
 // export function saveVitualTab(data) {

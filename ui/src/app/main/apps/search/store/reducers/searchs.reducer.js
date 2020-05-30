@@ -33,8 +33,7 @@ const initialState = {
 	relatedCompany: [],
 	matrix: [],
 	wordCloud: [],
-	subjectRelation: [],
-	selectedIndex: null
+	subjectRelation: []
 };
 
 const searchsReducer = function (state = initialState, action) {
@@ -170,17 +169,6 @@ const searchsReducer = function (state = initialState, action) {
 					...state.subjectRelation,
 					vec: action.payload
 				}
-			};
-		}
-		// case Actions.SAVE_VISUALTAB: {
-		// 	return {
-		// 		...action.payload
-		// 	};
-		// }
-		case Actions.SET_SELECTED_INDEX: {
-			return {
-				...state,
-				selectedIndex: action.selectedIndex
 			};
 		}
 		default:
