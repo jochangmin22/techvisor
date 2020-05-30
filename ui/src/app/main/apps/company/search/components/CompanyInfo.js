@@ -1,24 +1,12 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@material-ui/core/styles';
 import searchData from './searchData';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import { Grid } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
-	root: {
-		display: 'flex',
-		justifyContent: 'center',
-		height: '68px',
-		flexWrap: 'wrap',
-		'& > *': {
-			margin: theme.spacing(0.5)
-		}
-	},
-	popover: {
-		pointerEvents: 'none'
-	},
 	paper: {
 		padding: theme.spacing(1),
 		textAlign: 'center',
@@ -28,40 +16,40 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function CompanyInfo(props) {
-	const { Item } = props.search;
 	const classes = useStyles();
-	const theme = useTheme();
+	const { Item } = props.search;
+	const { corpName, corpCode, stockCode } = props.companyCode;
 
 	const corpInfo = {
 		대표이사: Item.korreprnm,
 		설립일자: Item.obz_date,
-		기업형태: Item.korreprnm,
+		기업형태: '주식회사 | 대기업', // Item.korreprnm,
 		산업분류: Item.sanupcode,
-		홈페이지: Item.korreprnm,
+		홈페이지: 'http://www.samsung.com/sec', // Item.korreprnm,
 		전화번호: Item.tel,
 		'지번 주소': Item.koraddr,
 		사업영역: Item.sanup
 	};
 
 	const stockInfo = {
-		시가총액: Item.korreprnm,
-		'주가(월)': Item.korreprnm,
-		'거래량(주)': Item.korreprnm,
-		'주가 변동률(일/월/년)': Item.korreprnm,
-		PER: Item.korreprnm,
-		PBR: Item.korreprnm,
-		ROA: Item.korreprnm,
-		BOE: Item.korreprnm
+		시가총액: '362.97조', //Item.korreprnm,
+		'주가(월)': '44,080', // Item.korreprnm,
+		'거래량(주)': '4백만', //Item.korreprnm,
+		'주가 변동률(일/월/년)': '-1.01 | -6.47 | -11.14', // Item.korreprnm,
+		PER: '8.89', //Item.korreprnm,
+		PBR: '1.26', //Item.korreprnm,
+		ROA: '1.08', //Item.korreprnm,
+		BOE: '23.77' //Item.korreprnm
 	};
 
 	const financeInfo = {
-		매출액: Item.korreprnm,
-		영업이익: Item.korreprnm,
-		당기순이익: Item.korreprnm,
-		자산: Item.korreprnm,
-		부채: Item.korreprnm,
-		자본: Item.korreprnm,
-		'종업원수(월)': Item.korreprnm,
+		매출액: '343.77조', //Item.korreprnm,
+		영업이익: '58.69조', //Item.korreprnm,
+		당기순이익: '44.34조', //Item.korreprnm,
+		자산: '339.36조', //Item.korreprnm,
+		부채: '91.6조', //Item.korreprnm,
+		자본: '347.76조', //Item.korreprnm,
+		'종업원수(월)': '102,981', //Item.korreprnm,
 		'': ''
 	};
 
@@ -71,8 +59,11 @@ function CompanyInfo(props) {
 
 	return (
 		<Paper className="rounded-8 shadow m-8 mb-16 w-full p-16 items-center justify-center">
-			<Typography variant="h6">삼성전자</Typography>
-			<Typography className="text-14 font-bold">KRX:{Item.stockcode}</Typography>
+			<div className="flex flex-row items-center mb-4">
+				<Typography variant="h6">{corpName}</Typography>
+				{stockCode ? <Typography className="text-14 font-bold ml-8">KRX:{stockCode}</Typography> : ''}
+				{corpCode ? <Typography className="text-14 font-bold ml-8">공시번호:{corpCode}</Typography> : ''}
+			</div>
 
 			<Grid container spacing={1}>
 				<Grid item xs={4}>
@@ -99,7 +90,7 @@ function CompanyInfo(props) {
 							<Grid item xs={5}>
 								{key}
 							</Grid>
-							<Grid item xs={7}>
+							<Grid item xs={6} className='text-right'>
 								{value}
 							</Grid>
 						</Grid>
@@ -114,7 +105,7 @@ function CompanyInfo(props) {
 							<Grid item xs={5}>
 								{key}
 							</Grid>
-							<Grid item xs={7}>
+							<Grid item xs={6} className='text-right'>
 								{value}
 							</Grid>
 						</Grid>

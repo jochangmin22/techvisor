@@ -3,9 +3,9 @@ from django.db import models
 
 class disclosure(models.Model):
     # objects = models.Manager()
-    corp_code = models.IntegerField(primary_key = True)
+    corp_code = models.CharField(max_length=10, primary_key = True)
     corp_name = models.CharField(max_length=255)
-    stock_code = models.IntegerField(null=True)
+    stock_code = models.CharField(max_length=10,null=True)
     modify_date = models.DateField()
 
     class Meta:
@@ -14,7 +14,7 @@ class disclosure(models.Model):
 class listed_corp(models.Model):
     # objects = models.Manager()
     회사명 = models.CharField(max_length=100, primary_key = True)
-    종목코드 = models.IntegerField(null=True)
+    종목코드 = models.CharField(max_length=10, null=True)
     업종 = models.CharField(max_length=150)
     주요제품 = models.CharField(max_length=255)
     상장일 = models.DateField()

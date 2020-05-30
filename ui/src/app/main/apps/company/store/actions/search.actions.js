@@ -3,6 +3,7 @@ import { setClickedSearchId } from './searchs.actions';
 export const GET_SEARCH = '[COMPANY APP] GET SEARCH';
 export const RESET_SEARCH = '[COMPANY APP] RESET SEARCH';
 export const GET_STOCK = '[COMPANY APP] GET STOCK';
+export const SET_COMPANY_CODE = '[COMPANY APP] SET COMPANY CODE';
 
 export function getSearch(params) {
 	const request = axios({
@@ -36,4 +37,11 @@ export function getStock(params) {
 				payload: response.data
 			});
 		});
+}
+
+export function setCompanyCode(data) {
+	return {
+		type: SET_COMPANY_CODE,
+		payload: data
+	};
 }

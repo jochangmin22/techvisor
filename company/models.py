@@ -11,7 +11,7 @@ class stock_quotes(models.Model):
         default = uuid.uuid4,
         editable = False
     )
-    kiscode = models.CharField(max_length=255)
+    kiscode = models.CharField(max_length=10)
     price_date = models.DateField()
     stock = JSONField(default=list, null=True)
     # volume = models.DecimalField(max_digits=15, decimal_places=1)
@@ -22,3 +22,19 @@ class stock_quotes(models.Model):
 
     class Meta:
         db_table = '"stock_quotes"'
+
+class financial_statements(models.Model):
+    objects =models.Manager()
+    id = models.UUIDField(
+        primary_key = True,
+        default = uuid.uuid4,
+        editable = False
+    )
+    kiscode = models.CharField(max_length=10)
+    corpcode = models.CharField(max_length=10)
+    corpinfo = JSONField(default=dict, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = '"financial_statements"'  
