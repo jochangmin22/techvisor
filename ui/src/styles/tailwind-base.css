@@ -21,12 +21,12 @@ hr,
 figure,
 p,
 pre {
-	margin: 0;
+    margin: 0;
 }
 
 button {
-	background: transparent;
-	padding: 0;
+    background: transparent;
+    padding: 0;
 }
 
 /**
@@ -35,21 +35,21 @@ button {
  */
 
 button:focus {
-	/*outline: 1px dotted;*/
-	/*outline: 5px auto -webkit-focus-ring-color;*/
-	outline: none;
+    /*outline: 1px dotted;*/
+    /*outline: 5px auto -webkit-focus-ring-color;*/
+    outline: none;
 }
 
 fieldset {
-	margin: 0;
-	padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 ol,
 ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 /**
@@ -63,10 +63,10 @@ ul {
  */
 
 html {
-	/* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; 1 */
+    /* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; 1 */
 	font-family: 'Apple SD Gothic Neo', AppleSDGothicNeo, 'Noto Sans KR', NanumGothic, 'Nalgun Gothic', '맑은 고딕',
-		돋움, dotum, Arial, sans-serif;
-	line-height: 1.5; /* 2 */
+		돋움, dotum, Arial, sans-serif;    
+    line-height: 1.5; /* 2 */
 }
 
 /**
@@ -98,10 +98,10 @@ html {
 *,
 ::before,
 ::after {
-	box-sizing: border-box; /* 1 */
-	border-width: 0; /* 2 */
-	border-style: solid; /* 2 */
-	/*border-color: theme('borderColor.default', currentColor); !* 2 *!*/
+    box-sizing: border-box; /* 1 */
+    border-width: 0; /* 2 */
+    border-style: solid; /* 2 */
+    /*border-color: theme('borderColor.default', currentColor); !* 2 *!*/
 }
 
 /*
@@ -109,7 +109,7 @@ html {
  */
 
 hr {
-	border-top-width: 1px;
+    border-top-width: 1px;
 }
 
 /**
@@ -123,25 +123,25 @@ hr {
  */
 
 img {
-	border-style: solid;
+    border-style: solid;
 }
 
 textarea {
-	resize: vertical;
+    resize: vertical;
 }
 
 input::placeholder,
 textarea::placeholder {
-	color: #a0aec0;
+    color: #A0AEC0;
 }
 
 button,
-[role='button'] {
-	cursor: pointer;
+[role="button"] {
+    cursor: pointer;
 }
 
 table {
-	border-collapse: collapse;
+    border-collapse: collapse;
 }
 
 h1,
@@ -150,8 +150,8 @@ h3,
 h4,
 h5,
 h6 {
-	font-size: inherit;
-	font-weight: inherit;
+    font-size: inherit;
+    font-weight: inherit;
 }
 
 /**
@@ -160,8 +160,8 @@ h6 {
  */
 
 a {
-	color: inherit;
-	text-decoration: inherit;
+    color: inherit;
+    text-decoration: inherit;
 }
 
 /**
@@ -177,9 +177,9 @@ input,
 optgroup,
 select,
 textarea {
-	padding: 0;
-	line-height: inherit;
-	color: inherit;
+    padding: 0;
+    line-height: inherit;
+    color: inherit;
 }
 
 /**
@@ -193,16 +193,7 @@ pre,
 code,
 kbd,
 samp {
-	font-family: theme(
-		'fontFamily.mono',
-		SFMono-Regular,
-		Menlo,
-		Monaco,
-		Consolas,
-		'Liberation Mono',
-		'Courier New',
-		monospace
-	);
+    font-family: theme('fontFamily.mono', SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
 }
 
 /**
@@ -221,8 +212,8 @@ audio,
 iframe,
 embed,
 object {
-	display: block;
-	vertical-align: middle;
+    display: block;
+    vertical-align: middle;
 }
 
 /**
@@ -234,6 +225,6 @@ object {
 
 img,
 video {
-	max-width: 100%;
-	height: auto;
+    max-width: 100%;
+    height: auto;
 }
