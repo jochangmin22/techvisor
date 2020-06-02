@@ -30,10 +30,10 @@ const useStyles = makeStyles(theme => ({
 		width: '100%',
 		height: '620px',
 		// padding: theme.spacing(2),
-		paddingTop: theme.spacing(0),
-		paddingBottom: theme.spacing(2),
-		paddingLeft: theme.spacing(2),
-		paddingRight: theme.spacing(2),
+		// paddingTop: theme.spacing(0),
+		// paddingBottom: theme.spacing(2),
+		// paddingLeft: theme.spacing(2),
+		// paddingRight: theme.spacing(2),
 		backgroundColor: theme.palette.background.default
 	},
 	paper: {

@@ -47,19 +47,21 @@ function SearchContent(props) {
 					<EmptyMsg icon="chat" msg="검색결과" />
 				) : (
 					<div className="flex flex-wrap w-full h-384 items-start justify-center">
-						<div className="flex flex-col w-full h-full md:w-1/2 p-16">
+						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16">
 							<SubjectRelation searchText={searchText} searchNum={searchNum} />
 						</div>
-						<div className="flex flex-col w-full h-full md:w-1/2 p-16 pl-0">
+						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pl-0">
 							<ContentVisual searchText={searchText} inventor={inventor} assignee={assignee} />
 						</div>
-						<div className="flex flex-col w-full h-full md:w-1/2 p-16 pt-0">
+						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pt-0">
 							<MatrixAnalysis searchText={searchText} searchNum={searchNum} />
 						</div>
-						<div className="flex flex-col w-full h-full md:w-1/2 p-16 pt-0 pl-0">
+						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pt-0 md:pl-0">
 							<NewsRelation searchText={searchText} />
 						</div>
-						<ContentGrid />
+						<div className="flex w-full h-full p-16 md:pt-0">
+							<ContentGrid />
+						</div>
 					</div>
 				)}
 			</FuseAnimateGroup>

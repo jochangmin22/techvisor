@@ -183,7 +183,7 @@ function MatrixAnalysis(props) {
 				columns={columns}
 				data={data}
 				size="small"
-				height="max-h-288 px-16"
+				height="max-h-256 px-16"
 				onRowClick={(ev, row) => {
 					if (row) {
 						// window.open(row.original.link, '_blank');

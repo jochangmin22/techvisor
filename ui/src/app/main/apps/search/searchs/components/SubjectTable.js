@@ -16,6 +16,7 @@ import parseSearchText from '../../inc/parseSearchText';
 import LeftConfig from '../setLeftConfig';
 import * as Actions from '../../store/actions';
 import { showMessage } from 'app/store/actions/fuse';
+import FuseScrollbars from '@fuse/core/FuseScrollbars';
 
 const useStyles = makeStyles(theme => ({
 	word: {
@@ -71,7 +72,7 @@ function SubjectTable(props) {
 	}
 
 	return (
-		<TableContainer className="px-12 py-0 max-h-224">
+		<FuseScrollbars className="flex flex-col max-h-224 px-12 py-0 flex-no-overflow items-center overflow-x-auto">
 			<MuiTable stickyHeader size="small">
 				<TableHead>
 					<TableRow>
@@ -118,7 +119,7 @@ function SubjectTable(props) {
 					))}
 				</TableBody>
 			</MuiTable>
-		</TableContainer>
+		</FuseScrollbars>
 	);
 }
 
