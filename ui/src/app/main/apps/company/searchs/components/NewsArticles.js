@@ -76,19 +76,20 @@ function NewsArticles(props) {
 			<div className="p-12 pb-0 flex items-center">
 				<Typography className="text-14 font-bold">관련기사</Typography>
 			</div>
-			{/* <Table columns={columns} data={data} size="small" /> */}
-			<EnhancedTable
-				columns={columns}
-				data={data}
-				size="small"
-				onRowClick={(ev, row) => {
-					if (row) {
-						window.open(row.original.link, '_blank');
-						// props.history.push(row.original.link);
-						// dispatch(Actions.openEditContactDialog(row.original));
-					}
-				}}
-			/>
+			<FuseScrollbars className="max-h-288 px-16">
+				<EnhancedTable
+					columns={columns}
+					data={data}
+					size="small"
+					onRowClick={(ev, row) => {
+						if (row) {
+							window.open(row.original.link, '_blank');
+							// props.history.push(row.original.link);
+							// dispatch(Actions.openEditContactDialog(row.original));
+						}
+					}}
+				/>
+			</FuseScrollbars>
 		</div>
 	);
 }

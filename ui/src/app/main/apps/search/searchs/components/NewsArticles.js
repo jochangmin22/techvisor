@@ -5,7 +5,8 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import SubjectContext from '../SubjectContext';
 import { useSelector } from 'react-redux';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import FuseScrollbars from '@fuse/core/FuseScrollbars';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -63,7 +64,7 @@ function NewsArticles(props) {
 	const data = React.useMemo(() => news, [news]);
 
 	if (!data || data.length === 0) {
-		return <CircularLoading delay={10000} />;
+		return <SpinLoading />;
 	}
 
 	return (
@@ -71,21 +72,21 @@ function NewsArticles(props) {
 			<div className="p-12 pb-0 flex items-center">
 				<Typography className="text-14 font-bold">관련기사</Typography>
 			</div>
-			{/* <Table columns={columns} data={data} size="small" /> */}
-			<EnhancedTable
-				columns={columns}
-				data={data}
-				size="small"
-				height="max-h-160"
-				showHeader={false}
-				onRowClick={(ev, row) => {
-					if (row) {
-						window.open(row.original.link, '_blank');
-						// props.history.push(row.original.link);
-						// dispatch(Actions.openEditContactDialog(row.original));
-					}
-				}}
-			/>
+			<FuseScrollbars className="max-h-160">
+				<EnhancedTable
+					columns={columns}
+					data={data}
+					size="small"
+					showHeader={false}
+					onRowClick={(ev, row) => {
+						if (row) {
+							window.open(row.original.link, '_blank');
+							// props.history.push(row.original.link);
+							// dispatch(Actions.openEditContactDialog(row.original));
+						}
+					}}
+				/>
+			</FuseScrollbars>
 		</div>
 	);
 }

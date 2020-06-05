@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
-import { useSelector, useDispatch } from 'react-redux';
-import CircularLoading from '../components/CircularLoading';
+import { useSelector } from 'react-redux';
 // import { Draggable } from 'react-beautiful-dnd';
-import * as Actions from '../store/actions';
+// import * as Actions from '../store/actions';
 // import Draggable from 'react-draggable';
 import PopoverMsg from '../components/PopoverMsg';
 import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 function MatrixAnalysis(props) {
-	const dispatch = useDispatch();
+	// const dispatch = useDispatch();
 	const matrix = useSelector(({ searchApp }) => searchApp.searchs.matrix);
 
 	const [selectedCategory, setSelectedCategory] = useState('기술별');
@@ -138,7 +138,7 @@ function MatrixAnalysis(props) {
 	// );
 
 	if (!data || data.length === 0) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (
@@ -146,7 +146,7 @@ function MatrixAnalysis(props) {
 			<div className="px-12 flex items-center">
 				<PopoverMsg
 					title="매트릭스 분석"
-					msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 주변단어, 국가별, 연도별, 기술별, 기업별 분석을 매트릭스 형태로 표시합니다."
+					msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 국가별, 연도별, 기술별, 기업별 분석을 매트릭스 형태로 표시합니다."
 				/>
 				<FormControl>
 					<Select
@@ -159,7 +159,7 @@ function MatrixAnalysis(props) {
 						displayEmpty
 						// disableUnderline
 					>
-						{['주변단어', '국가별', '연도별', '기술별', '기업별'].map((key, n) => (
+						{['국가별', '연도별', '기술별', '기업별'].map((key, n) => (
 							<MenuItem value={key} key={key}>
 								{key}
 							</MenuItem>
@@ -167,7 +167,7 @@ function MatrixAnalysis(props) {
 					</Select>
 				</FormControl>
 			</div>
-			<FuseScrollbars className="flex flex-col h-44 px-12 flex-no-overflow items-center overflow-x-auto">
+			<FuseScrollbars className="h-40 px-12">
 				<div className="flex w-full ">
 					{matrix && <Chip label={selectedCategory} key={selectedCategory} size="small" className="mx-4" />}
 					{matrix &&
@@ -179,19 +179,21 @@ function MatrixAnalysis(props) {
 						))}
 				</div>
 			</FuseScrollbars>
-			<EnhancedTable
-				columns={columns}
-				data={data}
-				size="small"
-				height="max-h-256 px-16"
-				onRowClick={(ev, row) => {
-					if (row) {
-						// window.open(row.original.link, '_blank');
-						// props.history.push(row.original.link);
-						// dispatch(Actions.openEditContactDialog(row.original));
-					}
-				}}
-			/>
+			<FuseScrollbars className="max-h-256 px-6">
+				<EnhancedTable
+					columns={columns}
+					data={data}
+					size="small"
+					height=""
+					onRowClick={(ev, row) => {
+						if (row) {
+							// window.open(row.original.link, '_blank');
+							// props.history.push(row.original.link);
+							// dispatch(Actions.openEditContactDialog(row.original));
+						}
+					}}
+				/>
+			</FuseScrollbars>
 		</Paper>
 	);
 }

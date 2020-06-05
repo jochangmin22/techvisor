@@ -4,7 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
-import TableContainer from '@material-ui/core/TableContainer';
+// import TableContainer from '@material-ui/core/TableContainer';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -23,6 +23,7 @@ import LeftConfig from '../setLeftConfig';
 import * as Actions from '../../store/actions';
 import { showMessage } from 'app/store/actions/fuse';
 import { useUpdateEffect } from '@fuse/hooks';
+import FuseScrollbars from '@fuse/core/FuseScrollbars';
 // TODO : Vitualize needed
 // TODO : 테이블 높이 조정 nested 화
 // FIXME : 테이블 항목 클릭하면 검색옵션에 삽입되게
@@ -282,7 +283,7 @@ function Classify(props) {
 					{['PUB', 'COMP', 'PERS'].map((v, index) => (
 						<Card className="flex w-full sm:w-1/3 flex-col rounded-8 shadow p-8" key={index}>
 							<Typography variant="body1">{filteredData.rows[currentRange][v].label}</Typography>
-							<TableContainer className="w-full max-h-224">
+							<FuseScrollbars className="w-full max-h-224">
 								<Table className={classes.sizeSmall} stickyHeader>
 									<TableHead>
 										<TableRow>
@@ -320,7 +321,7 @@ function Classify(props) {
 										))}
 									</TableBody>
 								</Table>
-							</TableContainer>
+							</FuseScrollbars>
 						</Card>
 					))}
 				</div>

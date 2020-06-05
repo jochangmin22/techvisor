@@ -14,6 +14,7 @@ import { showMessage } from 'app/store/actions/fuse';
 import _ from '@lodash';
 
 // TODO : showMessage not showing
+// TODO : handleResize
 function WordCloud(props) {
 	const dispatch = useDispatch();
 	const wordCloud = useSelector(({ searchApp }) => searchApp.searchs.wordCloud);
@@ -77,7 +78,7 @@ function WordCloud(props) {
 		setForm(_.set({ ...form }, name, newArray));
 
 		dispatch(Actions.setSearchSubmit(true));
-		
+
 		const [newParams] = parseSearchText(form, null);
 		dispatch(Actions.setSearchParams(newParams));
 		// props.history.push('/apps/e-commerce/orders/' + item.id);

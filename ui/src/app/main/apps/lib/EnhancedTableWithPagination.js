@@ -11,7 +11,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
 import clsx from 'clsx';
-import FuseScrollbars from '@fuse/core/FuseScrollbars';
+
 // import ContactsTablePaginationActions from './ContactsTablePaginationActions';
 
 // const IndeterminateCheckbox = React.forwardRef(({ indeterminate, ...rest }, ref) => {
@@ -29,7 +29,7 @@ import FuseScrollbars from '@fuse/core/FuseScrollbars';
 // 	);
 // });
 
-const EnhancedTable = ({ columns, data, height, showHeader = true, onRowClick }) => {
+const EnhancedTable = ({ columns, data, showHeader = true, onRowClick }) => {
 	const {
 		getTableProps,
 		headerGroups,
@@ -91,79 +91,77 @@ const EnhancedTable = ({ columns, data, height, showHeader = true, onRowClick })
 
 	// Render the UI for your table
 	return (
-		<FuseScrollbars className={clsx(height, 'flex flex-col px-12 flex-no-overflow items-center overflow-x-auto')}>
-			<MaUTable {...getTableProps()} size="small">
-				<TableHead className={showHeader ? '' : 'hidden'}>
-					{headerGroups.map(headerGroup => (
-						<TableRow {...headerGroup.getHeaderGroupProps()}>
-							{headerGroup.headers.map(column => (
-								<TableCell
-									className="whitespace-no-wrap px-12"
-									{...(!column.sortable
-										? column.getHeaderProps()
-										: column.getHeaderProps(column.getSortByToggleProps()))}
-								>
-									{column.render('Header')}
-									{column.sortable ? (
-										<TableSortLabel
-											active={column.isSorted}
-											// react-table has a unsorted state which is not treated here
-											direction={column.isSortedDesc ? 'desc' : 'asc'}
-										/>
-									) : null}
-								</TableCell>
-							))}
-						</TableRow>
-					))}
-				</TableHead>
-				<TableBody>
-					{page.map((row, i) => {
-						prepareRow(row);
-						return (
-							<TableRow
-								{...row.getRowProps()}
-								onClick={ev => onRowClick(ev, row)}
-								className="truncate cursor-pointer"
+		<MaUTable {...getTableProps()} size="small">
+			<TableHead className={showHeader ? '' : 'hidden'}>
+				{headerGroups.map(headerGroup => (
+					<TableRow {...headerGroup.getHeaderGroupProps()}>
+						{headerGroup.headers.map(column => (
+							<TableCell
+								className="whitespace-no-wrap px-12"
+								{...(!column.sortable
+									? column.getHeaderProps()
+									: column.getHeaderProps(column.getSortByToggleProps()))}
 							>
-								{row.cells.map(cell => {
-									return (
-										<TableCell
-											{...cell.getCellProps()}
-											className={clsx('px-12 py-6', cell.column.className)}
-										>
-											{cell.render('Cell')}
-										</TableCell>
-									);
-								})}
-							</TableRow>
-						);
-					})}
-				</TableBody>
-
-				<TableFooter>
-					<TableRow>
-						<TablePagination
-							classes={{
-								root: 'overflow-hidden',
-								spacer: 'w-0 max-w-0'
-							}}
-							rowsPerPageOptions={[5, 10, 25, { label: 'All', value: data.length }]}
-							colSpan={9}
-							count={data.length}
-							rowsPerPage={pageSize}
-							page={pageIndex}
-							SelectProps={{
-								inputProps: { 'aria-label': 'rows per page' },
-								native: false
-							}}
-							onChangePage={handleChangePage}
-							onChangeRowsPerPage={handleChangeRowsPerPage}
-							ActionsComponent={TablePaginationActions}
-						/>
+								{column.render('Header')}
+								{column.sortable ? (
+									<TableSortLabel
+										active={column.isSorted}
+										// react-table has a unsorted state which is not treated here
+										direction={column.isSortedDesc ? 'desc' : 'asc'}
+									/>
+								) : null}
+							</TableCell>
+						))}
 					</TableRow>
-				</TableFooter>
-			</MaUTable>
-		</FuseScrollbars>
+				))}
+			</TableHead>
+			<TableBody>
+				{page.map((row, i) => {
+					prepareRow(row);
+					return (
+						<TableRow
+							{...row.getRowProps()}
+							onClick={ev => onRowClick(ev, row)}
+							className="truncate cursor-pointer"
+						>
+							{row.cells.map(cell => {
+								return (
+									<TableCell
+										{...cell.getCellProps()}
+										className={clsx('px-12 py-6', cell.column.className)}
+									>
+										{cell.render('Cell')}
+									</TableCell>
+								);
+							})}
+						</TableRow>
+					);
+				})}
+			</TableBody>
+
+			<TableFooter>
+				<TableRow>
+					<TablePagination
+						classes={{
+							root: 'overflow-hidden',
+							spacer: 'w-0 max-w-0'
+						}}
+						rowsPerPageOptions={[5, 10, 25, { label: 'All', value: data.length }]}
+						colSpan={9}
+						count={data.length}
+						rowsPerPage={pageSize}
+						page={pageIndex}
+						SelectProps={{
+							inputProps: { 'aria-label': 'rows per page' },
+							native: false
+						}}
+						onChangePage={handleChangePage}
+						onChangeRowsPerPage={handleChangeRowsPerPage}
+						ActionsComponent={TablePaginationActions}
+					/>
+				</TableRow>
+			</TableFooter>
+		</MaUTable>
 	);
 };
 
