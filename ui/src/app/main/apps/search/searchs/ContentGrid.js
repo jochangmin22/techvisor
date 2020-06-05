@@ -160,6 +160,8 @@ const colsList = [
 	}
 ];
 
+const TurnOffHightlight = true;
+
 function ContentGrid(props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
@@ -394,7 +396,7 @@ function ContentGrid(props) {
 						// onPaginationChanged={onPaginationChanged}
 						// onSelectionChanged={onSelectionChanged.bind(this)}
 						// onFirstDataRendered={onFirstDataRendered}
-						frameworkComponents={frameworkComponents}
+						frameworkComponents={TurnOffHightlight ? '' : frameworkComponents}
 						reactNext
 						enableCellChangeFlash
 						localeText={localeText}

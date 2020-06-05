@@ -44,6 +44,8 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
+const TurnOffHightlight = true;
+
 function addSeparator(val, separator, p1, p2) {
 	return val ? val.slice(0, p1) + separator + val.slice(p1, p2) + separator + val.slice(p2) : '';
 }
@@ -156,7 +158,7 @@ function PatInfo(props) {
 						<Typography className="mb-16 px-16" component="p">
 							{props.search.초록 && (
 								<Highlighter
-									searchWords={props.terms}
+									searchWords={TurnOffHightlight ? [] : props.terms}
 									autoEscape={true}
 									textToHighlight={props.search.초록}
 								/>
@@ -176,7 +178,7 @@ function PatInfo(props) {
 							{props.search.청구항들[mainClaim] && (
 								<Highlighter
 									className="whitespace-pre-line"
-									searchWords={props.terms}
+									searchWords={TurnOffHightlight ? [] : props.terms}
 									autoEscape={false}
 									textToHighlight={props.search.청구항들[mainClaim]}
 								/>
@@ -188,7 +190,7 @@ function PatInfo(props) {
 								<Typography className="mb-16 px-16" component="p">
 									{props.search.키워드 && (
 										<Highlighter
-											searchWords={props.terms}
+											searchWords={TurnOffHightlight ? [] : props.terms}
 											autoEscape={false}
 											textToHighlight={props.search.키워드}
 										/>

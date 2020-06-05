@@ -32,6 +32,8 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
+const TurnOffHightlight = true;
+
 function SearchDetails(props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
@@ -130,7 +132,11 @@ function SearchDetails(props) {
 								<FuseAnimate animation="transition.slideLeftIn" delay={300}>
 									<Typography className="text-12 sm:text-16 truncate">
 										{search && (
-											<Highlighter searchWords={terms} autoEscape textToHighlight={search.명칭} />
+											<Highlighter
+												searchWords={TurnOffHightlight ? [] : terms}
+												autoEscape
+												textToHighlight={search.명칭}
+											/>
 										)}
 									</Typography>
 								</FuseAnimate>

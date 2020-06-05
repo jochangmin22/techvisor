@@ -18,6 +18,8 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
+const TurnOffHightlight = true;
+
 function Description(props) {
 	const classes = useStyles();
 	// const descPart = ['기술분야','배경기술','해결과제','해결수단','발명효과','도면설명','발명의실시예'];
@@ -148,7 +150,13 @@ function Description(props) {
 													<span key={n}>
 														{line && (
 															<Highlighter
-																searchWords={filtered ? [filtered] : props.terms}
+																searchWords={
+																	filtered
+																		? [filtered]
+																		: TurnOffHightlight
+																		? []
+																		: props.terms
+																}
 																autoEscape={true}
 																textToHighlight={line}
 															/>
