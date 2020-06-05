@@ -207,6 +207,150 @@ const themesConfig = {
 				default: '#121212'
 			}
 		}
+	},
+	ipgrim_blue: {
+		palette: {
+			type: 'light',
+			primary: {
+				light: '#96C4D8',
+				main: '#548BA1',
+				dark: '#214753'
+			},
+			secondary: {
+				light: '#C3D9F0',
+				main: '#B2D0EB',
+				dark: '#ACB0BF',
+				contrastText: '#FFF'
+			},
+			background: {
+				paper: '#FFFFFF',
+				default: '#F7F7F7'
+			},
+			error: red
+		},
+		status: {
+			danger: 'orange'
+		}
+	},
+	ipgrim_blue2: {
+		palette: {
+			type: 'light',
+			primary: {
+				light: '#d9e1e8',
+				main: '#9baec8',
+				dark: '#2b90d9'
+			},
+			secondary: {
+				light: '#ffc952',
+				main: '#47b8e0',
+				dark: '#34314c',
+				contrastText: '#FFF'
+			},
+			background: {
+				paper: '#FFFFFF',
+				default: '#F7F7F7'
+			},
+			error: red
+		},
+		status: {
+			danger: 'orange'
+		}
+	},
+	ipgrim_blue3: {
+		palette: {
+			type: 'light',
+			primary: {
+				light: '#1ec0ff',
+				main: '#03a6ff',
+				dark: '#0080ff'
+			},
+			secondary: {
+				light: '#a8dba8',
+				main: '#79bd9a',
+				dark: '#3b8686',
+				contrastText: '#FFF'
+			},
+			background: {
+				paper: '#FFFFFF',
+				default: '#F7F7F7'
+			},
+			error: red
+		},
+		status: {
+			danger: 'orange'
+		}
+	},
+	ipgrim_green1: {
+		palette: {
+			type: 'light',
+			primary: {
+				light: '#D1B6E1',
+				main: '#58C9B9',
+				dark: '#519D9E'
+			},
+			secondary: {
+				light: '#ffc952',
+				main: '#47b8e0',
+				dark: '#34314c',
+				contrastText: '#FFF'
+			},
+			background: {
+				paper: '#FFFFFF',
+				default: '#F7F7F7'
+			},
+			error: red
+		},
+		status: {
+			danger: 'orange'
+		}
+	},
+	ipgrim_mix1: {
+		palette: {
+			type: 'light',
+			primary: {
+				light: '#d8e9ef',
+				main: '#4ea1d3',
+				dark: '#454552'
+			},
+			secondary: {
+				light: '#df405a',
+				main: '#87314e',
+				dark: '#512645',
+				contrastText: '#FFF'
+			},
+			background: {
+				paper: '#FFFFFF',
+				default: '#F7F7F7'
+			},
+			error: red
+		},
+		status: {
+			danger: 'orange'
+		}
+	},
+	ipgrim_mix2: {
+		palette: {
+			type: 'light',
+			primary: {
+				light: '#2EC4B6',
+				main: '#EFFFE9',
+				dark: '#3F4B3B'
+			},
+			secondary: {
+				light: '#8FBC94',
+				main: '#548687',
+				dark: '#56445D',
+				contrastText: '#FFF'
+			},
+			background: {
+				paper: '#FFFFFF',
+				default: '#F7F7F7'
+			},
+			error: red
+		},
+		status: {
+			danger: 'orange'
+		}
 	}
 };
 

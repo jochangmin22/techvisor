@@ -7,7 +7,7 @@ const settingsConfig = {
 	animations: true,
 	direction: 'ltr', // rtl, ltr
 	theme: {
-		main: 'default',
+		main: 'ipgrim_mix2', //'default',
 		navbar: 'mainThemeDark',
 		toolbar: 'mainThemeLight',
 		footer: 'mainThemeDark'
