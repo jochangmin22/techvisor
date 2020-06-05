@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
 		minWidth: 48,
 		width: 48,
 		height: 48,
-		opacity: 0.9,
+		opacity: 0,
 		padding: 0,
 		borderBottomRightRadius: 0,
 		borderTopRightRadius: 0,
@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
 		backgroundColor: red[500],
 		'&:hover': {
 			backgroundColor: red[500],
-			opacity: 1
+			opacity: 0.9
 		}
 	},
 	'@keyframes rotating': {
