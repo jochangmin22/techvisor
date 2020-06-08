@@ -24,7 +24,7 @@ class stock_quotes(models.Model):
         db_table = '"stock_quotes"'
 
 class financial_statements(models.Model):
-    objects =models.Manager()
+    objects = models.Manager()
     id = models.UUIDField(
         primary_key = True,
         default = uuid.uuid4,

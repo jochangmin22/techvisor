@@ -6,6 +6,8 @@ from konlpy.tag import Mecab
 
 from django.http import JsonResponse
 from django.http import HttpResponse
+from django.db.models import Q
+import operator
 
 from .models import disclosure, listed_corp
 from .searchs import parse_searchs, parse_searchs_num
@@ -105,7 +107,10 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
         # print("Error Code:" + rescode)    
 
 def parse_news_nlp(request, mode="needJson"):
-    """ news title description tokenization """
+    """ 
+    news title description tokenization 
+    returns a list of NNP nouns
+    """
 
     # redis key
     params = {}
@@ -136,7 +141,7 @@ def parse_news_nlp(request, mode="needJson"):
         news_nlp = []
 
     # sorting on bais of frequency of elements 
-    news_nlp = sorted(news_nlp, key = news_nlp.count, reverse = True)           
+    news_nlp = sorted(news_nlp, key = news_nlp.count, reverse = True) 
 
     # redis save {
     new_context = {}
@@ -190,10 +195,9 @@ def parse_related_company(request, mode="needJson"):
             return HttpResponse('Not Found', status=404)
 
         disClosure = disclosure.objects.filter(corp_name__in=unique_news_nlp)
-
-        myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('corp_name'))
-        myCorpCode = list(disClosure.values_list('corp_code', flat=True).order_by('corp_name'))
-        myStockCode = list(disClosure.values_list('stock_code', flat=True).order_by('corp_name'))
+        myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('-stock_code','corp_name'))
+        myCorpCode = list(disClosure.values_list('corp_code', flat=True).order_by('-stock_code','corp_name'))
+        myStockCode = list(disClosure.values_list('stock_code', flat=True).order_by('-stock_code','corp_name'))
 
         response = { 'corpName': myCorpName, 'corpCode' : myCorpCode, 'stockCode': myStockCode}
 

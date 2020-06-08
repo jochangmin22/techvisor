@@ -33,7 +33,7 @@ export default function parseSearchText(params, inputSearchText) {
 		/**
 		 *  convert searchText to searchTextParenthesis with parenthesis
 		 */
-		let searchTextParenthesis = addParenthesis(searchText);
+		// let searchTextParenthesis = addParenthesis(searchText);
 		/**
 		 * update params value for UI
 		 */
@@ -49,12 +49,12 @@ export default function parseSearchText(params, inputSearchText) {
 		})[0];
 
 		if (paramDate !== undefined) {
-			let result = '';
-			if (/(?<=\(@)(.*?)(?=>)/gi.test(paramDate)) {
-				result = paramDate.match(/(?<=\(@)(.*?)(?=>)/gi)[0];
-			} else if (/(?<=\(@)(.*?)(?=<)/gi.test(paramDate)) {
-				result = paramDate.match(/(?<=\(@)(.*?)(?=<)/gi)[0];
-			}
+			// let result = '';
+			// if (/(?<=\(@)(.*?)(?=>)/gi.test(paramDate)) {
+			// 	result = paramDate.match(/(?<=\(@)(.*?)(?=>)/gi)[0];
+			// } else if (/(?<=\(@)(.*?)(?=<)/gi.test(paramDate)) {
+			// 	result = paramDate.match(/(?<=\(@)(.*?)(?=<)/gi)[0];
+			// }
 
 			const dNumber = paramDate.replace(/\D/g, '');
 			const dOperator = paramDate.replace(/[0-9]/g, '').replace(/@PRD|@AD|@PD|@FD/gi, '');
@@ -105,7 +105,7 @@ export default function parseSearchText(params, inputSearchText) {
 		/**
 		 * mistype handle,  ;+ convert
 		 */
-		const searchText = mergeArgs(params);
+		// const searchText = mergeArgs(params);
 
 		/**
 		 * make Terms array
@@ -235,49 +235,49 @@ function splitArgs(myString) {
 	return myResult;
 }
 
-function mergeArgs(params) {
-	const { terms, dateType, startDate, endDate, assignee, inventor, patentOffice, language, status, ipType } = params;
-	// 단백질 and 추출물 and 정제 AND (@AD>=20010101<=20180101) AND (한국생명공학연구원 OR 한국 한의학 연구원).AP AND (김).INV
-	let myResult = terms && terms.length > 0 ? terms.map(item => item.join(' or ')).join(' and ') + ' and ' : '';
-	const myDateType = dateType && dateType.length > 0 ? '(@' + dateType : '(';
-	let myDate = myDateType;
-	myDate += startDate && startDate.length > 0 ? '>=' + startDate : '';
-	myDate += endDate && endDate.length > 0 ? '<=' + endDate + ') and ' : ') and ';
-	myDate = myDate === myDateType + ') and ' ? '' : myDate;
+// function mergeArgs(params) {
+// 	const { terms, dateType, startDate, endDate, assignee, inventor, patentOffice, language, status, ipType } = params;
+// 	// 단백질 and 추출물 and 정제 AND (@AD>=20010101<=20180101) AND (한국생명공학연구원 OR 한국 한의학 연구원).AP AND (김).INV
+// 	let myResult = terms && terms.length > 0 ? terms.map(item => item.join(' or ')).join(' and ') + ' and ' : '';
+// 	const myDateType = dateType && dateType.length > 0 ? '(@' + dateType : '(';
+// 	let myDate = myDateType;
+// 	myDate += startDate && startDate.length > 0 ? '>=' + startDate : '';
+// 	myDate += endDate && endDate.length > 0 ? '<=' + endDate + ') and ' : ') and ';
+// 	myDate = myDate === myDateType + ') and ' ? '' : myDate;
 
-	let myAssignee =
-		assignee && assignee.length > 0
-			? '(' + assignee.map(item => (/\s/.test(item) ? '"' + item + '"' : item)).join(' or ') + ').AP and '
-			: '';
-	let myInventor =
-		inventor && inventor.length > 0
-			? '(' + inventor.map(item => (/\s/.test(item) ? '"' + item + '"' : item)).join(' or ') + ').INV and '
-			: '';
-	let myPatentOffice = patentOffice && patentOffice.length > 0 ? '(' + patentOffice.join(' or ') + ').CTRY and ' : '';
-	let myLanguage = language && language.length > 0 ? '(' + language.join(' or ') + ').LANG and ' : '';
-	let myStatus = status && status.length > 0 ? '(' + status.join(' or ') + ').STAT and ' : '';
-	let myIpType = ipType && ipType.length > 0 ? '(' + ipType.join(' or ') + ').TYPE and ' : '';
+// 	let myAssignee =
+// 		assignee && assignee.length > 0
+// 			? '(' + assignee.map(item => (/\s/.test(item) ? '"' + item + '"' : item)).join(' or ') + ').AP and '
+// 			: '';
+// 	let myInventor =
+// 		inventor && inventor.length > 0
+// 			? '(' + inventor.map(item => (/\s/.test(item) ? '"' + item + '"' : item)).join(' or ') + ').INV and '
+// 			: '';
+// 	let myPatentOffice = patentOffice && patentOffice.length > 0 ? '(' + patentOffice.join(' or ') + ').CTRY and ' : '';
+// 	let myLanguage = language && language.length > 0 ? '(' + language.join(' or ') + ').LANG and ' : '';
+// 	let myStatus = status && status.length > 0 ? '(' + status.join(' or ') + ').STAT and ' : '';
+// 	let myIpType = ipType && ipType.length > 0 ? '(' + ipType.join(' or ') + ').TYPE and ' : '';
 
-	myResult += myDate + myAssignee + myInventor + myPatentOffice + myLanguage + myStatus + myIpType;
+// 	myResult += myDate + myAssignee + myInventor + myPatentOffice + myLanguage + myStatus + myIpType;
 
-	if (myResult.endsWith(' and ')) myResult = myResult.slice(0, -5);
+// 	if (myResult.endsWith(' and ')) myResult = myResult.slice(0, -5);
 
-	return myResult;
-}
+// 	return myResult;
+// }
 
-function addParenthesis(searchText) {
-	let needParenthesis = false;
-	let searchTextParenthesis = '';
-	const result = searchText.split(' and ');
-	for (let i = 0; i < result.length; i++) {
-		if (result[i].includes(' or ') && !result[i].includes('(')) needParenthesis = true;
-		else needParenthesis = false;
-		if (needParenthesis) {
-			searchTextParenthesis += `(${result[i]}) and `;
-		} else {
-			searchTextParenthesis += `${result[i]} and `;
-		}
-	}
-	if (searchTextParenthesis.endsWith(' and ')) searchTextParenthesis = searchTextParenthesis.slice(0, -5);
-	return searchTextParenthesis;
-}
+// function addParenthesis(searchText) {
+// 	let needParenthesis = false;
+// 	let searchTextParenthesis = '';
+// 	const result = searchText.split(' and ');
+// 	for (let i = 0; i < result.length; i++) {
+// 		if (result[i].includes(' or ') && !result[i].includes('(')) needParenthesis = true;
+// 		else needParenthesis = false;
+// 		if (needParenthesis) {
+// 			searchTextParenthesis += `(${result[i]}) and `;
+// 		} else {
+// 			searchTextParenthesis += `${result[i]} and `;
+// 		}
+// 	}
+// 	if (searchTextParenthesis.endsWith(' and ')) searchTextParenthesis = searchTextParenthesis.slice(0, -5);
+// 	return searchTextParenthesis;
+// }

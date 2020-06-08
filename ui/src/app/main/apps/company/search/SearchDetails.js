@@ -34,10 +34,10 @@ function SearchDetails(props) {
 
 	const { stockCode } = companyCode;
 
-	const companyId = String(props.match.params.companyId).replace(/-/gi, '');
+	// const companyId = String(props.match.params.companyId).replace(/-/gi, '');
 	const pageLayout = useRef(null);
 
-	const [search, setSearch] = useState(searchData);
+	const [search] = useState(searchData);
 
 	useEffect(() => {
 		if (stockCode) {
@@ -48,13 +48,13 @@ function SearchDetails(props) {
 
 	function onDownload() {
 		setTimeout(() => {
-			const response = {
-				file:
-					'http://kpat.kipris.or.kr/kpat/biblio/biblioMain_pdfAcrobat.jsp?method=fullText&pub_reg=' +
-					(search && search.공고일자 ? 'R' : 'P') +
-					'&applno=' +
-					companyId
-			};
+			// const response = {
+			// 	file:
+			// 		'http://kpat.kipris.or.kr/kpat/biblio/biblioMain_pdfAcrobat.jsp?method=fullText&pub_reg=' +
+			// 		(search && search.공고일자 ? 'R' : 'P') +
+			// 		'&applno=' +
+			// 		companyId
+			// };
 			// window.open(response.file);
 		}, 100);
 	}

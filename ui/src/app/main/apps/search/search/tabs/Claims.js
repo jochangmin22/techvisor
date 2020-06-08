@@ -72,8 +72,6 @@ const claimTypes = { '전체 청구항': 'all', 독립항: 'dok', 종속항: 'jo
 const allClose = { dok: false, jong: false, sak: false, mi: false };
 const allOpen = { dok: true, jong: true, sak: true, mi: true };
 
-// FIXME : 청구항 수 표시 badge 말고 rounded-full 로 변경
-// FIXME : 독립항 종속항 제목 색깔
 // TODO : 버튼 작동
 // TODO : SelectionHightlighter 초기화
 function Claims(props) {
@@ -153,18 +151,19 @@ function Claims(props) {
 								{data.split('\n').map((line, n) => {
 									return (
 										<span key={n}>
-											{line && (
-												<SelectionHighlighter
-													text={line}
-													selectionHandler={selectionHandler}
-													customClass={classes.highLighter}
-												/>
-											)
-											// <Highlighter
-											//   	searchWords={props.terms}
-											//    	autoEscape={true}
-											//    	textToHighlight={line}
-											// />
+											{
+												line && (
+													<SelectionHighlighter
+														text={line}
+														selectionHandler={selectionHandler}
+														customClass={classes.highLighter}
+													/>
+												)
+												// <Highlighter
+												//   	searchWords={props.terms}
+												//    	autoEscape={true}
+												//    	textToHighlight={line}
+												// />
 											}
 											<br />
 										</span>
@@ -180,66 +179,3 @@ function Claims(props) {
 }
 
 export default Claims;
-
-// 	<div className={classes.root}>
-// 		<AppBar position="static">
-// 			<Toolbar variant="dense">
-// 				<h5 className={classes.title}>청구항 분석</h5>
-// 			</Toolbar>
-// 		</AppBar>
-// 		<h6 className="font-600 text-12 p-16" color="secondary">
-// 			청구항 정보
-// 		</h6>
-// 		<Paper className={classes.paper}>
-// 			<Table className={classes.table} size="small">
-// 				<TableBody>
-// 					<StyledTableRow>
-// 						<TableCell className={classes.tableRowFixed}>독립항 수</TableCell>
-// 						<TableCell className={classes.tableRow}>{props.search.독립항수}</TableCell>
-// 					</StyledTableRow>
-// 					<StyledTableRow>
-// 						<TableCell className={classes.tableRowFixed}>종속항 수</TableCell>
-// 						<TableCell className={classes.tableRow}>{props.search.종속항수}</TableCell>
-// 					</StyledTableRow>
-// 					<StyledTableRow>
-// 						<TableCell className={classes.tableRowFixed}>최초 청구항 수</TableCell>
-// 						<TableCell className={classes.tableRow}>{props.search.청구항수}</TableCell>
-// 					</StyledTableRow>
-// 				</TableBody>
-// 			</Table>
-
-// 			<Table className={classes.table} size="small">
-// 				<TableCell>
-// 					{/* {props.search.청구항들} */}
-// 					{names.map((data, key) => {
-// 						return (
-// 							<StyledTableRow key={key}>
-// 								<TableCell className={classes.tableRowClaim}>청구항 {key + 1}</TableCell>
-// 								<TableCell className={classes.tableRow}>
-// 									{data.split('\n').map(line => {
-// 										return (
-// 											<span>
-// 												{line && (
-// 													<Highlighter
-// 														searchWords={props.searchText.split(' ')}
-// 														autoEscape={true}
-// 														textToHighlight={line}
-// 													/>
-// 												)}
-// 												<br />
-// 											</span>
-// 										);
-// 									})}
-// 								</TableCell>
-// 							</StyledTableRow>
-// 						);
-// 					})}
-// 				</TableCell>
-// 			</Table>
-// 		</Paper>
-// 		<h6 className="font-600 text-12 p-16" color="secondary">
-// 			청구항 맵
-// 		</h6>
-// 		<div className="widget flex w-full sm:w-1/2 p-12">{/* <Widget8 widget={widgets.widget8} /> */}</div>
-// 	</div>
-// </FuseAnimateGroup>

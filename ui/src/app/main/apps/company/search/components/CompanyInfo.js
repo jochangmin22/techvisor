@@ -3,7 +3,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
-import searchData from './searchData';
+// // import searchData from './searchData';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 const useStyles = makeStyles(theme => ({
@@ -72,10 +72,10 @@ function CompanyInfo(props) {
 					</Typography>
 					{Object.entries(corpInfo).map(([key, value]) => (
 						<Grid container key={key} spacing={3}>
-							<Grid item xs={5}>
+							<Grid item xs={3}>
 								{key}
 							</Grid>
-							<Grid item xs={7}>
+							<Grid item xs={9}>
 								{value}
 							</Grid>
 						</Grid>
@@ -87,10 +87,10 @@ function CompanyInfo(props) {
 					</Typography>
 					{Object.entries(stockInfo).map(([key, value]) => (
 						<Grid container key={key} spacing={3}>
-							<Grid item xs={5}>
+							<Grid item xs={6}>
 								{key}
 							</Grid>
-							<Grid item xs={6} className='text-right'>
+							<Grid item xs={6} className="text-right">
 								{value}
 							</Grid>
 						</Grid>
@@ -102,39 +102,16 @@ function CompanyInfo(props) {
 					</Typography>
 					{Object.entries(financeInfo).map(([key, value]) => (
 						<Grid container key={key} spacing={3}>
-							<Grid item xs={5}>
+							<Grid item xs={4}>
 								{key}
 							</Grid>
-							<Grid item xs={6} className='text-right'>
+							<Grid item xs={8} className="text-right">
 								{value}
 							</Grid>
 						</Grid>
 					))}
 				</Grid>
 			</Grid>
-
-			{/* <EnhancedTable columns={columns} data={data} size="small" height="max-h-160" /> */}
-			{/* <p>
-				산업: {Item.sanupcode} | 설립일: {Item.obz_date}
-			</p>
-			<p>{Item.koraddr}</p>
-			<p>
-				(Tel) {Item.tel} | (Fax) {Item.tel}
-			</p>
-			<p>
-				매출 {Item.tel} | 영업이익 {Item.tel} | 당기순이익 {Item.tel}
-			</p>
-			<p>
-				자산 {Item.tel} | 부채 {Item.tel} | 자본 {Item.tel}
-			</p>
-			<p>
-				Leverage {Item.tel} | 영업이익률 {Item.tel} | ROA {Item.tel}
-			</p>
-			<p>
-				시가총액 {Item.tel} | PER {Item.tel} | PBR {Item.tel}
-			</p>
-			<p>종업원수 {Item.tel}</p>
-			<p>사업 영역: {Item.tel}</p> */}
 		</Paper>
 	);
 }

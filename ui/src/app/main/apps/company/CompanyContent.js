@@ -5,17 +5,17 @@ import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import * as Actions from './store/actions';
 // import { authRoles } from "app/auth";
 import ContentGrid from './searchs/ContentGrid';
-import ContentVisual from './searchs/ContentVisual';
-import SubjectRelation from './searchs/SubjectRelation';
-import MatrixAnalysis from './searchs/MatrixAnalysis';
-import NewsRelation from './searchs/NewsRelation';
+// import ContentVisual from './searchs/ContentVisual';
+// import SubjectRelation from './searchs/SubjectRelation';
+// import MatrixAnalysis from './searchs/MatrixAnalysis';
+// import NewsRelation from './searchs/NewsRelation';
 import EmptyMsg from './searchs/components/EmptyMsg';
 import searchData from './inc/searchData';
 
 function CompanyContent(props) {
 	const dispatch = useDispatch();
 	const searchParams = useSelector(({ companyApp }) => companyApp.searchs.searchParams);
-	const { searchText, searchNum } = searchParams;
+	const { searchText } = searchParams;
 	const searchs = useSelector(({ companyApp }) => companyApp.searchs.entities);
 	const searchLoading = useSelector(({ companyApp }) => companyApp.searchs.searchLoading);
 

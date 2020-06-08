@@ -1,4 +1,4 @@
-from .models import stock_quotes
+from .models import stock_quotes, financial_statements
 from django.db import connection
 from django.http import JsonResponse
 from django.http import HttpResponse
@@ -62,9 +62,9 @@ def crawl_stock(request):
         # exist ? {
         try:
             stockQuotes = stock_quotes.objects.filter(kiscode=kiscode).latest('price_date')
-            noRecord = stockQuotes.price_date if stockQuotes else None
+            lastRecordDate = stockQuotes.price_date if stockQuotes else None
         except:
-            noRecord = None
+            lastRecordDate = None
 
         # exist ? }
 
@@ -75,7 +75,9 @@ def crawl_stock(request):
         
         maxPage=source.find_all("table",align="center")
         mp = maxPage[0].find_all("td",class_="pgRR")
-        mpNum = int(mp[0].a.get('href')[-3:])
+        # mpNum = int(mp[0].a.get('href')[-3:])
+        mpNum = int(mp[0].a.get('href').split('page=')[1])
+        
 
         isCrawlBreak = None                                                    
         for page in range(1, mpNum+1):
@@ -100,9 +102,9 @@ def crawl_stock(request):
                     newDate = srlists[i].find_all("td",align="center")[0].text
                     newDate = newDate.replace('.','-')
                     newDate_obj = datetime.strptime(newDate, '%Y-%m-%d')
-                    noRecord_obj = datetime.combine(noRecord, datetime.min.time())
-                    # today's stock quotes are not stored in the db
-                    if not noRecord or (noRecord and noRecord_obj < newDate_obj and newDate_obj.date() != datetime.today().date()):
+                    lastRecordDate_obj = datetime.combine(lastRecordDate, datetime.min.time()) if lastRecordDate else ''
+
+                    if not lastRecordDate or (lastRecordDate and lastRecordDate_obj.date() <= newDate_obj.date()):
                         first = srlists[i].find_all("td",class_="num")[2].text
                         second = srlists[i].find_all("td",class_="num")[0].text
                         third = srlists[i].find_all("td",class_="num")[4].text
@@ -123,8 +125,13 @@ def crawl_stock(request):
                             'stock': [first, second, third, fourth, fifth],
                             'volume' : fifth
                         }
+                        isMatchToday = True if lastRecordDate and lastRecordDate_obj.date() == newDate_obj.date() else False
 
-                        stock_quotes.objects.create(**newStock)
+                        if not isMatchToday:
+                            stock_quotes.objects.create(**newStock)
+                        else:                            
+                            stock_quotes.objects.filter(kiscode=kiscode, price_date=newDate).update(**newStock)
+                        # stock_quotes.objects.update_or_create(**newStock)
                     else:
                         isCrawlBreak = True    
     return
@@ -141,13 +148,13 @@ def crawl_financial(request):
         # exist ? {
         try:
             financial = financial_statements.objects.filter(kiscode=kiscode)
-            noRecord = None
+            lastRecordDate = None
             if financial.exists():
                 rows = list(financial.values())
                 row = rows[0]
-                noRecord = row['updated_at']            
+                lastRecordDate = row['updated_at']            
         except:
-            noRecord = None
+            lastRecordDate = None
 
         # exist ? }
 
@@ -180,7 +187,7 @@ def crawl_financial(request):
                     newDate = srlists[i].find_all("td",align="center")[0].text
                     newDate = newDate.replace('.','-')
 
-                    if not noRecord or (noRecord and noRecord < newDate):
+                    if not lastRecordDate or (lastRecordDate and lastRecordDate < newDate):
                         first = srlists[i].find_all("td",class_="num")[2].text
                         second = srlists[i].find_all("td",class_="num")[0].text
                         third = srlists[i].find_all("td",class_="num")[4].text

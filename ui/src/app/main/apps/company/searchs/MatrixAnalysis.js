@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import EnhancedTable from './components/EnhancedTable';
-import { useSelector, useDispatch } from 'react-redux';
-import CircularLoading from '../components/CircularLoading';
-// import { Draggable } from 'react-beautiful-dnd';
-import * as Actions from '../store/actions';
-// import Draggable from 'react-draggable';
+import { useSelector } from 'react-redux';
 import PopoverMsg from '../components/PopoverMsg';
 import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 function MatrixAnalysis(props) {
-	const dispatch = useDispatch();
 	const matrix = useSelector(({ companyApp }) => companyApp.searchs.matrix);
 
 	const [selectedCategory, setSelectedCategory] = useState('기술별');
@@ -22,12 +18,6 @@ function MatrixAnalysis(props) {
 	function handleSelectedCategory(event) {
 		setSelectedCategory(event.target.value);
 	}
-
-	// const { setShowLoading } = useContext(SubjectContext);
-
-	// useEffect(() => {
-	// 	dispatch(Actions.updateMatrixCategory(selectedCategory));
-	// }, [dispatch, selectedCategory]);
 
 	const columns = React.useMemo(
 		() =>
@@ -79,7 +69,7 @@ function MatrixAnalysis(props) {
 	const data = React.useMemo(() => (matrix ? groupBy(matrix, selectedCategory) : []), [matrix, selectedCategory]);
 
 	if (!data || data.length === 0) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (
@@ -87,7 +77,7 @@ function MatrixAnalysis(props) {
 			<div className="px-12 flex items-center">
 				<PopoverMsg
 					title="매트릭스 분석"
-					msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 주변단어, 국가별, 연도별, 기술별, 기업별 분석을 매트릭스 형태로 표시합니다."
+					msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 국가별, 연도별, 기술별, 기업별 분석을 매트릭스 형태로 표시합니다."
 				/>
 				<FormControl>
 					<Select
@@ -100,7 +90,7 @@ function MatrixAnalysis(props) {
 						displayEmpty
 						// disableUnderline
 					>
-						{['주변단어', '국가별', '연도별', '기술별', '기업별'].map((key, n) => (
+						{['국가별', '연도별', '기술별', '기업별'].map((key, n) => (
 							<MenuItem value={key} key={key}>
 								{key}
 							</MenuItem>
