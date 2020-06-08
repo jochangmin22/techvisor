@@ -4,10 +4,10 @@ import { select } from 'd3-selection';
 import ReactWordcloud from 'react-wordcloud';
 import randomColor from 'randomcolor';
 import Paper from '@material-ui/core/Paper';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 function getCallback(callback) {
-	return function(word, event) {
+	return function (word, event) {
 		const isActive = callback !== 'onWordMouseOut';
 		const element = event.target;
 		const text = select(element);
@@ -36,7 +36,7 @@ function WordCloud(props) {
 	useEffect(() => {}, [wordCloud]);
 
 	if (!wordCloud || wordCloud.length === 0) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (

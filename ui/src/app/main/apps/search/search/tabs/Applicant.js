@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import * as Actions from '../../store/actions';
 import ApplicantTrend from './ApplicantTrend';
 import ApplicantIpc from './ApplicantIpc';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -105,14 +105,10 @@ function Applicant(props) {
 					</div>
 				</Paper>
 				<div className="w-full md:w-2/3 md:pr-8 items-center justify-center">
-					{showLoading ? (
-						<CircularLoading delay={15000} />
-					) : (
-						<ApplicantTrend applicantTrend={applicantTrend} />
-					)}
+					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantTrend applicantTrend={applicantTrend} />}
 				</div>
 				<div className="w-full md:w-1/3 md:pl-8 items-center justify-center">
-					{showLoading ? <CircularLoading delay={15000} /> : <ApplicantIpc applicantTrend={applicantTrend} />}
+					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantIpc applicantTrend={applicantTrend} />}
 				</div>
 			</>
 		</FuseAnimateGroup>

@@ -4,7 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import SubjectContext from './SubjectContext';
 import SubjectChips from './components/SubjectChips';
 import SubjectTable from './components/SubjectTable';
-import CircularLoading from '../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import PopoverMsg from '../components/PopoverMsg';
 
 function SubjectRelation(props) {
@@ -30,7 +30,7 @@ function SubjectRelation(props) {
 	}, [subjectRelation]);
 
 	if (!subjectRelation || subjectRelation.length === 0) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (
@@ -41,11 +41,7 @@ function SubjectRelation(props) {
 					msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 핵심키워드와 비교하여 유사 관계를 표시합니다."
 				/>
 				<SubjectChips searchText={searchText} searchNum={searchNum} topic={subjectRelation.topic} />
-				{vecData && vecData.length !== 0 && !showLoading ? (
-					<SubjectTable data={vecData} />
-				) : (
-					<CircularLoading />
-				)}
+				{vecData && vecData.length !== 0 && !showLoading ? <SubjectTable data={vecData} /> : <SpinLoading />}
 			</Paper>
 		</SubjectContext.Provider>
 	);

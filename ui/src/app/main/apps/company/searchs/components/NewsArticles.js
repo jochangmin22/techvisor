@@ -5,7 +5,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import EnhancedTable from './components/EnhancedTable';
 import SubjectContext from '../SubjectContext';
 import { useSelector } from 'react-redux';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -68,7 +68,7 @@ function NewsArticles(props) {
 	const data = React.useMemo(() => news, [news]);
 
 	if (!data || data.length === 0) {
-		return <CircularLoading delay={10000} />;
+		return <SpinLoading />;
 	}
 
 	return (

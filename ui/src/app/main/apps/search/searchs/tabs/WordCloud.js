@@ -6,7 +6,7 @@ import randomColor from 'randomcolor';
 import Paper from '@material-ui/core/Paper';
 import { useSelector, useDispatch } from 'react-redux';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import parseSearchText from '../../inc/parseSearchText';
 import LeftConfig from '../setLeftConfig';
 import * as Actions from '../../store/actions';
@@ -85,7 +85,7 @@ function WordCloud(props) {
 	}
 
 	if (!wordCloud || wordCloud.length === 0) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (

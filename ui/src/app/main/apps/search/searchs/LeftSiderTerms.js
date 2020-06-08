@@ -25,7 +25,6 @@ import parseSearchText from '../inc/parseSearchText';
 import * as Actions from '../store/actions';
 import { showMessage } from 'app/store/actions';
 
-// FIXME : make date TextField to uncontrolled
 // TODO: change focus next textField
 const useStyles = makeStyles(theme => ({
 	root: {

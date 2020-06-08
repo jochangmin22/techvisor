@@ -13,7 +13,6 @@ import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import parseSearchText from '../inc/parseSearchText';
-import clsx from 'clsx';
 
 function MatrixAnalysis(props) {
 	const dispatch = useDispatch();

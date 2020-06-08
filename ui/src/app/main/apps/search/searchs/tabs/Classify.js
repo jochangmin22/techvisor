@@ -11,7 +11,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 // import { PropTypes } from "prop-types";
 // import { FixedSizeList } from "react-window";
 import { makeStyles } from '@material-ui/core/styles';
@@ -248,7 +248,7 @@ function Classify(props) {
 	}, [props.searchText, searchs]);
 
 	if (!searchs || searchs.length === 0) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (

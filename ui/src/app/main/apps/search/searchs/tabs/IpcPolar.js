@@ -6,7 +6,7 @@ import Button from '@material-ui/core/Button';
 import { useTheme } from '@material-ui/styles';
 import { Polar } from 'react-chartjs-2';
 import _ from '@lodash';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 function IpcPolar(props) {
 	const theme = useTheme();
@@ -251,7 +251,7 @@ function IpcPolar(props) {
 	}, [props.searchText, searchs]);
 
 	if (!searchs || searchs.length === 0) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (

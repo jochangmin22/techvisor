@@ -6,7 +6,7 @@ import Button from '@material-ui/core/Button';
 import { useTheme } from '@material-ui/styles';
 import { HorizontalBar, Doughnut } from 'react-chartjs-2';
 import 'chartjs-plugin-datalabels';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import _ from 'lodash';
 
 const nationality = {
@@ -482,7 +482,7 @@ function ApplicantsBar(props) {
 	// });
 
 	if (!searchs || searchs.length === 0) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (

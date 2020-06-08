@@ -5,7 +5,7 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import { HorizontalBar, Doughnut } from 'react-chartjs-2';
 import 'chartjs-plugin-datalabels';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import _ from 'lodash';
 import { useTheme } from '@material-ui/styles';
 
@@ -474,7 +474,7 @@ function InventorsBar(props) {
 	// });
 
 	if (!searchs || searchs.length === 0) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (

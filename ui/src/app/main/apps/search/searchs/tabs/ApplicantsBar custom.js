@@ -5,7 +5,7 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import { useTheme } from '@material-ui/styles';
 import { HorizontalBar, Doughnut } from 'react-chartjs-2';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import _ from 'lodash';
 import parse from 'html-react-parser';
 
@@ -455,7 +455,7 @@ function ApplicantsBar(props) {
 	// });
 
 	if (!searchs || searchs.length === 0) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (

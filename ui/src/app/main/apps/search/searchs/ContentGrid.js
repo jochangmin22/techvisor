@@ -63,20 +63,20 @@ const columnDefs = [
 	{
 		headerName: '발명의명칭(국문)',
 		field: '발명의명칭(국문)',
-		width: 500,
-		cellRenderer: 'highlightCellRenderer'
+		width: 500
+		// cellRenderer: 'highlightCellRenderer'
 	},
 	{
 		headerName: '출원인',
 		field: '출원인1',
-		width: 250,
-		cellRenderer: 'highlightAssigneeCellRenderer'
+		width: 250
+		// cellRenderer: 'highlightAssigneeCellRenderer'
 	},
 	{
 		headerName: '발명자',
 		field: '발명자1',
-		width: 100,
-		cellRenderer: 'highlightInventorCellRenderer'
+		width: 100
+		// cellRenderer: 'highlightInventorCellRenderer'
 	},
 	{
 		headerName: 'IPC',

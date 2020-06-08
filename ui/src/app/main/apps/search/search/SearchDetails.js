@@ -10,7 +10,7 @@ import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import FuseAnimate from '@fuse/core/FuseAnimate';
 import FusePageCarded from '@fuse/core/FusePageCarded';
-import CircularLoading from '../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import withReducer from 'app/store/withReducer';
 import { Link } from 'react-router-dom';
@@ -81,7 +81,7 @@ function SearchDetails(props) {
 	}
 
 	if (!search) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (

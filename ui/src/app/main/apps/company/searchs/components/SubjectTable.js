@@ -11,7 +11,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import clsx from 'clsx';
 import _ from '@lodash';
 import { Line } from 'rc-progress';
-import CircularLoading from '../../components/CircularLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import parseSearchText from '../../inc/parseSearchText';
 import LeftConfig from '../setLeftConfig';
 import * as Actions from '../../store/actions';
@@ -67,7 +67,7 @@ function SubjectTable(props) {
 	}
 
 	if (!props) {
-		return <CircularLoading />;
+		return <SpinLoading />;
 	}
 
 	return (
