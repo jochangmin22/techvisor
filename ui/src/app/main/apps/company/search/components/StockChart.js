@@ -1,14 +1,16 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import Icon from '@material-ui/core/Icon';
+import Button from '@material-ui/core/Button';
 import echarts from 'echarts';
 import moment from 'moment';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useSelector, useDispatch } from 'react-redux';
 import * as Actions from '../../store/actions';
 import debounce from 'lodash/debounce';
-import { Icon, Button } from '@material-ui/core';
 import clsx from 'clsx';
+import { chartTypes } from 'app/main/apps/lib/variables';
 
 function calculateMA(dayCount, data) {
 	var result = [];
@@ -26,20 +28,25 @@ function calculateMA(dayCount, data) {
 	return result;
 }
 
-const defaultChipData = { corpName: '삼성전자', corpCode: '126380', stockCode: '005930' };
+// const defaultChipData = { corpName: '삼성전자', corpCode: '126380', stockCode: '005930' };
 
 function StockChart(props) {
 	const dispatch = useDispatch();
 	const chartRef = useRef(null);
-	// const { corpName, corpCode, stockCode } = props.companyCode;
-	const { corpName, corpCode, stockCode } = defaultChipData;
+	const { corpName, stockCode } = props.companyCode;
+	// const { corpName, corpCode, stockCode } = defaultChipData;
 	const stock = useSelector(({ companyApp }) => companyApp.search.stock);
+	const [today, setToday] = useState(null);
 	const [series, setSeries] = useState(null);
 	const [xAxis, setXAxis] = useState(null);
 	let echart = null;
 	const digits = 2;
 
-	const [currentRange, setCurrentRange] = useState('하루');
+	const [currentRange, setCurrentRange] = useState({
+		name: 'day',
+		text: '하루',
+		unit: '5분'
+	});
 
 	function handleChangeRange(range) {
 		setCurrentRange(range);
@@ -51,22 +58,44 @@ function StockChart(props) {
 		}
 	}, 100);
 
-	useEffect(() => {
-		if (!stock) {
-			dispatch(Actions.getStock({ kiscode: stockCode }));
-		}
-		// eslint-disable-next-line
-	}, [props]);
+	// useEffect(() => {
+	// 	if (!stock && stockCode) {
+	// 		dispatch(Actions.getStock({ kiscode: stockCode }));
+	// 	}
+	// 	// eslint-disable-next-line
+	// }, [props]);
+
+	// useEffect(() => {
+	// 	window.addEventListener('resize', handleResize);
+	// 	drawChart();
+	// 	// eslint-disable-next-line
+	// }, [handleResize]);
 
 	useEffect(() => {
-		window.addEventListener('resize', handleResize);
-		drawChart();
-	}, []);
-
-	useEffect(() => {
+		todayStock();
 		drawChart();
 		updateChart();
+		// eslint-disable-next-line
 	}, [stock]);
+
+	const todayStock = () => {
+		if (stock && stock.data) {
+			const _len = stock.data.length;
+			const price = stock.data[_len - 1][1];
+			const increase = price - stock.data[_len - 2][1];
+			const percent = ((increase / price) * 100).toFixed(2) + '%';
+			const color = increase > 0 ? 'text-red' : increase < 0 ? 'text-blue' : 'text-black';
+			const icon = increase > 0 ? 'trending_up' : increase < 0 ? 'trending_down' : 'trending_flat';
+			setToday({
+				price: price.toLocaleString(),
+				increase: Number(increase).toLocaleString(),
+				color: color,
+				icon: icon,
+				percent: percent
+			});
+		}
+		return;
+	};
 
 	const drawChart = () => {
 		if (!stock) return;
@@ -231,11 +260,11 @@ function StockChart(props) {
 					data: stock.data,
 					itemStyle: {
 						normal: {
-							opacity: 0.5,
-							color: '#0CF49B',
-							color0: '#FD1050',
-							borderColor: '#0CF49B',
-							borderColor0: '#FD1050'
+							opacity: 1.0,
+							color: '#3E67F1',
+							color0: '#D01454',
+							borderColor: '#3E67F1',
+							borderColor0: '#D01454'
 						}
 					}
 				},
@@ -254,11 +283,11 @@ function StockChart(props) {
 							color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
 								{
 									offset: 0,
-									color: 'rgba(255, 158, 68, 0.25)'
+									color: 'rgba(133, 245, 245, 0.25)'
 								},
 								{
 									offset: 1,
-									color: 'rgba(255, 70, 131, 0.25)'
+									color: 'rgba(71, 176, 252, 0.25)'
 								}
 							])
 						}
@@ -365,31 +394,32 @@ function StockChart(props) {
 
 	return (
 		<Paper className="rounded-8 shadow h-full w-full m-8 p-16 items-center justify-center">
-			<div className="flex items-center justify-between p-16 border-b-1">
-				<div className="flex items-center">
-					<Typography className="text-red-500 text-24">48,000</Typography>
-					<div className="flex flex-row items-center">
-						<Icon className="text-green">trending_up</Icon>
-						{/* <Icon className="text-red">trending_down</Icon> */}
-						<div className="mx-8">
-							{'321'}({'2.05%'})
+			<div className="flex items-center justify-between pl-4">
+				{today && (
+					<div className="flex items-center">
+						<Typography className="font-500 text-24">{today.price}</Typography>
+						<div className="flex flex-row items-center">
+							<Icon className={today.color}>{today.icon}</Icon>
+							<div className={clsx(today.color, 'mx-8')}>
+								{today.increase} ({today.percent})
+							</div>
 						</div>
 					</div>
-				</div>
+				)}
 				<div className="items-center">
-					{['하루', '일주일', '한달', '1년', '전체'].map(key => {
+					{chartTypes.map(({ name, text }) => {
 						return (
 							<Button
-								key={key}
+								key={name}
 								className={clsx(
 									'shadow-none px-16',
-									currentRange === key ? 'font-bold' : 'font-normal'
+									currentRange === name ? 'font-bold' : 'font-normal'
 								)}
-								onClick={() => handleChangeRange(key)}
+								onClick={() => handleChangeRange(name)}
 								color="default"
-								variant={currentRange === key ? 'contained' : 'text'}
+								variant={currentRange === name ? 'contained' : 'text'}
 							>
-								{key}
+								{text}
 							</Button>
 						);
 					})}

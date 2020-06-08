@@ -25,6 +25,12 @@ const searchReducer = function (state = initialState, action) {
 				stock: action.payload
 			};
 		}
+		// case Actions.CLEAR_STOCK: {
+		// 	return {
+		// 		...state,
+		// 		stock: '',
+		// 	};
+		// }
 		case Actions.SET_COMPANY_CODE: {
 			return {
 				...state,
