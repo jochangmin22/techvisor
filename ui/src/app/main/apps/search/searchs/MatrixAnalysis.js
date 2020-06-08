@@ -1,23 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import * as Actions from '../store/actions';
 // import { Draggable } from 'react-beautiful-dnd';
-// import * as Actions from '../store/actions';
 // import Draggable from 'react-draggable';
 import PopoverMsg from '../components/PopoverMsg';
 import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import parseSearchText from '../inc/parseSearchText';
+import clsx from 'clsx';
 
 function MatrixAnalysis(props) {
-	// const dispatch = useDispatch();
+	const dispatch = useDispatch();
 	const matrix = useSelector(({ searchApp }) => searchApp.searchs.matrix);
+	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
+	const [selectedCategory, setSelectedCategory] = useState(matrix.category);
+	const [showLoading, setShowLoading] = useState(false);
 
-	const [selectedCategory, setSelectedCategory] = useState('기술별');
+	function getColor(value) {
+		if (!matrix.max) {
+			return 'font-normal';
+		}
+		const hue = (value / matrix.max).toFixed(1) * 1000;
+		if (hue === 0) {
+			return 'font-normal text-blue-200';
+		}
+		if (hue === 1000) {
+			return 'font-extrabold text-red-900 text-13';
+		}
+		return hue < 500 ? 'font-normal text-blue-' + (hue + 100) : 'font-extrabold text-red-' + hue;
+	}
 
 	function handleSelectedCategory(event) {
 		setSelectedCategory(event.target.value);
@@ -25,35 +42,55 @@ function MatrixAnalysis(props) {
 
 	// const { setShowLoading } = useContext(SubjectContext);
 
-	// useEffect(() => {
-	// 	dispatch(Actions.updateMatrixCategory(selectedCategory));
-	// }, [dispatch, selectedCategory]);
+	useEffect(() => {
+		if (selectedCategory) {
+			const [, newApiParams] = parseSearchText(searchParams, null);
+			newApiParams.category = selectedCategory;
+			setShowLoading(true);
+			dispatch(Actions.getMatrix(newApiParams)).then(() => {
+				setShowLoading(false);
+			});
+		}
+	}, [dispatch, searchParams, selectedCategory]);
 
 	const columns = React.useMemo(
 		() =>
-			matrix
+			matrix.entities
 				? [
 						{
 							Header: selectedCategory,
 							accessor: selectedCategory,
-							className: 'text-11 text-center'
+							className: 'text-14 text-left max-w-96 overflow-hidden',
+							sortable: true,
+							Cell: row => (
+								<div>
+									<span title={row.value}>{row.value}</span>
+								</div>
+							)
 						}
 				  ].concat(
-						Object.keys(matrix).map(item => ({
+						Object.keys(matrix.entities).map(item => ({
 							Header: item,
 							accessor: item,
-							className: 'text-11 text-center'
+							className: 'text-11 text-center',
+							sortable: true,
+							Cell: row => (
+								<div className={getColor(row.value)}>
+									<span title={row.value}>{row.value}</span>
+								</div>
+							)
 						}))
 				  )
 				: [
 						{
 							Header: selectedCategory,
 							accessor: selectedCategory,
-							className: 'text-11 text-center'
+							className: 'text-11 text-center',
+							sortable: true
 						}
 				  ],
 		// eslint-disable-next-line
-		[matrix, selectedCategory]
+		[matrix.entities, selectedCategory]
 	);
 
 	const groupBy = (obj, selectedCategory) => {
@@ -76,7 +113,10 @@ function MatrixAnalysis(props) {
 		return Object.values(mapping);
 	};
 
-	const data = React.useMemo(() => (matrix ? groupBy(matrix, selectedCategory) : []), [matrix, selectedCategory]);
+	const data = React.useMemo(() => (matrix.entities ? groupBy(matrix.entities, selectedCategory) : []), [
+		matrix.entities,
+		selectedCategory
+	]);
 
 	// const data = React.useMemo(
 	// 	() =>
@@ -146,7 +186,7 @@ function MatrixAnalysis(props) {
 			<div className="px-12 flex items-center">
 				<PopoverMsg
 					title="매트릭스 분석"
-					msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 국가별, 연도별, 기술별, 기업별 분석을 매트릭스 형태로 표시합니다."
+					msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 연도별, 기술별, 기업별 분석을 매트릭스 형태로 표시합니다."
 				/>
 				<FormControl>
 					<Select
@@ -159,7 +199,7 @@ function MatrixAnalysis(props) {
 						displayEmpty
 						// disableUnderline
 					>
-						{['국가별', '연도별', '기술별', '기업별'].map((key, n) => (
+						{['연도별', '기술별', '기업별'].map((key, n) => (
 							<MenuItem value={key} key={key}>
 								{key}
 							</MenuItem>
@@ -169,9 +209,11 @@ function MatrixAnalysis(props) {
 			</div>
 			<FuseScrollbars className="h-40 px-12">
 				<div className="flex w-full ">
-					{matrix && <Chip label={selectedCategory} key={selectedCategory} size="small" className="mx-4" />}
-					{matrix &&
-						Object.entries(matrix).map(([key]) => (
+					{matrix.entities && (
+						<Chip label={selectedCategory} key={selectedCategory} size="small" className="mx-4" />
+					)}
+					{matrix.entities &&
+						Object.entries(matrix.entities).map(([key]) => (
 							// <Chip label={value} key={value} size="small" onClick={() => handleClick(value)} />
 							// <Draggable>
 							<Chip label={key} key={key} size="small" className="mx-4" />
@@ -179,21 +221,25 @@ function MatrixAnalysis(props) {
 						))}
 				</div>
 			</FuseScrollbars>
-			<FuseScrollbars className="max-h-256 px-6">
-				<EnhancedTable
-					columns={columns}
-					data={data}
-					size="small"
-					height=""
-					onRowClick={(ev, row) => {
-						if (row) {
-							// window.open(row.original.link, '_blank');
-							// props.history.push(row.original.link);
-							// dispatch(Actions.openEditContactDialog(row.original));
-						}
-					}}
-				/>
-			</FuseScrollbars>
+			{showLoading ? (
+				<SpinLoading />
+			) : (
+				<FuseScrollbars className="max-h-256 px-6">
+					<EnhancedTable
+						columns={columns}
+						data={data}
+						size="small"
+						height=""
+						onRowClick={(ev, row) => {
+							if (row) {
+								// window.open(row.original.link, '_blank');
+								// props.history.push(row.original.link);
+								// dispatch(Actions.openEditContactDialog(row.original));
+							}
+						}}
+					/>
+				</FuseScrollbars>
+			)}
 		</Paper>
 	);
 }

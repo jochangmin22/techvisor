@@ -22,11 +22,11 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 
-def parse_matrix(request, category="matrix"):
-    """ topic에 대한 주변단어, 국가별, 연도별, 기술별, 기업별 매트릭스
-    연도별 : topic, mtx_row 가져옴
-    * mtx_row [요약token] 에 각 topic이 포함되는 횟수 list
-        mtx_row list (출원일) <-> topic count
+def parse_matrix(request):
+    """ 
+    토픽에 대한 국가별, 연도별, 기술별, 기업별 매트릭스
+    1. topic, mtx_row 가져옴
+    2. mtx_row [요약token] 에 각 topic이 포함되는 [연도별, 기술별, 기업별] 횟수 list
     """
 
     params = {}
@@ -49,11 +49,11 @@ def parse_matrix(request, category="matrix"):
     apiParams = "¶".join(
         params.values()) if params['searchNum'] == '' else params['searchNum']
 
+    category = request.GET.get('category') if request.GET.get('category') else "연도별"
+
     # Redis {
     context = cache.get(apiParams)
     # Redis }
-
-    taged_docs = []
 
     # nlp_raw, mtx_raw 가져오기
     try:
@@ -68,42 +68,37 @@ def parse_matrix(request, category="matrix"):
         mtx_raw = []
 
     # topic 가져오기
-    # return HttpResponse(mtx_raw, content_type=u"application/json; charset=utf-8")
     try:
         topic = context['vec']['topic'] if context and context['vec'] and context['vec']['topic'] else get_topic(
             nlp_raw)
     except:
         topic = []
 
-    # mtx_raw의 요약token에서 topic 20 이 포함되는 출원번호 구하기 (mtx_raw는 출원번호, 출원일자(년), 출원인1, ipc요약, 요약token 로 구성)
+    if category == '연도별':
+        countField = '출원일자'
+    elif category == '기술별':
+        countField = 'ipc요약'
+    elif category == '기업별':
+        countField = '출원인1'
+
+    # mtx_raw의 요약token에서 topic 20 이 포함되는 [출원년, ipc요약, 출원인1] count 
+    # (mtx_raw는 출원번호, 출원일자(년), 출원인1, ipc요약, 요약token 로 구성)
     mlist = []  # list of dic
     all_list = {}  # dic of list of dic
+    matrixMax = 0
     for j in range(len(topic)):  # topic 20
         temp = [d for d in mtx_raw if topic[j] in d['요약token']]
-        temp2 = Counter(c['출원일자'] for c in temp)
+        temp2 = Counter(c[countField] for c in temp)
+        max_value = max(list(temp2.values()))
+        matrixMax = max_value if matrixMax < max_value else matrixMax
         mlist.append(temp2)
         all_list[topic[j]] = mlist
         mlist = []
-    # return HttpResponse(json.dumps(all_list, ensure_ascii=False))
-    return JsonResponse(all_list, safe=False)
-
-    # mtx_raw의 요약token에서 topic 20 <-> 연관단어(10)을 포함하는 raw 생성
-    mlist = []
-    alist = {}
-    for i in range(len(wordtovec_result_remove)):  # 연관단어 10
-        for j in range(len(sublist_result_remove)):  # topic 20
-            slist = []
-            temp = [d for d in mtx_raw if sublist_result_remove[j]
-                    in d['요약token'] and wordtovec_result_remove[i] in d['요약token']]
-            for k in range(len(temp)):
-                slist.append(str(temp[k]['출원번호']))
-            mlist.append(slist)
-        # alist['value'] = mlist
-        alist['value'] = mlist
-    return HttpResponse(json.dumps(alist, ensure_ascii=False))
-
+    res =  {"entities": all_list, "max": matrixMax}
+    return JsonResponse(res, safe=False)
 
 def get_topic(nlp_raw):
+    taged_docs = []
     try:  # handle NoneType error
         taged_docs = nlp_raw.split()
         tuple_taged_docs = tuple(taged_docs)  # list to tuble

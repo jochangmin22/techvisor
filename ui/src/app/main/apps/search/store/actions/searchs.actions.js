@@ -224,7 +224,7 @@ export function getMatrix(params) {
 export function updateMatrixCategory(data) {
 	return {
 		type: UPDATE_MATRIX_CATEGORY,
-		matrixCategory: data
+		payload: data
 	};
 }
 

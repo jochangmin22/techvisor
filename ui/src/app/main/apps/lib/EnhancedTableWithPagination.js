@@ -9,7 +9,7 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TablePaginationActions from './TablePaginationActions';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import { useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
+import { useGlobalFilter, usePagination, useRowSelect, useSortBy, useResizeColumns, useTable } from 'react-table';
 import clsx from 'clsx';
 
 // import ContactsTablePaginationActions from './ContactsTablePaginationActions';
@@ -47,7 +47,8 @@ const EnhancedTable = ({ columns, data, showHeader = true, onRowClick }) => {
 		useGlobalFilter,
 		useSortBy,
 		usePagination,
-		useRowSelect
+		useRowSelect,
+		useResizeColumns
 		// hooks => {
 		// 	hooks.allColumns.push(_columns => [
 		// 		// Let's make a column for selection
@@ -110,6 +111,10 @@ const EnhancedTable = ({ columns, data, showHeader = true, onRowClick }) => {
 										direction={column.isSortedDesc ? 'desc' : 'asc'}
 									/>
 								) : null}
+								<div
+									{...column.getResizerProps()}
+									className={`resize-x resizer ${column.isResizing ? 'isResizing' : ''}`}
+								/>
 							</TableCell>
 						))}
 					</TableRow>

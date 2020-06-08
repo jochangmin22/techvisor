@@ -22,7 +22,6 @@ const initialState = {
 		limit: 100,
 		offset: 0
 	},
-	matrixCategory: '연도별', // ['주변단어', '국가별', '연도별', '기술별', '기업별']
 	searchLoading: null,
 	searchSubmit: null,
 	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
@@ -31,7 +30,11 @@ const initialState = {
 	topicChips: [],
 	news: [],
 	relatedCompany: [],
-	matrix: [],
+	matrix: {
+		entities: [],
+		category: '연도별', // ['국가별', '연도별', '기술별', '기업별'],
+		max: 0
+	},
 	wordCloud: [],
 	subjectRelation: []
 };
@@ -133,13 +136,20 @@ const searchsReducer = function (state = initialState, action) {
 		case Actions.GET_MATRIX: {
 			return {
 				...state,
-				matrix: action.payload
+				matrix: {
+					...state.matrix,
+					entities: action.payload.entities,
+					max: action.payload.max
+				}
 			};
 		}
 		case Actions.UPDATE_MATRIX_CATEGORY: {
 			return {
 				...state,
-				matrix: action.payload
+				matrix: {
+					...state.matrix,
+					category: action.payload
+				}
 			};
 		}
 		case Actions.GET_WORDCLOUD: {
