@@ -85,7 +85,7 @@ function Description(props) {
 
 	return (
 		<FuseAnimateGroup
-			className="flex flex-wrap"
+			className="flex w-full"
 			enter={{
 				animation: 'transition.slideUpBigIn'
 			}}
@@ -139,7 +139,7 @@ function Description(props) {
 					{descPart &&
 						descPart.map((item, key) =>
 							props.search[item] ? (
-								<Collapse in={open[descPart[key]]} className="mb-28" key={key}>
+								<Collapse in={open[descPart[key]]} className="w-full mb-28" key={key}>
 									<h6 className="font-600 text-14 px-16 py-8">{item}</h6>
 									<Typography className="text-14 px-16">
 										{props.search[item]
@@ -147,7 +147,7 @@ function Description(props) {
 											.filter(item => item.includes(filtered))
 											.map((line, n) => {
 												return (
-													<span key={n}>
+													<span className="break-words" key={n}>
 														{line && (
 															<Highlighter
 																searchWords={
