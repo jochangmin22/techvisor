@@ -326,7 +326,7 @@ def handleRedis(redisKey, keys, data="", mode="r"):
         return JsonResponse(data, safe=False)        
     return    
 
-def parse_mypo(xmlStr=""): 
+def _parse_typo(xmlStr=""): 
     """ 오타 정리 """
     xmlStr = re.sub(r"<EMIID=", "<EMI ID=", xmlStr)  # tag 오타
     xmlStr = re.sub(
@@ -341,8 +341,8 @@ def parse_mypo(xmlStr=""):
     return xmlStr
 
 def parse_abstract(request, xmlStr=""):
-    # 오타 정리
-    xmlStr = parse_mypo(xmlStr)    
+
+    xmlStr = _parse_typo(xmlStr) # typo   
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
 
@@ -386,8 +386,7 @@ def abstract_type(bs, startTag, nextTag, keywordTag):
 def parse_claims(request, xmlStr="", appNo=""):
     """ 비정형 청구항을 bs를 이용하여 처리 """
 
-    # 오타 정리
-    xmlStr = parse_mypo(xmlStr)
+    xmlStr = _parse_typo(xmlStr)  # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
     # tree = elemTree.fromstring(xmlStr)
@@ -555,8 +554,8 @@ def claims_c_type(bs):
     return my_claim_type, my_claim
 
 def parse_description(request, xmlStr=""):
-    # 오타 정리
-    xmlStr = parse_mypo(xmlStr)    
+
+    xmlStr = _parse_typo(xmlStr)  # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
 

@@ -337,7 +337,7 @@ def handleRedis(redisKey, keys, data="", mode="r"):
     return
 
 
-def parse_mypo(xmlStr=""):
+def _parse_typo(xmlStr=""):
     """ 오타 정리 """
     xmlStr = re.sub(r"<EMIID=", "<EMI ID=", xmlStr)  # tag 오타
     xmlStr = re.sub(
@@ -353,8 +353,8 @@ def parse_mypo(xmlStr=""):
 
 
 def parse_abstract(request, xmlStr=""):
-    # 오타 정리
-    xmlStr = parse_mypo(xmlStr)
+   
+    xmlStr = _parse_typo(xmlStr)  # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
 
@@ -404,8 +404,7 @@ def abstract_type(bs, startTag, nextTag, keywordTag):
 def parse_claims(request, xmlStr="", appNo=""):
     """ 비정형 청구항을 bs를 이용하여 처리 """
 
-    # 오타 정리
-    xmlStr = parse_mypo(xmlStr)
+    xmlStr = _parse_typo(xmlStr) # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
     # tree = elemTree.fromstring(xmlStr)
@@ -578,8 +577,7 @@ def claims_c_type(bs):
 
 
 def parse_description(request, xmlStr=""):
-    # 오타 정리
-    xmlStr = parse_mypo(xmlStr)
+    xmlStr = _parse_typo(xmlStr) # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
 
@@ -594,6 +592,18 @@ def parse_description(request, xmlStr=""):
         attrName = "n" if bs.find_all('p', {"n": True}) else ""
         # TODO : convert tabular tag to table tag - sample 1019970061654
         return description_type(bs, attrName, my_name, my_tag)
+    # TODO : 1019930701447 구분 태그없는 비정형 타입, 처리요망 (psdode)      
+    # TODO : 1019900018250 구분 태그없는 비정형 타입, 처리요망 (sdode)      
+    elif bs.find("psdode"):  # type psdode tag start
+        my_name = ["발명의 명칭","도면의 간단한 설명", "발명의 상세한 설명"]
+        # my_tag = ["drdes", "invdes", "purinv", "bkgr", "tech", "config", "effect"]
+        my_tag = ["drdes", "", "", "bkgr", "tech", "config", "effect"]
+        # 상위 제목 ; 내용 추출 안함 - invdes, purinv
+
+        # p attribute 있는지 확인
+        attrName = "n" if bs.find_all('p', {"n": True}) else ""
+        # TODO : convert tabular tag to table tag - sample 1019970061654
+        return description_type(bs, attrName, my_name, my_tag)        
     elif bs.find("applicationbody"):  # type <ApplicationBody> tag start
         my_name = ["도면의 간단한 설명", "발명의 상세한 설명", "발명의 목적",
                    "발명이 속하는 기술 및 그 분야의 종래기술", "발명이 이루고자 하는 기술적 과제", "발명의 구성 및 작용", "발명의 효과"]
