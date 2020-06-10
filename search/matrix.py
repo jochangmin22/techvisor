@@ -97,6 +97,35 @@ def parse_matrix(request):
     res =  {"entities": all_list, "max": matrixMax}
     return JsonResponse(res, safe=False)
 
+def parse_matrix_dialog(request):
+    """ 
+    전체목록에서 3가지 필터 (topic, category, category value)
+    """
+    # TODO : apply redis if necessary
+    category = request.GET.get('category') if request.GET.get('category') else "연도별"
+    selectedTopic = request.GET.get('topic') if request.GET.get('topic') else ""
+    selectedCategoryValue = request.GET.get('categoryValue') if request.GET.get('categoryValue') else ""
+
+
+    if category == '연도별':
+        countField = 'left(출원일자,4)'
+    elif category == '기술별':
+        countField = 'ipc요약'
+    elif category == '기업별':
+        countField = '출원인1'
+
+    whereTopic =  ' and 요약token like \'%' + selectedTopic + '%\'' if category != selectedTopic else '' # click on the category itself?
+
+    # 3가지 필터된 목록 구하기 
+    query = parse_searchs(request, mode="query")
+    with connection.cursor() as cursor:    
+        query += whereTopic + ' and ' + countField + '= \'' + selectedCategoryValue + '\''
+        cursor.execute(query)
+        row = dictfetchall(cursor)
+
+    return JsonResponse(row, safe=False)
+
+
 def get_topic(nlp_raw):
     taged_docs = []
     try:  # handle NoneType error

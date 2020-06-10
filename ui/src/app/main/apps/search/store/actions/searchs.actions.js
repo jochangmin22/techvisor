@@ -23,7 +23,10 @@ export const GET_TOPIC_CHIPS = '[SEARCH APP] GET TOPIC CHIPS';
 export const GET_NEWS = '[SEARCH APP] GET NEWS';
 export const GET_RELATED_COMPANY = '[SEARCH APP] GET RELATED COMPANY';
 export const GET_MATRIX = '[SEARCH APP] GET MATRIX';
+export const GET_MATRIX_DIALOG = '[SEARCH APP] GET MATRIX DIALOG';
 export const UPDATE_MATRIX_CATEGORY = '[SEARCH APP] UPDATE MATRIX CATEGORY';
+export const OPEN_MATRIX_DIALOG = '[SEARCH APP] OPEN MATRIX DIALOG';
+export const CLOSE_MATRIX_DIALOG = '[SEARCH APP] CLOSE MATRIX DIALOG';
 
 export const UPDATE_COLS = '[SEARCH APP] UPDATE COLS';
 
@@ -221,10 +224,43 @@ export function getMatrix(params) {
 			});
 }
 
+export function getMatrixDialog(params) {
+	const request = axios.get(
+		`${process.env.REACT_APP_API_URL}/api/search-app/searchs/matrix-dialog`,
+		{ params },
+		{ timeout: 1000 * 60 * 0.5 } // 0.5 minute
+	);
+
+	return dispatch =>
+		request
+			.then(response =>
+				dispatch({
+					type: GET_MATRIX_DIALOG,
+					payload: response.data
+				})
+			)
+			.catch(err => {
+				console.log(err.code);
+				console.log(err.message);
+			});
+}
+
 export function updateMatrixCategory(data) {
 	return {
 		type: UPDATE_MATRIX_CATEGORY,
 		payload: data
+	};
+}
+
+export function openMatrixDialog() {
+	return {
+		type: OPEN_MATRIX_DIALOG
+	};
+}
+
+export function closeMatrixDialog() {
+	return {
+		type: CLOSE_MATRIX_DIALOG
 	};
 }
 

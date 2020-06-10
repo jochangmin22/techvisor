@@ -79,6 +79,9 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
     if context and context['mtx_raw'] and mode == 'matrix':
         return context['mtx_raw']
 
+    if context and context['raw'] and mode == 'matrix_dialog':
+        return context['raw']
+
     with connection.cursor() as cursor:
 
         # 검색범위 선택
@@ -218,6 +221,12 @@ def parse_searchs_num(request, mode="begin"):  # mode : begin, nlp, query
 
     if context and context['nlp_raw'] and mode == 'nlp':
         return context['nlp_raw']
+
+    if context and context['mtx_raw'] and mode == 'matrix':
+        return context['mtx_raw']        
+
+    if context and context['raw'] and mode == 'matrix_dialog':
+        return context['raw']
 
     with connection.cursor() as cursor:
         whereNum = ""

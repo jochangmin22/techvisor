@@ -13,6 +13,7 @@ import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import parseSearchText from '../inc/parseSearchText';
+import MatrixDialog from './MatrixDialog';
 
 function MatrixAnalysis(props) {
 	const dispatch = useDispatch();
@@ -20,20 +21,6 @@ function MatrixAnalysis(props) {
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const [selectedCategory, setSelectedCategory] = useState(matrix.category);
 	const [showLoading, setShowLoading] = useState(false);
-
-	function getColor(value) {
-		if (!matrix.max) {
-			return 'font-normal';
-		}
-		const hue = (value / matrix.max).toFixed(1) * 1000;
-		if (hue === 0) {
-			return 'font-normal text-blue-200';
-		}
-		if (hue === 1000) {
-			return 'font-extrabold text-red-900 text-13';
-		}
-		return hue < 500 ? 'font-normal text-blue-' + (hue + 100) : 'font-extrabold text-red-' + hue;
-	}
 
 	function handleSelectedCategory(event) {
 		setSelectedCategory(event.target.value);
@@ -52,45 +39,70 @@ function MatrixAnalysis(props) {
 		}
 	}, [dispatch, searchParams, selectedCategory]);
 
-	const columns = React.useMemo(
-		() =>
-			matrix.entities
-				? [
-						{
-							Header: selectedCategory,
-							accessor: selectedCategory,
-							className: 'text-14 text-left max-w-96 overflow-hidden',
-							sortable: true,
-							Cell: row => (
-								<div>
-									<span title={row.value}>{row.value}</span>
+	const columns = React.useMemo(() => {
+		function getColor(value) {
+			const hue = matrix.max && value ? (value / matrix.max).toFixed(1) * 10 : 0;
+			if (hue === 0) {
+				return 'font-normal text-blue-100';
+			} else if (hue > 0 && hue < 10) {
+				return 'font-normal text-blue-' + hue * 100;
+			} else if (hue === 10) {
+				return 'font-extrabold text-blue-900 text-12';
+			}
+		}
+
+		function onCellClick(ev, props) {
+			ev.preventDefault();
+
+			const [, newApiParams] = parseSearchText(searchParams, null);
+			newApiParams.category = selectedCategory;
+			newApiParams.topic = props.column.id;
+			newApiParams.categoryValue = Object.values(props.row.values)[0];
+			dispatch(Actions.getMatrixDialog(newApiParams)).then(() => {
+				dispatch(Actions.openMatrixDialog());
+			});
+		}
+
+		return matrix.entities
+			? [
+					{
+						Header: selectedCategory,
+						accessor: selectedCategory,
+						className: 'text-14 text-left max-w-96 overflow-hidden',
+						sortable: true,
+						Cell: props => (
+							<div onClick={ev => onCellClick(ev, props.cell)}>
+								<span title={props.cell.value}>{props.cell.value}</span>
+							</div>
+						)
+					}
+			  ].concat(
+					Object.keys(matrix.entities).map(item => ({
+						Header: item,
+						accessor: item,
+						className: 'text-11 text-center',
+						sortable: true,
+						// onClick: () => {
+						// 	alert('click!');
+						// },
+						Cell: props => {
+							return (
+								<div onClick={ev => onCellClick(ev, props.cell)} className={getColor(props.cell.value)}>
+									<span title={props.cell.value}>{props.cell.value}</span>
 								</div>
-							)
+							);
 						}
-				  ].concat(
-						Object.keys(matrix.entities).map(item => ({
-							Header: item,
-							accessor: item,
-							className: 'text-11 text-center',
-							sortable: true,
-							Cell: row => (
-								<div className={getColor(row.value)}>
-									<span title={row.value}>{row.value}</span>
-								</div>
-							)
-						}))
-				  )
-				: [
-						{
-							Header: selectedCategory,
-							accessor: selectedCategory,
-							className: 'text-11 text-center',
-							sortable: true
-						}
-				  ],
-		// eslint-disable-next-line
-		[matrix.entities, selectedCategory]
-	);
+					}))
+			  )
+			: [
+					{
+						Header: selectedCategory,
+						accessor: selectedCategory,
+						className: 'text-11 text-center',
+						sortable: true
+					}
+			  ];
+	}, [dispatch, searchParams, matrix.max, matrix.entities, selectedCategory]);
 
 	const groupBy = (obj, selectedCategory) => {
 		const keys = Object.keys(obj);
@@ -223,21 +235,24 @@ function MatrixAnalysis(props) {
 			{showLoading ? (
 				<SpinLoading />
 			) : (
-				<FuseScrollbars className="max-h-256 px-6">
-					<EnhancedTable
-						columns={columns}
-						data={data}
-						size="small"
-						height=""
-						onRowClick={(ev, row) => {
-							if (row) {
-								// window.open(row.original.link, '_blank');
-								// props.history.push(row.original.link);
-								// dispatch(Actions.openEditContactDialog(row.original));
-							}
-						}}
-					/>
-				</FuseScrollbars>
+				<>
+					<FuseScrollbars className="max-h-256 px-6">
+						<EnhancedTable
+							columns={columns}
+							data={data}
+							size="small"
+							height=""
+							onRowClick={(ev, row) => {
+								if (row) {
+									// window.open(row.original.link, '_blank');
+									// props.history.push(row.original.link);
+									// dispatch(Actions.openEditContactDialog(row.original));
+								}
+							}}
+						/>
+					</FuseScrollbars>
+					<MatrixDialog />
+				</>
 			)}
 		</Paper>
 	);

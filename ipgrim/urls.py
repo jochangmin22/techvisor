@@ -37,6 +37,7 @@ from search.views import (
     get_news_nlp,
     get_related_company,
     get_matrix,
+    get_matrix_dialog,
 )
 from company.views import (
     get_companies, get_companies_query, get_companies_num, get_company, get_stock, get_crawl)
@@ -65,6 +66,7 @@ urlpatterns = [
     re_path(r"^api/search-app/searchs/news_nlp$", csrf_exempt(get_news_nlp)),
     re_path(r"^api/search-app/searchs/related-company$", csrf_exempt(get_related_company)),
     re_path(r"^api/search-app/searchs/matrix$", get_matrix),
+    re_path(r"^api/search-app/searchs/matrix-dialog$", get_matrix_dialog),
     # path("api/search-app/thsrs/<str:keyword>/", get_thsrs),
     # path("api/search-app/applicant", get_applicant),
     # path("api/search-app/applicant/<str:keyword>/", get_applicant),

@@ -35,6 +35,12 @@ const initialState = {
 		category: '연도별', // ['국가별', '연도별', '기술별', '기업별'],
 		max: 0
 	},
+	matrixDialog: {
+		props: {
+			open: false
+		},
+		data: null
+	},
 	wordCloud: [],
 	subjectRelation: []
 };
@@ -143,12 +149,43 @@ const searchsReducer = function (state = initialState, action) {
 				}
 			};
 		}
+		case Actions.GET_MATRIX_DIALOG: {
+			return {
+				...state,
+				matrixDialog: {
+					...state.matrixDialog,
+					data: action.payload
+				}
+			};
+		}
 		case Actions.UPDATE_MATRIX_CATEGORY: {
 			return {
 				...state,
 				matrix: {
 					...state.matrix,
 					category: action.payload
+				}
+			};
+		}
+		case Actions.OPEN_MATRIX_DIALOG: {
+			return {
+				...state,
+				matrixDialog: {
+					...state.matrixDialog,
+					props: {
+						open: true
+					}
+				}
+			};
+		}
+		case Actions.CLOSE_MATRIX_DIALOG: {
+			return {
+				...state,
+				matrixDialog: {
+					props: {
+						open: false
+					},
+					data: null
 				}
 			};
 		}

@@ -6,7 +6,7 @@ from .search import parse_search, parse_search_quote, parse_search_family, parse
 # from .test import parse_test
 from .nlp import kr_nlp
 from .news import parse_news, parse_news_nlp, parse_related_company
-from .matrix import parse_matrix
+from .matrix import parse_matrix, parse_matrix_dialog
 
 # # caching with redis
 # from django.core.cache import cache
@@ -88,6 +88,9 @@ def get_related_company(request):
 
 def get_matrix(request):
     return parse_matrix(request)
+
+def get_matrix_dialog(request):
+    return parse_matrix_dialog(request)
 
 
 # def test(request, keyword=""):
