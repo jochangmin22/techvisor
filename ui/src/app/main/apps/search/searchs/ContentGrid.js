@@ -82,6 +82,11 @@ const columnDefs = [
 		headerName: 'IPC',
 		field: 'ipc요약',
 		width: 75
+	},
+	{
+		headerName: '유사도',
+		field: '유사도',
+		width: 90
 	}
 ];
 
@@ -157,6 +162,11 @@ const colsList = [
 		id: '8',
 		name: 'IPC',
 		field: 'ipc요약'
+	},
+	{
+		id: '9',
+		name: '유사도',
+		field: '유사도'
 	}
 ];
 

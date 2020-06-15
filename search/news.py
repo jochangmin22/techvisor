@@ -18,6 +18,16 @@ from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
+from tensorflow.keras import models
+from tensorflow.keras import layers
+from tensorflow.keras import optimizers
+from tensorflow.keras import losses
+from tensorflow.keras import metrics
+
+
+import numpy as np
+
+
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 client_id = settings.NAVER_NEWS_CLIENT_ID
@@ -129,7 +139,7 @@ def parse_news_nlp(request, mode="needJson"):
     
     # no
     news = context['news'] if  context and context['news'] else parse_news(request, mode="noJson")
-    # return JsonResponse(news, safe=False)
+
     news_nlp = ""
     if news:
         for i in range(len(news)):
@@ -221,6 +231,132 @@ def parse_related_company(request, mode="needJson"):
     # redis save }            
     return JsonResponse(news_nlp, safe=False)    
 
+def parse_news_sa(request): 
+    """ sensitive analysis whether news articles are positive or negative """
+    """ ./trainning/mostcommon.txt, model.json, model.h5 """
+
+    # redis key
+    params = {}
+    for value in [
+        "searchText",
+        "searchNum",
+    ]:
+        params[value] = request.GET.get(value) if request.GET.get(value) else ""
+    apiParams = "news¶".join(params.values()) if params['searchNum'] == '' else params['searchNum']
+
+    # is there data in Redis
+    context = cache.get(apiParams)
+    news = context['news'] if context and context['news'] else parse_news(request, mode="noJson")
+
+    token = ''
+    if news:
+        for i in range(len(news)):
+            token += news[i]['title'] + " " if news[i]['title'] else ""
+            token += news[i]['description'] + " " if news[i]['description'] else ""
+        news_token = tokenizer(token) if token else ''
+    else:
+        news_token = []        
+
+    result = _sensitive_analysis(news_token)            
+
+    return JsonResponse(result, status=200, safe=False)
+    # except:
+    #     return HttpResponse() # 500     
+
+def _sensitive_analysis(news_token):
+    tr_path = settings.BASE_DIR + '/search/training/'
+
+    # with open(tr_path + 'train_docs.json') as f:
+    #     train_docs = json.load(f)
+    # with open(tr_path + 'test_docs.json') as f:
+    #     test_docs = json.load(f)    
+
+    # {
+    # tokens = [t for d in train_docs for t in d[0]]
+
+    # import nltk
+    # text = nltk.Text(tokens, name='NMSC')
+
+    # selected_words = [f[0] for f in text.vocab().most_common(10)]
+    # }
+
+    # with open(tr_path + 'mostcommon.txt') as f:
+    #     selected_words = f.read().splitlines()  
+
+    # selected_words = []
+    # with open(tr_path + "mostcommon.txt", "r") as f:
+    #     for line in f:
+    #         selected_words.append(line.strip())  
+
+    with open(tr_path + "mostcommon.json", 'r') as f:
+        selected_words = json.load(f)
+        
+            
+    # with open(tr_path + 'mostcommon.txt') as f:
+    #     content = f.readlines()
+    # selected_words = [x.strip() for x in content]         
+
+
+
+    def term_frequency(doc):
+        return [doc.count(word) for word in selected_words]    
+
+    # train_x = [term_frequency(d) for d, _ in train_docs]
+    # test_x = [term_frequency(d) for d, _ in test_docs]
+    # train_y = [c for _, c in train_docs]
+    # test_y = [c for _, c in test_docs]        
+
+    # x_train = np.asarray(train_x).astype('float32')
+    # x_test = np.asarray(test_x).astype('float32')
+
+    # y_train = np.asarray(train_y).astype('float32')
+    # y_test = np.asarray(test_y).astype('float32')   
+
+    # model = models.Sequential()
+    # model.add(layers.Dense(64, activation='relu', input_shape=(5000,)))
+    # model.add(layers.Dense(64, activation='relu'))
+    # model.add(layers.Dense(1, activation='sigmoid'))
+
+    # model.compile(optimizer=optimizers.RMSprop(lr=0.001),
+    #             loss=losses.binary_crossentropy,
+    #             metrics=[metrics.binary_accuracy])
+
+    # model.fit(x_train, y_train, epochs=10, batch_size=512)
+    # results = model.evaluate(x_test, y_test) 
+
+    # load model
+    model = models.load_model(tr_path + 'model.h5')
+    # summarize model.
+    model.summary()
+    # load dataset
+    # dataset = loadtxt("pima-indians-diabetes.csv", delimiter=",")
+
+    # X = dataset[:,0:8]
+    # Y = dataset[:,8]
+    # evaluate the model
+    # score = model.evaluate(X, Y, verbose=0)
+    # print("%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
+
+
+    # def predict_pos_neg(review):
+    #     token = tokenize(review)
+    #     tf = term_frequency(token)
+    #     data = np.expand_dims(np.asarray(tf).astype('float32'), axis=0)
+    #     score = float(model.predict(data)) * 100
+    #     return score
+    # return predict_pos_neg(news_token)
+
+    # token = tokenize(news_token)
+    # token = tokenizer(news_token)
+    # token = tokenize("믿고 보는 감독이지만 이번에는 아니네요")
+    tf = term_frequency(news_token)
+    data = np.expand_dims(np.asarray(tf).astype('float32'), axis=0)
+    score = round(float(model.predict(data))*100,2)
+    return score
+    # return score
+
+   
+
 
 # NNG일반명사 ,NNP고유명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
 # def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
@@ -236,7 +372,15 @@ def tokenizer(raw, pos=["NNP","UNKNOWN"]):
             # and not type(word) == float
         ]
     except:
-        return []        
+        return []       
+
+def tokenize(doc):
+    mecab = Mecab()
+    # norm은 정규화, stem은 근어로 표시하기를 나타냄
+    return ['/'.join(t) for t in mecab.pos(doc)] #, norm=True, stem=True)]         
+
+def term_frequency(doc, selected_words):
+    return [doc.count(word) for word in selected_words]    
 
 def remove_duplicate(seq):
     seen = set()

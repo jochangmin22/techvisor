@@ -29,6 +29,7 @@ const initialState = {
 	selectedSearchIds: [],
 	topicChips: [],
 	news: [],
+	newsSA: null,
 	relatedCompany: [],
 	matrix: {
 		entities: [],
@@ -131,6 +132,12 @@ const searchsReducer = function (state = initialState, action) {
 			return {
 				...state,
 				news: action.payload
+			};
+		}
+		case Actions.GET_NEWS_SA: {
+			return {
+				...state,
+				newsSA: action.payload
 			};
 		}
 		case Actions.GET_RELATED_COMPANY: {

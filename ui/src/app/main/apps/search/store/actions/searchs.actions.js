@@ -21,6 +21,7 @@ export const RESET_SUBJECT_RELATION_VEC = '[SEARCH APP] RESET SUBJECT RELATION V
 
 export const GET_TOPIC_CHIPS = '[SEARCH APP] GET TOPIC CHIPS';
 export const GET_NEWS = '[SEARCH APP] GET NEWS';
+export const GET_NEWS_SA = '[SEARCH APP] GET NEWS SA';
 export const GET_RELATED_COMPANY = '[SEARCH APP] GET RELATED COMPANY';
 export const GET_MATRIX = '[SEARCH APP] GET MATRIX';
 export const GET_MATRIX_DIALOG = '[SEARCH APP] GET MATRIX DIALOG';
@@ -162,24 +163,27 @@ export function setSearchSubmit(data) {
 }
 
 export function getNews(params) {
-	const request = axios.get(
-		`${process.env.REACT_APP_API_URL}/api/search-app/searchs/news`,
-		{ params },
-		{ timeout: 1000 * 60 * 0.5 } // 0.5 minute
-	);
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/searchs/news`, { params });
 
 	return dispatch =>
-		request
-			.then(response =>
-				dispatch({
-					type: GET_NEWS,
-					payload: response.data
-				})
-			)
-			.catch(err => {
-				console.log(err.code);
-				console.log(err.message);
-			});
+		request.then(response =>
+			dispatch({
+				type: GET_NEWS,
+				payload: response.data
+			})
+		);
+}
+
+export function getNewsSA(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/searchs/news_sa`, { params });
+
+	return dispatch =>
+		request.then(response =>
+			dispatch({
+				type: GET_NEWS_SA,
+				payload: response.data
+			})
+		);
 }
 
 export function getRelatedCompany(params) {

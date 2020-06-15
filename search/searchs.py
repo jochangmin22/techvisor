@@ -12,6 +12,8 @@ from konlpy.tag import Mecab
 
 from copy import deepcopy
 
+# from .similarity import similarity
+
 # caching with redis
 from django.core.cache import cache
 from django.conf import settings
@@ -183,9 +185,13 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
 
         # 요약token tokenizer
         nlp_raw = ' '.join(tokenizer(nlp_raw) if nlp_raw else '')
+        # nlp_raw = ' '.join(tokenizer_pos(nlp_raw) if nlp_raw else '')
     else:  # 결과값 없을 때 처리
         row = []
 
+    # ''' 유사도 처리 '''
+    # result=similarity(row)
+    # return JsonResponse(result, safe=False)
     # redis 저장 {
     new_context = {}
     new_context['nlp_raw'] = nlp_raw
@@ -647,6 +653,20 @@ def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
         ]
     except:
         return []
+
+def tokenizer_pos(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
+    mecab = Mecab()
+    STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
+    try:
+        return [
+            word
+            for word, tag in mecab.pos(raw) if len(word) > 1 and word not in STOPWORDS
+            # if len(word) > 1 and tag in pos and word not in stopword
+            # if tag in pos
+            # and not type(word) == float
+        ]
+    except:
+        return []        
 
     # # source = requests.get('http://kpat.kipris.or.kr/kpat/thsrs.do?s_flag=2&thsrs_srch=').text
 

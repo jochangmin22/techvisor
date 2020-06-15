@@ -5,7 +5,7 @@ from .searchs import parse_searchs, parse_query, parse_searchs_num
 from .search import parse_search, parse_search_quote, parse_search_family, parse_search_legal, parse_search_registerfee, parse_search_rightfullorder, parse_search_rightholder, parse_search_applicant, parse_search_applicant_trend
 # from .test import parse_test
 from .nlp import kr_nlp
-from .news import parse_news, parse_news_nlp, parse_related_company
+from .news import parse_news, parse_news_nlp, parse_related_company, parse_news_sa
 from .matrix import parse_matrix, parse_matrix_dialog
 
 # # caching with redis
@@ -78,6 +78,9 @@ def get_vec(request):
 
 def get_news(request):
     return parse_news(request)
+
+def get_news_sa(request):
+    return parse_news_sa(request)
 
 def get_news_nlp(request):
     return parse_news_nlp(request)
