@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import * as Actions from '../store/actions';
 // import { Draggable } from 'react-beautiful-dnd';
 // import Draggable from 'react-draggable';
-import PopoverMsg from '../components/PopoverMsg';
+import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
@@ -210,7 +210,7 @@ function MatrixAnalysis(props) {
 						displayEmpty
 						// disableUnderline
 					>
-						{['연도별', '기술별', '기업별'].map((key, n) => (
+						{['연도별', '기술별', '기업별'].map(key => (
 							<MenuItem value={key} key={key}>
 								{key}
 							</MenuItem>

@@ -5,7 +5,7 @@ import SubjectContext from './SubjectContext';
 import SubjectChips from './components/SubjectChips';
 import SubjectTable from './components/SubjectTable';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import PopoverMsg from '../components/PopoverMsg';
+import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 
 function SubjectRelation(props) {
 	const { searchText, searchNum } = props;

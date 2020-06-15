@@ -21,3 +21,7 @@ secrets.json
 client_secrets.json
 
 # git rm --cached brabrabra [is folder add this: -r]
+access.log
+search/training
+diagnose_tensorboard.py
+*.swp

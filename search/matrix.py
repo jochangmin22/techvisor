@@ -86,16 +86,19 @@ def parse_matrix(request):
     mlist = []  # list of dic
     all_list = {}  # dic of list of dic
     matrixMax = 0
-    for j in range(len(topic)):  # topic 20
-        temp = [d for d in mtx_raw if topic[j] in d['요약token']]
-        temp2 = Counter(c[countField] for c in temp)
-        max_value = max(list(temp2.values()))
-        matrixMax = max_value if matrixMax < max_value else matrixMax
-        mlist.append(temp2)
-        all_list[topic[j]] = mlist
-        mlist = []
-    res =  {"entities": all_list, "max": matrixMax}
-    return JsonResponse(res, safe=False)
+    try:
+        for j in range(len(topic)):  # topic 20
+            temp = [d for d in mtx_raw if topic[j] in d['요약token']]
+            temp2 = Counter(c[countField] for c in temp)
+            max_value = max(list(temp2.values()))
+            matrixMax = max_value if matrixMax < max_value else matrixMax
+            mlist.append(temp2)
+            all_list[topic[j]] = mlist
+            mlist = []
+        res =  {"entities": all_list, "max": matrixMax}
+        return JsonResponse(res, safe=False)
+    except:
+        pass
 
 def parse_matrix_dialog(request):
     """ 

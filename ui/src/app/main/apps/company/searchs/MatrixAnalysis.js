@@ -5,7 +5,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import EnhancedTable from './components/EnhancedTable';
 import { useSelector } from 'react-redux';
-import PopoverMsg from '../components/PopoverMsg';
+import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';

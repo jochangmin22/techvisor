@@ -1,8 +1,10 @@
 from django.db import models
+from django.contrib.postgres.fields import JSONField
+
 # Create your models here.
 
 class disclosure(models.Model):
-    # objects = models.Manager()
+    objects = models.Manager()
     corp_code = models.CharField(max_length=10, primary_key = True)
     corp_name = models.CharField(max_length=255)
     stock_code = models.CharField(max_length=10,null=True)
@@ -12,7 +14,7 @@ class disclosure(models.Model):
         db_table = '"disclosure"'
 
 class listed_corp(models.Model):
-    # objects = models.Manager()
+    objects = models.Manager()
     회사명 = models.CharField(max_length=100, primary_key = True)
     종목코드 = models.CharField(max_length=10, null=True)
     업종 = models.CharField(max_length=150)
@@ -24,5 +26,5 @@ class listed_corp(models.Model):
     지역 = models.CharField(max_length=50)
 
     class Meta:
-        db_table = '"listed_corp"'        
+        db_table = '"listed_corp"'
 
