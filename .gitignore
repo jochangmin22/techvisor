@@ -25,3 +25,4 @@ access.log
 search/training
 diagnose_tensorboard.py
 *.swp
+conda_env.txt
