@@ -199,6 +199,7 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
     new_context['raw'] = row
     new_context['wordcloud'] = []
     new_context['vec'] = []
+    new_context['modelType'] = ''
     new_context['matrix'] = []
     cache.set(apiParams, new_context, CACHE_TTL)
     # redis 저장 }
@@ -301,6 +302,7 @@ def parse_searchs_num(request, mode="begin"):  # mode : begin, nlp, query
     new_context['raw'] = row
     new_context['wordcloud'] = []
     new_context['vec'] = []
+    new_context['modelType'] = ''
     new_context['matrix'] = []
     cache.set(apiParams, new_context, CACHE_TTL)
     # Redis 저장 }

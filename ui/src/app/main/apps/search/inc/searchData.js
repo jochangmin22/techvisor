@@ -17365,7 +17365,8 @@ const searchData = {
 				label: '조성물',
 				value: 0.3861456513404846
 			}
-		]
+		],
+		modelType: 'word2vec'
 	},
 	selectedIndex: null
 };

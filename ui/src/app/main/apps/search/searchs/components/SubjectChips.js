@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function SubjectChips(props) {
-	const { searchNum, topic } = props;
+	const { searchNum, topic, modelType } = props;
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
@@ -39,7 +39,8 @@ function SubjectChips(props) {
 		} else {
 			setShowLoading(true);
 			const [, newApiParams] = parseSearchText(searchParams, null);
-			newApiParams.keywordvec = value; // updateSubjectRelation 에서만 이 line 추가
+			newApiParams.keywordvec = value;
+			newApiParams.modelType = modelType;
 
 			dispatch(Actions.resetSubjectRelationVec(topic));
 			dispatch(Actions.updateSubjectRelation(newApiParams)).then(() => {

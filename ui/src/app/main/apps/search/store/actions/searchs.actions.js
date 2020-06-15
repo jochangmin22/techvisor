@@ -18,6 +18,7 @@ export const GET_WORDCLOUD = '[SEARCH APP] GET WORDCLOUD';
 export const GET_SUBJECT_RELATION = '[SEARCH APP] GET SUBJECT RELATION';
 export const UPDATE_SUBJECT_RELATION = '[SEARCH APP] UPDATE SUBJECT RELATION';
 export const RESET_SUBJECT_RELATION_VEC = '[SEARCH APP] RESET SUBJECT RELATION VEC';
+export const UPDATE_SUBJECT_RELATION_MODEL_TYPE = '[SEARCH APP] UPDATE SUBJECT RELATION MODEL TYPE';
 
 export const GET_TOPIC_CHIPS = '[SEARCH APP] GET TOPIC CHIPS';
 export const GET_NEWS = '[SEARCH APP] GET NEWS';
@@ -351,6 +352,13 @@ export function updateSubjectRelation(params) {
 				console.log(err.code);
 				console.log(err.message);
 			});
+}
+
+export function updateSubjectRelationModelType(data) {
+	return {
+		type: UPDATE_SUBJECT_RELATION_MODEL_TYPE,
+		payload: data
+	};
 }
 
 // export function saveVitualTab(data) {

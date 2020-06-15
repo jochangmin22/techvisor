@@ -7,11 +7,11 @@ import json
 from konlpy.corpus import kolaw
 from konlpy.tag import Mecab
 from operator import itemgetter
-from gensim import corpora, models
-import gensim
 import numpy as np
 from itertools import permutations
 from gensim.models import Word2Vec
+from gensim.models import FastText
+
 from .searchs import parse_searchs, parse_searchs_num
 
 # caching with redis
@@ -53,11 +53,14 @@ def kr_nlp(request, category=""):
     if context:
         _keywordvec = request.GET.get(
             "keywordvec") if request.GET.get("keywordvec") else None
+        if context['modelType'] and request.GET.get("modelType"):
+            _modelType = request.GET.get("modelType") if context['modelType'] != request.GET.get("modelType") else None
+
         if category == "topic" and context['topic']:
             return HttpResponse(context['topic'], content_type="text/plain; charset=utf-8")
         elif category == "wordcloud" and context['wordcloud']:
             return HttpResponse(context['wordcloud'])
-        elif category == "vec" and context['vec'] and not _keywordvec:
+        elif category == "vec" and context['vec'] and not _keywordvec and not _modelType:
             return HttpResponse(json.dumps(context['vec'], ensure_ascii=False))
     # Redis }
 
@@ -88,86 +91,6 @@ def kr_nlp(request, category=""):
         # break
         return HttpResponse(res, content_type="text/plain; charset=utf-8")
 
-    # if category == "topic":
-    #     """ 빈도수 """
-    #     if context['topic']: # redis ?
-    #         return HttpResponse( context['topic'], content_type="text/plain; charset=utf-8")
-    #     else:
-    #         topic_num = 15
-    #         dictionary = corpora.Dictionary(taged_docs)
-    #         corpus = [dictionary.doc2bow(text) for text in taged_docs]
-    #         ldamodel = gensim.models.ldamodel.LdaModel(
-    #             corpus, num_topics=topic_num, id2word=dictionary
-    #         )
-
-    #         dicts = []
-    #         ldawords = [[] for i in range(topic_num)]
-    #         for i in range(len(taged_docs)):
-    #             lda = ldamodel.show_topic(i, topic_num)
-
-    #         # 결과값 list to dict 변환 {
-    #         lda.sort(key=lambda element: element[1], reverse=True)
-
-    #         cnt = 0
-    #         for i in lda:
-    #             ldawords[cnt] = cnt, i[0]
-    #             cnt += 1
-
-    #         fields = ["key", "label"]
-    #         # 결과값 list to dict 변환 }
-
-    #         # update redis
-    #         context['topic'] = [dict(zip(fields, i)) for i in ldawords]
-    #         cache.set(apiParams, context, CACHE_TTL)
-
-    #         return HttpResponse( context['topic'], content_type="text/plain; charset=utf-8")
-
-    # elif category == "wordcloud":
-    #     """ 워드 클라우드 """
-    #     if context and context['wordcloud']: # redis ?
-    #         return HttpResponse(context['wordcloud'])
-    #     else:
-    #         # 방법 1. tupe 형식 처리 {
-    #         count = Counter(tuple_taged_docs)  ## Counter를 쓰기 위해 hashable 한 tuple를 가져옴
-    #         _sublist = count.most_common(50)  # 상위 50개
-    #         sublist = dict(_sublist)
-    #         # return HttpResponse(tuple_taged_docs, content_type="application/json; charset=utf-8");
-
-    #         #### react-tagcloud 용 {
-    #         # 폰트 size 12~ 70 이내로 조정하기 - react-tagcloud 만 해당 : 현재 react Wordcloud 사용중이라 필요없음 {
-    #         # OldMin = min(sublist.values())
-    #         # OldMax = max(sublist.values())
-    #         # NewMax = 70
-    #         # NewMin = 12
-
-    #         # for k, v in sublist.items():
-    #         #     NewValue = (((v - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-    #         #     sublist[k] = round(NewValue)
-    #         # 폰트 size 12~ 70 이내로 조정하기 - react-tagcloud 만 해당 : 현재 react Wordcloud 사용중이라 필요없음 }
-    #         #### react-tagcloud 용 }
-
-    #         # sublist = sorted(sublist.items(), key=operator.itemgetter(1), reverse=True)[
-    #         # sublist = sorted(sublist.items(), key=itemgetter(1), reverse=True)[:50]  # 상위 50개
-    #         sublist = sorted(sublist.items(), key=itemgetter(1), reverse=True)
-
-    #         # field name 넣기
-    #         # https://stackoverflow.com/questions/20540871/python-tuple-to-dict-with-additional-list-of-keys
-    #         fields = ["text", "value"]
-    #         dicts = [dict(zip(fields, d)) for d in sublist]
-
-    #         # json 형태로 출력
-    #         # sublist = json.dumps(sublist, ensure_ascii=False, indent="\t")
-    #         dicts = json.dumps(dicts, ensure_ascii=False, indent="\t")
-    #         if dicts is None:
-    #             return HttpResponse("[]", content_type="text/plain; charset=utf-8")
-
-    #         # Redis {
-    #         if context is not None:
-    #             context['wordcloud'] = dicts
-    #             cache.set(apiParams, context, CACHE_TTL)
-    #         # Redis }
-
-    #         return HttpResponse(dicts)
     elif category == "wordcloud":
         """ 워드 클라우드 """
         if context and context['wordcloud']:  # redis ?
@@ -210,28 +133,29 @@ def kr_nlp(request, category=""):
             return HttpResponse(dicts)
 
     elif category == "vec":
-        """ wordCloud 처리 -> 연관 단어 추출 """
-        # _keywordvec = request.GET.get("keywordvec") if request.GET.get("keywordvec") else None
-        # if context['vec'] and not _keywordvec: # redis ?
-        #     # return HttpResponse(json.dumps(context['vec'], ensure_ascii=False))
-        #     return HttpResponse(_keywordvec, ensure_ascii=False)
-        # else:
-        # wordCloud 처리 {
+        """ 빈도수 단어로 연관 단어 추출 (처음은 맨 앞단어로) """
+
+        # 빈도수 단어 
         count = Counter(tuple_taged_docs)
         _sublist = count.most_common(20)
         sublist = dict(_sublist)
 
-        # 지정된 연관단어 exist ? 없으면 처음 토픽어 선택
+        # select first topic word if no related word is specified
         keywordvec = (
-            # list(sublist.keys())[0] if keywordre == "" else keywordre
             request.GET.get("keywordvec")
             if request.GET.get("keywordvec")
             else list(sublist.keys())[0]
         )
-        # wordCloud 처리 }
 
-        # 연관 단어 추출 {
-        topic_num = 20  # 단어수 설정
+        modelType = (
+            request.GET.get("modelType")
+            if request.GET.get("modelType")
+            else "word2vec"
+        )
+
+        # 연관 단어 추출
+        # 기존 방법 {        
+        # topic_num = 20  # 단어수 설정
         # dictionary = corpora.Dictionary(taged_docs)
         # corpus = [dictionary.doc2bow(text) for text in taged_docs]
         # tfidf = models.TfidfModel(corpus, id2word=dictionary)
@@ -243,7 +167,53 @@ def kr_nlp(request, category=""):
         # size- 키워드 간 분석벡터 수 조정, window-주변단어 앞 뒤 갯수
         # min_count-코퍼스 내 빈도 ( )개 미만 단어는 분석 제외
         # workers-CPU쿼드 코어 사용, iter-학습 횟수, sg-분석방법론 [0]CBOW / [1]Skip-Gram
-        model = Word2Vec(
+
+        # model = Word2Vec(
+        #     sentences=[taged_docs],
+        #     size=100,  # 500,
+        #     window=3,
+        #     min_count=5,  # 2,
+        #     workers=4,
+        #     iter=100,  # 300,
+        #     sg=1,
+        # )
+
+        # 기존 방법 }
+
+        # 옵션 설정
+        num_features = 300  # 문자 벡터 차원 수
+        min_word_count = 3  # 최소 문자 수
+        num_workers = 4  # 병렬 처리 스레드 수
+        window_context = 5  # 문자열 창 크기
+        # downsampling = 1e-3  # 문자 빈도수 Downsample
+
+
+        # # word2vec 모델 학습
+        if modelType == 'word2vec':
+            model = Word2Vec(sentences=[taged_docs],
+                            workers=num_workers,
+                            size=num_features,
+                            min_count=min_word_count,
+                            iter=100,
+                            window=window_context, sg=0)
+
+        # modelRaw = Word2Vec(sentences=[taged_docs],
+        #                             workers=num_workers,
+        #                             size=num_features,
+        #                             min_count=min_word_count,
+        #                             window=window_context, sg=0)
+
+        # # fasttext 모델 학습
+        elif modelType == 'fasttext':
+            model = FastText(sentences=[taged_docs],
+                                workers=num_workers,
+                                size=num_features,
+                                min_count=min_word_count,
+                                iter=100,
+                                window=window_context, sg=0)
+
+        else:
+            model = Word2Vec(
             sentences=[taged_docs],
             size=100,  # 500,
             window=3,
@@ -251,16 +221,21 @@ def kr_nlp(request, category=""):
             workers=4,
             iter=100,  # 300,
             sg=1,
-        )
+        )                                
+
+        # modelRaw_ft = FastText(newSentsRaw,
+        #                     workers=num_workers,
+        #                     size=num_features,
+        #                     min_count=min_word_count,
+        #                     window=window_context, sg=0)          
 
         # wordtovec_result = model.wv.similarity('actor', 'actress') #similarity: 두 단어의 유사도를 계산
         try:
-            wordtovec_result = model.wv.most_similar(
-                keywordvec, topn=10
-            )  # most_similar: 가장 유사한 단어를 출력
+            wordtovec_result = model.wv.most_similar(keywordvec, topn=20)  # most_similar: 가장 유사한 단어를 출력
         except:
-            # break
-            return HttpResponse('{"vec":[{"label":"없음","value":0}]}', content_type="text/plain; charset=utf-8")
+            # handle "word '--' not in vocabulary"
+            return JsonResponse('{"vec":[{"label":"없음","value":0}]}', safe=False)
+            # return HttpResponse('{"vec":[{"label":"없음","value":0}]}', content_type="text/plain; charset=utf-8")
         # window_wordtovec_result = "[" + keywordvec + "]", " 연관 단어 : ", wordtovec_result
         # return HttpResponse(window_wordtovec_result)  # 워드투백 결과
         # return HttpResponse(wordtovec_result)  # 워드투백 결과
@@ -283,8 +258,7 @@ def kr_nlp(request, category=""):
         # convert list of lists (wordtovec_result) to list of dictionaries
         keys = ["label", "value"]
         # handle wordtovec_result is empty
-        d = [dict(zip(keys, l)) for l in wordtovec_result] if wordtovec_result != [
-        ] else [{"label": "없음", "value": 0}]
+        d = [dict(zip(keys, l)) for l in wordtovec_result] if wordtovec_result != [] else [{"label": "없음", "value": 0}]
 
         sublist_result_remove = []  # --- topic 반복 횟수는 여기서 불필요하므로 제거
         for key in sublist.keys():
@@ -300,6 +274,7 @@ def kr_nlp(request, category=""):
         # Redis {
         if context is not None:
             context['vec'] = res
+            context['modelType'] = modelType
             cache.set(apiParams, context, CACHE_TTL)
         # Redis }
 

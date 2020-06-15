@@ -43,7 +43,11 @@ const initialState = {
 		data: null
 	},
 	wordCloud: [],
-	subjectRelation: []
+	subjectRelation: {
+		topic: [],
+		vec: [],
+		modelType: 'word2vec' // ['word2vec','fasttext']
+	}
 };
 
 const searchsReducer = function (state = initialState, action) {
@@ -212,6 +216,8 @@ const searchsReducer = function (state = initialState, action) {
 			return {
 				...state,
 				subjectRelation: {
+					...state.subjectRelation,
+					vec: [],
 					topic: action.topic // only vec reset
 				}
 			};
@@ -222,6 +228,15 @@ const searchsReducer = function (state = initialState, action) {
 				subjectRelation: {
 					...state.subjectRelation,
 					vec: action.payload
+				}
+			};
+		}
+		case Actions.UPDATE_SUBJECT_RELATION_MODEL_TYPE: {
+			return {
+				...state,
+				subjectRelation: {
+					...state.subjectRelation,
+					modelType: action.payload
 				}
 			};
 		}
