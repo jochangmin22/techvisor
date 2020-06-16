@@ -6,8 +6,6 @@ from konlpy.tag import Mecab
 
 from django.http import JsonResponse
 from django.http import HttpResponse
-from django.db.models import Q
-import operator
 
 from .models import disclosure, listed_corp
 from .searchs import parse_searchs, parse_searchs_num

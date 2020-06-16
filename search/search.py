@@ -3,12 +3,7 @@ from django.db import connection
 from django.http import JsonResponse
 from django.http import HttpResponse
 from bs4 import BeautifulSoup
-from lxml import etree as ET
 import re
-from itertools import permutations
-import json
-
-import os
 from konlpy.tag import Mecab
 
 # caching with redis

@@ -1,13 +1,8 @@
 from django.db import connection
 from django.http import JsonResponse
 from django.http import HttpResponse
-from bs4 import BeautifulSoup
-from lxml import etree as ET
 import re
-from itertools import permutations, islice
-import json
-
-import os
+from itertools import permutations
 from konlpy.tag import Mecab
 
 from copy import deepcopy
@@ -22,7 +17,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 # from urllib.parse import unquote
-# pynori python 3.6과 호환되는지 확인해야함
+# TODO: pynori 성능 확인필요
 # from pynori.korean_analyzer import KoreanAnalyzer
 
 # for api {

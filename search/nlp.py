@@ -1,14 +1,8 @@
-from django.db import connection
 from collections import Counter
 from django.http import JsonResponse
 from django.http import HttpResponse
-import os
 import json
-from konlpy.corpus import kolaw
-from konlpy.tag import Mecab
 from operator import itemgetter
-import numpy as np
-from itertools import permutations
 from gensim.models import Word2Vec
 from gensim.models import FastText
 
@@ -188,7 +182,7 @@ def kr_nlp(request, category=""):
         # downsampling = 1e-3  # 문자 빈도수 Downsample
 
 
-        # # word2vec 모델 학습
+        # word2vec 모델 학습
         if modelType == 'word2vec':
             model = Word2Vec(sentences=[taged_docs],
                             workers=num_workers,
@@ -203,7 +197,7 @@ def kr_nlp(request, category=""):
         #                             min_count=min_word_count,
         #                             window=window_context, sg=0)
 
-        # # fasttext 모델 학습
+        # fasttext 모델 학습
         elif modelType == 'fasttext':
             model = FastText(sentences=[taged_docs],
                                 workers=num_workers,
@@ -212,6 +206,7 @@ def kr_nlp(request, category=""):
                                 iter=100,
                                 window=window_context, sg=0)
 
+        # 기존에 처음 설정한 word2vec 모델 학습
         else:
             model = Word2Vec(
             sentences=[taged_docs],
@@ -233,27 +228,9 @@ def kr_nlp(request, category=""):
         try:
             wordtovec_result = model.wv.most_similar(keywordvec, topn=20)  # most_similar: 가장 유사한 단어를 출력
         except:
-            # handle "word '--' not in vocabulary"
+            # handle "word 'brabra' not in vocabulary"
             return JsonResponse('{"vec":[{"label":"없음","value":0}]}', safe=False)
             # return HttpResponse('{"vec":[{"label":"없음","value":0}]}', content_type="text/plain; charset=utf-8")
-        # window_wordtovec_result = "[" + keywordvec + "]", " 연관 단어 : ", wordtovec_result
-        # return HttpResponse(window_wordtovec_result)  # 워드투백 결과
-        # return HttpResponse(wordtovec_result)  # 워드투백 결과
-
-        # wordtovec_result_remove = []  # ---- 확률값 제거
-        # for vec in wordtovec_result:
-        #     wordtovec_result_remove.append(vec[0])
-        # wordtovec_result_removed = (
-        #     "[" + keyword + "]",
-        #     "[" + keywordre + "]",
-        #     " 연관 단어 : ",
-        #     wordtovec_result_remove,
-        # )
-
-        # convert list of lists (wordtovec_result) to dictionary
-        # d = dict()
-        # for k, v in wordtovec_result:
-        #     d[k] = str(v)
 
         # convert list of lists (wordtovec_result) to list of dictionaries
         keys = ["label", "value"]
@@ -268,8 +245,6 @@ def kr_nlp(request, category=""):
 
         # multiple result를 위해 json사용
         res = {"topic": sublist_result_remove, "vec": d}
-
-        # return HttpResponse(json.dumps(res, ensure_ascii=False))
 
         # Redis {
         if context is not None:

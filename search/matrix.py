@@ -1,17 +1,6 @@
 from django.db import connection
 from collections import Counter
 from django.http import JsonResponse
-from django.http import HttpResponse
-import os
-import json
-from konlpy.corpus import kolaw
-from konlpy.tag import Mecab
-from operator import itemgetter
-from gensim import corpora, models
-import gensim
-import numpy as np
-from itertools import permutations
-from gensim.models import Word2Vec
 from .searchs import parse_searchs, parse_searchs_num
 
 # caching with redis
@@ -135,10 +124,10 @@ def get_topic(nlp_raw):
         taged_docs = nlp_raw.split()
         tuple_taged_docs = tuple(taged_docs)  # list to tuble
     except:
-        return HttpResponse(json.dumps("{}", ensure_ascii=False))
+        return JsonResponse("{}", safe=False)
 
     if taged_docs == [] or taged_docs == [[]]:  # result is empty
-        return HttpResponse(json.dumps("{}", ensure_ascii=False))
+        return JsonResponse("{}", safe=False)
 
     topic_num = 20
     count = Counter(tuple_taged_docs)
