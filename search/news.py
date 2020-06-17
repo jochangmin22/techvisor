@@ -203,9 +203,9 @@ def parse_related_company(request, mode="needJson"):
             return HttpResponse('Not Found', status=404)
 
         disClosure = disclosure.objects.filter(corp_name__in=unique_news_nlp)
-        myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('-stock_code','corp_name'))
-        myCorpCode = list(disClosure.values_list('corp_code', flat=True).order_by('-stock_code','corp_name'))
-        myStockCode = list(disClosure.values_list('stock_code', flat=True).order_by('-stock_code','corp_name'))
+        myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('-stock_code','corp_name'))[:10]
+        myCorpCode = list(disClosure.values_list('corp_code', flat=True).order_by('-stock_code','corp_name'))[:10]
+        myStockCode = list(disClosure.values_list('stock_code', flat=True).order_by('-stock_code','corp_name'))[:10]
 
         response = { 'corpName': myCorpName, 'corpCode' : myCorpCode, 'stockCode': myStockCode}
 

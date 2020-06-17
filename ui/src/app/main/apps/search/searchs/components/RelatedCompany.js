@@ -34,13 +34,13 @@ function NewsArticles(props) {
 		<FuseScrollbars>
 			<div className="flex flex-row p-12 pb-0 h-72 flex-wrap items-center">
 				<Typography className="text-14 font-bold">관련기업</Typography>
-				<Chip
+				{/* <Chip
 					key={defaultChipData.corpCode}
 					label={defaultChipData.corpName}
 					size="small"
 					className="mx-4"
 					onClick={e => handleClick(e, defaultChipData)}
-				/>
+				/> */}
 				{data &&
 					data.length > 0 &&
 					data.map((row, i) => {
