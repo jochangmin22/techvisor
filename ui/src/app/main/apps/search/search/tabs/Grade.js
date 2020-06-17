@@ -49,9 +49,9 @@ function Grade(props) {
 	const registerFee = useSelector(({ searchApp }) => searchApp.search.registerFee);
 
 	useEffect(() => {
-		// dispatch(Actions.getRightfullOrder(props.appNo));
-		if (props.search && props.search.등록번호 !== undefined) {
-			dispatch(Actions.getRegisterFee(props.search.등록번호));
+		if (props.search && props.search.등록번호 && props.search.등록번호 !== undefined) {
+			const params = { rgNo: props.search.등록번호 };
+			dispatch(Actions.getRegisterFee(params));
 		}
 		// eslint-disable-next-line
 	}, [props.search]);

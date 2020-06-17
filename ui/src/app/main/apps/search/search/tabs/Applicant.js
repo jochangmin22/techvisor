@@ -48,8 +48,9 @@ function Applicant(props) {
 	const [showLoading, setShowLoading] = useState(false);
 	useEffect(() => {
 		setShowLoading(true);
-		dispatch(Actions.getApplicantTrend(props.search.출원인코드1));
-		dispatch(Actions.getApplicant(props.search.출원인코드1)).then(() => {
+		const params = { cusNo: props.search.출원인코드1 };
+		dispatch(Actions.getApplicantTrend(params));
+		dispatch(Actions.getApplicant(params)).then(() => {
 			setShowLoading(false);
 		});
 	}, [dispatch, props.search.출원인코드1]);

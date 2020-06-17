@@ -5742,10 +5742,18 @@ eslint-config-react-app@^5.2.1:
   dependencies:
     confusing-browser-globals "^1.0.9"
 
-eslint-import-resolver-node@^0.3.2, eslint-import-resolver-node@^0.3.3:
+eslint-import-resolver-node@^0.3.2:
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.3.tgz#dbaa52b6b2816b50bc6711af75422de808e98404"
   integrity sha512-b8crLDo0M5RSe5YG8Pu2DYBj71tSB6OvXkfzwbJU2w7y8P4/yo0MyF8jU26IEuEuHF2K5/gcAJE3LhQGqBBbVg==
+  dependencies:
+    debug "^2.6.9"
+    resolve "^1.13.1"
+
+eslint-import-resolver-node@^0.3.3:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.4.tgz#85ffa81942c25012d8231096ddf679c03042c717"
+  integrity sha512-ogtf+5AB/O+nM6DIeBUNr2fuT7ot9Qg/1harBfBtaP13ekEWFQEEMP94BCB7zaNW3gyY+8SHYF00rnqYwXKWOA==
   dependencies:
     debug "^2.6.9"
     resolve "^1.13.1"
@@ -11416,9 +11424,9 @@ raw-loader@4.0.1:
     schema-utils "^2.6.5"
 
 rc-easyui@^1.0.53:
-  version "1.1.18"
-  resolved "https://registry.yarnpkg.com/rc-easyui/-/rc-easyui-1.1.18.tgz#29bccf536019014349558029106e8bc909f608fe"
-  integrity sha512-D36RMi7zavQhoblH3lGNp4Bjwrgx+t8x/93I6Owj2QlagU1S5MVPoEYoXkP6HJdnoeCttwKUskm05kw9HnDM8A==
+  version "1.1.19"
+  resolved "https://registry.yarnpkg.com/rc-easyui/-/rc-easyui-1.1.19.tgz#624936624715ed3f83d85ea6d0651e277cbde861"
+  integrity sha512-4Kj1dN76I5d3cFkqh8qxnfN6c1Hp1bufzK2qsYZB/85BngrDFI6T/wA/PTWD/pBkB2mQgA+N3aNXCusWmv4p2g==
 
 rc-progress@^2.5.2:
   version "2.6.1"

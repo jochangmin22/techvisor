@@ -2,7 +2,7 @@
 # from django.http import HttpResponse
 
 from .searchs import parse_searchs, parse_query, parse_searchs_num
-from .search import parse_search, parse_search_quote, parse_search_family, parse_search_legal, parse_search_registerfee, parse_search_rightfullorder, parse_search_rightholder, parse_search_applicant, parse_search_applicant_trend
+from .search import parse_search, parse_search_quote, parse_search_family, parse_search_legal, parse_search_registerfee, parse_search_rightfullorder, parse_search_rightholder, parse_search_applicant, parse_search_applicant_trend, parse_search_similar
 # from .test import parse_test
 from .nlp import kr_nlp
 from .news import parse_news, parse_news_nlp, parse_related_company, parse_news_sa
@@ -28,40 +28,43 @@ def get_query(request):
     return parse_query(request)
 
 
-def get_search(request, patNo=""):
-    return parse_search(request, patNo)
+def get_search(request):
+    return parse_search(request)
 
 
-def get_search_quote(request, patNo=""):
-    return parse_search_quote(request, patNo)
+def get_search_quote(request):
+    return parse_search_quote(request)
 
 
-def get_search_family(request, patNo=""):
-    return parse_search_family(request, patNo)
+def get_search_family(request):
+    return parse_search_family(request)
 
 
-def get_search_legal(request, patNo=""):
-    return parse_search_legal(request, patNo)
+def get_search_legal(request):
+    return parse_search_legal(request)
 
 
-def get_search_registerfee(request, rgNo=""):
-    return parse_search_registerfee(request, rgNo)
+def get_search_registerfee(request):
+    return parse_search_registerfee(request)
 
 
-def get_search_rightfullorder(request, patNo=""):
-    return parse_search_rightfullorder(request, patNo)
+def get_search_rightfullorder(request):
+    return parse_search_rightfullorder(request)
 
 
-def get_search_rightholder(request, rgNo=""):
-    return parse_search_rightholder(request, rgNo)
+def get_search_rightholder(request):
+    return parse_search_rightholder(request)
 
 
-def get_search_applicant(request, cusNo=""):
-    return parse_search_applicant(request, cusNo)
+def get_search_applicant(request):
+    return parse_search_applicant(request)
 
 
-def get_search_applicant_trend(request, cusNo=""):
-    return parse_search_applicant_trend(request, cusNo)
+def get_search_applicant_trend(request):
+    return parse_search_applicant_trend(request)
+
+def get_search_similar(request):
+    return parse_search_similar(request)
 
 
 def get_wordcloud(request):

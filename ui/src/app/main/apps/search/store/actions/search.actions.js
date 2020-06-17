@@ -10,16 +10,16 @@ export const GET_SEARCH_RIGHTFULL_ORDER = '[SEARCH APP] GET SEARCH RIGHTFULL ORD
 export const GET_SEARCH_RIGHT_HOLDER = '[SEARCH APP] GET SEARCH RIGHT HOLDER';
 export const GET_SEARCH_APPLICANT = '[SEARCH APP] GET SEARCH APPLICANT';
 export const GET_SEARCH_APPLICANT_TREND = '[SEARCH APP] GET SEARCH APPLICANT_TREND';
+export const GET_SIMILAR = '[SEARCH APP] GET SIMILAR';
+export const RESET_SIMILAR = '[SEARCH APP] RESET SIMILAR';
+export const UPDATE_SIMILAR_MODEL_TYPE = '[SEARCH APP] UPDATE SIMILAR MODEL TYPE';
 
-export function getSearch(appNo) {
-	const request = axios({
-		method: 'get',
-		url: `${process.env.REACT_APP_API_URL}/api/search-app/search/${appNo}`
-	});
+export function getSearch(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search`, { params });
 
 	return dispatch =>
 		request.then(response => {
-			dispatch(setClickedSearchId(appNo));
+			dispatch(setClickedSearchId(params.appNo));
 			dispatch({
 				type: GET_SEARCH,
 				payload: response.data
@@ -34,11 +34,8 @@ export function resetSearch() {
 	};
 }
 
-export function getQuote(appNo) {
-	const request = axios({
-		method: 'get',
-		url: `${process.env.REACT_APP_API_URL}/api/search-app/search-quote/${appNo}`
-	});
+export function getQuote(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/quote`, { params });
 
 	return dispatch =>
 		request.then(response => {
@@ -49,11 +46,8 @@ export function getQuote(appNo) {
 		});
 }
 
-export function getFamily(appNo) {
-	const request = axios({
-		method: 'get',
-		url: `${process.env.REACT_APP_API_URL}/api/search-app/search-family/${appNo}`
-	});
+export function getFamily(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/family`, { params });
 
 	return dispatch =>
 		request.then(response => {
@@ -64,11 +58,8 @@ export function getFamily(appNo) {
 		});
 }
 
-export function getLegal(appNo) {
-	const request = axios({
-		method: 'get',
-		url: `${process.env.REACT_APP_API_URL}/api/search-app/search-legal/${appNo}`
-	});
+export function getLegal(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/legal`, { params });
 
 	return dispatch =>
 		request.then(response => {
@@ -79,11 +70,8 @@ export function getLegal(appNo) {
 		});
 }
 
-export function getRegisterFee(rgNo) {
-	const request = axios({
-		method: 'get',
-		url: `${process.env.REACT_APP_API_URL}/api/search-app/search-registerfee/${rgNo}`
-	});
+export function getRegisterFee(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/registerfee`, { params });
 
 	return dispatch =>
 		request.then(response => {
@@ -94,11 +82,8 @@ export function getRegisterFee(rgNo) {
 		});
 }
 
-export function getRightfullOrder(appNo) {
-	const request = axios({
-		method: 'get',
-		url: `${process.env.REACT_APP_API_URL}/api/search-app/search-rightfullorder/${appNo}`
-	});
+export function getRightfullOrder(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/rightfullorder`, { params });
 
 	return dispatch =>
 		request.then(response => {
@@ -109,11 +94,8 @@ export function getRightfullOrder(appNo) {
 		});
 }
 
-export function getRightHolder(rgNo) {
-	const request = axios({
-		method: 'get',
-		url: `${process.env.REACT_APP_API_URL}/api/search-app/search-rightholder/${rgNo}`
-	});
+export function getRightHolder(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/rightholder`, { params });
 
 	return dispatch =>
 		request.then(response => {
@@ -124,11 +106,8 @@ export function getRightHolder(rgNo) {
 		});
 }
 
-export function getApplicant(cusNo) {
-	const request = axios({
-		method: 'get',
-		url: `${process.env.REACT_APP_API_URL}/api/search-app/search-applicant/${cusNo}`
-	});
+export function getApplicant(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/applicant`, { params });
 
 	return dispatch =>
 		request.then(response => {
@@ -139,11 +118,8 @@ export function getApplicant(cusNo) {
 		});
 }
 
-export function getApplicantTrend(cusNo) {
-	const request = axios({
-		method: 'get',
-		url: `${process.env.REACT_APP_API_URL}/api/search-app/search-applicant-trend/${cusNo}`
-	});
+export function getApplicantTrend(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/applicant-trend`, { params });
 
 	return dispatch =>
 		request.then(response => {
@@ -152,4 +128,29 @@ export function getApplicantTrend(cusNo) {
 				payload: response.data
 			});
 		});
+}
+
+export function getSimilar(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/similar`, { params });
+
+	return dispatch =>
+		request.then(response => {
+			dispatch({
+				type: GET_SIMILAR,
+				payload: response.data
+			});
+		});
+}
+
+export function resetSimilar() {
+	return {
+		type: RESET_SIMILAR
+	};
+}
+
+export function updateSimilarModelType(data) {
+	return {
+		type: UPDATE_SIMILAR_MODEL_TYPE,
+		payload: data
+	};
 }

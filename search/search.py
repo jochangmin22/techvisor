@@ -5,6 +5,9 @@ from django.http import HttpResponse
 from bs4 import BeautifulSoup
 import re
 from konlpy.tag import Mecab
+from collections import Counter
+
+from .similarity import similarity
 
 # caching with redis
 from django.core.cache import cache
@@ -14,7 +17,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 # from urllib.parse import unquote
-# pynori python 3.6과 호환되는지 확인해야함
+# TODO : pynori 성능 확인
 # from pynori.korean_analyzer import KoreanAnalyzer
 
 # for api {
@@ -23,17 +26,18 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 # from itertools import repeat
 # for api }
 
-def parse_search(request, patNo=""):
+def parse_search(request):
     """ searchDetails용 검색 """
-    patNo = patNo.replace("-", "")
+    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
+    appNo = appNo.replace("-", "")
 
-    redisKey = patNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'raw')
     # Redis }
 
     with connection.cursor() as cursor:
-        whereAppNo = "" if patNo == "" else 'WHERE "출원번호" = $$' + patNo + "$$"
+        whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
         # regexp_replace(초록, E'<[^>]+>', '', 'gi')
         # regexp_replace(regexp_replace(청구항,E'<?/?br>',E'\r\n', 'gi'),E'<DP[^<]+?>', ' ', 'gi')
         # TODO : 공개공보에 발명자4~10 넣어버리기 - crosstab 속도문제
@@ -104,17 +108,18 @@ def parse_search(request, patNo=""):
     # return HttpResponse(row, content_type="text/plain; charset=utf-8")
 
 
-def parse_search_quote(request, patNo=""):
+def parse_search_quote(request):
     """ searchDetails용 인용 검색 """
-    patNo = patNo.replace("-", "")
+    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
+    appNo = appNo.replace("-", "")
 
-    redisKey = patNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'quote')
     # Redis }
 
     with connection.cursor() as cursor:
-        whereAppNo = "" if patNo == "" else 'WHERE "출원번호" = $$' + patNo + "$$"
+        whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
         cursor.execute(
             "SELECT A.*, B.* FROM (SELECT *, split_part(\"인용문헌출원번호_국내\", ',', 1)::numeric AS 인용문헌번호1 FROM 특허실용심사인용문헌 "
             + whereAppNo
@@ -130,15 +135,16 @@ def parse_search_quote(request, patNo=""):
     return JsonResponse(row, safe=False)
 
 
-def parse_search_family(request, patNo=""):
+def parse_search_family(request):
     """ searchDetails용 패밀리 검색 """
-    patNo = patNo.replace("-", "")
-    redisKey = patNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
+    appNo = appNo.replace("-", "")
+    redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'family')
     # Redis }
     with connection.cursor() as cursor:
-        whereAppNo = "" if patNo == "" else 'WHERE "출원번호" = $$' + patNo + "$$"
+        whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
         cursor.execute(
             "SELECT A.*, B.* FROM (SELECT *, case when 패밀리국가코드 = 'KR' then split_part(패밀리출원번호, ',', 1)::numeric else null end 패밀리출원번호1 FROM 특허패밀리 "
             + whereAppNo
@@ -154,15 +160,16 @@ def parse_search_family(request, patNo=""):
     return JsonResponse(row, safe=False)
 
 
-def parse_search_legal(request, patNo=""):
+def parse_search_legal(request):
     """ searchDetails용 법적상태이력 검색 """
-    patNo = patNo.replace("-", "")
-    redisKey = patNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
+    appNo = appNo.replace("-", "")
+    redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'legal')
     # Redis }
     with connection.cursor() as cursor:
-        whereAppNo = "" if patNo == "" else 'WHERE "출원번호" = $$' + patNo + "$$"
+        whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
         cursor.execute(
             "SELECT * FROM 법적상태이력 "
             + whereAppNo
@@ -177,8 +184,10 @@ def parse_search_legal(request, patNo=""):
     return JsonResponse(row, safe=False)
 
 
-def parse_search_registerfee(request, rgNo=""):
+def parse_search_registerfee(request):
     """ searchDetails용 등록료 검색 """
+    rgNo = request.GET.get('rgNo') if request.GET.get('rgNo') else ''
+    return HttpResponse(rgNo, content_type=u"text/plain; charset=utf-8")
     rgNo = rgNo.replace("-", "")
     redisKey = rgNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
@@ -200,15 +209,16 @@ def parse_search_registerfee(request, rgNo=""):
     return JsonResponse(row, safe=False)
 
 
-def parse_search_rightfullorder(request, patNo=""):
+def parse_search_rightfullorder(request):
     """ searchDetails용 권리순위 검색 """
-    patNo = patNo.replace("-", "")
-    redisKey = patNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
+    appNo = appNo.replace("-", "")
+    redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'rightfullorder')
     # Redis }
     with connection.cursor() as cursor:
-        whereAppNo = "" if patNo == "" else 'WHERE "출원번호" = $$' + patNo + "$$"
+        whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
         cursor.execute(
             "SELECT * FROM 권리순위 "
             + whereAppNo
@@ -223,8 +233,9 @@ def parse_search_rightfullorder(request, patNo=""):
     return JsonResponse(row, safe=False)
 
 
-def parse_search_rightholder(request, rgNo=""):
+def parse_search_rightholder(request):
     """ searchDetails용 권리권자변동 검색 """
+    rgNo = request.GET.get('rgNo') if request.GET.get('rgNo') else ''
     rgNo = rgNo.replace("-", "")
     redisKey = rgNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
@@ -246,8 +257,9 @@ def parse_search_rightholder(request, rgNo=""):
     return JsonResponse(row, safe=False)
 
 
-def parse_search_applicant(request, cusNo=""):
+def parse_search_applicant(request):
     """ searchDetails용 출원인 법인, 출원동향, 보유기술 검색 """
+    cusNo = request.GET.get('cusNo') if request.GET.get('cusNo') else ''
     cusNo = cusNo.replace("-", "")
     operationKey = 'corpBsApplicantInfo'
 
@@ -295,8 +307,9 @@ def parse_search_applicant(request, cusNo=""):
     return JsonResponse(res, safe=False)
 
 
-def parse_search_applicant_trend(request, cusNo=""):
+def parse_search_applicant_trend(request):
     """ searchDetails용 출원인 출원동향, 보유기술 검색 """
+    cusNo = request.GET.get('cusNo') if request.GET.get('cusNo') else ''
     cusNo = cusNo.replace("-", "")
     redisKey = cusNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
@@ -317,6 +330,35 @@ def parse_search_applicant_trend(request, cusNo=""):
     #
     return JsonResponse(row, safe=False)
 
+def parse_search_similar(request):
+    """ 유사 문서 목록 """
+    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
+    modelType = request.GET.get('modelType') if request.GET.get('modelType') else 'doc2vec'
+
+    redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    # Redis {
+    handleRedis(redisKey, 'similar')
+    # Redis }
+
+    with connection.cursor() as cursor:
+        cursor.execute('select "명칭token" t, "요약token" a, "대표항token" c from 공개공보 where 출원번호 =' + appNo)
+        row = dictfetchall(cursor)
+    raw = ' '.join(filter(None, (row[0]['t'], row[0]['a'], row[0]['c'])))
+    raw = tokenizer(raw)
+    raw = tuple(raw)
+
+    count = Counter(raw)
+    count = count.most_common(3)
+    new_raw = dict(count)
+    new_raw = list(new_raw.keys())
+    row = similarity(new_raw, modelType) 
+        
+    # Redis {
+    handleRedis(redisKey, 'similar', row, mode="w")
+    # Redis }
+
+    return JsonResponse(row, safe=False)    
+
 
 def handleRedis(redisKey, keys, data="", mode="r"):
     """ read or write to redis """
@@ -330,7 +372,6 @@ def handleRedis(redisKey, keys, data="", mode="r"):
             cache.set(redisKey, context, CACHE_TTL)
         return JsonResponse(data, safe=False)
     return
-
 
 def _parse_typo(xmlStr=""):
     """ 오타 정리 """

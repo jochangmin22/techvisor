@@ -559,9 +559,6 @@ def tsquery_keywords(keyword="", fieldName=""):
         res = None
     return res
 
-    # return HttpResponse(strKeyword, content_type="text/plain; charset=utf-8")
-
-
 def parse_query(request):
     """ 쿼리 확인용 """
     return HttpResponse(parse_searchs(request, mode="query"), content_type="text/plain; charset=utf-8")

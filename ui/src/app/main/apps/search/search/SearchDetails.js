@@ -47,19 +47,23 @@ function SearchDetails(props) {
 	const [tabValue, setTabValue] = useState(0);
 
 	useEffect(() => {
-		dispatch(Actions.getSearch(appNo));
-		dispatch(Actions.getQuote(appNo));
-		dispatch(Actions.getFamily(appNo));
-		dispatch(Actions.getLegal(appNo));
+		const params = { appNo: appNo };
+		dispatch(Actions.getSearch(params));
+		dispatch(Actions.getQuote(params));
+		dispatch(Actions.getFamily(params));
+		dispatch(Actions.getLegal(params));
+		dispatch(Actions.getSimilar(params));
 		if (search && search.출원인코드1 !== null && search.출원인코드1 !== undefined) {
-			dispatch(Actions.getApplicant(search.출원인코드1));
-			dispatch(Actions.getApplicantTrend(search.출원인코드1));
+			const params = { cusNo: search.출원인코드1 };
+			dispatch(Actions.getApplicant(params));
+			dispatch(Actions.getApplicantTrend(params));
 		}
 		if (search && search.등록번호 !== null && search.등록번호 !== undefined) {
-			dispatch(Actions.getRegisterFee(search.등록번호));
-			dispatch(Actions.getRightHolder(search.등록번호));
+			const params = { rgNo: search.등록번호 };
+			dispatch(Actions.getRegisterFee(params));
+			dispatch(Actions.getRightHolder(params));
 		}
-		// dispatch(Actions.getRightfullOrder(appNo));
+		// dispatch(Actions.getRightfullOrder({appNo: appNo}));
 		// eslint-disable-next-line
 	}, [dispatch, props.match.params]);
 
@@ -194,7 +198,7 @@ function SearchDetails(props) {
 						{tabValue === 1 && <Specification search={search} searchText={searchText} terms={terms} />}
 						{tabValue === 2 && <Keyword search={search} />}
 						{tabValue === 3 && <Applicant search={search} />}
-						{tabValue === 4 && <Similar search={search} />}
+						{tabValue === 4 && <Similar appNo={appNo} />}
 						{tabValue === 5 && <Grade search={search} />}
 						{tabValue === 6 && <Associate search={search} />}
 					</div>
