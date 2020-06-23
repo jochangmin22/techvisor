@@ -41,12 +41,6 @@ OPER_PERIOD = "getPdAcctoSttusInfoSearch"
 # detail params sample : ?seq=22216&serviceKey=서비스인증키
 # period params sample : ?seq=784911&data_crt_ym=201510&serviceKey=서비스인증키
 
-# DART 전자공시
-API_KEY = "e0e209eea9e65bd15ccbafb3adb8db40477cedc5"
-DART_URL = "https://opendart.fss.or.kr/api/"
-OPER_GONG = "list.json"
-OPER_COMPANY = "company.json"
-
 def parse_companies_query(request):
     """ 쿼리 확인용 """
     return HttpResponse(parse_companies(request, mode="query"), content_type="text/plain; charset=utf-8")

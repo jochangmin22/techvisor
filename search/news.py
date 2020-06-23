@@ -28,9 +28,9 @@ import numpy as np
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-client_id = settings.NAVER_NEWS_CLIENT_ID
-client_secret = settings.NAVER_NEWS_CLIENT_SECRET
-API_URL = settings.NAVER_NEWS_API_URL
+client_id = settings.NAVER['news_client_id']
+client_secret = settings.NAVER['news_client_secret']
+api_url = settings.NAVER['news_api_url']
 
 display = 100 # 각 키워드 당 검색해서 저장할 기사 수
 
@@ -71,7 +71,7 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
     min_name = clean_keyword(params['searchText'])
     # min_name = "하이브리드 자동차"
     encText = urllib.parse.quote(min_name)
-    url = API_URL + encText + \
+    url = api_url + encText + \
         "&display=" + str(display) + "&sort=sim"
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id", client_id)

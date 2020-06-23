@@ -6,24 +6,6 @@ import { makeStyles } from '@material-ui/styles';
 // import * as Actions from '../../store/actions';
 
 const useStyles = makeStyles(theme => ({
-	root: {
-		flexGrow: 1,
-		width: '780',
-		margin: '0 auto'
-	},
-	paper: {
-		width: '100%',
-		overflowX: 'auto'
-	},
-	tableRow: {
-		fontSize: 11,
-		fontWeight: 600
-	},
-	tableRowFixed: {
-		width: '15%',
-		fontSize: 11,
-		fontWeight: 600
-	},
 	table: {
 		'& th': {
 			padding: '4px 0',
@@ -55,7 +37,7 @@ function LegalStatus(props) {
 				<h6 className="font-600 text-14 p-16" color="secondary">
 					법적상태
 				</h6>
-				<div className="table-responsive px-16">
+				<div className="table-responsive h-288 px-16">
 					<table className={clsx(classes.table, 'w-full text-justify dense')}>
 						<thead>
 							<tr>

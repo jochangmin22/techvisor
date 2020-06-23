@@ -1,6 +1,7 @@
 import React from 'react';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import Highlighter from 'react-highlight-words';
@@ -11,27 +12,6 @@ import Quotation from './Quotation';
 import Family from './Family';
 
 const useStyles = makeStyles(theme => ({
-	root: {
-		flexGrow: 1,
-		// width: "100%",
-		width: '780',
-		margin: '0 auto'
-	},
-	paper: {
-		// marginTop: theme.spacing(0),
-		width: '100%',
-		overflowX: 'auto'
-		// marginBottom: theme.spacing(0)
-	},
-	tableRow: {
-		fontSize: 11,
-		fontWeight: 600
-	},
-	tableRowFixed: {
-		width: '15%',
-		fontSize: 11,
-		fontWeight: 600
-	},
 	table: {
 		'& th': {
 			padding: '4px 0',
@@ -42,6 +22,7 @@ const useStyles = makeStyles(theme => ({
 	primaryColor: {
 		color: theme.palette.primary.main
 	}
+
 }));
 
 const TurnOffHightlight = true;
@@ -59,6 +40,36 @@ function PatInfo(props) {
 
 	const mainClaim = props.search.청구항종류.indexOf('dok');
 
+	const bibloInfo = {
+		특허상태: props.search.등록사항,
+		IPC: props.search.ipc코드,
+		CPC: props.search.ipc코드,
+		출원번호: addSeparator(props.search.출원번호, '-', 2, 6) +
+												(props.search.출원일자
+													? ' (' + addSeparator(props.search.출원일자, '.', 4, 6) + ')'
+													: ''),
+		등록번호: addSeparator(props.search.등록번호, '-', 2, 6) +
+												(props.search.등록일자
+													? ' (' + addSeparator(props.search.등록일자, '.', 4, 6) + ')'
+													: ''),
+		공개번호: addSeparator(props.search.공개번호, '-', 2, 6) +
+												(props.search.공개일자
+													? ' (' + addSeparator(props.search.공개일자, '.', 4, 6) + ')'
+													: ''),
+		공고번호: addSeparator(props.search.공고번호, '-', 2, 6) +
+												(props.search.공고일자
+													? ' (' + addSeparator(props.search.공고일자, '.', 4, 6) + ')'
+													: ''),
+		출원인: removeRedundunant(props.search.출원인1) +
+												(props.search.출원인2
+													? ', ' + removeRedundunant(props.search.출원인2)
+													: '') +
+												(props.search.출원인3
+													? ', ' + removeRedundunant(props.search.출원인3)
+													: ''),
+		발명자: removeRedundunant(props.search.발명자)
+	};	
+
 	return (
 		<FuseAnimateGroup
 			className="flex flex-wrap"
@@ -69,84 +80,17 @@ function PatInfo(props) {
 			<>
 				<Paper className="w-full rounded-8 shadow mb-16">
 					<div className="flex flex-col items-start p-12">
-						{/* <Typography className="py-16 font-600">서지정보</Typography> */}
-						<h6 className="font-600 text-14 p-16" color="secondary">
-							서지정보
-						</h6>
-						<div className="table-responsive px-16">
-							<table className={clsx(classes.table, 'w-full text-justify dense')}>
-								<tbody>
-									<tr className="type">
-										<th>특허상태</th>
-										<td>{props.search.등록사항}</td>
-									</tr>
-
-									<tr className="size">
-										<th>IPC</th>
-										<td>{props.search.ipc코드}</td>
-									</tr>
-
-									<tr className="location">
-										<th>CPC</th>
-										<td>{props.search.ipc코드}</td>
-									</tr>
-
-									<tr className="owner">
-										<th>출원번호</th>
-										<td>
-											{addSeparator(props.search.출원번호, '-', 2, 6) +
-												(props.search.출원일자
-													? ' (' + addSeparator(props.search.출원일자, '.', 4, 6) + ')'
-													: '')}
-										</td>
-									</tr>
-									<tr className="owner">
-										<th>등록번호</th>
-										<td>
-											{addSeparator(props.search.등록번호, '-', 2, 6) +
-												(props.search.등록일자
-													? ' (' + addSeparator(props.search.등록일자, '.', 4, 6) + ')'
-													: '')}
-										</td>
-									</tr>
-									<tr className="owner">
-										<th>공개번호</th>
-										<td>
-											{addSeparator(props.search.공개번호, '-', 2, 6) +
-												(props.search.공개일자
-													? ' (' + addSeparator(props.search.공개일자, '.', 4, 6) + ')'
-													: '')}
-										</td>
-									</tr>
-									<tr className="owner">
-										<th>공고번호</th>
-										<td>
-											{addSeparator(props.search.공고번호, '-', 2, 6) +
-												(props.search.공고일자
-													? ' (' + addSeparator(props.search.공고일자, '.', 4, 6) + ')'
-													: '')}
-										</td>
-									</tr>
-									<tr className="owner">
-										<th>출원인</th>
-										<td>
-											{removeRedundunant(props.search.출원인1) +
-												(props.search.출원인2
-													? ', ' + removeRedundunant(props.search.출원인2)
-													: '') +
-												(props.search.출원인3
-													? ', ' + removeRedundunant(props.search.출원인3)
-													: '')}
-										</td>
-									</tr>
-									<tr className="owner">
-										<th>발명자</th>
-										<td>{removeRedundunant(props.search.발명자)}</td>
-										{/* <td>{props.search.발명자}</td> */}
-									</tr>
-								</tbody>
-							</table>
-						</div>
+						<Typography className="p-12 text-14 font-bold">서지정보</Typography>
+						{Object.entries(bibloInfo).map(([key, value]) => (
+							<Grid container key={key} spacing={3}>
+								<Grid item xs={4} md={2}>
+									<div className={clsx(classes.primaryColor, "p-4 md:p-8")}>{key}</div>
+								</Grid>
+								<Grid item xs={8} md={10}>
+									<div className="p-4 md:p-8">{value}</div>
+								</Grid>
+							</Grid>
+						))}
 					</div>
 				</Paper>
 				<Paper className="w-full rounded-8 shadow mb-16">

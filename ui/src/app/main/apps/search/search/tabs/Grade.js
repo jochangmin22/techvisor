@@ -1,30 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Paper from '@material-ui/core/Paper';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../../store/actions';
+import { Typography } from '@material-ui/core';
+import GradeTable from './GradeTable';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 const useStyles = makeStyles(theme => ({
-	root: {
-		flexGrow: 1,
-		width: '780',
-		margin: '0 auto'
-	},
-	paper: {
-		width: '100%',
-		overflowX: 'auto'
-	},
-	tableRow: {
-		fontSize: 11,
-		fontWeight: 600
-	},
-	tableRowFixed: {
-		width: '15%',
-		fontSize: 11,
-		fontWeight: 600
-	},
 	table: {
 		'& th': {
 			padding: '4px 0',
@@ -47,6 +32,19 @@ function Grade(props) {
 	// const rightfullOrder = useSelector(({ searchApp }) => searchApp.search.rightfullOrder);
 	const rightHolder = useSelector(({ searchApp }) => searchApp.search.rightHolder);
 	const registerFee = useSelector(({ searchApp }) => searchApp.search.registerFee);
+
+	const [rightHolderData, setRightHolderData] = useState(null);
+	const [registerFeeData, setRegisterFeeData] = useState(null);
+
+	useEffect(() => {
+		if (rightHolder === null) {
+			setRightHolderData(null);
+		} else {
+			if (rightHolder !== undefined) {
+				setRightHolderData(rightHolder);
+			}
+		}
+	}, [rightHolder]);	
 
 	useEffect(() => {
 		if (props.search && props.search.등록번호 && props.search.등록번호 !== undefined) {
@@ -74,10 +72,15 @@ function Grade(props) {
 				</Paper>
 				<Paper className="w-full rounded-8 shadow mb-16">
 					<div className="flex flex-col items-start p-12">
-						<h6 className="font-600 text-14 p-16" color="secondary">
+						<Typography className="text-14 p-16 font-bold">
 							기타 주요 사항
-						</h6>
-						<h6 className={clsx(classes.primaryColor, 'font-600 text-14 px-16 py-8')}>권리변동 사항</h6>
+						</Typography>
+						<Typography className={clsx(classes.primaryColor, 'text-14 px-16 py-8 font-bold')}>권리변동 사항</Typography>
+						{/* {rightHolderData && rightHolderData.length !== 0 && !showLoading ? (
+							<GradeTable data={rightHolderData} />
+						) : (
+							<SpinLoading delay={20000} className="h-full" />
+						)}						 */}
 						<div className="table-responsive px-16">
 							<table className={clsx(classes.table, 'w-full text-justify dense')}>
 								<thead>
@@ -131,7 +134,7 @@ function Grade(props) {
 									</tr>
 								</thead>
 								<tbody>
-									{registerFee &&
+									{registerFee && 
 										registerFee
 											// .filter(registerFee => registerFee.법적상태명 === '연차료납부')
 											.map((item, key) => (

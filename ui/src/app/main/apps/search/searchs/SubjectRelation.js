@@ -24,12 +24,10 @@ function SubjectRelation(props) {
 
 	const showLoadingValue = useMemo(() => ({ showLoading, setShowLoading }), [showLoading, setShowLoading]);
 
-	function handlemodelType(event) {
+	function handleModelType(event) {
 		setModelType(event.target.value);
 	}
 
-	// https://stackoverflow.com/questions/28121272/whats-the-best-way-to-update-an-object-in-an-array-in-reactjs
-	// data: this.state.data.map(el => (el.id === id ? {...el, text} : el))
 	useEffect(() => {
 		if (subjectRelation === null) {
 			setVecData(null);
@@ -66,7 +64,7 @@ function SubjectRelation(props) {
 						msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 핵심키워드와 비교하여 유사 관계를 표시합니다."
 					/>
 					<FormControl>
-						<Select className="w-128 px-12" value={modelType} onChange={handlemodelType} displayEmpty>
+						<Select className="w-128 px-12" value={modelType} onChange={handleModelType} displayEmpty>
 							{['word2vec', 'fasttext', 'btowin'].map(key => (
 								<MenuItem value={key} key={key}>
 									{key}

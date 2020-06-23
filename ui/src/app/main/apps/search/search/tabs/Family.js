@@ -6,24 +6,6 @@ import { makeStyles } from '@material-ui/styles';
 // import * as Actions from '../../store/actions';
 
 const useStyles = makeStyles(theme => ({
-	root: {
-		flexGrow: 1,
-		width: '780',
-		margin: '0 auto'
-	},
-	paper: {
-		width: '100%',
-		overflowX: 'auto'
-	},
-	tableRow: {
-		fontSize: 11,
-		fontWeight: 600
-	},
-	tableRowFixed: {
-		width: '15%',
-		fontSize: 11,
-		fontWeight: 600
-	},
 	table: {
 		'& th': {
 			padding: '4px 0',
@@ -82,12 +64,12 @@ function Family(props) {
 						<table className={clsx(classes.table, 'w-full text-justify dense')}>
 							<thead>
 								<tr>
-									<th>국가코드</th>
-									<th>문헌번호</th>
-									<th>일자</th>
+									<th className="w-1/12">국가코드</th>
+									<th className="w-1/6">문헌번호</th>
+									<th className="w-1/12">일자</th>
 									<th>발명의명칭</th>
-									<th>IPC</th>
-									<th>CPC</th>
+									<th className="w-1/12">IPC</th>
+									<th className="w-1/12">CPC</th>
 								</tr>
 							</thead>
 							<tbody>

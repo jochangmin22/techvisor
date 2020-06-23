@@ -43,9 +43,8 @@ KIPRIS_SERVICE_KEY = get_secret("KIPRIS_SERVICE_KEY")
 KIPRIS_REST_URL = get_secret("KIPRIS_REST_URL")
 
 
-NAVER_NEWS_API_URL = get_secret("NAVER_NEWS_API_URL")
-NAVER_NEWS_CLIENT_ID = get_secret("NAVER_NEWS_CLIENT_ID")
-NAVER_NEWS_CLIENT_SECRET = get_secret("NAVER_NEWS_CLIENT_SECRET")
+DART = get_secret("DART")
+NAVER = get_secret("NAVER")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -101,6 +100,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
+    "django_extensions",
     # app
     "search",
     "users",

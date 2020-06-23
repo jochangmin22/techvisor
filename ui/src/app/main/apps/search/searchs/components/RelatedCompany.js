@@ -25,7 +25,7 @@ function NewsArticles(props) {
 	function handleClick(e, companyInfo) {
 		e.preventDefault();
 		dispatch(Actions.setCompanyCode(companyInfo));
-		props.history.push(`/apps/company/${companyInfo.corpName}`);
+		props.history.push(`/apps/company/${companyInfo.corpCode}`);
 	}
 
 	const data = React.useMemo(() => corpName, [corpName]);

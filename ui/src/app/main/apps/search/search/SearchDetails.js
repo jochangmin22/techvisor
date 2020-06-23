@@ -67,8 +67,8 @@ function SearchDetails(props) {
 		// eslint-disable-next-line
 	}, [dispatch, props.match.params]);
 
-	function handleChangeTab(event, tabValue) {
-		setTabValue(tabValue);
+	function handleChangeTab(event, value) {
+		setTabValue(value);
 	}
 
 	function onDownload() {

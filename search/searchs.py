@@ -124,15 +124,11 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
 
         cursor.execute(
             "SET work_mem to '100MB';"
-            # + "SET statement_timeout TO 20000;"
             + query
-            # + ' and (등록사항 <> ALL (\'{"소멸","거절","취하"}\'::varchar[]))'
-            # + " GROUP BY 특허고객대표번호"
-            # + " order by 출원번호 DESC"
-            # + " limit 1000"
         )
         row = dictfetchall(cursor)
-    # return HttpResponse(query, content_type="text/plain; charset=utf-8")
+
+    
 
     nlp_raw = ""
     mtx_raw = []

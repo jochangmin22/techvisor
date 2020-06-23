@@ -3,6 +3,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
+import clsx from 'clsx';
 
 function SpinLoading(props) {
 	const [showLoading, setShowLoading] = useState(props.delay);
@@ -16,7 +17,7 @@ function SpinLoading(props) {
 	}
 
 	return (
-		<div className="flex flex-1 flex-col items-center justify-center">
+		<div className={clsx(props.className, 'flex flex-1 flex-col items-center justify-center')}>
 			<Typography className="text-16 my-24" color="primary">
 				Loading...
 			</Typography>

@@ -3,27 +3,9 @@ import { useSelector } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
-// import * as Actions from '../../store/actions';
+import { Typography } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
-	root: {
-		flexGrow: 1,
-		width: '780',
-		margin: '0 auto'
-	},
-	paper: {
-		width: '100%',
-		overflowX: 'auto'
-	},
-	tableRow: {
-		fontSize: 11,
-		fontWeight: 600
-	},
-	tableRowFixed: {
-		width: '15%',
-		fontSize: 11,
-		fontWeight: 600
-	},
 	table: {
 		'& th': {
 			padding: '4px 0',
@@ -38,20 +20,13 @@ const useStyles = makeStyles(theme => ({
 
 function Quotation(props) {
 	const classes = useStyles(props);
-	// const dispatch = useDispatch();
 	const quote = useSelector(({ searchApp }) => searchApp.search.quote);
-
-	// useEffect(() => {
-	// 	dispatch(Actions.getQuote(props.appNo));
-	// }, [props.appNo]);
 
 	return (
 		<>
 			<Paper className="w-full rounded-8 shadow mb-16">
 				<div className="flex flex-col items-start p-12">
-					<h6 className="font-600 text-14 p-16" color="secondary">
-						인용도 분석
-					</h6>
+					<Typography className="p-16 text-14 font-bold">인용도 분석</Typography>
 					<h6 className={clsx(classes.primaryColor, 'font-600 text-14 px-16 py-8')}>주요 인용 정보</h6>
 					<div className="table-responsive px-16">
 						<table className={clsx(classes.table, 'w-full text-justify dense')}>
@@ -80,11 +55,10 @@ function Quotation(props) {
 			</Paper>
 			<Paper className="w-full rounded-8 shadow mb-16">
 				<div className="flex flex-col items-start p-12">
-					<h6 className="font-600 text-14 p-16" color="secondary">
+					<Typography className="p-16 text-14 font-bold">
 						인용/피인용 특허문헌 : 총 ({quote && quote.length !== 0 && quote.length}) 건
-					</h6>
-					{/* <h6 className={clsx(classes.primaryColor, 'font-600 text-14 px-16 py-8')}>주요 인용 정보</h6> */}
-					<div className="table-responsive px-16">
+					</Typography>
+					<div className="table-responsive h-136 px-16">
 						<table className={clsx(classes.table, 'w-full text-justify dense')}>
 							<thead>
 								<tr>

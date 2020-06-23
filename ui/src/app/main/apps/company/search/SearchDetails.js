@@ -32,7 +32,7 @@ function SearchDetails(props) {
 	// const search = useSelector(({ companyApp }) => companyApp.search.search);
 	const companyCode = useSelector(({ companyApp }) => companyApp.search.companyCode);
 
-	const { stockCode } = companyCode;
+	const { stockCode, corpCode } = companyCode;
 
 	// const companyId = String(props.match.params.companyId).replace(/-/gi, '');
 	const pageLayout = useRef(null);
@@ -43,8 +43,10 @@ function SearchDetails(props) {
 		if (stockCode) {
 			dispatch(Actions.getStock({ kiscode: stockCode }));
 		}
-		// eslint-disable-next-line
-	}, [dispatch, props.match.params]);
+		if (corpCode) {
+			dispatch(Actions.getCompanyInfo({ corp_code: corpCode }));
+		}
+	}, [dispatch, stockCode, corpCode]);
 
 	function onDownload() {
 		setTimeout(() => {

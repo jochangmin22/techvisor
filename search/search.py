@@ -187,7 +187,6 @@ def parse_search_legal(request):
 def parse_search_registerfee(request):
     """ searchDetails용 등록료 검색 """
     rgNo = request.GET.get('rgNo') if request.GET.get('rgNo') else ''
-    return HttpResponse(rgNo, content_type=u"text/plain; charset=utf-8")
     rgNo = rgNo.replace("-", "")
     redisKey = rgNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
@@ -340,24 +339,39 @@ def parse_search_similar(request):
     handleRedis(redisKey, 'similar')
     # Redis }
 
-    with connection.cursor() as cursor:
-        cursor.execute('select "명칭token" t, "요약token" a, "대표항token" c from 공개공보 where 출원번호 =' + appNo)
-        row = dictfetchall(cursor)
-    raw = ' '.join(filter(None, (row[0]['t'], row[0]['a'], row[0]['c'])))
-    raw = tokenizer(raw)
-    raw = tuple(raw)
+    # with connection.cursor() as cursor:
+    #     cursor.execute('select "명칭token" t, "요약token" a, "대표항token" c from 공개공보 where 출원번호 =' + appNo)
+    #     row = dictfetchall(cursor)
+    # raw = ' '.join(filter(None, (row[0]['t'], row[0]['a'], row[0]['c'])))
+    # raw = tokenizer(raw)
+    # raw = tuple(raw)
 
-    count = Counter(raw)
-    count = count.most_common(3)
-    new_raw = dict(count)
-    new_raw = list(new_raw.keys())
-    row = similarity(new_raw, modelType) 
+    # count = Counter(raw)
+    # count = count.most_common(3)
+    # new_raw = dict(count)
+    # new_raw = list(new_raw.keys())
+
+    # row = similarity(new_raw, modelType) 
         
+    # # Redis {
+    # handleRedis(redisKey, 'similar', row, mode="w")
+    # # Redis }
+
+    # return JsonResponse(row, safe=False)      
+
+    with connection.cursor() as cursor:
+        cursor.execute('select "ipc요약" i, "요약token" a from 공개공보 where 출원번호 =' + appNo)
+        row = dictfetchall(cursor)
+
+    row = similarity(row[0]['i'], row[0]['a'], modelType) 
+
     # Redis {
-    handleRedis(redisKey, 'similar', row, mode="w")
+    # handleRedis(redisKey, 'similar', row, mode="w")
     # Redis }
 
-    return JsonResponse(row, safe=False)    
+    # return JsonResponse(row, safe=False)    
+    return HttpResponse(row, content_type=u"application/json; charset=utf-8")
+
 
 
 def handleRedis(redisKey, keys, data="", mode="r"):
@@ -629,12 +643,18 @@ def parse_description(request, xmlStr=""):
         # TODO : convert tabular tag to table tag - sample 1019970061654
         return description_type(bs, attrName, my_name, my_tag)
     # TODO : 1019930701447 구분 태그없는 비정형 타입, 처리요망 (psdode)      
+    # TODO : 1019930700523 구분 태그없는 비정형 타입, 처리요망 (psdode)      
     # TODO : 1019900018250 구분 태그없는 비정형 타입, 처리요망 (sdode)      
     elif bs.find("psdode"):  # type psdode tag start
-        my_name = ["발명의 명칭","도면의 간단한 설명", "발명의 상세한 설명"]
-        # my_tag = ["drdes", "invdes", "purinv", "bkgr", "tech", "config", "effect"]
-        my_tag = ["drdes", "", "", "bkgr", "tech", "config", "effect"]
-        # 상위 제목 ; 내용 추출 안함 - invdes, purinv
+        if bs.find('pinvti'):
+            my_name = ["발명의 명칭","발명의 상세한 설명"]
+            # my_tag = ["pinvti", "pinvdes"]
+            my_tag = ["", "pinvdes"]
+        else:            
+            my_name = ["발명의 명칭","도면의 간단한 설명", "발명의 상세한 설명"]
+            # my_tag = ["drdes", "invdes", "purinv", "bkgr", "tech", "config", "effect"]
+            my_tag = ["drdes", "", "", "bkgr", "tech", "config", "effect"]
+            # 상위 제목 ; 내용 추출 안함 - invdes, purinv
 
         # p attribute 있는지 확인
         attrName = "n" if bs.find_all('p', {"n": True}) else ""
