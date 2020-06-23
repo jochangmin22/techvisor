@@ -4,6 +4,7 @@ export const GET_SEARCH = '[COMPANY APP] GET SEARCH';
 export const RESET_SEARCH = '[COMPANY APP] RESET SEARCH';
 export const GET_STOCK = '[COMPANY APP] GET STOCK';
 export const CLEAR_STOCK = '[COMPANY APP] CLEAR STOCK';
+export const GET_COMPANY_INFO = '[COMPANY APP] GET COMPANY INFO';
 export const SET_COMPANY_CODE = '[COMPANY APP] SET COMPANY CODE';
 
 export function getSearch(params) {
@@ -36,6 +37,19 @@ export function getStock(params) {
 			// dispatch(resetSearch());
 			dispatch({
 				type: GET_STOCK,
+				payload: response.data
+			});
+		});
+}
+
+export function getCompanyInfo(params) {
+	const request = axios.post(`${process.env.REACT_APP_API_URL}/api/company-app/company-info`, params);
+
+	return dispatch =>
+		request.then(response => {
+			// dispatch(resetSearch());
+			dispatch({
+				type: GET_COMPANY_INFO,
 				payload: response.data
 			});
 		});

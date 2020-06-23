@@ -42,7 +42,7 @@ from search.views import (
     get_matrix_dialog,
 )
 from company.views import (
-    get_companies, get_companies_query, get_companies_num, get_company, get_stock, get_crawl)
+    get_companies, get_companies_query, get_companies_num, get_company, get_stock, get_crawl, get_company_info)
 from users.views import (do_auth, do_auth_start, do_verify,
                          do_access_token, do_register, do_update)
 from callback.views import (redirect_google_login, google_callback)
@@ -93,6 +93,7 @@ urlpatterns = [
     re_path(r"^api/company-app/searchs/vec$", get_vec),
     re_path(r"^api/company-app/searchs/topic$", get_topic),
     re_path(r"^api/company-app/stock$", csrf_exempt(get_stock)),
+    re_path(r"^api/company-app/company-info$", csrf_exempt(get_company_info)),
     re_path(r"^api/company-app/crawl-stock$", csrf_exempt(get_crawl)),
     path("api/company-app/search", get_company),
     path("api/company-app/search/<str:companyId>/", get_company),

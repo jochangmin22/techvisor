@@ -3,7 +3,8 @@ import * as Actions from '../actions';
 const initialState = {
 	search: null,
 	stock: null,
-	companyCode: []
+	companyCode: [],
+	companyInfo: []
 };
 
 const searchReducer = function (state = initialState, action) {
@@ -31,6 +32,12 @@ const searchReducer = function (state = initialState, action) {
 		// 		stock: '',
 		// 	};
 		// }
+		case Actions.GET_COMPANY_INFO: {
+			return {
+				...state,
+				companyInfo: action.payload
+			};
+		}
 		case Actions.SET_COMPANY_CODE: {
 			return {
 				...state,

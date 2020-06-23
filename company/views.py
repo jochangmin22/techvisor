@@ -3,7 +3,7 @@
 
 from .companies import parse_companies, parse_companies_query, parse_companies_num
 from .company import parse_company
-from .finance import parse_stock, crawl_stock
+from .finance import parse_stock, crawl_stock, crawl_dart
 
 
 def get_companies(request):
@@ -28,6 +28,8 @@ def get_stock(request):
 def get_crawl(request):
     return crawl_stock(request)
 
+def get_company_info(request):
+    return crawl_dart(request)
 
 def get_topic(request):
     return kr_nlp(request, "topic")
