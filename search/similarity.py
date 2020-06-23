@@ -1,14 +1,18 @@
+from django.db import connection
 import pandas as pd
 import numpy as np
+import json
 import re
 import pickle
 from konlpy.tag import Mecab #, Kkma, Okt, Komoran
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import random
 
 from django.http import JsonResponse
 from django.http import HttpResponse
+from django.conf import settings
 
 # 형태소 분석기 선언
 mecab = Mecab()
@@ -34,24 +38,97 @@ def remove_punc(text):
     return re.sub("[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]", ' ', text)
 
 
+# def pos(text):
+#     return [token for token, tag in mecab.pos(text) if tag[:2] == 'NN' or tag[:2] == 'NP' or tag[:2] == 'SL']
+
 def pos(text):
-    return [token for token, tag in mecab.pos(text) if tag[:2] == 'NN' or tag[:2] == 'NP' or tag[:2] == 'SL']
+    STOPWORDS = getattr(settings, 'STOPWORDS')
+    return [token for token, tag in mecab.pos(text) if tag[:2] == 'NN' or tag[:2] == 'NP' or tag[:2] == 'SL' or tag[:2] == 'SH' and token not in STOPWORDS]
 
 
-def similarity(df_sim):
-    # for i in range(len(row)):
+# def similarity(raw, modelType):
 
-    #     row[i]['유사도'] = mtx_raw[i]['출원일자'][:-4]
-    # df_sim = pd.read_excel('./data/COMPA_바이러스_치료검색_4천여건.xlsx')
-    sents_sim = [remove_punc(remove_brackets(remove_tags(sent))) for sent in df_sim['초록'] if type(sent) == str] # 제거 수행
-    sents_sim = [sent for sent in sents_sim if '내용 없음' not in sent and '내용없음' not in sent] # 내용 없는 초록 제거
+#     wherePharse = ' WHERE (("전문소" @@ to_tsquery(\''
+#     # 바이러스 & 치료 & 단백질 & 감염 & 항원\')))'
+#     wherePharse += ' & '.join(str(v) for v in raw)
+#     wherePharse += '\')))'
+
+#     query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 ' + \
+#         wherePharse        
+    
+#     with connection.cursor() as cursor:
+#         cursor.execute(query)
+#         row = dictfetchall(cursor)
+
+#     for j in range(len(row)):
+#         newSents_sim = [pos(row[j]['요약token'])] 
+#         # documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(newSents_sim)]
+
+#         # sims = w2b_value(documents, newSents_sim)
+#         sims=0.838434
+#         row[j]['유사도'] = round(sims,3)
+   
+#     return row
+
+def similarity(ipc, abstract, modelType):
+
+    # query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE ipc요약 = \'' + ipc + '\' limit 100'
+
+    # psql pg_trgm similarity로 1차 유사도 측정 , 유사도 기본값 0.3
+    query = 'select set_limit(0.5);'
+    query += 'SELECT strict_word_similarity("요약token", $${}$$) AS similarity, 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE 요약token % $${}$$;'.format(abstract, abstract)  # ORDER BY similarity DESC
+
+
+    df_sim = pd.read_sql_query(query, connection)
+    sents_sim = [sent for sent in df_sim['요약token']]
+    # sents_sim = [remove_punc(remove_brackets(remove_tags(sent))) for sent in df_sim['요약token'] if type(sent) == str] # 제거 수행
+    # sents_sim = [sent for sent in sents_sim if '내용 없음' not in sent and '내용없음' not in sent] # 내용 없는 초록 제거
+    # 0: "본 발명 은 탈모 의 예방 또는 치료 용   또는 발모 또는 육모 촉진 용 약학 조성물 또는 화장료 조성물 에 관한 것 으로서   본 발명 에 따른 조성물 은 우수 한 탈모 의 예방 또는 치료 및 발모 또는 육모 촉진 효과 를 나타내 며   성별 및 연령 에 관계없이 안 전하 게 사용 될 수 있 다  "
+
     newSents_sim = [pos(s) for s in sents_sim]      # 문장에서 명사와 외국어만 추출하여 리스트로
-    newSentsRaw_sim = [s.split() for s in sents_sim]
+    #    0: ["발명", "항암", "바이러스", "간동맥", "투여", "이용", "간암", "치료", "방법", "것", "발명", "항암", "바이러스", "간동맥", "투여", "이용",…]
 
     documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(newSents_sim)]
-    # documentsRaw = [TaggedDocument(doc, [i]) for i, doc in enumerate(newSentsRaw_sim)]
+
+    if modelType == 'doc2vec':
+        sims = w2b_value(documents, newSents_sim, abstract, sents_sim)
+        # return w2b_value(documents, newSents_sim, abstract, sents_sim)
+    else:
+        return cosine_value(documents, newSents_sim)
+
+    # sims 대로 df 정렬
+    
+    df_sim['유사도'] = sims
+    df_sim.sort_values(by=['유사도'], axis=0, ascending=False)
+
+    
+    df_row = df_sim.to_json(orient="records")
+    return df_row
+
+    # for i, v in enumerate(sims):
+    #     df_row[i]['유사도'] = str(v) # round(int(v),3)
+
+    # return df_row
+    # return df_sim['요약token']
 
 
+
+    # old
+    # with connection.cursor() as cursor:
+    #     cursor.execute(query)
+    #     row = dictfetchall(cursor)
+
+    # for j in range(len(row)):
+    #     newSents_sim = [pos(row[j]['요약token'])] 
+    #     # documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(newSents_sim)]
+
+    #     # sims = w2b_value(documents, newSents_sim)
+    #     sims=0.838434 - (random.randint(1, 50) / 100)
+    #     row[j]['유사도'] = round(sims,3)
+   
+    return row
+
+def w2b_value(documents, newSents_sim, abstract, sents_sim):
     '''단순 doc2vec'''
     # 옵션 설정
     num_features = 300  # 문자 벡터 차원 수
@@ -66,33 +143,16 @@ def similarity(df_sim):
                     min_count=min_word_count,
                     window=context)
 
-    # modelDocRaw = Doc2Vec(documentsRaw,
-    #                     workers=num_workers,
-    #                     vector_size=num_features,
-    #                     min_count=min_word_count,
-    #                     window=context)
-
-
     # 가장 비슷한 문서 프린팅 (명사 모델)
-    i=100
-    new_vector = modelDoc.infer_vector(newSents_sim[i])
-    sims = modelDoc.docvecs.most_similar([new_vector])
+    # i=100
+    myLen = len(newSents_sim)
+    new_vector = modelDoc.infer_vector(list(abstract))
+    sims = modelDoc.docvecs.most_similar([new_vector], topn=myLen)
+    # sims = modelDoc.docvecs
+    # return [sents_sim[s] + str(w) for s, w in sims]
+    return [w for s, w in sims]
 
-    # print(sents_sim[i])
-    for s, w in sims:
-        print(sents_sim[s])
-
-
-    # # 가장 비슷한 문서 프린팅
-    # new_vectorRaw = modelDocRaw.infer_vector(newSentsRaw_sim[0])
-    # simsRaw = modelDocRaw.docvecs.most_similar([new_vectorRaw])
-    # return sents_sim[0]
-    # print(sents_sim[0])
-    # for s, w in simsRaw:
-    #     print(sents_sim[s])
-
-
-
+def cosine_value(documents, newSents_sim):
     '''cosine simility'''
 
     vectorizer = CountVectorizer(min_df=1, tokenizer=lam)
@@ -105,9 +165,6 @@ def similarity(df_sim):
     # similarity matrix
     cos_sims = (cosine_similarity(df2, df2))
 
-    def most_similar(cos_sims, idx, topn=10):
-        sort_index = np.argsort(cos_sims[idx])
-        return sort_index[-topn:][::-1]
 
     # 가장 비슷한 문서 프린팅
     i=100
@@ -115,9 +172,12 @@ def similarity(df_sim):
     for idx in most_similar(cos_sims, i, 20):
         print(sents_sim[idx])
 
+    return sents_sim[idx]
 
-    '''topic model'''
-    return
+
+# def most_similar(cos_sims, idx, topn=20):
+#     sort_index = np.argsort(cos_sims[idx])
+#     return sort_index[-topn:][::-1]
 
 def similarity_original(df_sim):
     # df_sim = pd.read_excel('./data/COMPA_바이러스_치료검색_4천여건.xlsx')
@@ -196,3 +256,8 @@ def similarity_original(df_sim):
 
     '''topic model'''
     return
+
+def dictfetchall(cursor):
+    "Return all rows from a cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]    

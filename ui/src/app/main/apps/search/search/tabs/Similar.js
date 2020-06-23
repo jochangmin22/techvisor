@@ -1,42 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Paper from '@material-ui/core/Paper';
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/styles';
+import FormControl from '@material-ui/core/FormControl';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
-
-const useStyles = makeStyles(theme => ({
-	root: {
-		flexGrow: 1,
-		width: '780',
-		margin: '0 auto'
-	},
-	paper: {
-		width: '100%',
-		overflowX: 'auto'
-	},
-	tableRow: {
-		fontSize: 11,
-		fontWeight: 600
-	},
-	tableRowFixed: {
-		width: '15%',
-		fontSize: 11,
-		fontWeight: 600
-	},
-	table: {
-		'& th': {
-			padding: '4px 0',
-			color: theme.palette.primary.main,
-			fontWeight: 500
-		}
-	},
-	primaryColor: {
-		color: theme.palette.primary.main
-	}
-}));
+import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import * as Actions from '../../store/actions';
+import { useDispatch, useSelector } from 'react-redux';
+import SimilarTable from './SimilarTable';
 
 function Similar(props) {
-	const classes = useStyles(props);
+	const { appNo } = props;
+	const dispatch = useDispatch();
+	const similar = useSelector(({ searchApp }) => searchApp.search.similar);
+	const [simData, setSimData] = useState(null);
+	const [modelType, setModelType] = useState('');
+	const [showLoading, setShowLoading] = useState(false);
+
+	function handleModelType(event) {
+		setModelType(event.target.value);
+	}
+
+	useEffect(() => {
+		if (similar === null) {
+			setSimData(null);
+		} else {
+			if (similar.entities !== undefined) {
+				setSimData(similar.entities);
+			}
+		}
+	}, [similar]);
+
+	useEffect(() => {
+		if (modelType) {
+			dispatch(Actions.updateSimilarModelType(modelType));
+			setShowLoading(true);
+			dispatch(Actions.resetSimilar());
+			dispatch(Actions.getSimilar({ appNo: appNo, modelType: modelType })).then(() => {
+				setShowLoading(false);
+			});
+		}
+	}, [modelType]);
+
+	if (!similar || similar.length === 0) {
+		return <SpinLoading />;
+	}
 
 	return (
 		<FuseAnimateGroup
@@ -45,38 +54,28 @@ function Similar(props) {
 				animation: 'transition.slideUpBigIn'
 			}}
 		>
-			<>
-				<Paper className="w-full rounded-8 shadow mb-16">
-					<div className="flex flex-col items-start p-12">
-						<h6 className="font-600 text-14 p-16" color="secondary">
-							유사특허 목록
-						</h6>
-						<h6 className={clsx(classes.primaryColor, 'font-600 text-14 px-16 py-8')}>
-							관련 분야 다인용 선행문헌 정보
-						</h6>
-						<div className="table-responsive px-16">
-							<table className={clsx(classes.table, 'w-full text-justify dense')}>
-								<thead>
-									<tr>
-										<th>구분</th>
-										<th>행정상태</th>
-										<th>명칭</th>
-										<th>출원번호</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td>1</td>
-										<td>2015.01.02</td>
-										<td>Ldc의 입력 전류 정보를 이용한 ldc 제어 장치</td>
-										<td>10-2017-101001011</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</Paper>
-			</>
+			<Paper className="w-full h-full rounded-8 shadow">
+				<div className="px-12 flex items-center">
+					<PopoverMsg
+						title="유사특허 목록"
+						msg="현재 특허의 내용을 자연어 처리를 통해 가장 유사한 특허목록을 표시합니다."
+					/>
+					<FormControl>
+						<Select className="w-160 px-12" value={modelType} onChange={handleModelType} displayEmpty>
+							{['doc2vec', 'cosine simility'].map(key => (
+								<MenuItem value={key} key={key}>
+									{key}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+				</div>
+				{simData && simData.length !== 0 && !showLoading ? (
+					<SimilarTable data={simData} />
+				) : (
+					<SpinLoading delay={20000} className="h-full" />
+				)}
+			</Paper>
 		</FuseAnimateGroup>
 	);
 }

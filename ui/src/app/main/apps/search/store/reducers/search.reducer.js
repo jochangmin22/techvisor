@@ -9,12 +9,16 @@ const initialState = {
 	rightfullOrder: null,
 	rightHolder: null,
 	applicant: null,
-	applicantTrend: null
+	applicantTrend: null,
+	similar: {
+		entities: [],
+		modelType: 'doc2vec' // ['doc2vec', 'cosine simility'],
+	}
 };
 
 // const initialState = null;
 
-const searchReducer = function(state = initialState, action) {
+const searchReducer = function (state = initialState, action) {
 	switch (action.type) {
 		case Actions.GET_SEARCH: {
 			return {
@@ -73,6 +77,32 @@ const searchReducer = function(state = initialState, action) {
 			return {
 				...state,
 				applicantTrend: action.payload
+			};
+		}
+		case Actions.GET_SIMILAR: {
+			return {
+				...state,
+				similar: {
+					...state.similar,
+					entities: action.payload
+				}
+			};
+		}
+		case Actions.RESET_SIMILAR: {
+			return {
+				...state,
+				similar: {
+					...initialState.similar
+				}
+			};
+		}
+		case Actions.UPDATE_SIMILAR_MODEL_TYPE: {
+			return {
+				...state,
+				similar: {
+					...state.similar,
+					modelType: action.payload
+				}
 			};
 		}
 		default:
