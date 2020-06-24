@@ -28,7 +28,7 @@ function HistoryTimeLine(props) {
 	const title = ['출원', '공개', '등록'];
 	return (
 		<Paper className="w-full rounded-8 shadow mb-16">
-			<div className="flex-col items-start p-12">
+			<div className="flex-col items-start p-12 py-0">
 				<Typography className="p-12 text-14 font-bold">출원 히스토리</Typography>
 				<FuseScrollbars className="w-full max-h-192 px-6 flex-no-overflow">
 					<Timeline align="alternate">
@@ -56,9 +56,7 @@ function HistoryTimeLine(props) {
 					</Timeline>
 				</FuseScrollbars>
 			</div>
-			<Typography className="text-14 px-16 py-8 font-bold" color="textSecondary">
-				도면
-			</Typography>
+			<Typography className="text-14 px-16 py-8 font-bold">도면</Typography>
 			<div className="px-16 py-8">
 				<Figures className="mx-16 my-8" appNo={props.search.출원번호} />
 			</div>

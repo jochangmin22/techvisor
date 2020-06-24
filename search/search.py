@@ -16,6 +16,8 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
+KIPRIS = settings.KIPRIS
+
 # from urllib.parse import unquote
 # TODO : pynori 성능 확인
 # from pynori.korean_analyzer import KoreanAnalyzer
@@ -195,7 +197,7 @@ def parse_search_registerfee(request):
     with connection.cursor() as cursor:
         whereRgNo = "" if rgNo == "" else 'WHERE "등록번호" = $$' + rgNo + "$$"
         cursor.execute(
-            "SELECT * FROM 등록료 "
+            "SELECT to_char(to_date(납부일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 납입일, concat(시작연차,'-',마지막년차) 납입년차, TO_CHAR(등록료,'FM999,999,999') as 납입금액 FROM 등록료 "
             + whereRgNo
             + " order by 시작연차 DESC"
         )
@@ -243,9 +245,9 @@ def parse_search_rightholder(request):
     with connection.cursor() as cursor:
         whereRgNo = "" if rgNo == "" else 'WHERE "등록번호" = $$' + rgNo + "$$"
         cursor.execute(
-            "SELECT * FROM 권리권자변동 "
+            "SELECT 순위번호, 권리자일련번호, concat(권리자명, ' (',주소,')') 권리자정보, to_char(to_date(등록일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 등록일자 FROM 권리권자변동 "
             + whereRgNo
-            + " order by 순위번호 ASC"
+            + " and 권리자구분 = $$권리자$$ order by 순위번호 ASC, 권리자일련번호 ASC"
         )
         row = dictfetchall(cursor)
 
@@ -261,9 +263,12 @@ def parse_search_applicant(request):
     cusNo = request.GET.get('cusNo') if request.GET.get('cusNo') else ''
     cusNo = cusNo.replace("-", "")
     operationKey = 'corpBsApplicantInfo'
+    # url = KIPRIS['rest_url'] + operationKey + '?ApplicantNumber=' + cusNo + '&accessKey=' + KIPRIS['service_key']
+    url = "http://plus.kipris.or.kr/openapi/rest/CorpBsApplicantService/corpBsApplicantInfo?ApplicantNumber=119980018012&accessKey=" + KIPRIS['service_key']
+    # return JsonResponse(url, safe=False)
 
-    source = requests.get(settings.KIPRIS_REST_URL + '/' + operationKey +
-                          '?ApplicantNumber=' + cusNo + '&accessKey=' + settings.KIPRIS_SERVICE_KEY).text
+    source = requests.get(url).text
+                         
     soup = BeautifulSoup(source, "lxml")
 
     # faliure msg ;
@@ -360,10 +365,12 @@ def parse_search_similar(request):
     # return JsonResponse(row, safe=False)      
 
     with connection.cursor() as cursor:
-        cursor.execute('select "ipc요약" i, "요약token" a from 공개공보 where 출원번호 =' + appNo)
+        cursor.execute('select "요약token" a from 공개공보 where 출원번호 =' + appNo)
         row = dictfetchall(cursor)
 
-    row = similarity(row[0]['i'], row[0]['a'], modelType) 
+    data = tokenizer(row[0]['a'])
+
+    row = similarity(data, modelType) 
 
     # Redis {
     # handleRedis(redisKey, 'similar', row, mode="w")
