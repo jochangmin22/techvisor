@@ -11,6 +11,7 @@ import * as Actions from '../../store/actions';
 import debounce from 'lodash/debounce';
 import clsx from 'clsx';
 import { chartTypes } from 'app/main/apps/lib/variables';
+import FuseAnimate from '@fuse/core/FuseAnimate';
 
 function calculateMA(dayCount, data) {
 	var result = [];
@@ -72,11 +73,13 @@ function StockChart(props) {
 	// }, [handleResize]);
 
 	useEffect(() => {
-		todayStock();
-		drawChart();
-		updateChart();
+		if (stockCode && stock) {
+			todayStock();
+			drawChart();
+			updateChart();
+		}
 		// eslint-disable-next-line
-	}, [stock]);
+	}, [stockCode, stock]);
 
 	const todayStock = () => {
 		if (stock && stock.data) {
@@ -387,6 +390,30 @@ function StockChart(props) {
 			xAxis
 		});
 	};
+
+	if (corpName === undefined) {
+		return '';
+	}
+
+	if (!stockCode || stockCode.length === 0) {
+		return (
+			<div className="flex flex-col flex-1 items-center justify-center p-16">
+				<div className="max-w-512 text-center">
+					<FuseAnimate delay={500}>
+						<Typography variant="h5" color="textSecondary" className="mb-16">
+							주식 차트가 없습니다.
+						</Typography>
+					</FuseAnimate>
+
+					<FuseAnimate delay={600}>
+						<Typography variant="subtitle1" color="textSecondary" className="mb-48">
+							주식 차트는 상장 기업에만 제공됩니다.
+						</Typography>
+					</FuseAnimate>
+				</div>
+			</div>
+		);
+	}
 
 	if (!stock || stock.length === 0) {
 		return <SpinLoading />;

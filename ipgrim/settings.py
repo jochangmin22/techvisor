@@ -39,10 +39,7 @@ def get_secret(setting, secrets=secrets):
 
 SECRET_KEY = get_secret("SECRET_KEY")
 
-KIPRIS_SERVICE_KEY = get_secret("KIPRIS_SERVICE_KEY")
-KIPRIS_REST_URL = get_secret("KIPRIS_REST_URL")
-
-
+KIPRIS = get_secret("KIPRIS")
 DART = get_secret("DART")
 NAVER = get_secret("NAVER")
 

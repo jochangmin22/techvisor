@@ -29,7 +29,7 @@ import clsx from 'clsx';
 // 	);
 // });
 
-const EnhancedTable = ({ columns, data, showHeader = true, onRowClick }) => {
+const EnhancedTable = ({ columns, data, showHeader = true, showFooter = true, onRowClick }) => {
 	const {
 		getTableProps,
 		headerGroups,
@@ -144,7 +144,7 @@ const EnhancedTable = ({ columns, data, showHeader = true, onRowClick }) => {
 				})}
 			</TableBody>
 
-			<TableFooter>
+			<TableFooter className={showFooter ? '' : 'hidden'}>
 				<TableRow>
 					<TablePagination
 						classes={{

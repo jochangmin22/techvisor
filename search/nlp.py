@@ -49,6 +49,8 @@ def kr_nlp(request, category=""):
             "keywordvec") if request.GET.get("keywordvec") else None
         if context['modelType'] and request.GET.get("modelType"):
             _modelType = request.GET.get("modelType") if context['modelType'] != request.GET.get("modelType") else None
+        else:
+            _modelType = None            
 
         if category == "topic" and context['topic']:
             return HttpResponse(context['topic'], content_type="text/plain; charset=utf-8")

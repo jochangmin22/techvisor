@@ -1,7 +1,7 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import SubjectContext from '../SubjectContext';
+// import SubjectContext from '../SubjectContext';
 import { useSelector } from 'react-redux';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
@@ -15,9 +15,9 @@ function NewsAnalysis(props) {
 	const classes = useStyles();
 	const newsSA = useSelector(({ searchApp }) => searchApp.searchs.newsSA);
 
-	const { setShowLoading } = useContext(SubjectContext);
+	// const { setShowLoading } = useContext(SubjectContext);
 
-	const data = useMemo(() => newsSA, [newsSA]);
+	const data = useMemo(() => (newsSA === 0 || newsSA < 15 || newsSA > 85 ? 50 : newsSA), [newsSA]);
 
 	if (!data || data.length === 0) {
 		return <SpinLoading />;
@@ -56,7 +56,7 @@ function NewsAnalysis(props) {
 							transition: 'all .2s ease-out'
 						}}
 					>
-						부정 {100 - data}%
+						부정 {(100 - data).toFixed(1)}%
 					</div>
 				</div>
 			</div>

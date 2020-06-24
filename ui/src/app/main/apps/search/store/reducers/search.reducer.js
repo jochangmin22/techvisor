@@ -22,14 +22,14 @@ const searchReducer = function (state = initialState, action) {
 	switch (action.type) {
 		case Actions.GET_SEARCH: {
 			return {
-				// ...state,
 				...state,
-				// data: action.payload
 				search: action.payload
 			};
 		}
 		case Actions.RESET_SEARCH: {
-			return null;
+			return {
+				...initialState
+			};
 		}
 		case Actions.GET_SEARCH_QUOTE: {
 			return {

@@ -43,23 +43,26 @@ function SearchDetails(props) {
 	const { searchText } = searchParams;
 	const terms = [].concat(...searchParams.terms.flatMap(x => x.toString().split(' ').join(',').split(',')));
 	const appNo = String(props.match.params.appNo).replace(/-/gi, '');
+	const rgNo = search && search.등록번호 !== null && search.등록번호 !== undefined ? search.등록번호 : null;
+	const cusNo = search && search.출원인코드1 !== null && search.출원인코드1 !== undefined ? search.출원인코드1 : null;
 	const pageLayout = useRef(null);
 	const [tabValue, setTabValue] = useState(0);
 
 	useEffect(() => {
 		const params = { appNo: appNo };
+		dispatch(Actions.resetSearch());
 		dispatch(Actions.getSearch(params));
 		dispatch(Actions.getQuote(params));
 		dispatch(Actions.getFamily(params));
 		dispatch(Actions.getLegal(params));
 		dispatch(Actions.getSimilar(params));
-		if (search && search.출원인코드1 !== null && search.출원인코드1 !== undefined) {
-			const params = { cusNo: search.출원인코드1 };
+		if (cusNo) {
+			const params = { cusNo: cusNo };
 			dispatch(Actions.getApplicant(params));
 			dispatch(Actions.getApplicantTrend(params));
 		}
-		if (search && search.등록번호 !== null && search.등록번호 !== undefined) {
-			const params = { rgNo: search.등록번호 };
+		if (rgNo) {
+			const params = { rgNo: rgNo };
 			dispatch(Actions.getRegisterFee(params));
 			dispatch(Actions.getRightHolder(params));
 		}
@@ -199,7 +202,7 @@ function SearchDetails(props) {
 						{tabValue === 2 && <Keyword search={search} />}
 						{tabValue === 3 && <Applicant search={search} />}
 						{tabValue === 4 && <Similar appNo={appNo} />}
-						{tabValue === 5 && <Grade search={search} />}
+						{tabValue === 5 && <Grade rgNo={rgNo} />}
 						{tabValue === 6 && <Associate search={search} />}
 					</div>
 				)

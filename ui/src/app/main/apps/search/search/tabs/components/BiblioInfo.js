@@ -23,7 +23,7 @@ function BiblioInfo(props) {
 			addSeparator(props.search.출원번호, '-', 2, 6) +
 			(props.search.출원일자 ? ' (' + addSeparator(props.search.출원일자, '.', 4, 6) + ')' : ''),
 		등록번호:
-			addSeparator(props.search.등록번호, '-', 2, 6) +
+			addSeparator(props.search.등록번호, '-', 2, 9) +
 			(props.search.등록일자 ? ' (' + addSeparator(props.search.등록일자, '.', 4, 6) + ')' : ''),
 		공개번호:
 			addSeparator(props.search.공개번호, '-', 2, 6) +

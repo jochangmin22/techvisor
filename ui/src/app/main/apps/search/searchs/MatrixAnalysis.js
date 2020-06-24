@@ -220,9 +220,9 @@ function MatrixAnalysis(props) {
 			</div>
 			<FuseScrollbars className="h-40 px-12">
 				<div className="flex w-full ">
-					{matrix.entities && (
+					{/* {matrix.entities && (
 						<Chip label={selectedCategory} key={selectedCategory} size="small" className="mx-4" />
-					)}
+					)} */}
 					{matrix.entities &&
 						Object.entries(matrix.entities).map(([key]) => (
 							// <Chip label={value} key={value} size="small" onClick={() => handleClick(value)} />
@@ -241,7 +241,6 @@ function MatrixAnalysis(props) {
 							columns={columns}
 							data={data}
 							size="small"
-							height=""
 							onRowClick={(ev, row) => {
 								if (row) {
 									// window.open(row.original.link, '_blank');

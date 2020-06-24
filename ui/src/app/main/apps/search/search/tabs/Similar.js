@@ -41,7 +41,7 @@ function Similar(props) {
 				setShowLoading(false);
 			});
 		}
-	}, [modelType]);
+	}, [dispatch, appNo, modelType]);
 
 	if (!similar || similar.length === 0) {
 		return <SpinLoading />;

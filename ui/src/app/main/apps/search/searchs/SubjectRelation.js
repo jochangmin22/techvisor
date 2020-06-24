@@ -49,7 +49,7 @@ function SubjectRelation(props) {
 				setShowLoading(false);
 			});
 		}
-	}, [modelType]);
+	}, [dispatch, searchParams, subjectRelation.topic, modelType]);
 
 	if (!subjectRelation || subjectRelation.length === 0) {
 		return <SpinLoading />;

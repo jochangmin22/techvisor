@@ -4,12 +4,12 @@ import MaUTable from '@material-ui/core/Table';
 import PropTypes from 'prop-types';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
+// import TableContainer from '@material-ui/core/TableContainer';
 // import TableFooter from '@material-ui/core/TableFooter';
-// import TableHead from '@material-ui/core/TableHead';
+import TableHead from '@material-ui/core/TableHead';
 // import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-// import TableSortLabel from '@material-ui/core/TableSortLabel';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
 import clsx from 'clsx';
 // import ContactsTablePaginationActions from './ContactsTablePaginationActions';
@@ -29,10 +29,10 @@ import clsx from 'clsx';
 // 	);
 // });
 
-const EnhancedTable = ({ columns, data, height, onRowClick }) => {
+const EnhancedTable = ({ columns, data, showHeader = true, height, onRowClick }) => {
 	const {
 		getTableProps,
-		// headerGroups,
+		headerGroups,
 		prepareRow,
 		page
 		// gotoPage,
@@ -91,56 +91,59 @@ const EnhancedTable = ({ columns, data, height, onRowClick }) => {
 
 	// Render the UI for your table
 	return (
-		<TableContainer className={height}>
-			<MaUTable {...getTableProps()} size="small">
-				{/* <TableHead>
-					{headerGroups.map(headerGroup => (
-						<TableRow {...headerGroup.getHeaderGroupProps()}>
-							{headerGroup.headers.map(column => (
-								<TableCell
-									className="whitespace-no-wrap p-12"
-									{...(!column.sortable
-										? column.getHeaderProps()
-										: column.getHeaderProps(column.getSortByToggleProps()))}
-								>
-									{column.render('Header')}
-									{column.sortable ? (
-										<TableSortLabel
-											active={column.isSorted}
-											// react-table has a unsorted state which is not treated here
-											direction={column.isSortedDesc ? 'desc' : 'asc'}
-										/>
-									) : null}
-								</TableCell>
-							))}
-						</TableRow>
-					))}
-				</TableHead> */}
-				<TableBody>
-					{page.map((row, i) => {
-						prepareRow(row);
-						return (
-							<TableRow
-								{...row.getRowProps()}
-								onClick={ev => onRowClick(ev, row)}
-								className="truncate cursor-pointer"
+		<MaUTable {...getTableProps()} size="small">
+			<TableHead className={showHeader ? '' : 'hidden'}>
+				{headerGroups.map(headerGroup => (
+					<TableRow {...headerGroup.getHeaderGroupProps()}>
+						{headerGroup.headers.map(column => (
+							<TableCell
+								className="whitespace-no-wrap px-12"
+								{...(!column.sortable
+									? column.getHeaderProps()
+									: column.getHeaderProps(column.getSortByToggleProps()))}
 							>
-								{row.cells.map(cell => {
-									return (
-										<TableCell
-											{...cell.getCellProps()}
-											className={clsx('px-12 py-6', cell.column.className)}
-										>
-											{cell.render('Cell')}
-										</TableCell>
-									);
-								})}
-							</TableRow>
-						);
-					})}
-				</TableBody>
+								{column.render('Header')}
+								{column.sortable ? (
+									<TableSortLabel
+										active={column.isSorted}
+										// react-table has a unsorted state which is not treated here
+										direction={column.isSortedDesc ? 'desc' : 'asc'}
+									/>
+								) : null}
+								<div
+									{...column.getResizerProps()}
+									className={`resize-x resizer ${column.isResizing ? 'isResizing' : ''}`}
+								/>
+							</TableCell>
+						))}
+					</TableRow>
+				))}
+			</TableHead>
+			<TableBody>
+				{page.map((row, i) => {
+					prepareRow(row);
+					return (
+						<TableRow
+							{...row.getRowProps()}
+							onClick={ev => onRowClick(ev, row)}
+							className="truncate cursor-pointer"
+						>
+							{row.cells.map(cell => {
+								return (
+									<TableCell
+										{...cell.getCellProps()}
+										className={clsx('px-12 py-6', cell.column.className)}
+									>
+										{cell.render('Cell')}
+									</TableCell>
+								);
+							})}
+						</TableRow>
+					);
+				})}
+			</TableBody>
 
-				{/* <TableFooter>
+			{/* <TableFooter>
 					<TableRow>
 						<TablePagination
 							classes={{
@@ -162,8 +165,7 @@ const EnhancedTable = ({ columns, data, height, onRowClick }) => {
 						/>
 					</TableRow>
 				</TableFooter> */}
-			</MaUTable>
-		</TableContainer>
+		</MaUTable>
 	);
 };
 

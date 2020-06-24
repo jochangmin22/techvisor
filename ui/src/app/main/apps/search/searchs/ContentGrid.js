@@ -75,19 +75,19 @@ const columnDefs = [
 	{
 		headerName: '발명자',
 		field: '발명자1',
-		width: 100
+		width: 120
 		// cellRenderer: 'highlightInventorCellRenderer'
 	},
 	{
 		headerName: 'IPC',
 		field: 'ipc요약',
 		width: 75
-	},
-	{
-		headerName: '유사도',
-		field: '유사도',
-		width: 90
 	}
+	// {
+	// 	headerName: '유사도',
+	// 	field: '유사도',
+	// 	width: 90
+	// }
 ];
 
 const localeText = {
@@ -162,12 +162,12 @@ const colsList = [
 		id: '8',
 		name: 'IPC',
 		field: 'ipc요약'
-	},
-	{
-		id: '9',
-		name: '유사도',
-		field: '유사도'
 	}
+	// {
+	// 	id: '9',
+	// 	name: '유사도',
+	// 	field: '유사도'
+	// }
 ];
 
 const TurnOffHightlight = true;
