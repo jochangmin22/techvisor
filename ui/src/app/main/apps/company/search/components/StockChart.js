@@ -29,14 +29,14 @@ function calculateMA(dayCount, data) {
 	return result;
 }
 
-// const defaultChipData = { corpName: '삼성전자', corpCode: '126380', stockCode: '005930' };
+// const defaultChipData = { stock_name: '삼성전자', corpCode: '126380', stock_code: '005930' };
 
 function StockChart(props) {
 	const dispatch = useDispatch();
 	const chartRef = useRef(null);
-	const { corpName, stockCode } = props.companyCode;
-	// const { corpName, corpCode, stockCode } = defaultChipData;
-	const stock = useSelector(({ companyApp }) => companyApp.search.stock);
+	const { stock_name, stock_code } = props.companyInfo;
+	// const { stock_name, corpCode, stock_code } = defaultChipData;
+	const entities = useSelector(({ companyApp }) => companyApp.search.stock.entities);
 	const [today, setToday] = useState(null);
 	const [series, setSeries] = useState(null);
 	const [xAxis, setXAxis] = useState(null);
@@ -51,6 +51,7 @@ function StockChart(props) {
 
 	function handleChangeRange(range) {
 		setCurrentRange(range);
+		dispatch(Actions.setChartType(range));
 	}
 
 	const handleResize = debounce(() => {
@@ -60,32 +61,25 @@ function StockChart(props) {
 	}, 100);
 
 	// useEffect(() => {
-	// 	if (!stock && stockCode) {
-	// 		dispatch(Actions.getStock({ kiscode: stockCode }));
-	// 	}
-	// 	// eslint-disable-next-line
-	// }, [props]);
-
-	// useEffect(() => {
 	// 	window.addEventListener('resize', handleResize);
 	// 	drawChart();
 	// 	// eslint-disable-next-line
 	// }, [handleResize]);
 
 	useEffect(() => {
-		if (stockCode && stock) {
+		if (stock_code && entities) {
 			todayStock();
 			drawChart();
 			updateChart();
 		}
 		// eslint-disable-next-line
-	}, [stockCode, stock]);
+	}, [stock_code, entities]);
 
 	const todayStock = () => {
-		if (stock && stock.data) {
-			const _len = stock.data.length;
-			const price = stock.data[_len - 1][1];
-			const increase = price - stock.data[_len - 2][1];
+		if (entities && entities.data) {
+			const _len = entities.data.length;
+			const price = entities.data[_len - 1][1];
+			const increase = price - entities.data[_len - 2][1];
 			const percent = ((increase / price) * 100).toFixed(2) + '%';
 			const color = increase > 0 ? 'text-red' : increase < 0 ? 'text-blue' : 'text-black';
 			const icon = increase > 0 ? 'trending_up' : increase < 0 ? 'trending_down' : 'trending_flat';
@@ -101,11 +95,11 @@ function StockChart(props) {
 	};
 
 	const drawChart = () => {
-		if (!stock) return;
+		if (!entities.data) return;
 
-		const dataMA5 = calculateMA(5, stock.data);
-		const dataMA15 = calculateMA(15, stock.data);
-		const dataMA50 = calculateMA(50, stock.data);
+		const dataMA5 = calculateMA(5, entities.data);
+		const dataMA15 = calculateMA(15, entities.data);
+		const dataMA50 = calculateMA(50, entities.data);
 
 		const myChart = echarts.init(chartRef.current);
 		echart = myChart;
@@ -114,7 +108,7 @@ function StockChart(props) {
 			animation: false,
 			title: {
 				left: 'left',
-				text: corpName
+				text: stock_name
 			},
 			legend: {
 				top: 30,
@@ -175,7 +169,7 @@ function StockChart(props) {
 			xAxis: [
 				{
 					type: 'category',
-					data: stock.dates,
+					data: entities.dates,
 					scale: true,
 					boundaryGap: false,
 					axisLabel: {
@@ -197,7 +191,7 @@ function StockChart(props) {
 				{
 					type: 'category',
 					gridIndex: 1,
-					data: stock.dates,
+					data: entities.dates,
 					scale: true,
 					boundaryGap: false,
 					axisLine: {
@@ -260,7 +254,7 @@ function StockChart(props) {
 				{
 					type: 'candlestick',
 					name: '가치변화',
-					data: stock.data,
+					data: entities.data,
 					itemStyle: {
 						normal: {
 							opacity: 1.0,
@@ -338,7 +332,7 @@ function StockChart(props) {
 					type: 'bar',
 					xAxisIndex: 1,
 					yAxisIndex: 1,
-					data: stock.volumes
+					data: entities.volumes
 				}
 			]
 		};
@@ -354,17 +348,17 @@ function StockChart(props) {
 			return;
 		}
 
-		const { data, currencyKey } = this.props;
+		// const { data, currencyKey } = this.props;
 
-		if (!stock) return;
+		if (!entities.data) return;
 		console.log('updating..');
 
 		const { series, xAxis } = this;
 
-		const dates = stock.data.map(info => new Date(info.get('date') * 1000)).toJS();
+		const dates = entities.data.map(info => new Date(info.get('date') * 1000)).toJS();
 		dates.push(new Date(dates[dates.length - 1].getTime() + dates[1].getTime() - dates[0].getTime()));
 
-		const candleStickData = stock.data
+		const candleStickData = entities.data
 			.map(info => {
 				return [
 					info.get('open').toFixed(digits),
@@ -375,14 +369,14 @@ function StockChart(props) {
 			})
 			.toJS();
 
-		const volumes = stock.data.map(info => info.get('volume').toFixed(2)).toJS();
+		const volumes = entities.data.map(info => info.get('volume').toFixed(2)).toJS();
 
 		xAxis[0].data = dates;
 		xAxis[1].data = dates;
 		series[0].data = candleStickData;
-		series[1].data = calculateMA(stock.data, 5);
-		series[2].data = calculateMA(stock.data, 15);
-		series[3].data = calculateMA(stock.data, 50);
+		series[1].data = calculateMA(entities.data, 5);
+		series[2].data = calculateMA(entities.data, 15);
+		series[3].data = calculateMA(entities.data, 50);
 		series[4].data = volumes;
 
 		echart.setOption({
@@ -391,11 +385,11 @@ function StockChart(props) {
 		});
 	};
 
-	if (corpName === undefined) {
+	if (stock_name === undefined) {
 		return '';
 	}
 
-	if (!stockCode || stockCode.length === 0) {
+	if (!stock_code || stock_code.length === 0) {
 		return (
 			<div className="flex flex-col flex-1 items-center justify-center p-16">
 				<div className="max-w-512 text-center">
@@ -415,7 +409,7 @@ function StockChart(props) {
 		);
 	}
 
-	if (!stock || stock.length === 0) {
+	if (stock_code && (!entities || entities.length === 0)) {
 		return <SpinLoading />;
 	}
 

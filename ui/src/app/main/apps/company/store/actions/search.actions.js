@@ -4,8 +4,8 @@ export const GET_SEARCH = '[COMPANY APP] GET SEARCH';
 export const RESET_SEARCH = '[COMPANY APP] RESET SEARCH';
 export const GET_STOCK = '[COMPANY APP] GET STOCK';
 export const CLEAR_STOCK = '[COMPANY APP] CLEAR STOCK';
+export const SET_CHART_TYPE = '[COMPANY APP] SET CHART TYPE';
 export const GET_COMPANY_INFO = '[COMPANY APP] GET COMPANY INFO';
-export const SET_COMPANY_CODE = '[COMPANY APP] SET COMPANY CODE';
 
 export function getSearch(params) {
 	const request = axios({
@@ -42,28 +42,30 @@ export function getStock(params) {
 		});
 }
 
-export function getCompanyInfo(params) {
-	const request = axios.post(`${process.env.REACT_APP_API_URL}/api/company-app/company-info`, params);
-
-	return dispatch =>
-		request.then(response => {
-			// dispatch(resetSearch());
-			dispatch({
-				type: GET_COMPANY_INFO,
-				payload: response.data
-			});
-		});
-}
-
 export function clearStock() {
 	return {
 		type: CLEAR_STOCK
 	};
 }
 
-export function setCompanyCode(data) {
+export function setChartType(payload) {
 	return {
-		type: SET_COMPANY_CODE,
-		payload: data
+		type: SET_CHART_TYPE,
+		payload: payload
 	};
+}
+
+export function getCompanyInfo(params) {
+	const request = axios.post(`${process.env.REACT_APP_API_URL}/api/company-app/company-info`, params);
+
+	return dispatch =>
+		request.then(response => {
+			dispatch({
+				type: GET_COMPANY_INFO,
+				payload: response.data
+			});
+			if (response.data.stock_code) {
+				dispatch(getStock({ kiscode: response.data.stock_code }));
+			}
+		});
 }

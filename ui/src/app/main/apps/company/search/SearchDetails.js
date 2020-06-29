@@ -29,24 +29,23 @@ function SearchDetails(props) {
 	const classes = useStyles();
 	const theme = useTheme();
 	const dispatch = useDispatch();
-	// const search = useSelector(({ companyApp }) => companyApp.search.search);
-	const companyCode = useSelector(({ companyApp }) => companyApp.search.companyCode);
+	const companyInfo = useSelector(({ companyApp }) => companyApp.search.companyInfo);
+	// const stockCode = useSelector(({ companyApp }) => companyApp.search.companyInfo.stockCode);
+	const companyId = String(props.match.params.companyId);
 
-	const { stockCode, corpCode } = companyCode;
-
-	// const companyId = String(props.match.params.companyId).replace(/-/gi, '');
 	const pageLayout = useRef(null);
 
 	const [search] = useState(searchData);
 
 	useEffect(() => {
-		if (stockCode) {
-			dispatch(Actions.getStock({ kiscode: stockCode }));
+		// if (stockCode) {
+		// 	dispatch(Actions.getStock({ kiscode: companyInfo.stockCode }));
+		// }
+		// dispatch(Actions.resetSearch());
+		if (companyId) {
+			dispatch(Actions.getCompanyInfo({ corp_code: companyId }));
 		}
-		if (corpCode) {
-			dispatch(Actions.getCompanyInfo({ corp_code: corpCode }));
-		}
-	}, [dispatch, stockCode, corpCode]);
+	}, [dispatch, companyId]);
 
 	function onDownload() {
 		setTimeout(() => {
@@ -110,8 +109,8 @@ function SearchDetails(props) {
 			content={
 				search && (
 					<div className="p-12 max-w-3xl">
-						<CompanyInfo search={search} companyCode={companyCode} />
-						<StockChart search={search} companyCode={companyCode} />
+						<CompanyInfo companyInfo={companyInfo} />
+						<StockChart companyInfo={companyInfo} />
 					</div>
 				)
 			}

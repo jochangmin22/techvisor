@@ -1,10 +1,9 @@
-/* eslint-disable */
-import React, { useContext } from 'react';
+import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import Chip from '@material-ui/core/Chip';
 import { withRouter } from 'react-router-dom';
-import SubjectContext from '../SubjectContext';
+// import SubjectContext from '../SubjectContext';
 import { useSelector, useDispatch } from 'react-redux';
 import * as Actions from '../../../company/store/actions';
 
@@ -14,18 +13,18 @@ import * as Actions from '../../../company/store/actions';
 // 	stockCode: [null, '187790', null, null, '100', null, null, null]
 // };
 
-const defaultChipData = { corpName: '삼성전자', corpCode: '126380', stockCode: '005930' };
+// const defaultChipData = { corpName: '삼성전자', corpCode: '126380', stockCode: '005930' };
 
 function NewsArticles(props) {
 	const dispatch = useDispatch();
 	const relatedCompany = useSelector(({ searchApp }) => searchApp.searchs.relatedCompany);
-	const { corpName, corpCode, stockCode } = relatedCompany;
+	const { corpName, corpCode } = relatedCompany;
 	// const { setShowLoading } = useContext(SubjectContext);
 
-	function handleClick(e, companyInfo) {
+	function handleClick(e, corp_code) {
 		e.preventDefault();
-		dispatch(Actions.setCompanyCode(companyInfo));
-		props.history.push(`/apps/company/${companyInfo.corpCode}`);
+		dispatch(Actions.resetSearch());
+		props.history.push(`/apps/company/${corp_code}`);
 	}
 
 	const data = React.useMemo(() => corpName, [corpName]);
@@ -43,15 +42,14 @@ function NewsArticles(props) {
 				/> */}
 				{data &&
 					data.length > 0 &&
-					data.map((row, i) => {
-						const companyInfo = { corpName: corpName[i], corpCode: corpCode[i], stockCode: stockCode[i] };
+					data.map((_, i) => {
 						return (
 							<Chip
-								key={companyInfo.corpCode}
-								label={companyInfo.corpName}
+								key={corpName[i]}
+								label={corpName[i]}
 								size="small"
 								className="m-4"
-								onClick={e => handleClick(e, companyInfo)}
+								onClick={e => handleClick(e, corpCode[i])}
 							/>
 						);
 					})}

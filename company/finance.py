@@ -13,6 +13,10 @@ from dateutil.relativedelta import relativedelta
 import requests
 import pandas as pd
 
+# naver crawl
+from selenium.webdriver import Chrome
+from selenium import webdriver
+import re    
 
 
 # caching with redis
@@ -30,23 +34,41 @@ def parse_stock(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         kiscode = data["kiscode"]
-        # return JsonResponse(crawl_stock(request), safe=False)
+        chartType = 'year'
+
         # update 
         try:
             crawl_stock(request)
         except:
             return HttpResponse() # 500
-            
-        try:
-            today = datetime.today().strftime('%Y-%m-%d')
-            ten_yrs_before = datetime.now() + relativedelta(years=-10)
-            ten_yrs_before = ten_yrs_before.strftime('%Y-%m-%d')
 
-            isExist = stock_quotes.objects.filter(kiscode=kiscode, price_date__range=[ten_yrs_before,today]).exists()
+        try:
+            
+            today = datetime.today().strftime('%Y-%m-%d')
+
+            
+            # 하루 일주일 한달 일년 전체
+            kwargs = {}
+            if chartType == 'day':
+                kwargs['days'] = -1
+            elif chartType == 'week':
+                kwargs['weeks'] = -1
+            elif chartType == 'month':
+                kwargs['months'] = -1
+            elif chartType == "year":
+                kwargs['years'] = -1
+            elif chartType == "all":
+                kwargs['years'] = -10
+
+            temp = datetime.now() + relativedelta(**kwargs)
+            range_from = temp.strftime('%Y-%m-%d')
+
+    
+            isExist = stock_quotes.objects.filter(kiscode=kiscode, price_date__range=[range_from,today]).exists()
             if not isExist:
                 return HttpResponse('Not Found', status=404)
 
-            stockQuotes = stock_quotes.objects.filter(kiscode=kiscode, price_date__range=[ten_yrs_before,today])
+            stockQuotes = stock_quotes.objects.filter(kiscode=kiscode, price_date__range=[range_from,today])
 
             myDate = list(stockQuotes.values_list('price_date', flat=True).order_by('price_date'))
             myStock = list(stockQuotes.values_list('stock', flat=True).order_by('price_date'))
@@ -294,6 +316,10 @@ def crawl_dart(request):
         # acc_mt(pin):"12"
                 
         res = {}
+        res['corp_code'] = data['corp_code']
+        res['corp_name'] = data['corp_name']
+        res['stock_code'] = data['stock_code']
+        res['stock_name'] = data['stock_name']
         res['ceo_nm'] = data['ceo_nm']
         res['est_dt'] = data['est_dt']
         res['jurir_no'] = data['jurir_no']
@@ -302,37 +328,179 @@ def crawl_dart(request):
         res['phn_no'] = data['phn_no']
         res['adres'] = data['adres']
 
-
         # 시황 정보 · 재무 정보
         if data['stock_code']:
-            url = NAVER['finance_url'] + data['stock_code']
-
-            request = requests.get(url)
-            df = pd.read_html(request.text)[3]
-
-            df.set_index(('주요재무정보', '주요재무정보', '주요재무정보'), inplace=True)
-            df.index.rename('주요재무정보', inplace=True)
-            df.columns = df.columns.droplevel(2)
-            df = df.iloc[:,2:-7] # 최근 연간 실적 - 작년
-            dft = df.T
-            data2 = dft.to_dict('records')
-            res['PER'] = data2[0]['PER(배)']
-            res['PBR'] = data2[0]['PBR(배)']
-            res['ROE'] = data2[0]['ROE(지배주주)']
-            res['매출액'] = data2[0]['매출액']
-            res['영업이익'] = data2[0]['영업이익']
-            res['당기순이익'] = data2[0]['당기순이익']
-            res['당기순이익'] = data2[0]['당기순이익']
+            more_info = crawl_naver(data['stock_code'])
         else:
-            res['PER'] = ''
-            res['PBR'] = ''
-            res['ROE'] = ''
-            res['매출액'] = ''
-            res['영업이익'] = ''
-            res['당기순이익'] = ''
-            res['당기순이익'] = ''                 
+            more_info = {'매출액': '',
+                '영업이익': '',
+                '당기순이익': '',
+                '자산총계': '',
+                '부채총계': '',
+                '자본총계': '',
+                'EPS(원)': '',
+                'PER(배)': '',
+                'ROE(%)': '',
+                'BPS(원)': '',
+                'PBR(배)': '',
+                '종업원수': '',
+                '상장일': '',
+                }            
+        res.update(more_info)
+
+        # # 시황 정보 · 재무 정보
+        # if data['stock_code']:
+        #     url = NAVER['finance_url'] + data['stock_code']
+
+        #     request = requests.get(url)
+        #     df = pd.read_html(request.text)[3]
+
+        #     df.set_index(('주요재무정보', '주요재무정보', '주요재무정보'), inplace=True)
+        #     df.index.rename('주요재무정보', inplace=True)
+        #     df.columns = df.columns.droplevel(2)
+        #     df = df.iloc[:,2:-7] # 최근 연간 실적 - 작년
+        #     dft = df.T
+        #     data2 = dft.to_dict('records')
+        #     res['PER'] = data2[0]['PER(배)']
+        #     res['PBR'] = data2[0]['PBR(배)']
+        #     res['ROE'] = data2[0]['ROE(지배주주)']
+        #     res['매출액'] = data2[0]['매출액']
+        #     res['영업이익'] = data2[0]['영업이익']
+        #     res['당기순이익'] = data2[0]['당기순이익']
+        #     res['당기순이익'] = data2[0]['당기순이익']
+        # else:
+        #     res['PER'] = ''
+        #     res['PBR'] = ''
+        #     res['ROE'] = ''
+        #     res['매출액'] = ''
+        #     res['영업이익'] = ''
+        #     res['당기순이익'] = ''
+        #     res['당기순이익'] = ''                 
 
     return JsonResponse(res, safe=False)
+
+def crawl_naver(stock_code):
+    options = webdriver.ChromeOptions()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.headless = True
+    browser = webdriver.Chrome(executable_path="/usr/bin/chromedriver",options=options)
+
+    url = NAVER['finance_sum_url'] + stock_code
+    browser.get(url)
+
+    browser.switch_to_frame(browser.find_element_by_id('coinfo_cp'))
+    
+    #재무제표 "연간" 클릭하기
+    browser.find_elements_by_xpath('//*[@class="schtab"][1]/tbody/tr/td[3]')[0].click()
+
+    html0 = browser.page_source
+    html1 = BeautifulSoup(html0,'html.parser')
+    
+    # #기업명 뽑기
+    # title0 = html1.find('head').find('title').text
+    # print(title0.split('-')[-1])
+
+    #거래량, 시가총액, 수익률 구하기
+    html11 = html1.find('table',{'class':'gHead','summary':'기업의 기본적인 시세정보(주가/전일대비/수익률,52주최고/최저,액면가,거래량/거래대금,시가총액,유동주식비율,외국인지분율,52주베타,수익률(1M/3M/6M/1Y))를 제공합니다.'})
+   
+    tbody0 = html11.find('tbody')
+    tr0 = tbody0.find_all('tr')
+    
+    tr1 = tr0[3]
+    td1 = tr1.find('td').text
+
+    tr2 = tr0[4]
+    td2 = tr2.find('td').text
+
+    tr3 = tr0[0]
+    td3 = tr3.find('td')
+    l = td3.find_all('span')
+
+    stock_return = l[1].text if l else ''
+
+    tr4 = tr0[8]
+    td4 = tr4.find('td')
+    sp0 = td4.find_all('span')
+    stock_return += '/' + sp0[0].text
+    stock_return += '/' + sp0[3].text
+
+    stock_volume = td1.strip().split(' /',1)[0]
+    market_cap = td2.strip()
+    
+    html22 = html1.find('table',{'class':'gHead01 all-width','summary':'주요재무정보를 제공합니다.'})
+    
+    #date scrapy
+    thead0 = html22.find('thead')
+    tr0 = thead0.find_all('tr')[1]
+    th0 = tr0.find_all('th')
+    
+    date = []
+    for i in range(len(th0)):
+        date.append(''.join(re.findall('[0-9/]',th0[i].text)))
+    
+    #columns scrapy
+    tbody0 = html22.find('tbody')
+    tr0 = tbody0.find_all('tr')
+    
+    col = []
+    for i in range(len(tr0)):
+
+        if '\xa0' in tr0[i].find('th').text:
+            tx = re.sub('\xa0','',tr0[i].find('th').text)
+        else:
+            tx = tr0[i].find('th').text
+
+        col.append(tx)
+    
+    #main text scrapy
+    td = []
+    for i in range(len(tr0)):
+        td0 = tr0[i].find_all('td')
+        td1 = []
+        for j in range(len(td0)):
+            if td0[j].text == '':
+                td1.append('0')
+            else:
+                td1.append(td0[j].text)
+
+        td.append(td1)
+
+    td2 = list(map(list,zip(*td)))
+
+    df = pd.DataFrame(td2,columns = col,index = date)     
+    my_df = df.loc[['2019/12'],['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','EPS(원)','PER(배)','ROE(%)','BPS(원)','PBR(배)']]
+    res = my_df.to_dict('records')
+
+    #종업원수·상장일 구하기
+    #"기업개요" 클릭하기
+    browser.find_elements_by_xpath('//*[@class="wrapper-menu"][1]/dl/dt[2]')[0].click()
+
+    html0 = browser.page_source
+    html1 = BeautifulSoup(html0,'html.parser')   
+    
+    html22 = html1.find('table',{'class':'gHead all-width','summary':'기업에 대한 기본적인 정보(본사주소,홈페이지,대표전화,설립일,대표이사,계열,종업원수,주식수(보통주/우선주),감사인,명의개서,주거래은행)을 제공합니다.'})
+   
+    tbody0 = html22.find('tbody')
+    tr0 = tbody0.find_all('tr')[3]
+    td0 = tr0.find_all('td')[1].text
+
+    employee = td0.strip().split(' (')[0]
+
+    tr0 = tbody0.find_all('tr')[2]
+    td0 = tr0.find_all('td')[0].text
+    text0 = td0.strip().rsplit('상장일: ',1)[-1]
+    listing_date = text0.replace('/','.').replace(')','')
+
+    res[0].update({
+        '종업원수' : employee,
+        '상장일' : listing_date,
+        '거래량' : stock_volume,
+        '시가총액' : market_cap,
+        '수익률' : stock_return,
+    })
+
+    return res[0]    
 
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
