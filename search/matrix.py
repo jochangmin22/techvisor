@@ -84,10 +84,11 @@ def parse_matrix(request):
             mlist.append(temp2)
             all_list[topic[j]] = mlist
             mlist = []
-        res =  {"entities": all_list, "max": matrixMax}
-        return JsonResponse(res, safe=False)
     except:
         pass
+
+    res =  {"entities": all_list, "max": matrixMax}
+    return JsonResponse(res, safe=False)
 
 def parse_matrix_dialog(request):
     """ 
