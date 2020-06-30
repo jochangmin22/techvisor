@@ -29,6 +29,25 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 DART = settings.DART
 NAVER = settings.NAVER
 
+empty_info = {
+    '매출액': '',
+    '영업이익': '',
+    '당기순이익': '',
+    '자산총계': '',
+    '부채총계': '',
+    '자본총계': '',
+    'EPS(원)': '',
+    'PER(배)': '',
+    'ROE(%)': '',
+    'BPS(원)': '',
+    'PBR(배)': '',
+    '종업원수': '',
+    '상장일': '',
+    '거래량': '',
+    '시가총액':'',
+    '수익률':'',
+}
+
 def parse_stock(request):
     """ stock quote """
     if request.method == 'POST':
@@ -332,21 +351,11 @@ def crawl_dart(request):
         if data['stock_code']:
             more_info = crawl_naver(data['stock_code'])
         else:
-            more_info = {'매출액': '',
-                '영업이익': '',
-                '당기순이익': '',
-                '자산총계': '',
-                '부채총계': '',
-                '자본총계': '',
-                'EPS(원)': '',
-                'PER(배)': '',
-                'ROE(%)': '',
-                'BPS(원)': '',
-                'PBR(배)': '',
-                '종업원수': '',
-                '상장일': '',
-                }            
+            more_info = empty_info
+            
         res.update(more_info)
+
+    return JsonResponse(res, safe=False)        
 
         # # 시황 정보 · 재무 정보
         # if data['stock_code']:
@@ -377,7 +386,7 @@ def crawl_dart(request):
         #     res['당기순이익'] = ''
         #     res['당기순이익'] = ''                 
 
-    return JsonResponse(res, safe=False)
+
 
 def crawl_naver(stock_code):
     options = webdriver.ChromeOptions()
@@ -390,6 +399,14 @@ def crawl_naver(stock_code):
     browser.get(url)
 
     browser.switch_to_frame(browser.find_element_by_id('coinfo_cp'))
+
+    # page not found handle
+    # 상장된지 얼마안되서 자료없는 경우인듯
+    try:
+        browser.find_element_by_id('pageError') # <div id="pageError">
+        return empty_info
+    except:
+        pass    
     
     #재무제표 "연간" 클릭하기
     browser.find_elements_by_xpath('//*[@class="schtab"][1]/tbody/tr/td[3]')[0].click()
@@ -469,7 +486,11 @@ def crawl_naver(stock_code):
     td2 = list(map(list,zip(*td)))
 
     df = pd.DataFrame(td2,columns = col,index = date)     
-    my_df = df.loc[['2019/12'],['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','EPS(원)','PER(배)','ROE(%)','BPS(원)','PBR(배)']]
+    try:
+        my_df = df.loc[['2019/12'],['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','EPS(원)','PER(배)','ROE(%)','BPS(원)','PBR(배)']]
+    except:
+        return empty_info
+                
     res = my_df.to_dict('records')
 
     #종업원수·상장일 구하기
