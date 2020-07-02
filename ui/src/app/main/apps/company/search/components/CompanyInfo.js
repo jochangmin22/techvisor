@@ -9,6 +9,7 @@ import { addSeparator } from 'app/main/apps/lib/utils';
 const useStyles = makeStyles(theme => ({
 	paper: {
 		padding: theme.spacing(1),
+		marginBottom: theme.spacing(1.5),
 		textAlign: 'center',
 		backgroundColor: theme.palette.secondary.light,
 		color: theme.palette.secondary.contrastText
@@ -23,10 +24,12 @@ function CompanyInfo(props) {
 		대표이사: item.ceo_nm,
 		설립일: item.est_dt ? addSeparator(item.est_dt, '.', 4, 6) : '',
 		상장일: item.상장일 ? item.상장일 : '',
-		법인등록번호: item.jurir_no,
+		// 법인등록번호: item.jurir_no,
 		// 기업형태: '주식회사 | 대기업', // item.korreprnm,
 		// 산업분류: item.sanupcode,
-		업종코드: item.induty_code,
+		// 업종코드: item.induty_code,
+		업종: item.업종,
+		주요제품: item.주요제품,
 		홈페이지: item.hm_url,
 		전화번호: item.phn_no,
 		'지번 주소': item.adres
@@ -82,10 +85,14 @@ function CompanyInfo(props) {
 						{Object.entries(corpInfo).map(([key, value]) => (
 							<Grid container key={key} spacing={3}>
 								<Grid item xs={4}>
-									{key}
+									<Typography variant="body2" color="textSecondary" className="pl-16">
+										{key}
+									</Typography>
 								</Grid>
 								<Grid item xs={8}>
-									{value}
+									<Typography variant="body2" gutterBottom>
+										{value}
+									</Typography>
 								</Grid>
 							</Grid>
 						))}
@@ -97,10 +104,14 @@ function CompanyInfo(props) {
 						{Object.entries(stockInfo).map(([key, value]) => (
 							<Grid container key={key} spacing={3}>
 								<Grid item xs={6}>
-									{key}
+									<Typography variant="body2" color="textSecondary" className="pl-16">
+										{key}
+									</Typography>
 								</Grid>
 								<Grid item xs={6} className="text-right">
-									{value}
+									<Typography variant="body2" gutterBottom>
+										{value}
+									</Typography>
 								</Grid>
 							</Grid>
 						))}
@@ -112,10 +123,14 @@ function CompanyInfo(props) {
 						{Object.entries(financeInfo).map(([key, value]) => (
 							<Grid container key={key} spacing={3}>
 								<Grid item xs={4}>
-									{key}
+									<Typography variant="body2" color="textSecondary" className="pl-16">
+										{key}
+									</Typography>
 								</Grid>
 								<Grid item xs={8} className="text-right">
-									{value}
+									<Typography variant="body2" gutterBottom>
+										{value}
+									</Typography>
 								</Grid>
 							</Grid>
 						))}

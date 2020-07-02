@@ -20,7 +20,7 @@ class listed_corp(models.Model):
     업종 = models.CharField(max_length=150)
     주요제품 = models.CharField(max_length=255)
     상장일 = models.DateField()
-    결산일 = models.CharField(max_length=10)
+    결산월 = models.CharField(max_length=10)
     대표자명 = models.CharField(max_length=100)
     홈페이지 = models.CharField(max_length=100)
     지역 = models.CharField(max_length=50)
