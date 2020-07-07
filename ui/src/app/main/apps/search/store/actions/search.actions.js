@@ -4,6 +4,8 @@ export const GET_SEARCH = '[SEARCH APP] GET SEARCH';
 export const RESET_SEARCH = '[SEARCH APP] RESET SEARCH';
 export const GET_SEARCH_QUOTE = '[SEARCH APP] GET SEARCH QUOTE';
 export const GET_SEARCH_FAMILY = '[SEARCH APP] GET SEARCH FAMILY';
+export const GET_SEARCH_IPC_CPC = '[SEARCH APP] GET SEARCH IPC CPC';
+export const GET_SEARCH_RND = '[SEARCH APP] GET SEARCH RND';
 export const GET_SEARCH_LEGAL = '[SEARCH APP] GET SEARCH LEGAL';
 export const GET_SEARCH_REGISTER_FEE = '[SEARCH APP] GET SEARCH REGISTER FEE';
 export const GET_SEARCH_RIGHTFULL_ORDER = '[SEARCH APP] GET SEARCH RIGHTFULL ORDER';
@@ -55,6 +57,27 @@ export function getFamily(params) {
 				type: GET_SEARCH_FAMILY,
 				payload: response.data
 			});
+		});
+}
+
+export function getIpcCpc(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/ipc-cpc`, { params });
+
+	return dispatch =>
+		request.then(response => {
+			dispatch({
+				type: GET_SEARCH_IPC_CPC,
+				payload: response.data
+			});
+		});
+}
+
+export function getRnd(params) {
+	const request = axios.get(`${process.env.REACT_APP_API_URL}/api/search-app/search/rnd`, { params });
+
+	return dispatch =>
+		request.then(response => {
+			dispatch({ type: GET_SEARCH_RND, payload: response.data });
 		});
 }
 

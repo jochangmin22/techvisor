@@ -29,7 +29,7 @@ import clsx from 'clsx';
 // 	);
 // });
 
-const EnhancedTable = ({ columns, data, showHeader = true, showFooter = true, onRowClick }) => {
+const EnhancedTable = ({ columns, data, showHeader = true, showFooter = true, rowClick = true, onRowClick }) => {
 	const {
 		getTableProps,
 		headerGroups,
@@ -92,7 +92,7 @@ const EnhancedTable = ({ columns, data, showHeader = true, showFooter = true, on
 
 	// Render the UI for your table
 	return (
-		<MaUTable {...getTableProps()} size="small">
+		<MaUTable {...getTableProps()} size="small" className={showFooter ? '' : 'mb-20'}>
 			<TableHead className={showHeader ? '' : 'hidden'}>
 				{headerGroups.map(headerGroup => (
 					<TableRow {...headerGroup.getHeaderGroupProps()}>
@@ -127,7 +127,7 @@ const EnhancedTable = ({ columns, data, showHeader = true, showFooter = true, on
 						<TableRow
 							{...row.getRowProps()}
 							onClick={ev => onRowClick(ev, row)}
-							className="truncate cursor-pointer"
+							className={clsx('truncate', rowClick ? 'cursor-pointer' : 'cursor-default')}
 						>
 							{row.cells.map(cell => {
 								return (

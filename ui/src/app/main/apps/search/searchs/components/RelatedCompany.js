@@ -45,7 +45,7 @@ function NewsArticles(props) {
 					data.map((_, i) => {
 						return (
 							<Chip
-								key={corpName[i]}
+								key={corpCode[i]}
 								label={corpName[i]}
 								size="small"
 								className="m-4"

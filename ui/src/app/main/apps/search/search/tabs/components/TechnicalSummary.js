@@ -36,7 +36,7 @@ function TechnicalSummary(props) {
 				</Typography>
 				<h6 className={clsx(classes.primaryColor, 'font-600 text-14 px-16 py-8')}>대표청구항</h6>
 				<Typography className="mb-16 px-16" component="p">
-					청구항{mainClaim + 1}항(대표청구항)
+					청구항{mainClaim + 1}항 <span className="text-gray-500">(대표청구항)</span>
 				</Typography>
 				<Typography className="mb-16 px-16" component="p">
 					{props.search.청구항들[mainClaim] && (

@@ -1,102 +1,180 @@
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/styles';
-import { Typography } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
+import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
+import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import QuoteTree from './components/QuoteTree';
+import QuoteMap from './components/QuoteMap';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import { withRouter } from 'react-router-dom';
 
-const useStyles = makeStyles(theme => ({
-	table: {
-		'& th': {
-			padding: '4px 0',
-			color: theme.palette.primary.main,
-			fontWeight: 500
-		}
+// const columnsA = [
+// 	{
+// 		Header: '인용',
+// 		columns: [
+// 			{
+// 				Header: '소계',
+// 				accessor: '인용소계'
+// 			},
+// 			{
+// 				Header: '논문·외국특허',
+// 				accessor: '인용논문외국특허'
+// 			},
+// 			{
+// 				Header: '국내특허',
+// 				accessor: '인용국내특허'
+// 			}
+// 		]
+// 	},
+// 	{
+// 		Header: '피인용',
+// 		columns: [
+// 			{
+// 				Header: '소계',
+// 				accessor: '피인용소계'
+// 			},
+// 			{
+// 				Header: '논문·외국특허',
+// 				accessor: '피인용논문외국특허'
+// 			},
+// 			{
+// 				Header: '국내특허',
+// 				accessor: '피인용국내특허'
+// 			}
+// 		]
+// 	}
+// ];
+
+const columnsB = [
+	{
+		Header: '식별코드',
+		accessor: '식별코드',
+		className: 'text-12 text-gray-500 text-left',
+		sortable: true,
+		width: 80
 	},
-	primaryColor: {
-		color: theme.palette.primary.main
+	{
+		Header: '국가',
+		accessor: '국가',
+		className: 'text-12 text-gray-500 text-left',
+		sortable: true,
+		width: 80
+	},
+	{
+		Header: 'IPC코드',
+		accessor: 'IPC코드',
+		className: 'text-12 text-left',
+		sortable: true,
+		width: 80
+	},
+	{
+		Header: '출원번호',
+		accessor: '출원번호',
+		className: 'text-12 text-left',
+		sortable: true,
+		width: 150
+	},
+	{
+		Header: '인용참증단계',
+		accessor: '인용참증단계',
+		className: 'text-12 text-left',
+		sortable: true,
+		width: 150
+	},
+	{
+		Header: '발명의 명칭',
+		accessor: '명칭',
+		className: 'text-12 text-left',
+		sortable: true,
+		width: 300
+	},
+	{
+		Header: '일자',
+		accessor: '일자',
+		className: 'text-12 text-left',
+		sortable: true,
+		width: 120
+	},
+	{
+		Header: '출원인',
+		accessor: '출원인',
+		className: 'text-12 text-left',
+		sortable: true,
+		width: 150
 	}
-}));
+];
 
 function Quotation(props) {
-	const classes = useStyles(props);
-	const quote = useSelector(({ searchApp }) => searchApp.search.quote);
+	const entities = useSelector(({ searchApp }) => searchApp.search.quote);
+
+	// const dataA = useMemo(
+	// 	() =>
+	// 		entities
+	// 			? [
+	// 					{
+	// 						인용소계: entities.filter(item => item.식별코드 === 'B1').length,
+	// 						인용논문외국특허: entities.filter(item => item.식별코드 === 'B1' && item.국가 !== 'KR')
+	// 							.length,
+	// 						인용국내특허: entities.filter(item => item.식별코드 === 'B1' && item.국가 === 'KR').length,
+	// 						피인용소계: entities.filter(item => item.식별코드 === 'F1').length,
+	// 						피인용논문외국특허: entities.filter(item => item.식별코드 === 'F1' && item.국가 !== 'KR')
+	// 							.length,
+	// 						피인용국내특허: entities.filter(item => item.식별코드 === 'F1' && item.국가 === 'KR').length
+	// 					}
+	// 			  ]
+	// 			: [],
+	// 	[entities]
+	// );
+	const dataB = useMemo(() => (entities ? entities : []), [entities]);
+	useEffect(() => {}, [dataB]);
+
+	const showFooter = entities && entities.length > 10 ? true : false;
+
+	if (!entities) {
+		return <SpinLoading className="h-200" />;
+	}
 
 	return (
 		<>
+			{/* <Paper className="w-full rounded-8 shadow mb-16">
+				<Typography className="p-12 text-14 font-bold">인용도 분석</Typography>
+				<EnhancedTable
+					columns={columnsA}
+					data={dataA}
+					size="small"
+					rowClick={false}
+					showFooter={false}
+					onRowClick={(ev, row) => {
+						if (row) {
+							// props.history.push(`/apps/search/${row.original.출원번호}`);
+						}
+					}}
+				/>
+			</Paper> */}
 			<Paper className="w-full rounded-8 shadow mb-16">
-				<div className="flex flex-col items-start p-12">
-					<Typography className="p-16 text-14 font-bold">인용도 분석</Typography>
-					<h6 className={clsx(classes.primaryColor, 'font-600 text-14 px-16 py-8')}>주요 인용 정보</h6>
-					<div className="table-responsive px-16">
-						<table className={clsx(classes.table, 'w-full text-justify dense')}>
-							<tbody>
-								<tr>
-									<th className="w-208">총 피인용 수</th>
-									<td>{quote && quote.length !== 0 && quote.length}</td>
-								</tr>
-								<tr>
-									<th className="w-208">피인용 문헌의 논문, 외국특허 수</th>
-									<td>
-										{quote &&
-											quote.length !== 0 &&
-											quote.length -
-												quote.filter(item => item.표준인용문헌국가코드 !== 'KR').length}
-									</td>
-								</tr>
-								<tr>
-									<th className="w-208">국태 피인용 특허 수</th>
-									<td>{quote && quote.length !== 0 && quote.length}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
+				<Typography className="p-16 pl-28 text-14 font-bold">인용·피인용 특허문헌</Typography>
+				<div className="px-16">
+					<QuoteTree data={dataB} />
 				</div>
+				<FuseScrollbars className="max-h-512 px-6">
+					<EnhancedTable
+						columns={columnsB}
+						data={dataB}
+						size="small"
+						showFooter={showFooter}
+						// rowClick={false}
+						onRowClick={(ev, row) => {
+							if (row) {
+								props.history.push(`/apps/search/${row.original.출원번호}`);
+							}
+						}}
+					/>
+				</FuseScrollbars>
 			</Paper>
-			<Paper className="w-full rounded-8 shadow mb-16">
-				<div className="flex flex-col items-start p-12">
-					<Typography className="p-16 text-14 font-bold">
-						인용/피인용 특허문헌 : 총 ({quote && quote.length !== 0 && quote.length}) 건
-					</Typography>
-					<div className="table-responsive h-136 px-16">
-						<table className={clsx(classes.table, 'w-full text-justify dense')}>
-							<thead>
-								<tr>
-									<th>식별코드</th>
-									<th>국가</th>
-									<th>문헌번호</th>
-									<th>인용참증단계</th>
-									<th>발명의 명칭</th>
-									<th>출원인</th>
-								</tr>
-							</thead>
-							<tbody>
-								{quote &&
-									quote.map((quote, index) => (
-										<tr key={index}>
-											<td className="w-84">{quote.표준인용식별코드}</td>
-											<td className="w-72">{quote.표준인용문헌국가코드}</td>
-											<td className="max-w-256">{quote.원인용문헌번호}</td>
-											<td className="w-136">{quote.인용문헌구분코드명}</td>
-											<td className="max-w-320">{quote.명칭}</td>
-											<td className="w-136">{quote.출원인}</td>
-										</tr>
-									))}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</Paper>
-			<Paper className="w-full rounded-8 shadow mb-16">
-				<div className="flex flex-col items-start p-12">
-					<h6 className="font-600 text-14 p-16" color="secondary">
-						인용도 맵
-					</h6>
-					{/* <h6 className={clsx(classes.primaryColor, 'font-600 text-14 px-16 py-8')}>주요 인용 정보</h6>											 */}
-				</div>
-			</Paper>
+			<QuoteMap appNo={props.appNo} applicant={props.applicant} data={dataB} />
 		</>
 	);
 }
 
-export default Quotation;
+export default withRouter(Quotation);

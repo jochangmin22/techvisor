@@ -56,6 +56,8 @@ function SearchDetails(props) {
 		dispatch(Actions.getFamily(params));
 		dispatch(Actions.getLegal(params));
 		dispatch(Actions.getSimilar(params));
+		dispatch(Actions.getIpcCpc(params));
+		dispatch(Actions.getRnd(params));
 		if (cusNo) {
 			const params = { cusNo: cusNo };
 			dispatch(Actions.getApplicant(params));
@@ -102,7 +104,7 @@ function SearchDetails(props) {
 				rightSidebar: 'w-640'
 			}}
 			header={
-				<div className="flex flex-1 max-w-3xl items-center justify-between">
+				<div className="flex flex-1 max-w-5xl items-center justify-between">
 					<div className="flex flex-col items-start">
 						<FuseAnimate animation="transition.slideRightIn" delay={300}>
 							<Typography
@@ -180,21 +182,21 @@ function SearchDetails(props) {
 						// className="w-full border-b-1 px-24"
 						classes={{ root: 'max-w-3xl h-48' }}
 					>
-						<Tab label="특허정보" className="h-48 min-w-128" />
-						{/* <Tab label="청구항" className="h-48 min-w-128" />
-						<Tab label="발명의 설명" className="h-48 min-w-128" /> */}
-						<Tab label="명세서" className="h-48 min-w-128" />
-						<Tab label="키워드" className="h-48 min-w-128" />
-						<Tab label="출원인" className="h-48 min-w-128" />
-						<Tab label="유사특허" className="h-48 min-w-128" />
-						<Tab label="기술등급" className="h-48 min-w-128" />
-						<Tab label="연관기업" className="h-48 min-w-128" />
+						<Tab label="특허정보" className="h-48 min-w-160" />
+						{/* <Tab label="청구항" className="h-48 min-w-160" />
+						<Tab label="발명의 설명" className="h-48 min-w-160" /> */}
+						<Tab label="명세서" className="h-48 min-w-160" />
+						<Tab label="키워드" className="h-48 min-w-160" />
+						<Tab label="출원인" className="h-48 min-w-160" />
+						<Tab label="유사특허" className="h-48 min-w-160" />
+						<Tab label="기술등급" className="h-48 min-w-160" />
+						<Tab label="연관기업" className="h-48 min-w-160" />
 					</Tabs>
 				)
 			}
 			content={
 				search && (
-					<div className="p-12 max-w-3xl">
+					<div className="p-12 max-w-5xl">
 						{tabValue === 0 && <PatInfo search={search} searchText={searchText} terms={terms} />}
 						{/* {tabValue === 1 && <Claims search={search} searchText={searchText} terms={terms} />} */}
 						{/* {tabValue === 2 && <Description search={search} searchText={searchText} terms={terms} />} */}

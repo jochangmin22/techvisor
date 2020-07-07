@@ -1,112 +1,109 @@
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/styles';
-// import * as Actions from '../../store/actions';
+import Typography from '@material-ui/core/Typography';
+import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
+import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import FamilyTree from './components/FamilyTree';
+// import FamilyMap from './components/FamilyMap';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import FuseAnimate from '@fuse/core/FuseAnimate';
 
-const useStyles = makeStyles(theme => ({
-	table: {
-		'& th': {
-			padding: '4px 0',
-			color: theme.palette.primary.main,
-			fontWeight: 500
-		}
+const columns = [
+	{
+		Header: '국가코드',
+		accessor: '국가코드',
+		className: 'text-12 text-gray-500 text-left',
+		sortable: true,
+		width: 80
 	},
-	primaryColor: {
-		color: theme.palette.primary.main
+	{
+		Header: '문헌번호',
+		accessor: '문헌번호',
+		className: 'text-12 text-gray-500 text-left',
+		sortable: true,
+		width: 120
+	},
+	{
+		Header: '일자',
+		accessor: '일자',
+		className: 'text-12 text-left',
+		sortable: true,
+		width: 120
+	},
+	{
+		Header: '발명의 명칭',
+		accessor: '명칭',
+		className: 'text-12 text-left',
+		sortable: true,
+		width: 500
+	},
+	{
+		Header: 'IPC',
+		accessor: 'IPC',
+		className: 'text-12 text-left',
+		sortable: true,
+		width: 120
+	},
+	{
+		Header: 'CPC',
+		accessor: 'CPC',
+		className: 'text-12 text-left',
+		sortable: true,
+		width: 120
 	}
-}));
-
-function addSeparator(val, separator, p1, p2) {
-	return val ? val.slice(0, p1) + separator + val.slice(p1, p2) + separator + val.slice(p2) : '';
-}
+];
 
 function Family(props) {
-	const classes = useStyles(props);
-	// const dispatch = useDispatch();
-	const family = useSelector(({ searchApp }) => searchApp.search.family);
+	const entities = useSelector(({ searchApp }) => searchApp.search.family);
 
-	// useEffect(() => {
-	// 	dispatch(Actions.getFamily(props.search.출원번호));
-	// }, [props.search.출원번호]);
+	const data = useMemo(() => (entities ? entities : []), [entities]);
+	useEffect(() => {}, [data]);
+
+	const showFooter = entities && entities.length > 10 ? true : false;
+
+	if (!entities) {
+		return <SpinLoading className="h-200" />;
+	}
+
+	if (entities && entities.length === 0) {
+		return (
+			<Paper className="w-full rounded-8 shadow mb-16">
+				<Typography className="p-16 pl-28 text-14 font-bold">패밀리 특허문헌</Typography>
+				<div className="max-w-512 text-center">
+					<FuseAnimate delay={600}>
+						<Typography variant="subtitle1" color="textSecondary" className="mb-48">
+							조회된 패밀리 특허가 없습니다.
+						</Typography>
+					</FuseAnimate>
+				</div>
+			</Paper>
+		);
+	}
 
 	return (
 		<>
 			<Paper className="w-full rounded-8 shadow mb-16">
-				<div className="flex flex-col items-start p-12">
-					<h6 className="font-600 text-14 p-16" color="secondary">
-						패밀리 특허 분석
-					</h6>
-					<h6 className={clsx(classes.primaryColor, 'font-600 text-14 px-16 py-8')}>패밀리 정보</h6>
-					<div className="table-responsive px-16">
-						<table className={clsx(classes.table, 'w-full text-justify dense')}>
-							<tbody>
-								<tr>
-									<th className="w-208">패밀리 수</th>
-									<td>{family && family.length !== 0 ? family.length : 1}</td>
-								</tr>
-								<tr>
-									<th className="w-208">해외 패밀리 국가 수</th>
-									<td>{family && family.length !== 0 ? family.length : 0}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
+				<Typography className="p-16 pl-28 text-14 font-bold">패밀리 특허문헌</Typography>
+				<div className="px-16">
+					<FamilyTree />
 				</div>
+				<FuseScrollbars className="max-h-512 px-6">
+					<EnhancedTable
+						columns={columns}
+						data={data}
+						size="small"
+						showFooter={showFooter}
+						// rowClick={false}
+						onRowClick={(ev, row) => {
+							if (row) {
+								// props.history.push(`/apps/search/${row.original.출원번호}`);
+							}
+						}}
+					/>
+				</FuseScrollbars>
 			</Paper>
-			<Paper className="w-full rounded-8 shadow mb-16">
-				<div className="flex flex-col items-start p-12">
-					<h6 className="font-600 text-14 p-16" color="secondary">
-						패밀리 특허문헌
-					</h6>
-					<div className="table-responsive px-16">
-						<table className={clsx(classes.table, 'w-full text-justify dense')}>
-							<thead>
-								<tr>
-									<th className="w-1/12">국가코드</th>
-									<th className="w-1/6">문헌번호</th>
-									<th className="w-1/12">일자</th>
-									<th>발명의명칭</th>
-									<th className="w-1/12">IPC</th>
-									<th className="w-1/12">CPC</th>
-								</tr>
-							</thead>
-							<tbody>
-								{family && family.length !== 0 ? (
-									family.map((item, index) => (
-										<tr key={index}>
-											<td>{item.패밀리국가코드}</td>
-											<td>{item.패밀리번호}</td>
-											<td>{item.등록번호}</td>
-											<td>{item.명칭}</td>
-											<td>{item.ipc코드}</td>
-											<td>{item.ipc코드}</td>
-										</tr>
-									))
-								) : (
-									<tr>
-										<td>KR</td>
-										<td>{addSeparator(props.search.출원번호, '-', 2, 6)}</td>
-										<td>{addSeparator(props.search.등록일자, '.', 4, 6)}</td>
-										<td>{props.search.명칭}</td>
-										<td>{props.search.ipc코드}</td>
-										<td>{props.search.ipc코드}</td>
-									</tr>
-								)}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</Paper>
-			<Paper className="w-full rounded-8 shadow mb-16">
-				<div className="flex flex-col items-start p-12">
-					<h6 className="font-600 text-14 p-16" color="secondary">
-						패밀리 맵
-					</h6>
-					{/* <h6 className={clsx(classes.primaryColor, 'font-600 text-14 px-16 py-8')}>주요 인용 정보</h6>											 */}
-				</div>
-			</Paper>
+			{/* <FamilyMap appNo={props.appNo} data={data} /> */}
 		</>
 	);
 }

@@ -9,7 +9,6 @@ import TimelineOppositeContent from '@material-ui/lab/TimelineOppositeContent';
 import TimelineDot from '@material-ui/lab/TimelineDot';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import { addSeparator } from 'app/main/apps/lib/utils';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import Figures from './Figures';
 
@@ -24,21 +23,27 @@ const useStyles = makeStyles(theme => ({
 
 function HistoryTimeLine(props) {
 	const classes = useStyles();
-	const { 출원일자, 공개일자, 등록일자 } = props.search;
-	const title = ['출원', '공개', '등록'];
+	const { 출원일자, 공개일자, 등록일자, 소멸일자, 존속기간만료일자 } = props.search;
+	const historyInfo = {
+		출원: 출원일자,
+		공개: 공개일자,
+		등록: 등록일자,
+		소멸: 소멸일자,
+		존속기간만료: 소멸일자 === null ? 존속기간만료일자 : ''
+	};
 	return (
 		<Paper className="w-full rounded-8 shadow mb-16">
 			<div className="flex-col items-start p-12 py-0">
 				<Typography className="p-12 text-14 font-bold">출원 히스토리</Typography>
 				<FuseScrollbars className="w-full max-h-192 px-6 flex-no-overflow">
 					<Timeline align="alternate">
-						{[출원일자, 공개일자, 등록일자]
-							.filter(v => v)
-							.map((key, n) => (
-								<TimelineItem key={n}>
+						{Object.entries(historyInfo)
+							.filter(([_, value]) => value && value.length > 0)
+							.map(([key, value]) => (
+								<TimelineItem key={key}>
 									<TimelineOppositeContent>
 										<Typography variant="body2" color="textSecondary">
-											{addSeparator(key, '.', 4, 6)}
+											{value}
 										</Typography>
 									</TimelineOppositeContent>
 									<TimelineSeparator>
@@ -47,8 +52,7 @@ function HistoryTimeLine(props) {
 									</TimelineSeparator>
 									<TimelineContent>
 										<Paper elevation={3} className={classes.paper}>
-											{/* <Typography variant="h6" component="h1">Eat</Typography> */}
-											<Typography>{title[n]}</Typography>
+											<Typography>{key}</Typography>
 										</Paper>
 									</TimelineContent>
 								</TimelineItem>
@@ -58,7 +62,7 @@ function HistoryTimeLine(props) {
 			</div>
 			<Typography className="text-14 px-16 py-8 font-bold">도면</Typography>
 			<div className="px-16 py-8">
-				<Figures className="mx-16 my-8" appNo={props.search.출원번호} />
+				<Figures className="mx-16 my-8" appNo={props.search.출원번호원본} />
 			</div>
 		</Paper>
 	);

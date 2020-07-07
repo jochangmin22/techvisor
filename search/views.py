@@ -2,7 +2,20 @@
 # from django.http import HttpResponse
 
 from .searchs import parse_searchs, parse_query, parse_searchs_num
-from .search import parse_search, parse_search_quote, parse_search_family, parse_search_legal, parse_search_registerfee, parse_search_rightfullorder, parse_search_rightholder, parse_search_applicant, parse_search_applicant_trend, parse_search_similar
+from .search import (
+    parse_search,
+    parse_search_quote,
+    parse_search_family,
+    parse_search_ipc_cpc,
+    parse_search_rnd,
+    parse_search_legal,
+    parse_search_registerfee,
+    parse_search_rightfullorder,
+    parse_search_rightholder,
+    parse_search_applicant,
+    parse_search_applicant_trend,
+    parse_search_similar
+)
 # from .test import parse_test
 from .nlp import kr_nlp
 from .news import parse_news, parse_news_nlp, parse_related_company, parse_news_sa
@@ -39,6 +52,11 @@ def get_search_quote(request):
 def get_search_family(request):
     return parse_search_family(request)
 
+def get_search_ipc_cpc(request):
+    return parse_search_ipc_cpc(request)
+
+def get_search_rnd(request):
+    return parse_search_rnd(request)
 
 def get_search_legal(request):
     return parse_search_legal(request)

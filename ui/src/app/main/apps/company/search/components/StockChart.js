@@ -38,10 +38,10 @@ function StockChart(props) {
 	// const { stock_name, corpCode, stock_code } = defaultChipData;
 	const entities = useSelector(({ companyApp }) => companyApp.search.stock.entities);
 	const [today, setToday] = useState(null);
-	const [series, setSeries] = useState(null);
-	const [xAxis, setXAxis] = useState(null);
-	let echart = null;
-	const digits = 2;
+	// const [series, setSeries] = useState(null);
+	// const [xAxis, setXAxis] = useState(null);
+	const [echart, setEchart] = useState(null);
+	// const digits = 2;
 
 	const [currentRange, setCurrentRange] = useState({
 		name: 'day',
@@ -54,23 +54,11 @@ function StockChart(props) {
 		dispatch(Actions.setChartType(range));
 	}
 
-	const handleResize = debounce(() => {
-		if (echart) {
-			echart.resize();
-		}
-	}, 100);
-
-	// useEffect(() => {
-	// 	window.addEventListener('resize', handleResize);
-	// 	drawChart();
-	// 	// eslint-disable-next-line
-	// }, [handleResize]);
-
 	useEffect(() => {
 		if (stock_code && entities) {
 			todayStock();
 			drawChart();
-			updateChart();
+			// updateChart();
 		}
 		// eslint-disable-next-line
 	}, [stock_code, entities]);
@@ -94,15 +82,62 @@ function StockChart(props) {
 		return;
 	};
 
+	// const updateChart = () => {
+	// 	if (!echart || !series) {
+	// 		return;
+	// 	}
+
+	// 	// const { data, currencyKey } = this.props;
+
+	// 	if (!entities.data) return;
+	// 	console.log('updating..');
+
+	// 	const { series, xAxis } = this;
+
+	// 	const dates = entities.data.map(info => new Date(info.get('date') * 1000)).toJS();
+	// 	dates.push(new Date(dates[dates.length - 1].getTime() + dates[1].getTime() - dates[0].getTime()));
+
+	// 	const candleStickData = entities.data
+	// 		.map(info => {
+	// 			return [
+	// 				info.get('open').toFixed(digits),
+	// 				info.get('close').toFixed(digits),
+	// 				info.get('low').toFixed(digits),
+	// 				info.get('high').toFixed(digits)
+	// 			];
+	// 		})
+	// 		.toJS();
+
+	// 	const volumes = entities.data.map(info => info.get('volume').toFixed(2)).toJS();
+
+	// 	xAxis[0].data = dates;
+	// 	xAxis[1].data = dates;
+	// 	series[0].data = candleStickData;
+	// 	series[1].data = calculateMA(entities.data, 5);
+	// 	series[2].data = calculateMA(entities.data, 15);
+	// 	series[3].data = calculateMA(entities.data, 50);
+	// 	series[4].data = volumes;
+
+	// 	echart.setOption({
+	// 		series,
+	// 		xAxis
+	// 	});
+	// };
+
 	const drawChart = () => {
 		if (!entities.data) return;
+
+		if (echart) {
+			echart.dispose();
+			setEchart(null);
+		}
 
 		const dataMA5 = calculateMA(5, entities.data);
 		const dataMA15 = calculateMA(15, entities.data);
 		const dataMA50 = calculateMA(50, entities.data);
 
 		const myChart = echarts.init(chartRef.current);
-		echart = myChart;
+		setEchart(myChart);
 
 		const option = {
 			animation: false,
@@ -337,53 +372,30 @@ function StockChart(props) {
 			]
 		};
 
-		setSeries(option.series);
-		setXAxis(option.xAxis);
+		// setSeries(option.series);
+		// setXAxis(option.xAxis);
 
 		myChart.setOption(option);
 	};
 
-	const updateChart = () => {
-		if (!echart || !series) {
-			return;
+	const handleResize = debounce(() => {
+		if (echart) {
+			echart.resize();
 		}
+	}, 500);
 
-		// const { data, currencyKey } = this.props;
-
-		if (!entities.data) return;
-		console.log('updating..');
-
-		const { series, xAxis } = this;
-
-		const dates = entities.data.map(info => new Date(info.get('date') * 1000)).toJS();
-		dates.push(new Date(dates[dates.length - 1].getTime() + dates[1].getTime() - dates[0].getTime()));
-
-		const candleStickData = entities.data
-			.map(info => {
-				return [
-					info.get('open').toFixed(digits),
-					info.get('close').toFixed(digits),
-					info.get('low').toFixed(digits),
-					info.get('high').toFixed(digits)
-				];
-			})
-			.toJS();
-
-		const volumes = entities.data.map(info => info.get('volume').toFixed(2)).toJS();
-
-		xAxis[0].data = dates;
-		xAxis[1].data = dates;
-		series[0].data = candleStickData;
-		series[1].data = calculateMA(entities.data, 5);
-		series[2].data = calculateMA(entities.data, 15);
-		series[3].data = calculateMA(entities.data, 50);
-		series[4].data = volumes;
-
-		echart.setOption({
-			series,
-			xAxis
-		});
-	};
+	useEffect(() => {
+		// drawChart();
+		window.addEventListener('resize', handleResize);
+		return () => {
+			// if (echart) {
+			// 	echart.dispose();
+			// 	// echart = null;
+			// 	setEchart(null);
+			// }
+			window.removeEventListener('resize', handleResize);
+		};
+	}, [handleResize]);
 
 	if (stock_name === undefined) {
 		return '';

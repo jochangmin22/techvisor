@@ -2245,11 +2245,6 @@
     lodash "^4.17.15"
     lodash-es "^4.17.15"
 
-"@scarf/scarf@^1.0.4":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@scarf/scarf/-/scarf-1.0.6.tgz#52011dfb19187b53b75b7b6eac20da0810ddd88f"
-  integrity sha512-y4+DuXrAd1W5UIY3zTcsosi/1GyYT8k5jGnZ/wG7UUHVrU+MHlH4Mp87KK2/lvMW4+H7HVcdB+aJhqywgXksjA==
-
 "@sindresorhus/is@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-2.1.1.tgz#ceff6a28a5b4867c2dd4a1ba513de278ccbe8bb1"
@@ -5942,9 +5937,9 @@ eslint-plugin-react@7.19.0:
     xregexp "^4.3.0"
 
 eslint-plugin-react@^7.19.0:
-  version "7.20.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-react/-/eslint-plugin-react-7.20.1.tgz#87fcf8d0de225817ba0b2d8f38740733d61ff4ba"
-  integrity sha512-HitovDhscMmu3uOod3aqZRdKURdXgmlkptEue958gJBmIJO9hvgO4uZyqsJ4+22WqJVP3CsTKfqWSuTlJL6b8w==
+  version "7.20.3"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react/-/eslint-plugin-react-7.20.3.tgz#0590525e7eb83890ce71f73c2cf836284ad8c2f1"
+  integrity sha512-txbo090buDeyV0ugF3YMWrzLIUqpYTsWSDZV9xLSmExE1P/Kmgg9++PD931r+KEWS66O1c9R4srLVVHmeHpoAg==
   dependencies:
     array-includes "^3.1.1"
     array.prototype.flatmap "^1.2.3"
@@ -11503,9 +11498,9 @@ raw-loader@4.0.1:
     schema-utils "^2.6.5"
 
 rc-easyui@^1.0.53:
-  version "1.1.19"
-  resolved "https://registry.yarnpkg.com/rc-easyui/-/rc-easyui-1.1.19.tgz#624936624715ed3f83d85ea6d0651e277cbde861"
-  integrity sha512-4Kj1dN76I5d3cFkqh8qxnfN6c1Hp1bufzK2qsYZB/85BngrDFI6T/wA/PTWD/pBkB2mQgA+N3aNXCusWmv4p2g==
+  version "1.1.20"
+  resolved "https://registry.yarnpkg.com/rc-easyui/-/rc-easyui-1.1.20.tgz#270511a2e93f3e303606f3f53b9ed4149cd654a8"
+  integrity sha512-kaQy/947dcghJ2XKDkRRuvh3DScIkU2GKkwxcBBtxww/tUpiE7DCMob1CA8AHXL9idcl1Vs5oLwmF3CBsCuMKQ==
 
 rc-progress@^2.5.2:
   version "2.6.1"
@@ -11947,11 +11942,9 @@ react-swipeable-views@0.13.9:
     warning "^4.0.1"
 
 react-table@^7.2.0:
-  version "7.2.1"
-  resolved "https://registry.yarnpkg.com/react-table/-/react-table-7.2.1.tgz#d85f5a59b6441ccd9e0acddc93c288c54a7de7ee"
-  integrity sha512-cICU3w5yFWTDluz9yFePziEQXGt3PK5R1Va3InP7qMGnZOKm8kv0GiDMli+VOqE1uM1dBYPb9BEad15up1ac6g==
-  dependencies:
-    "@scarf/scarf" "^1.0.4"
+  version "7.2.2"
+  resolved "https://registry.yarnpkg.com/react-table/-/react-table-7.2.2.tgz#2978a903f0e367e1ceab25d60a6a40ae23498f77"
+  integrity sha512-JBE3QUyRQJkHRU72NKo7HRGtSGcrzIcVLDbsoZI+KhWkFEZ2t9UfpqeHBdbc3R5RRJZ6qC7+NzZZxJPSYWKPBQ==
 
 react-text-mask@5.4.3:
   version "5.4.3"

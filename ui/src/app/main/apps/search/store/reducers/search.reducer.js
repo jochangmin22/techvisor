@@ -4,6 +4,8 @@ const initialState = {
 	search: null,
 	quote: null,
 	family: null,
+	ipcCpc: [],
+	rnd: [],
 	legal: null,
 	registerFee: null,
 	rightfullOrder: null,
@@ -41,6 +43,18 @@ const searchReducer = function (state = initialState, action) {
 			return {
 				...state,
 				family: action.payload
+			};
+		}
+		case Actions.GET_SEARCH_IPC_CPC: {
+			return {
+				...state,
+				ipcCpc: action.payload
+			};
+		}
+		case Actions.GET_SEARCH_RND: {
+			return {
+				...state,
+				rnd: action.payload
 			};
 		}
 		case Actions.GET_SEARCH_LEGAL: {

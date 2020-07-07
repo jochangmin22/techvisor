@@ -4,8 +4,9 @@ import LegalStatus from './LegalStatus';
 import Quotation from './Quotation';
 import Family from './Family';
 import BiblioInfo from './components/BiblioInfo';
-import HistoryTimeLine from './components/HistoryTimeLine';
+import HistoryStepper from './components/HistoryStepper';
 import TechnicalSummary from './components/TechnicalSummary';
+import Rnd from './Rnd';
 
 function PatInfo(props) {
 	return (
@@ -20,12 +21,13 @@ function PatInfo(props) {
 					<BiblioInfo search={props.search} />
 				</div>
 				<div className="flex w-full h-512 md:w-1/2">
-					<HistoryTimeLine search={props.search} />
+					<HistoryStepper search={props.search} />
 				</div>
 				<TechnicalSummary search={props.search} />
-				<LegalStatus appNo={props.search.출원번호} />
-				<Quotation appNo={props.search.출원번호} />
+				<LegalStatus />
+				<Quotation appNo={props.search.출원번호} applicant={props.search.출원인1} />
 				<Family search={props.search} />
+				<Rnd />
 			</div>
 		</FuseAnimateGroup>
 	);
