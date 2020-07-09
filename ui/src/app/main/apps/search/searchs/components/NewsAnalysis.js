@@ -44,7 +44,7 @@ function NewsAnalysis(props) {
 							transition: 'all .2s ease-out'
 						}}
 					>
-						긍정 {data}%
+						긍정 {data.toFixed(1)}%
 					</div>
 					<div
 						className={clsx(

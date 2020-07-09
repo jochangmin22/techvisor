@@ -8,6 +8,7 @@ import FamilyTree from './components/FamilyTree';
 // import FamilyMap from './components/FamilyMap';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import FuseAnimate from '@fuse/core/FuseAnimate';
+import { withRouter } from 'react-router-dom';
 
 const columns = [
 	{
@@ -19,7 +20,7 @@ const columns = [
 	},
 	{
 		Header: '문헌번호',
-		accessor: '문헌번호',
+		accessor: '패밀리번호',
 		className: 'text-12 text-gray-500 text-left',
 		sortable: true,
 		width: 120
@@ -86,7 +87,7 @@ function Family(props) {
 			<Paper className="w-full rounded-8 shadow mb-16">
 				<Typography className="p-16 pl-28 text-14 font-bold">패밀리 특허문헌</Typography>
 				<div className="px-16">
-					<FamilyTree />
+					<FamilyTree data={data} />
 				</div>
 				<FuseScrollbars className="max-h-512 px-6">
 					<EnhancedTable
@@ -108,4 +109,4 @@ function Family(props) {
 	);
 }
 
-export default Family;
+export default withRouter(Family);

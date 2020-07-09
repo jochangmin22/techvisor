@@ -14,7 +14,7 @@ const columns = [
 	},
 	{
 		Header: '유사도',
-		accessor: '유사도',
+		accessor: 'similarity',
 		className: 'text-14 text-left',
 		sortable: true,
 		width: 90

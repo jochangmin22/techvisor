@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'd3-transition';
 import { select } from 'd3-selection';
 import ReactWordcloud from 'react-wordcloud';
+import debounce from 'lodash/debounce';
 import randomColor from 'randomcolor';
 import Paper from '@material-ui/core/Paper';
 import { useSelector, useDispatch } from 'react-redux';
@@ -84,6 +85,20 @@ function WordCloud(props) {
 		// props.history.push('/apps/e-commerce/orders/' + item.id);
 	}
 
+	const handleResize = debounce(() => {
+		getCallback('onWordClick');
+		// if (echart) {
+		// 	echart.resize();
+		// }
+	}, 500);
+
+	useEffect(() => {
+		window.addEventListener('resize', handleResize);
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	}, [handleResize]);
+
 	if (!wordCloud || wordCloud.length === 0) {
 		return <SpinLoading />;
 	}
@@ -125,36 +140,6 @@ function WordCloud(props) {
 					// minSize={[200, 250]}
 					// size={[400, 400]}
 				/>
-				{/* <TagCloud
-                    className="tag-cloud min-w-320 min-h-288 lg:min-w-640"
-                    style={{
-                        fontFamily: "Noto Sans KR",
-                        //fontSize: () => Math.round(Math.random() * 50) + 16,
-                        fontSize: 30,
-                        color: () =>
-                            randomColor({
-                                hue: "blue"
-                            }),
-                        padding: 5,
-                        width: "100%",
-                        height: "100%"
-                    }}
-                >
-                    {wordCloud.map((item, index) => {
-                        return (
-                            <div
-                                style={{
-                                    height: 25,
-                                    width: "auto",
-                                    fontSize: item.value
-                                }}
-                                key={index}
-                            >
-                                {item.text}
-                            </div>
-                        );
-                    })}
-                </TagCloud> */}
 			</Paper>
 		</FuseAnimateGroup>
 	);

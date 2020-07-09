@@ -108,8 +108,15 @@ const useStyles = makeStyles({
 	}
 });
 
-function FamilyTree() {
+function FamilyTree(props) {
 	const classes = useStyles();
+	const data = props.data;
+
+	const KRTotal = data.filter(x => {
+		return x.국가코드 === 'KR';
+	}).length;
+
+	const OCTotal = data.length - KRTotal;
 
 	return (
 		<TreeView
@@ -119,9 +126,9 @@ function FamilyTree() {
 			defaultExpandIcon={<ArrowRightIcon />}
 			defaultEndIcon={<div style={{ width: 24 }} />}
 		>
-			<StyledTreeItem nodeId="1" labelText="패밀리 소계" labelInfo={1}>
-				<StyledTreeItem nodeId="2" labelText="국내특허" labelInfo={1} color="#1a73e8" bgColor="#e8f0fe" />
-				<StyledTreeItem nodeId="3" labelText="해외특허" labelInfo={0} color="#e3742f" bgColor="#fcefe3" />
+			<StyledTreeItem nodeId="1" labelText="패밀리 소계" labelInfo={data.length}>
+				<StyledTreeItem nodeId="2" labelText="국내특허" labelInfo={KRTotal} color="#1a73e8" bgColor="#e8f0fe" />
+				<StyledTreeItem nodeId="3" labelText="해외특허" labelInfo={OCTotal} color="#e3742f" bgColor="#fcefe3" />
 			</StyledTreeItem>
 		</TreeView>
 	);

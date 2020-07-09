@@ -8,6 +8,7 @@ import QuoteTree from './components/QuoteTree';
 import QuoteMap from './components/QuoteMap';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { withRouter } from 'react-router-dom';
+import FuseAnimate from '@fuse/core/FuseAnimate';
 
 // const columnsA = [
 // 	{
@@ -133,6 +134,21 @@ function Quotation(props) {
 
 	if (!entities) {
 		return <SpinLoading className="h-200" />;
+	}
+
+	if (entities && entities.length === 0) {
+		return (
+			<Paper className="w-full rounded-8 shadow mb-16">
+				<Typography className="p-16 pl-28 text-14 font-bold">인용·피인용 특허문헌</Typography>
+				<div className="max-w-512 text-center">
+					<FuseAnimate delay={600}>
+						<Typography variant="subtitle1" color="textSecondary" className="mb-48">
+							조회된 인용·피인용 특허가 없습니다.
+						</Typography>
+					</FuseAnimate>
+				</div>
+			</Paper>
+		);
 	}
 
 	return (

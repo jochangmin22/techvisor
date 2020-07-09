@@ -4,6 +4,8 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import FuseAnimate from '@fuse/core/FuseAnimate';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 const columns = [
 	{
@@ -57,12 +59,23 @@ function LegalStatus(props) {
 	const showFooter = entities && entities.length > 10 ? true : false;
 
 	if (!entities) {
-		return '';
+		return <SpinLoading className="h-200" />;
 	}
-	// useEffect(() => {
-	// 	dispatch(Actions.getLegal(props.appNo));
-	// }, [props.appNo]);
 
+	if (entities && entities.length === 0) {
+		return (
+			<Paper className="w-full rounded-8 shadow mb-16">
+				<Typography className="p-16 pl-28 text-14 font-bold">법적 상태</Typography>
+				<div className="max-w-512 text-center">
+					<FuseAnimate delay={600}>
+						<Typography variant="subtitle1" color="textSecondary" className="mb-48">
+							조회된 법적 상태 내용이 없습니다.
+						</Typography>
+					</FuseAnimate>
+				</div>
+			</Paper>
+		);
+	}
 	return (
 		<Paper className="w-full rounded-8 shadow mb-16">
 			<Typography className="p-16 pl-28 text-14 font-bold">법적 상태</Typography>

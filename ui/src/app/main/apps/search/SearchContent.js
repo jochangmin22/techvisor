@@ -10,7 +10,7 @@ import SubjectRelation from './searchs/SubjectRelation';
 import MatrixAnalysis from './searchs/MatrixAnalysis';
 import NewsRelation from './searchs/NewsRelation';
 import EmptyMsg from './searchs/components/EmptyMsg';
-import searchData from './inc/searchData';
+import searchData from './inc/searchDataNew';
 
 function SearchContent(props) {
 	const dispatch = useDispatch();

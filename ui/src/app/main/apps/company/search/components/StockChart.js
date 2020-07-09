@@ -388,11 +388,6 @@ function StockChart(props) {
 		// drawChart();
 		window.addEventListener('resize', handleResize);
 		return () => {
-			// if (echart) {
-			// 	echart.dispose();
-			// 	// echart = null;
-			// 	setEchart(null);
-			// }
 			window.removeEventListener('resize', handleResize);
 		};
 	}, [handleResize]);
