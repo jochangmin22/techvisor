@@ -7,7 +7,7 @@ from konlpy.tag import Mecab
 from django.http import JsonResponse
 from django.http import HttpResponse
 
-from .models import disclosure, listed_corp
+from .models import disclosure
 from .searchs import parse_searchs, parse_searchs_num
 from .nlp import kr_nlp
 
@@ -201,8 +201,9 @@ def parse_related_company(request, mode="needJson"):
         isExist = disclosure.objects.filter(corp_name__in=unique_news_nlp).exists()
         if not isExist:
             return HttpResponse('Not Found', status=404)
+        EXCLUDE_COMPANY_NAME = getattr(settings, 'EXCLUDE_COMPANY_NAME', DEFAULT_TIMEOUT)
 
-        disClosure = disclosure.objects.filter(corp_name__in=unique_news_nlp)
+        disClosure = disclosure.objects.filter(corp_name__in=unique_news_nlp).exclude(corp_name__in=EXCLUDE_COMPANY_NAME)
         myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('-stock_code','corp_name'))[:10]
         myCorpCode = list(disClosure.values_list('corp_code', flat=True).order_by('-stock_code','corp_name'))[:10]
         myStockCode = list(disClosure.values_list('stock_code', flat=True).order_by('-stock_code','corp_name'))[:10]
@@ -250,12 +251,15 @@ def parse_news_sa(request):
     if news:
         for i in range(len(news)):
             token += news[i]['title'] + " " if news[i]['title'] else ""
-            token += news[i]['description'] + " " if news[i]['description'] else ""
-        news_token = tokenizer(token) if token else ''
-    else:
-        news_token = []        
-
-    result = _sensitive_analysis(news_token)            
+            if i > 5: break
+            # token += news[i]['description'] + " " if news[i]['description'] else ""
+        # news_token = tokenize(token) if token else ''
+    # else:
+        # news_token = ''
+  
+     
+    result = _sensitive_analysis(token)            
+    # result = _sensitive_analysis(tokenize('셀트리온이 항체치료제 선택한 이유 안전성·변이대응 탁월'))            
 
     return JsonResponse(result, status=200, safe=False)
     # except:
@@ -324,6 +328,7 @@ def _sensitive_analysis(news_token):
 
     # load model
     model = models.load_model(tr_path + 'model.h5')
+    # model = models.load_model(tr_path + 'news_model.h5')
     # summarize model.
     model.summary()
     # load dataset
@@ -347,13 +352,14 @@ def _sensitive_analysis(news_token):
     # token = tokenize(news_token)
     # token = tokenizer(news_token)
     # token = tokenize("믿고 보는 감독이지만 이번에는 아니네요")
-    tf = term_frequency(news_token)
+    # token = tokenize("셀트리온이 항체치료제 선택한 이유 안전성·변이대응 탁월")
+    token = tokenize(news_token)
+    tf = term_frequency(token)
     data = np.expand_dims(np.asarray(tf).astype('float32'), axis=0)
-    score = round(float(model.predict(data))*100,2)
-    return score
-    # return score
+    # score = float(model.predict(data))
 
-   
+    score = round(float(model.predict(data)*100),1)
+    return score
 
 
 # NNG일반명사 ,NNP고유명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
