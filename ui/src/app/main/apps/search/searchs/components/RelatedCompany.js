@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Typography from '@material-ui/core/Typography';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import Chip from '@material-ui/core/Chip';
@@ -27,12 +27,12 @@ function NewsArticles(props) {
 		props.history.push(`/apps/company/${corp_code}`);
 	}
 
-	const data = React.useMemo(() => corpName, [corpName]);
+	const data = useMemo(() => corpName, [corpName]);
 
 	return (
-		<FuseScrollbars>
-			<div className="flex flex-row p-12 pb-0 h-72 flex-wrap items-center">
-				<Typography className="text-14 font-bold">관련기업</Typography>
+		<FuseScrollbars className="h-36 px-12">
+			<div className="flex flex-row flex-wrap h-full items-center py-4">
+				<Typography className="text-14 font-bold mr-8">관련기업</Typography>
 				{/* <Chip
 					key={defaultChipData.corpCode}
 					label={defaultChipData.corpName}

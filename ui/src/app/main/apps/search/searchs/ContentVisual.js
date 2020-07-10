@@ -15,6 +15,7 @@ import Classify from './tabs/Classify';
 import ApplicantsBar from './tabs/ApplicantsBar';
 import InventorsBar from './tabs/InventorsBar';
 import EmptyMsg from './components/EmptyMsg';
+import IndicatorAnalysis from './tabs/IndicatorAnalysis';
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -82,9 +83,7 @@ function ContentVisual(props) {
 
 	const isEmpty = !!(!searchText && !inventor && !assignee);
 
-	useEffect(()=> {
-
-	},[props]);
+	useEffect(() => {}, [props]);
 
 	return (
 		<div className={clsx(classes.root, 'w-full h-full rounded-8 shadow')}>
@@ -106,6 +105,7 @@ function ContentVisual(props) {
 					<Tab label="주체별" className={classes.tab} {...a11yProps(3)} />
 					<Tab label="출원인" className={classes.tab} {...a11yProps(4)} />
 					<Tab label="발명자" className={classes.tab} {...a11yProps(5)} />
+					<Tab label="지표분석" className={classes.tab} {...a11yProps(6)} />
 					{/* </Hidden> */}
 
 					{/* <Hidden smUp>
@@ -168,6 +168,14 @@ function ContentVisual(props) {
 						<EmptyMsg icon="assessment" msg="발명자별 동향" />
 					) : (
 						<InventorsBar searchText={searchText} />
+					))}
+			</TabPanel>
+			<TabPanel value={tabValue} index={6}>
+				{tabValue === 6 &&
+					(isEmpty ? (
+						<EmptyMsg icon="assessment" msg="특허 지표분석" />
+					) : (
+						<IndicatorAnalysis searchText={searchText} />
 					))}
 			</TabPanel>
 		</div>

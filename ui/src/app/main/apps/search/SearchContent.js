@@ -8,7 +8,7 @@ import ContentGrid from './searchs/ContentGrid';
 import ContentVisual from './searchs/ContentVisual';
 import SubjectRelation from './searchs/SubjectRelation';
 import MatrixAnalysis from './searchs/MatrixAnalysis';
-import NewsRelation from './searchs/NewsRelation';
+import NewsAnalysis from './searchs/NewsAnalysis';
 import EmptyMsg from './searchs/components/EmptyMsg';
 import searchData from './inc/searchDataNew';
 
@@ -57,7 +57,7 @@ function SearchContent(props) {
 							<MatrixAnalysis searchText={searchText} searchNum={searchNum} />
 						</div>
 						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pt-0 md:pl-0">
-							<NewsRelation searchText={searchText} />
+							<NewsAnalysis searchText={searchText} />
 						</div>
 						<div className="flex w-full h-full p-16 md:pt-0">
 							<ContentGrid />

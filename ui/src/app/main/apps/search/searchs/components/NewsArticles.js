@@ -1,23 +1,27 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Typography from '@material-ui/core/Typography';
-import { useTheme } from '@material-ui/core/styles';
+import { useTheme, makeStyles } from '@material-ui/core/styles';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
-// import SubjectContext from '../SubjectContext';
 import { useSelector } from 'react-redux';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import clsx from 'clsx';
+
+const useStyles = makeStyles(theme => ({
+	positiveBackground: { backgroundColor: theme.palette.primary.dark },
+	negativeBackground: { backgroundColor: theme.palette.primary.light }
+}));
 
 function NewsArticles(props) {
-	// const { searchNum, topic } = props;
+	const classes = useStyles();
 	const theme = useTheme();
-	// const dispatch = useDispatch();
 	const news = useSelector(({ searchApp }) => searchApp.searchs.news);
+	const newsSA = useSelector(({ searchApp }) => searchApp.searchs.newsSA);
 
-	// const { setShowLoading } = useContext(SubjectContext);
+	const data = useMemo(() => news, [news]);
+	const dataSA = useMemo(() => (newsSA === 0 || newsSA < 15 || newsSA > 85 ? 50 : newsSA), [newsSA]);
 
-	// const { newsData, setNewsData } = useState(news);
-
-	const columns = React.useMemo(
+	const columns = useMemo(
 		() => [
 			{
 				Header: '제목',
@@ -41,20 +45,50 @@ function NewsArticles(props) {
 		[theme.palette.primary.main]
 	);
 
-	const data = React.useMemo(() => news, [news]);
-
 	if (!data || data.length === 0) {
 		return <SpinLoading />;
 	}
 
 	return (
 		<div className="flex flex-col">
-			<Typography className="p-12 pb-0 text-14 font-bold">관련기사</Typography>
-			<FuseScrollbars className="max-h-160">
+			<div className="px-12 flex items-center justify-between">
+				<Typography className="p-12 text-14 font-bold">관련기사</Typography>
+				<div className="items-center justify-center w-xs h-18 px-8">
+					<div className="flex flex-row w-full h-full rounded-4 shadow">
+						<div
+							className={clsx(
+								classes.positiveBackground,
+								'h-full items-center justify-center text-center text-11 p-4 text-white'
+							)}
+							style={{
+								width: `${dataSA}%`,
+								transition: 'all .2s ease-out'
+							}}
+						>
+							긍정 {dataSA.toFixed(1)}%
+						</div>
+						<div
+							className={clsx(
+								classes.negativeBackground,
+								'h-full items-center justify-center text-center text-11 p-4 text-white'
+							)}
+							style={{
+								width: `${100 - dataSA}%`,
+								transition: 'all .2s ease-out'
+							}}
+						>
+							부정 {(100 - dataSA).toFixed(1)}%
+						</div>
+					</div>
+				</div>
+			</div>
+			<FuseScrollbars className="max-h-224 px-8">
 				<EnhancedTable
 					columns={columns}
 					data={data}
 					size="small"
+					pageSize={5}
+					// pageOptions={[5, 10, 25]}
 					showHeader={false}
 					onRowClick={(ev, row) => {
 						if (row) {

@@ -29,7 +29,16 @@ import clsx from 'clsx';
 // 	);
 // });
 
-const EnhancedTable = ({ columns, data, showHeader = true, showFooter = true, rowClick = true, onRowClick }) => {
+const EnhancedTable = ({
+	columns,
+	data,
+	pageSize: controlledPageSize,
+	// pageOptions: controlledPageOptions,
+	showHeader = true,
+	showFooter = true,
+	rowClick = true,
+	onRowClick
+}) => {
 	const {
 		getTableProps,
 		headerGroups,
@@ -42,6 +51,7 @@ const EnhancedTable = ({ columns, data, showHeader = true, showFooter = true, ro
 		{
 			columns,
 			data,
+			initialState: { pageSize: controlledPageSize || 10 },
 			autoResetPage: true
 		},
 		useGlobalFilter,

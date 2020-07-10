@@ -241,6 +241,8 @@ function MatrixAnalysis(props) {
 							columns={columns}
 							data={data}
 							size="small"
+							pageSize={5}
+							// pageOptions={[6, 12, 25]}
 							onRowClick={(ev, row) => {
 								if (row) {
 									// window.open(row.original.link, '_blank');

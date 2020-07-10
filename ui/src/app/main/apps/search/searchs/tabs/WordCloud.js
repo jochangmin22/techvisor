@@ -35,7 +35,6 @@ function WordCloud(props) {
 			text.on('click', () => {
 				if (isActive) {
 					handleClick(word.text);
-					// window.open(`https://duckduckgo.com/?q=${word.text}`, '_blank');
 				}
 			}).transition();
 			// .attr("background", "white")
@@ -45,7 +44,6 @@ function WordCloud(props) {
 	}
 
 	const callbacks = {
-		// getWordColor: word => (word.value > 50 ? "orange" : "purple"),
 		getWordTooltip: word => `"${word.text}" : ${word.value} 번 반복`,
 		onWordClick: getCallback('onWordClick'),
 		onWordMouseOut: getCallback('onWordMouseOut'),
@@ -82,7 +80,6 @@ function WordCloud(props) {
 
 		const [newParams] = parseSearchText(form, null);
 		dispatch(Actions.setSearchParams(newParams));
-		// props.history.push('/apps/e-commerce/orders/' + item.id);
 	}
 
 	const handleResize = debounce(() => {
@@ -145,4 +142,3 @@ function WordCloud(props) {
 	);
 }
 export default WordCloud;
-// export default withReducer('searchApp', reducer)(WordCloud);
