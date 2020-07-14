@@ -70,18 +70,18 @@ def pos(text):
    
 #     return row
 
-def similarity(ipc, abstract, modelType):
+def similarity(abstract, modelType):
 
     # query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE ipc요약 = \'' + ipc + '\' limit 100'
 
     # psql pg_trgm similarity로 1차 유사도 측정 , 유사도 기본값 0.3
-    query = 'select set_limit(0.5);'
-    query += 'SELECT strict_word_similarity("요약token", $${}$$) AS similarity, 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE 요약token % $${}$$;'.format(abstract, abstract)  # ORDER BY similarity DESC
+    # query = 'select set_limit(0.2);'
+    query = 'SELECT case when similarity("요약token", $${}$$) = 1 then 0.981 else round(similarity("요약token", $${}$$)::numeric, 3) end AS similarity, 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE 요약token % $${}$$ ORDER BY similarity DESC;'.format(abstract, abstract, abstract)  
 
 
     df_sim = pd.read_sql_query(query, connection)
-    sents_sim = [sent for sent in df_sim['요약token']]
-    # sents_sim = [remove_punc(remove_brackets(remove_tags(sent))) for sent in df_sim['요약token'] if type(sent) == str] # 제거 수행
+    # sents_sim = [sent for sent in df_sim['요약token']]
+    sents_sim = [remove_punc(remove_brackets(remove_tags(sent))) for sent in df_sim['요약token'] if type(sent) == str] # 제거 수행
     # sents_sim = [sent for sent in sents_sim if '내용 없음' not in sent and '내용없음' not in sent] # 내용 없는 초록 제거
     # 0: "본 발명 은 탈모 의 예방 또는 치료 용   또는 발모 또는 육모 촉진 용 약학 조성물 또는 화장료 조성물 에 관한 것 으로서   본 발명 에 따른 조성물 은 우수 한 탈모 의 예방 또는 치료 및 발모 또는 육모 촉진 효과 를 나타내 며   성별 및 연령 에 관계없이 안 전하 게 사용 될 수 있 다  "
 
@@ -90,28 +90,22 @@ def similarity(ipc, abstract, modelType):
 
     documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(newSents_sim)]
 
+    topn = len(newSents_sim)
+
     if modelType == 'doc2vec':
-        sims = w2b_value(documents, newSents_sim, abstract, sents_sim)
+        sims = w2b_value(documents, topn, abstract)
         # return w2b_value(documents, newSents_sim, abstract, sents_sim)
     else:
-        return cosine_value(documents, newSents_sim)
-
-    # sims 대로 df 정렬
+        return cosine_value(documents, topn, sents_sim, abstract)
     
     df_sim['유사도'] = sims
-    df_sim.sort_values(by=['유사도'], axis=0, ascending=False)
+
+    # new_df = df_sim.sort_values(by=['유사도'], axis=0, ascending=False)
+    # df_row = new_df.to_json(orient="records")
 
     
     df_row = df_sim.to_json(orient="records")
     return df_row
-
-    # for i, v in enumerate(sims):
-    #     df_row[i]['유사도'] = str(v) # round(int(v),3)
-
-    # return df_row
-    # return df_sim['요약token']
-
-
 
     # old
     # with connection.cursor() as cursor:
@@ -128,7 +122,7 @@ def similarity(ipc, abstract, modelType):
    
     return row
 
-def w2b_value(documents, newSents_sim, abstract, sents_sim):
+def w2b_value(documents, topn, abstract):
     '''단순 doc2vec'''
     # 옵션 설정
     num_features = 300  # 문자 벡터 차원 수
@@ -145,14 +139,14 @@ def w2b_value(documents, newSents_sim, abstract, sents_sim):
 
     # 가장 비슷한 문서 프린팅 (명사 모델)
     # i=100
-    myLen = len(newSents_sim)
-    new_vector = modelDoc.infer_vector(list(abstract))
-    sims = modelDoc.docvecs.most_similar([new_vector], topn=myLen)
-    # sims = modelDoc.docvecs
-    # return [sents_sim[s] + str(w) for s, w in sims]
-    return [w for s, w in sims]
+    new_vector = modelDoc.infer_vector(abstract)
+    sims = modelDoc.docvecs.most_similar([new_vector], topn=topn)
 
-def cosine_value(documents, newSents_sim):
+    # sort a list of tuples by 1st item
+    sorted_sims = sorted(sims, key=lambda x: x[0])
+    return [w for s, w in sorted_sims]
+
+def cosine_value(documents, topn, sents_sim, abstract):
     '''cosine simility'''
 
     vectorizer = CountVectorizer(min_df=1, tokenizer=lam)
@@ -165,19 +159,19 @@ def cosine_value(documents, newSents_sim):
     # similarity matrix
     cos_sims = (cosine_similarity(df2, df2))
 
+    def most_similar(cos_sims, idx, topn=10):
+        sort_index = np.argsort(cos_sims[idx])
+        return sort_index[-topn:][::-1]
 
     # 가장 비슷한 문서 프린팅
-    i=100
-    print(sents_sim[i])
-    for idx in most_similar(cos_sims, i, 20):
+    # i=100
+    # print(sents_sim[i])
+    for idx in most_similar(cos_sims, i, topn):
         print(sents_sim[idx])
 
     return sents_sim[idx]
 
 
-# def most_similar(cos_sims, idx, topn=20):
-#     sort_index = np.argsort(cos_sims[idx])
-#     return sort_index[-topn:][::-1]
 
 def similarity_original(df_sim):
     # df_sim = pd.read_excel('./data/COMPA_바이러스_치료검색_4천여건.xlsx')

@@ -240,7 +240,7 @@ def parse_search_quote(request):
     # Change words in 인용참증단계
     for r in row:
         if r['인용참증단계']:
-            r.update({'인용참증단계' : r['인용참증단계'].replace('발송문서','심사관 인용').replace('선행기술조사문헌','심사보고서').replace('선행기술조사보고서','선행기술조사')})
+            r.update({'인용참증단계' : r['인용참증단계'].replace('발송문서','심사관 인용').replace('선행기술조사문헌','심사보고서').replace('선행기술조사보고서','선행기술조사').replace('출원서인용문헌이력정보','출원서 인용')})
 
     # Redis {
     handleRedis(redisKey, 'quote', row, mode="w")
@@ -289,7 +289,7 @@ def parse_search_family(request):
     with connection.cursor() as cursor:
         whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
         cursor.execute(
-            "SELECT A.국가코드, A.패밀리번호, A.문헌코드, A.문헌번호, B.명칭, B.일자, B.ipc코드 FROM (SELECT 출원번호, 패밀리국가코드 국가코드, 패밀리번호, 문헌코드, 문헌번호, case when 패밀리국가코드 = 'KR' then split_part(패밀리출원번호, ',', 1)::numeric else null end 패밀리출원번호1 FROM 특허패밀리 "
+            "SELECT A.국가코드, A.패밀리번호, A.문헌코드, A.문헌번호, B.명칭, B.일자, B.ipc코드 \"IPC\" FROM (SELECT 출원번호, 패밀리국가코드 국가코드, 패밀리번호, 문헌코드, 문헌번호, case when 패밀리국가코드 = 'KR' then split_part(패밀리출원번호, ',', 1)::numeric else null end 패밀리출원번호1 FROM 특허패밀리 "
             + whereAppNo
             + ") A LEFT JOIN (SELECT 출원번호, \"발명의명칭(국문)\" || case when coalesce(\"발명의명칭(영문)\", '') = '' then '' else ' (' || \"발명의명칭(영문)\" || ')' end 명칭, to_char(to_date(등록일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 일자, ipc코드 FROM 공개공보 "
             + ") B ON A.패밀리출원번호1 = B.출원번호"
