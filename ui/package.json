@@ -23,6 +23,7 @@
 		"chartjs-plugin-datalabels": "^0.7.0",
 		"clsx": "1.1.0",
 		"cross-fetch": "3.0.4",
+		"d3": "^5.16.0",
 		"date-fns": "2.13.0",
 		"echarts": "^4.7.0",
 		"firebase": "7.14.5",
