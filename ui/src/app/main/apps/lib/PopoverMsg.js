@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function PopoverMsg(props) {
-	const { msg, title } = props;
+	const { msg, title, variant } = props;
 	const classes = useStyles();
 	const [anchorEl, setAnchorEl] = useState(null);
 
@@ -30,7 +30,7 @@ function PopoverMsg(props) {
 
 	return (
 		<div className="p-12 pb-4 flex items-center">
-			<Typography variant="h6">{title}</Typography>
+			<Typography variant={variant || 'h6'}>{title}</Typography>
 			<Icon
 				className="ml-8"
 				color="action"
