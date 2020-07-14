@@ -30,6 +30,7 @@ const initialState = {
 	topicChips: [],
 	news: [],
 	newsSA: null,
+	indicator: [],
 	relatedCompany: [],
 	matrix: {
 		entities: [],
