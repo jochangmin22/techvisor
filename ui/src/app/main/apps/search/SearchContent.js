@@ -46,7 +46,7 @@ function SearchContent(props) {
 				{!searchText && !inventor && !assignee ? (
 					<EmptyMsg icon="chat" msg="검색결과" />
 				) : (
-					<div className="flex flex-wrap w-full h-384 items-start justify-center">
+					<div className="flex flex-wrap w-full h-460 items-start justify-center">
 						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16">
 							<SubjectRelation searchText={searchText} searchNum={searchNum} />
 						</div>
