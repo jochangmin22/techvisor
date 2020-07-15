@@ -111,7 +111,8 @@ def kr_nlp(request, category=""):
 
             # field name 넣기
             # https://stackoverflow.com/questions/20540871/python-tuple-to-dict-with-additional-list-of-keys
-            fields = ["text", "value"]
+            # fields = ["text", "value"]
+            fields = ["name", "value"]
             dicts = [dict(zip(fields, d)) for d in sublist]
 
             # json 형태로 출력

@@ -8820,203 +8820,203 @@ const searchData = {
 	},
 	wordCloud: [
 		{
-			text: '이미지',
+			name: '이미지',
 			value: 1389
 		},
 		{
-			text: '정보',
+			name: '정보',
 			value: 1171
 		},
 		{
-			text: '인식',
+			name: '인식',
 			value: 936
 		},
 		{
-			text: '텍스트',
+			name: '텍스트',
 			value: 914
 		},
 		{
-			text: '데이터',
+			name: '데이터',
 			value: 580
 		},
 		{
-			text: '시스템',
+			name: '시스템',
 			value: 457
 		},
 		{
-			text: '입력',
+			name: '입력',
 			value: 436
 		},
 		{
-			text: '저장',
+			name: '저장',
 			value: 419
 		},
 		{
-			text: '차량',
+			name: '차량',
 			value: 357
 		},
 		{
-			text: '추출',
+			name: '추출',
 			value: 356
 		},
 		{
-			text: '문자',
+			name: '문자',
 			value: 349
 		},
 		{
-			text: '서버',
+			name: '서버',
 			value: 331
 		},
 		{
-			text: '영상',
+			name: '영상',
 			value: 310
 		},
 		{
-			text: '음성',
+			name: '음성',
 			value: 300
 		},
 		{
-			text: '전송',
+			name: '전송',
 			value: 285
 		},
 		{
-			text: '단말기',
+			name: '단말기',
 			value: 263
 		},
 		{
-			text: '촬영',
+			name: '촬영',
 			value: 258
 		},
 		{
-			text: '파일',
+			name: '파일',
 			value: 244
 		},
 		{
-			text: '변환',
+			name: '변환',
 			value: 236
 		},
 		{
-			text: '출력',
+			name: '출력',
 			value: 235
 		},
 		{
-			text: '수신',
+			name: '수신',
 			value: 235
 		},
 		{
-			text: '코드',
+			name: '코드',
 			value: 225
 		},
 		{
-			text: '서비스',
+			name: '서비스',
 			value: 224
 		},
 		{
-			text: '문서',
+			name: '문서',
 			value: 219
 		},
 		{
-			text: '카메라',
+			name: '카메라',
 			value: 210
 		},
 		{
-			text: '관리',
+			name: '관리',
 			value: 209
 		},
 		{
-			text: '표시',
+			name: '표시',
 			value: 208
 		},
 		{
-			text: '화면',
+			name: '화면',
 			value: 205
 		},
 		{
-			text: '위치',
+			name: '위치',
 			value: 204
 		},
 		{
-			text: '검색',
+			name: '검색',
 			value: 201
 		},
 		{
-			text: '번호',
+			name: '번호',
 			value: 197
 		},
 		{
-			text: '디스플레이',
+			name: '디스플레이',
 			value: 196
 		},
 		{
-			text: '해당',
+			name: '해당',
 			value: 192
 		},
 		{
-			text: '모듈',
+			name: '모듈',
 			value: 189
 		},
 		{
-			text: '광고',
+			name: '광고',
 			value: 181
 		},
 		{
-			text: '콘텐츠',
+			name: '콘텐츠',
 			value: 177
 		},
 		{
-			text: '명함',
+			name: '명함',
 			value: 163
 		},
 		{
-			text: '기능',
+			name: '기능',
 			value: 160
 		},
 		{
-			text: '제어',
+			name: '제어',
 			value: 154
 		},
 		{
-			text: '결과',
+			name: '결과',
 			value: 153
 		},
 		{
-			text: '전자',
+			name: '전자',
 			value: 150
 		},
 		{
-			text: '설정',
+			name: '설정',
 			value: 149
 		},
 		{
-			text: '분석',
+			name: '분석',
 			value: 148
 		},
 		{
-			text: '디지털',
+			name: '디지털',
 			value: 145
 		},
 		{
-			text: '기반',
+			name: '기반',
 			value: 144
 		},
 		{
-			text: '메시지',
+			name: '메시지',
 			value: 144
 		},
 		{
-			text: '확인',
+			name: '확인',
 			value: 142
 		},
 		{
-			text: '개인',
+			name: '개인',
 			value: 141
 		},
 		{
-			text: '자동',
+			name: '자동',
 			value: 140
 		},
 		{
-			text: '통신',
+			name: '통신',
 			value: 139
 		}
 	],

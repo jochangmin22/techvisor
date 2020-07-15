@@ -790,203 +790,203 @@ const searchData = {
 	},
 	wordCloud: [
 		{
-			text: '바이러스',
+			name: '바이러스',
 			value: 2089
 		},
 		{
-			text: '단백질',
+			name: '단백질',
 			value: 1676
 		},
 		{
-			text: '치료',
+			name: '치료',
 			value: 1330
 		},
 		{
-			text: '세포',
+			name: '세포',
 			value: 938
 		},
 		{
-			text: '감염',
+			name: '감염',
 			value: 693
 		},
 		{
-			text: '조성물',
+			name: '조성물',
 			value: 654
 		},
 		{
-			text: '유전자',
+			name: '유전자',
 			value: 646
 		},
 		{
-			text: '예방',
+			name: '예방',
 			value: 568
 		},
 		{
-			text: '질환',
+			name: '질환',
 			value: 528
 		},
 		{
-			text: '발현',
+			name: '발현',
 			value: 519
 		},
 		{
-			text: '면역',
+			name: '면역',
 			value: 493
 		},
 		{
-			text: '벡터',
+			name: '벡터',
 			value: 492
 		},
 		{
-			text: '백신',
+			name: '백신',
 			value: 464
 		},
 		{
-			text: '항원',
+			name: '항원',
 			value: 463
 		},
 		{
-			text: '항체',
+			name: '항체',
 			value: 448
 		},
 		{
-			text: '재조합',
+			name: '재조합',
 			value: 367
 		},
 		{
-			text: '서열',
+			name: '서열',
 			value: 359
 		},
 		{
-			text: '결합',
+			name: '결합',
 			value: 353
 		},
 		{
-			text: '활성',
+			name: '활성',
 			value: 325
 		},
 		{
-			text: '반응',
+			name: '반응',
 			value: 257
 		},
 		{
-			text: '화합물',
+			name: '화합물',
 			value: 256
 		},
 		{
-			text: '억제',
+			name: '억제',
 			value: 252
 		},
 		{
-			text: '간염',
+			name: '간염',
 			value: 251
 		},
 		{
-			text: '효과',
+			name: '효과',
 			value: 243
 		},
 		{
-			text: '유도',
+			name: '유도',
 			value: 229
 		},
 		{
-			text: '특이',
+			name: '특이',
 			value: 227
 		},
 		{
-			text: '인플루엔자',
+			name: '인플루엔자',
 			value: 227
 		},
 		{
-			text: '핵산',
+			name: '핵산',
 			value: 223
 		},
 		{
-			text: '융합',
+			name: '융합',
 			value: 221
 		},
 		{
-			text: '관련',
+			name: '관련',
 			value: 214
 		},
 		{
-			text: '분자',
+			name: '분자',
 			value: 210
 		},
 		{
-			text: '생산',
+			name: '생산',
 			value: 210
 		},
 		{
-			text: '용도',
+			name: '용도',
 			value: 204
 		},
 		{
-			text: '인간',
+			name: '인간',
 			value: 193
 		},
 		{
-			text: '펩타이드',
+			name: '펩타이드',
 			value: 186
 		},
 		{
-			text: '입자',
+			name: '입자',
 			value: 177
 		},
 		{
-			text: 'HCV',
+			name: 'HCV',
 			value: 176
 		},
 		{
-			text: '종양',
+			name: '종양',
 			value: 168
 		},
 		{
-			text: 'HIV',
+			name: 'HIV',
 			value: 167
 		},
 		{
-			text: '약학',
+			name: '약학',
 			value: 164
 		},
 		{
-			text: '질병',
+			name: '질병',
 			value: 153
 		},
 		{
-			text: 'DNA',
+			name: 'DNA',
 			value: 150
 		},
 		{
-			text: '코딩',
+			name: '코딩',
 			value: 149
 		},
 		{
-			text: '개시',
+			name: '개시',
 			value: 141
 		},
 		{
-			text: '동물',
+			name: '동물',
 			value: 134
 		},
 		{
-			text: 'RSV',
+			name: 'RSV',
 			value: 133
 		},
 		{
-			text: '진단',
+			name: '진단',
 			value: 133
 		},
 		{
-			text: '성분',
+			name: '성분',
 			value: 132
 		},
 		{
-			text: '투여',
+			name: '투여',
 			value: 131
 		},
 		{
-			text: '신규',
+			name: '신규',
 			value: 128
 		}
 	],

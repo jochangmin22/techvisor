@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
 function getMapKeyValueByIndex(obj) {
 	let newObj = [];
 	// min value greater then 1
-	Object.entries(obj).forEach(([key, value]) => value > 1 && newObj.push({ text: key, value: value }));
+	Object.entries(obj).forEach(([key, value]) => value > 1 && newObj.push({ name: key, value: value }));
 	return newObj;
 }
 
@@ -60,11 +60,11 @@ function Keyword(props) {
 	dependent = dependent.toFixed(0);
 
 	const keywordInfo = {
-		'독립 청구항' : independent,
-		'발명의 설명' : description.toLocaleString(),
-		'종속항의 평균' : dependent,
-		요약 : props.search.초록.split(' ').length,
-	}
+		'독립 청구항': independent,
+		'발명의 설명': description.toLocaleString(),
+		'종속항의 평균': dependent,
+		요약: props.search.초록.split(' ').length
+	};
 
 	return (
 		<FuseAnimateGroup
@@ -77,13 +77,11 @@ function Keyword(props) {
 				<div className="flex w-full sm:w-1/3 pr-12">
 					<Paper className="w-full rounded-8 shadow mb-16">
 						<div className="flex flex-col items-start p-12">
-							<Typography className="text-14 p-12 font-bold">
-								키워드 분석
-							</Typography>
+							<Typography className="text-14 p-12 font-bold">키워드 분석</Typography>
 							{Object.entries(keywordInfo).map(([key, value]) => (
 								<Grid container key={key} spacing={3}>
 									<Grid item xs={6}>
-										<div className={clsx(classes.primaryColor, "p-4 md:p-8")}>{key} 단어 수</div>
+										<div className={clsx(classes.primaryColor, 'p-4 md:p-8')}>{key} 단어 수</div>
 									</Grid>
 									<Grid item xs={6}>
 										<div className="p-4 md:p-8 text-base">{value}</div>
@@ -103,9 +101,9 @@ function Keyword(props) {
 								{wordCloud.map(data => {
 									return (
 										<Chip
-											key={data.text}
+											key={data.name}
 											// icon={icon}
-											label={data.text}
+											label={data.name}
 											className={classes.chip}
 										/>
 									);
@@ -131,7 +129,7 @@ function Keyword(props) {
 							<h6 className="font-600 text-14 p-16" color="secondary">
 								워드 클라우드
 							</h6>
-							<WordCloud wordCloud={wordCloud} />
+							<WordCloud entities={wordCloud} />
 						</div>
 					</Paper>
 				</div>

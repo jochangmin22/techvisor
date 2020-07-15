@@ -26,7 +26,7 @@ function DownloadFilterMenu(props) {
 	}
 
 	return (
-		<div>
+		<>
 			<IconButton className="w-32 h-32 m-4 p-4" onClick={handleMenuClick}>
 				<Icon>settings</Icon>
 			</IconButton>
@@ -61,7 +61,7 @@ function DownloadFilterMenu(props) {
 					</List>
 				</ClickAwayListener>
 			</Popover>
-		</div>
+		</>
 	);
 }
 
