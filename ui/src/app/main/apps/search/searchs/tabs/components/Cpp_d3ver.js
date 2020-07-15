@@ -1,32 +1,29 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
+import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
+// import { Line } from 'react-chartjs-2';
 import { useTheme } from '@material-ui/styles';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import { select, line, curveCardinal } from 'd3';
 import _ from '@lodash';
-import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';
+import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 
 const entities = [
-	{ 출원인: '삼성전자', 피인용수: '22', CPP: '4.4', PII: '1.1', TS: '5.50', PFS: '0.75' },
-	{ 출원인: '엘지전자', 피인용수: '30', CPP: '3', PII: '0.75', TS: '7.50', PFS: '0.50' },
-	{ 출원인: '구글 엘엘씨', 피인용수: '27', CPP: '9', PII: '2.25', TS: '6.75', PFS: '3.13' },
-	{ 출원인: '에스케이플래닛 주식회사', 피인용수: '1', CPP: '0.5', PII: '0.13', TS: '0.26', PFS: '0.94' },
-	{ 출원인: '한국전자통신연구원', 피인용수: '1', CPP: '0.5', PII: '0.13', TS: '0.26', PFS: '0.6' },
-	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', PII: '0.13', TS: '0.26', PFS: '0.6' },
-	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', PII: '0.13', TS: '0.26', PFS: '0.6' },
-	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', PII: '0.13', TS: '0.26', PFS: '0.6' },
-	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', PII: '0.13', TS: '0.26', PFS: '0.6' },
-	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', PII: '0.13', TS: '0.26', PFS: '0.6' },
-	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', PII: '0.13', TS: '0.26', PFS: '0.6' },
-	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', PII: '0.13', TS: '0.26', PFS: '0.6' },
-	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', PII: '0.13', TS: '0.26', PFS: '0.6' }
+	{ 출원인: '삼성전자', 피인용수: '22', CPP: '4.4', 전체: '4', PII: '1.1', TS: '5.50', PFS: '0.75' },
+	{ 출원인: '엘지전자', 피인용수: '30', CPP: '3', 전체: '4', PII: '0.75', TS: '7.50', PFS: '0.50' },
+	{ 출원인: '구글 엘엘씨', 피인용수: '27', CPP: '9', 전체: '4', PII: '2.25', TS: '6.75', PFS: '3.13' },
+	{ 출원인: '에스케이플래닛 주식회사', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.94' },
+	{ 출원인: '한국전자통신연구원', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.6' },
+	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.6' }
 ];
 
-const maxValue = [30, 9, 2.25, 7.5, 3.13];
+const data = [25, 30, 45, 60, 20];
 
-function IndicatorTable(props) {
+function Cpp(props) {
 	const theme = useTheme();
+	const svgRef = useRef();
+
 	const initialState = {
 		title: '연도별 출원건수',
 		ranges: {
@@ -363,70 +360,104 @@ function IndicatorTable(props) {
 		}
 	};
 
-	const searchs = useSelector(({ searchApp }) => searchApp.searchs.entities);
-	// // const indicator = useSelector(({ searchApp }) => searchApp.searchs.indicator);
+	const lineOptions = {
+		spanGaps: false,
+		legend: {
+			display: false
+		},
+		maintainAspectRatio: false,
+		elements: {
+			point: {
+				radius: 2,
+				borderWidth: 1,
+				hoverRadius: 2,
+				hoverBorderWidth: 1
+			},
+			line: {
+				tension: 0.4
+			}
+		},
+		layout: {
+			padding: {
+				top: 4,
+				left: 4,
+				right: 4,
+				bottom: 4
+			}
+		},
+		scales: {
+			xAxes: [
+				{
+					display: true,
+					ticks: {
+						autoSkip: true,
+						stepSize: 1,
+						beginAtZero: false
+					},
+					gridLines: {
+						display: false
+					}
+				}
+			],
+			yAxes: [
+				{
+					display: true,
+					ticks: {
+						autoSkip: true,
+						stepSize: 1,
+						// min: 1,
+						// max: 50,
+						fontSize: 10
+					},
+					gridLines: {
+						display: false
+					}
+				}
+			]
+		},
+		tooltips: {
+			mode: 'nearest',
+			intersect: true
+			// callbacks: graphicTooltips(graphicId)
+		},
+		plugins: { datalabels: { display: false } }
+	};
 
-	const data = useMemo(() => entities, []);
+	const searchs = useSelector(({ searchApp }) => searchApp.searchs.entities);
+	const indicator = useSelector(({ searchApp }) => searchApp.searchs.indicator);
+
+	// const data = useMemo(() => entities, []);
+
+	const [currentRange, setCurrentRange] = useState('CPP');
 
 	const [filteredData, setFilteredData] = useState(initialState);
 
-	const defaultColumn = useMemo(
-		() => ({
-			width: 80
-		}),
-		[]
-	);
+	const [data, setData] = useState([25, 30, 45, 60, 20]);
 
-	const columns = useMemo(() => {
-		function getColor(value, index) {
-			const hue = maxValue && value ? (value / maxValue[index]).toFixed(1) * 10 : 0;
-			// const hue = 10;
-			if (hue === 0) {
-				return 'font-normal text-blue-100';
-			} else if (hue > 0 && hue < 10) {
-				return 'font-normal text-blue-' + hue * 100;
-			} else if (hue === 10) {
-				return 'font-extrabold text-blue-900 text-12';
-			}
-		}
+	function drawChart(data) {
+		const canvasHeight = 400;
+		const canvasWidth = 600;
+		const scale = 20;
+		const svg = select(svgRef.current);
 
-		return [
-			{
-				Header: '출원인',
-				accessor: '출원인',
-				Cell: row => (
-					<span>
-						<span
-							style={{
-								color: theme.palette.primary.main,
-								transition: 'all .3s ease'
-							}}
-						>
-							&#10625;
-						</span>{' '}
-						{row.value}
-					</span>
-				),
-				className: 'text-12',
-				sortable: true,
-				width: 180
-			}
-		].concat(
-			['피인용수', 'CPP', 'PII', 'TS', 'PFS'].map((item, index) => ({
-				Header: item,
-				accessor: item,
-				className: 'text-12',
-				sortable: true,
-				Cell: props => {
-					return (
-						<div className={getColor(props.cell.value, index)}>
-							<span title={props.cell.value}>{props.cell.value}</span>
-						</div>
-					);
-				}
-			}))
-		);
-	}, [theme.palette.primary.main]);
+		const myLine = line()
+			.x((value, index) => index * 50)
+			.y(value => 150 - value)
+			.curve(curveCardinal);
+
+		const svgCanvas = svg
+			.selectAll('path')
+			.data([data])
+			.join('path')
+			.attr('d', value => myLine(value))
+			.attr('fill', 'none')
+			.attr('stroke', 'blue');
+	}
+
+	useEffect(() => {
+		drawChart(data);
+		// const svg = select(svgRef.current);
+	}, [data]);
 
 	useEffect(() => {
 		function getStats(arr) {
@@ -638,22 +669,29 @@ function IndicatorTable(props) {
 
 	return (
 		<Paper className="w-full h-full shadow-none">
-			<FuseScrollbars className="max-h-360 w-256 sm:w-400 md:w-320 lg:w-400 xl:w-580 px-8">
-				<EnhancedTable
-					columns={columns}
-					data={data}
-					defaultColumn={defaultColumn}
-					size="small"
-					pageSize={9}
-					pageOptions={[9, 18, 27]}
-					onRowClick={(ev, row) => {
-						if (row) {
-						}
-					}}
+			<div className="flex justify-center border-b-1">
+				<PopoverMsg
+					title="피인용도 지수(CPP: Cites per Patent)"
+					variant="body1"
+					msg="CPP 값이 높을수록 기술개발의 측면에서 파급력이 높은 주요특허 또는 원천특허를 많이 가지고 있음을
+					의미함"
 				/>
-			</FuseScrollbars>
+			</div>
+			<div className="flex flex-col sm:flex sm:flex-row p-8 container">
+				<div className="flex flex-1 flex-col w-full w-full">
+					{/* <Line
+						data={{
+							labels: filteredData.mainChart[currentRange].labels,
+							datasets: filteredData.mainChart[currentRange].datasets
+						}}
+						options={lineOptions}
+						height={180}
+					/> */}
+					<svg ref={svgRef}></svg>
+				</div>
+			</div>
 		</Paper>
 	);
 }
 
-export default React.memo(IndicatorTable);
+export default React.memo(Cpp);

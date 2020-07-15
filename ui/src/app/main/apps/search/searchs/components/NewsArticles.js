@@ -82,13 +82,13 @@ function NewsArticles(props) {
 					</div>
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-224 px-8">
+			<FuseScrollbars className="max-h-320 px-8">
 				<EnhancedTable
 					columns={columns}
 					data={data}
 					size="small"
-					pageSize={5}
-					// pageOptions={[5, 10, 25]}
+					pageSize={7}
+					pageOptions={[7, 14, 21]}
 					showHeader={false}
 					onRowClick={(ev, row) => {
 						if (row) {

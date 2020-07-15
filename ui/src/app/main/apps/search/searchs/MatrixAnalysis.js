@@ -3,7 +3,7 @@ import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
+import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';
 import { useSelector, useDispatch } from 'react-redux';
 import * as Actions from '../store/actions';
 // import { Draggable } from 'react-beautiful-dnd';
@@ -38,6 +38,13 @@ function MatrixAnalysis(props) {
 			});
 		}
 	}, [dispatch, searchParams, selectedCategory]);
+
+	const defaultColumn = React.useMemo(
+		() => ({
+			width: 80
+		}),
+		[]
+	);
 
 	const columns = React.useMemo(() => {
 		function getColor(value) {
@@ -236,13 +243,14 @@ function MatrixAnalysis(props) {
 				<SpinLoading />
 			) : (
 				<>
-					<FuseScrollbars className="max-h-256 px-6">
+					<FuseScrollbars className="max-h-360 px-6">
 						<EnhancedTable
 							columns={columns}
+							defaultColumn={defaultColumn}
 							data={data}
 							size="small"
-							pageSize={5}
-							// pageOptions={[6, 12, 25]}
+							pageSize={8}
+							pageOptions={[8, 16, 24]}
 							onRowClick={(ev, row) => {
 								if (row) {
 									// window.open(row.original.link, '_blank');

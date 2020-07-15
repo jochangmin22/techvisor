@@ -63,7 +63,6 @@ function SubjectTable(props) {
 
 		const [newParams] = parseSearchText(form, null);
 		dispatch(Actions.setSearchParams(newParams));
-		// props.history.push('/apps/e-commerce/orders/' + item.id);
 	}
 
 	if (!props) {

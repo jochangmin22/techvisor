@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import MuiTable from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
-// import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
@@ -64,7 +63,6 @@ function SubjectTable(props) {
 
 		const [newParams] = parseSearchText(form, null);
 		dispatch(Actions.setSearchParams(newParams));
-		// props.history.push('/apps/e-commerce/orders/' + item.id);
 	}
 
 	if (!props) {
@@ -72,7 +70,7 @@ function SubjectTable(props) {
 	}
 
 	return (
-		<FuseScrollbars className="max-h-224 px-12 py-0 items-center">
+		<FuseScrollbars className="max-h-288 px-12 py-0 items-center">
 			<MuiTable stickyHeader size="small">
 				<TableHead>
 					<TableRow>

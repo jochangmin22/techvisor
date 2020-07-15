@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import _ from '@lodash';
 import debounce from 'lodash/debounce';
 import echarts from 'echarts';
+import 'echarts/theme/fresh-cut';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 
 const entities = [
 	{ 출원인: '삼성전자', 피인용수: '22', CPP: '4.4', 전체: '4', PII: '1.1', TS: '5.50', PFS: '0.75' },
-	{ 출원인: '엘지전자', 피인용수a: '30', CPP: '3', 전체: '4', PII: '0.75', TS: '7.50', PFS: '0.50' },
+	{ 출원인: '엘지전자', 피인용수: '30', CPP: '3', 전체: '4', PII: '0.75', TS: '7.50', PFS: '0.50' },
 	{ 출원인: '구글 엘엘씨', 피인용수: '27', CPP: '9', 전체: '4', PII: '2.25', TS: '6.75', PFS: '3.13' },
 	{ 출원인: '에스케이플래닛 주식회사', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.94' },
 	{ 출원인: '한국전자통신연구원', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.6' },
@@ -39,7 +39,7 @@ function Cpp(props) {
 			setEchart(null);
 		}
 
-		const myChart = echarts.init(chartRef.current);
+		const myChart = echarts.init(chartRef.current, 'fresh-cut');
 		setEchart(myChart);
 
 		const option = {
@@ -151,7 +151,7 @@ function Cpp(props) {
 					많은 빈도로 인용됨을 나타냄"
 				/>
 			</div>
-			<div id="main" className="w-full h-xs" ref={chartRef}></div>
+			<div id="main" className="w-full h-xs" ref={chartRef} />
 		</Paper>
 	);
 }

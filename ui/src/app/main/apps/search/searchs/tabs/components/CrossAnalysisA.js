@@ -1,28 +1,27 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
-import _ from '@lodash';
+import Typography from '@material-ui/core/Typography';
 import debounce from 'lodash/debounce';
 import echarts from 'echarts';
-import 'echarts/theme/macarons2';
-import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
+import 'echarts/theme/blue';
 
-const entities = [
-	{ 출원인: '삼성전자', 피인용수: '22', CPP: '4.4', 전체: '4', PII: '1.1', TS: '5.50', PFS: '0.75' },
-	{ 출원인: '엘지전자', 피인용수: '30', CPP: '3', 전체: '4', PII: '0.75', TS: '7.50', PFS: '0.50' },
-	{ 출원인: '구글 엘엘씨', 피인용수: '27', CPP: '9', 전체: '4', PII: '2.25', TS: '6.75', PFS: '3.13' },
-	{ 출원인: '에스케이플래닛 주식회사', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.94' },
-	{ 출원인: '한국전자통신연구원', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.6' },
-	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.6' }
-];
+// const entities = [
+// 	{ 출원인: '삼성전자', 피인용수: '22', CPP: '4.4', 전체: '4', PII: '1.1', TS: '5.50', PFS: '0.75' },
+// 	{ 출원인: '엘지전자', 피인용수: '30', CPP: '3', 전체: '4', PII: '0.75', TS: '7.50', PFS: '0.50' },
+// 	{ 출원인: '구글 엘엘씨', 피인용수: '27', CPP: '9', 전체: '4', PII: '2.25', TS: '6.75', PFS: '3.13' },
+// 	{ 출원인: '에스케이플래닛 주식회사', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.94' },
+// 	{ 출원인: '한국전자통신연구원', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.6' },
+// 	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.6' }
+// ];
 
-function Cpp(props) {
+function CrossAnalysis(props) {
 	const chartRef = useRef(null);
 	const [echart, setEchart] = useState(null);
 
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.indicator);
 
-	const data = useMemo(() => entities, []);
+	// const data = useMemo(() => entities, []);
 
 	useEffect(() => {
 		if (entities) {
@@ -39,7 +38,7 @@ function Cpp(props) {
 			setEchart(null);
 		}
 
-		const myChart = echarts.init(chartRef.current, 'macarons2');
+		const myChart = echarts.init(chartRef.current, 'blue');
 		setEchart(myChart);
 
 		const option = {
@@ -61,7 +60,7 @@ function Cpp(props) {
 				}
 			},
 			legend: {
-				data: ['KIPO', 'USPTO', 'JPO', 'EPO']
+				data: ['특허등록수', 'CPP', 'PII', 'TS', 'PFS']
 			},
 			xAxis: [
 				{
@@ -159,16 +158,14 @@ function Cpp(props) {
 	return (
 		<Paper className="w-full h-full shadow-none">
 			<div className="flex justify-center border-b-1">
-				<PopoverMsg
-					title="피인용도 지수(CPP: Cites per Patent)"
-					variant="body1"
-					msg="CPP 값이 높을수록 기술개발의 측면에서 파급력이 높은 주요특허 또는 원천특허를 많이 가지고 있음을
-					의미함"
-				/>
+				<Typography variant="body1" className="my-8">
+					CPP, PII, TS 및 PFS 교차분석
+				</Typography>
+				{/* <PopoverMsg title="CPP, PII, TS 및 PFS 교차분석" variant="body1" msg="" /> */}
 			</div>
 			<div id="main" className="w-full h-xs" ref={chartRef} />
 		</Paper>
 	);
 }
 
-export default React.memo(Cpp);
+export default React.memo(CrossAnalysis);

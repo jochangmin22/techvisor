@@ -42,7 +42,7 @@ const EnhancedTable = ({
 	data,
 	defaultColumn,
 	pageSize: controlledPageSize,
-	// pageOptions: controlledPageOptions,
+	pageOptions: controlledPageOptions,
 	showHeader = true,
 	showFooter = true,
 	rowClick = true,
@@ -55,13 +55,16 @@ const EnhancedTable = ({
 		page,
 		gotoPage,
 		setPageSize,
-		state: { pageIndex, pageSize }
+		state: { pageIndex, pageSize, pageOptions }
 	} = useTable(
 		{
 			columns,
 			data,
 			defaultColumn,
-			initialState: { pageSize: controlledPageSize || 10 },
+			initialState: {
+				pageSize: controlledPageSize || 10,
+				pageOptions: controlledPageOptions || [5, 10, 25]
+			},
 			autoResetPage: true
 		},
 		useBlockLayout,
@@ -172,7 +175,7 @@ const EnhancedTable = ({
 							root: 'overflow-hidden',
 							spacer: 'w-0 max-w-0'
 						}}
-						rowsPerPageOptions={[5, 10, 25, { label: 'All', value: data.length }]}
+						rowsPerPageOptions={pageOptions.concat({ label: 'All', value: data.length })}
 						colSpan={9}
 						count={data.length}
 						rowsPerPage={pageSize}

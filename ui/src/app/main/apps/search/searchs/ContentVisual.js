@@ -99,13 +99,13 @@ function ContentVisual(props) {
 					className={classes.tabs}
 				>
 					{/* <Hidden xsDown> */}
-					<Tab label="워드클" className={classes.tab} {...a11yProps(0)} />
-					<Tab label="연도별" className={classes.tab} {...a11yProps(1)} />
-					<Tab label="기술별" className={classes.tab} {...a11yProps(2)} />
-					<Tab label="주체별" className={classes.tab} {...a11yProps(3)} />
-					<Tab label="출원인" className={classes.tab} {...a11yProps(4)} />
-					<Tab label="발명자" className={classes.tab} {...a11yProps(5)} />
-					<Tab label="지표분석" className={classes.tab} {...a11yProps(6)} />
+					<Tab label="지표분석" className={classes.tab} {...a11yProps(0)} />
+					<Tab label="워드클" className={classes.tab} {...a11yProps(1)} />
+					<Tab label="연도별" className={classes.tab} {...a11yProps(2)} />
+					<Tab label="기술별" className={classes.tab} {...a11yProps(3)} />
+					<Tab label="주체별" className={classes.tab} {...a11yProps(4)} />
+					<Tab label="출원인" className={classes.tab} {...a11yProps(5)} />
+					<Tab label="발명자" className={classes.tab} {...a11yProps(6)} />
 					{/* </Hidden> */}
 
 					{/* <Hidden smUp>
@@ -121,13 +121,21 @@ function ContentVisual(props) {
 			<TabPanel value={tabValue} index={0}>
 				{tabValue === 0 &&
 					(isEmpty ? (
+						<EmptyMsg icon="assessment" msg="특허 지표분석" />
+					) : (
+						<IndicatorAnalysis searchText={searchText} />
+					))}
+			</TabPanel>
+			<TabPanel value={tabValue} index={1}>
+				{tabValue === 1 &&
+					(isEmpty ? (
 						<EmptyMsg icon="text_fields" msg="워드클라우드" />
 					) : (
 						<WordCloud searchText={searchText} />
 					))}
 			</TabPanel>
-			<TabPanel value={tabValue} index={1}>
-				{tabValue === 1 &&
+			<TabPanel value={tabValue} index={2}>
+				{tabValue === 2 &&
 					(isEmpty ? (
 						<EmptyMsg icon="photo" msg="연도별 출원건수" />
 					) : (
@@ -136,8 +144,8 @@ function ContentVisual(props) {
 						</div>
 					))}
 			</TabPanel>
-			<TabPanel value={tabValue} index={2}>
-				{tabValue === 2 &&
+			<TabPanel value={tabValue} index={3}>
+				{tabValue === 3 &&
 					(isEmpty ? (
 						<EmptyMsg icon="layers" msg="기술분야별 동향" />
 					) : (
@@ -146,36 +154,28 @@ function ContentVisual(props) {
 						</div>
 					))}
 			</TabPanel>
-			<TabPanel value={tabValue} index={3}>
-				{tabValue === 3 &&
+			<TabPanel value={tabValue} index={4}>
+				{tabValue === 4 &&
 					(isEmpty ? (
 						<EmptyMsg icon="receipt" msg="출원주체별 건수" />
 					) : (
 						<Classify searchText={searchText} />
 					))}
 			</TabPanel>
-			<TabPanel value={tabValue} index={4}>
-				{tabValue === 4 &&
+			<TabPanel value={tabValue} index={5}>
+				{tabValue === 5 &&
 					(isEmpty ? (
 						<EmptyMsg icon="assessment" msg="출원인별 동향" />
 					) : (
 						<ApplicantsBar searchText={searchText} />
 					))}
 			</TabPanel>
-			<TabPanel value={tabValue} index={5}>
-				{tabValue === 5 &&
+			<TabPanel value={tabValue} index={6}>
+				{tabValue === 6 &&
 					(isEmpty ? (
 						<EmptyMsg icon="assessment" msg="발명자별 동향" />
 					) : (
 						<InventorsBar searchText={searchText} />
-					))}
-			</TabPanel>
-			<TabPanel value={tabValue} index={6}>
-				{tabValue === 6 &&
-					(isEmpty ? (
-						<EmptyMsg icon="assessment" msg="특허 지표분석" />
-					) : (
-						<IndicatorAnalysis searchText={searchText} />
 					))}
 			</TabPanel>
 		</div>
