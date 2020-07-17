@@ -35,7 +35,7 @@ function CrossAnalysis(props) {
 		const option = {
 			grid: {
 				left: '3%',
-				right: '7%',
+				right: '25%',
 				bottom: '3%',
 				containLabel: true
 			},
@@ -60,16 +60,32 @@ function CrossAnalysis(props) {
 			},
 			toolbox: {
 				feature: {
-					dataZoom: {},
+					dataZoom: { show: true, title: { zoom: '영역 줌', back: '줌 복원' } },
 					brush: {
-						type: ['rect', 'polygon', 'clear']
+						type: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
+						title: {
+							rect: '사각형 그리기',
+							polygon: '폴리곤 그리기',
+							lineX: '라인X 그리기',
+							lineY: '라인Y 그리기',
+							keep: '유지',
+							clear: '초기화'
+						}
+					},
+					saveAsImage: {
+						show: true,
+						name: 'ipgrim 교차분석 차트2',
+						title: '이미지로 저장',
+						lang: ['Click to Save']
 					}
 				}
 			},
 			brush: {},
 			legend: {
-				data: ['KR', 'US', 'NZ', 'CA', 'FR', 'GB', 'NL', 'CH', 'JP', 'CN', 'DE', 'IL'],
-				left: 'center'
+				right: 10,
+				top: '15%',
+				orient: 'vertical',
+				data: ['KR', 'US', 'NZ', 'CA', 'FR', 'GB', 'NL', 'CH', 'JP', 'CN', 'DE', 'IL']
 			},
 			xAxis: [
 				{

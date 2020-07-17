@@ -33,8 +33,7 @@ def parse_matrix(request):
         "status",
         "ipType",
     ]:
-        params[value] = request.GET.get(
-            value) if request.GET.get(value) else ""
+        params[value] = request.GET.get(value,'')
     apiParams = "¶".join(
         params.values()) if params['searchNum'] == '' else params['searchNum']
 

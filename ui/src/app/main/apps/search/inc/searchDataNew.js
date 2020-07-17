@@ -7466,9 +7466,12 @@ const searchData = {
 		searchNum: ''
 	},
 	searchScope: {
-		volume: '',
-		limit: 100,
-		offset: 0
+		searchVolume: "",
+		wordCloudScope: {
+			volume: '요약',
+			unit: "구문",
+			output: 50
+		}
 	},
 	searchLoading: false,
 	searchSubmit: false,
@@ -8820,309 +8823,309 @@ const searchData = {
 	},
 	wordCloud: [
 		{
-			name: '이미지',
-			value: 1389
+			name: '텍스트 정보',
+			value: 68
 		},
 		{
-			name: '정보',
-			value: 1171
+			name: '이미지 데이터',
+			value: 52
 		},
 		{
-			name: '인식',
-			value: 936
+			name: '위치 정보',
+			value: 48
 		},
 		{
-			name: '텍스트',
-			value: 914
+			name: '텍스트 데이터',
+			value: 47
 		},
 		{
-			name: '데이터',
-			value: 580
+			name: '차량 번호',
+			value: 45
 		},
 		{
-			name: '시스템',
-			value: 457
+			name: '문자 인식',
+			value: 44
 		},
 		{
-			name: '입력',
-			value: 436
+			name: '이동 통신 단말기',
+			value: 39
 		},
 		{
-			name: '저장',
-			value: 419
+			name: '이미지 파일',
+			value: 39
 		},
 		{
-			name: '차량',
-			value: 357
+			name: '음성 데이터',
+			value: 31
 		},
 		{
-			name: '추출',
-			value: 356
+			name: '음성 인식',
+			value: 30
 		},
 		{
-			name: '문자',
-			value: 349
+			name: '개인 정보',
+			value: 29
 		},
 		{
-			name: '서버',
-			value: 331
+			name: '웹 페이지',
+			value: 28
 		},
 		{
-			name: '영상',
-			value: 310
+			name: '텍스트 파일',
+			value: 27
 		},
 		{
-			name: '음성',
-			value: 300
+			name: '디스플레이 부',
+			value: 27
 		},
 		{
-			name: '전송',
-			value: 285
+			name: '번호판 이미지',
+			value: 25
 		},
 		{
-			name: '단말기',
-			value: 263
+			name: 'QR 코드',
+			value: 25
 		},
 		{
-			name: '촬영',
-			value: 258
+			name: '텍스트 이미지',
+			value: 25
 		},
 		{
-			name: '파일',
-			value: 244
+			name: '이미지 정보',
+			value: 23
 		},
 		{
-			name: '변환',
-			value: 236
+			name: '전화 번호',
+			value: 21
 		},
 		{
-			name: '출력',
-			value: 235
+			name: '기 설정',
+			value: 20
 		},
 		{
-			name: '수신',
-			value: 235
+			name: '디지털 펜',
+			value: 19
 		},
 		{
-			name: '코드',
-			value: 225
+			name: '차원 바코드',
+			value: 18
 		},
 		{
-			name: '서비스',
-			value: 224
+			name: '인식 코드',
+			value: 18
 		},
 		{
-			name: '문서',
-			value: 219
+			name: '문서 이미지',
+			value: 18
 		},
 		{
-			name: '카메라',
-			value: 210
+			name: '명함 앱',
+			value: 18
 		},
 		{
-			name: '관리',
-			value: 209
+			name: '좌표 값',
+			value: 17
 		},
 		{
-			name: '표시',
-			value: 208
+			name: '스마트 기기',
+			value: 17
 		},
 		{
-			name: '화면',
-			value: 205
+			name: '사운드 생성기',
+			value: 17
 		},
 		{
-			name: '위치',
-			value: 204
+			name: '텍스트 형태',
+			value: 16
 		},
 		{
-			name: '검색',
-			value: 201
+			name: '코드 이미지',
+			value: 15
 		},
 		{
-			name: '번호',
-			value: 197
+			name: '전자 문서',
+			value: 15
 		},
 		{
-			name: '디스플레이',
-			value: 196
+			name: '단말 A',
+			value: 15
 		},
 		{
-			name: '해당',
-			value: 192
+			name: '해당 차량',
+			value: 15
 		},
 		{
-			name: '모듈',
-			value: 189
+			name: '코드 정보',
+			value: 15
 		},
 		{
-			name: '광고',
-			value: 181
+			name: '차량 번호판',
+			value: 15
 		},
 		{
-			name: '콘텐츠',
-			value: 177
+			name: '이동 단말기',
+			value: 15
 		},
 		{
-			name: '명함',
-			value: 163
+			name: '검색 결과',
+			value: 14
 		},
 		{
-			name: '기능',
-			value: 160
+			name: '스캔 이미지',
+			value: 14
 		},
 		{
-			name: '제어',
-			value: 154
+			name: '광학 문자 인식',
+			value: 13
 		},
 		{
-			name: '결과',
-			value: 153
+			name: '체납 차량',
+			value: 13
 		},
 		{
-			name: '전자',
-			value: 150
+			name: '영상 데이터',
+			value: 13
 		},
 		{
-			name: '설정',
-			value: 149
+			name: '모바일 컴퓨팅 디바이스',
+			value: 13
 		},
 		{
-			name: '분석',
-			value: 148
+			name: '출력 부',
+			value: 13
 		},
 		{
-			name: '디지털',
-			value: 145
+			name: '영상 정보',
+			value: 13
 		},
 		{
-			name: '기반',
-			value: 144
+			name: '명함 이미지',
+			value: 13
 		},
 		{
-			name: '메시지',
-			value: 144
+			name: '화면 돋보기',
+			value: 13
 		},
 		{
-			name: '확인',
-			value: 142
+			name: '텍스트 블록',
+			value: 12
 		},
 		{
-			name: '개인',
-			value: 141
+			name: '멀티미디어 메시지 통합 서버',
+			value: 12
 		},
 		{
-			name: '자동',
-			value: 140
+			name: '터치 스크린',
+			value: 12
 		},
 		{
-			name: '통신',
-			value: 139
+			name: '웹 브라우저',
+			value: 12
 		}
 	],
 	subjectRelation: {
 		topic: [
-			'이미지',
-			'정보',
-			'인식',
-			'텍스트',
-			'데이터',
-			'시스템',
-			'입력',
-			'저장',
-			'차량',
-			'추출',
-			'문자',
-			'서버',
-			'영상',
-			'음성',
-			'전송',
-			'단말기',
-			'촬영',
-			'파일',
-			'변환',
-			'출력'
+			'텍스트 정보',
+			'이미지 데이터',
+			'위치 정보',
+			'텍스트 데이터',
+			'차량 번호',
+			'문자 인식',
+			'이동 통신 단말기',
+			'이미지 파일',
+			'음성 데이터',
+			'음성 인식',
+			'개인 정보',
+			'웹 페이지',
+			'텍스트 파일',
+			'디스플레이 부',
+			'번호판 이미지',
+			'QR 코드',
+			'텍스트 이미지',
+			'이미지 정보',
+			'전화 번호',
+			'기 설정'
 		],
 		vec: [
 			{
-				label: '텍스트',
-				value: 0.745407223701477
+				label: '이미지 정보',
+				value: 0.7920637614792322
 			},
 			{
-				label: '문자',
-				value: 0.650317907333374
+				label: '중앙 서버',
+				value: 0.7920637614702673
 			},
 			{
-				label: '표준',
-				value: 0.6282185316085815
+				label: '단속 카메라',
+				value: 0.7749372720718384
 			},
 			{
-				label: '제시',
-				value: 0.6135447025299072
+				label: '지추 출부',
+				value: 0.761283278465271
 			},
 			{
-				label: 'text',
-				value: 0.608098030090332
+				label: '번호판 이미지',
+				value: 0.7513125538825989
 			},
 			{
-				label: '경색',
-				value: 0.605047881603241
+				label: '무선 전송',
+				value: 0.7473723292350769
 			},
 			{
-				label: '엔진',
-				value: 0.6009020805358887
+				label: '추가 정보',
+				value: 0.7049371004104614
 			},
 			{
-				label: '보정',
-				value: 0.5873429179191589
+				label: '스마트폰 단말기',
+				value: 0.7018114328384399
 			},
 			{
-				label: '음소',
-				value: 0.5863364934921265
+				label: '모델 명',
+				value: 0.7002522945404053
 			},
 			{
-				label: '암호',
-				value: 0.5800921320915222
+				label: '동영상 정보',
+				value: 0.6992709636688232
 			},
 			{
-				label: '문장',
-				value: 0.5766615271568298
+				label: '정보 단말기',
+				value: 0.6964386701583862
 			},
 			{
-				label: '종이',
-				value: 0.5672581195831299
+				label: '영상 처 리부',
+				value: 0.6882354021072388
 			},
 			{
-				label: '광학',
-				value: 0.5669529438018799
+				label: '고객 정보',
+				value: 0.6720424294471741
 			},
 			{
-				label: '추출기',
-				value: 0.5668765306472778
+				label: '촬영 차량',
+				value: 0.6677547693252563
 			},
 			{
-				label: '당해',
-				value: 0.5637927055358887
+				label: '적외선 조사 부',
+				value: 0.6478091478347778
 			},
 			{
-				label: '영문',
-				value: 0.552227258682251
+				label: '인식 부',
+				value: 0.6375088691711426
 			},
 			{
-				label: '변환',
-				value: 0.5521508455276489
+				label: '문자 정보',
+				value: 0.6360438466072083
 			},
 			{
-				label: '추출',
-				value: 0.5425535440444946
+				label: '음성 정보',
+				value: 0.6307920637614729
 			},
 			{
-				label: '입력',
-				value: 0.5359704494476318
+				label: '방송 프로그램',
+				value: 0.6277647614479065
 			},
 			{
-				label: '필드',
-				value: 0.5337544083595276
+				label: '위반 차량',
+				value: 0.6241400241851807
 			}
 		],
 		modelType: 'word2vec'

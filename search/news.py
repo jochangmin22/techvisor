@@ -57,7 +57,7 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
         # "status",
         # "ipType",
     ]:
-        params[value] = request.GET.get(value) if request.GET.get(value) else ""
+        params[value] = request.GET.get(value, '')
     apiParams = "news¶".join(params.values()) if params['searchNum'] == '' else params['searchNum']
 
 
@@ -126,7 +126,7 @@ def parse_news_nlp(request, mode="needJson"):
         "searchText",
         "searchNum",
     ]:
-        params[value] = request.GET.get(value) if request.GET.get(value) else ""
+        params[value] = request.GET.get(value, '')
     apiParams = "news¶".join(params.values()) if params['searchNum'] == '' else params['searchNum']
 
     # is there data in Redis
@@ -173,7 +173,7 @@ def parse_related_company(request, mode="needJson"):
         "searchText",
         "searchNum",
     ]:
-        params[value] = request.GET.get(value) if request.GET.get(value) else ""
+        params[value] = request.GET.get(value, '')
     apiParams = "news¶".join(params.values()) if params['searchNum'] == '' else params['searchNum']
 
     # is there data in Redis
@@ -240,7 +240,7 @@ def parse_news_sa(request):
         "searchText",
         "searchNum",
     ]:
-        params[value] = request.GET.get(value) if request.GET.get(value) else ""
+        params[value] = request.GET.get(value, '')
     apiParams = "news¶".join(params.values()) if params['searchNum'] == '' else params['searchNum']
 
     # is there data in Redis

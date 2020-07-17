@@ -53,13 +53,31 @@ function CrossAnalysis(props) {
 			},
 			toolbox: {
 				feature: {
-					dataView: { show: true, readOnly: false },
-					magicType: { show: true, type: ['line', 'bar'] },
-					restore: { show: true },
-					saveAsImage: { show: true }
+					dataView: {
+						show: true,
+						title: '표로 보기',
+						lang: ['표로 보기', '닫기', '갱신'],
+						readOnly: false
+					},
+					magicType: {
+						show: true,
+						title: { line: '선', bar: '바', stack: '누적 막대', tiled: '타일' },
+						type: ['line', 'bar', 'stack', 'tiled']
+					},
+					restore: { show: true, title: '원래대로' },
+					saveAsImage: {
+						show: true,
+						name: 'ipgrim 교차분석 차트1',
+						title: '이미지로 저장',
+						lang: ['Click to Save']
+					}
 				}
 			},
 			legend: {
+				right: 'center',
+				bottom: 0,
+				orient: 'horizontal',
+				width: '100%',
 				data: ['특허등록수', 'CPP', 'PII', 'TS', 'PFS']
 			},
 			xAxis: [
