@@ -18,9 +18,12 @@ const initialState = {
 		ipType: []
 	},
 	searchScope: {
-		volume: '',
-		limit: 100,
-		offset: 0
+		searchVolume: '',
+		wordCloudScope: {
+			volume: '요약',
+			unit: '구문', // '워드',
+			output: 50
+		}
 	},
 	searchLoading: null,
 	searchSubmit: null,
@@ -124,7 +127,19 @@ const searchsReducer = function (state = initialState, action) {
 		case Actions.SET_SEARCH_VOLUME: {
 			return {
 				...state,
-				searchVolume: action.searchVolume
+				searchScope: {
+					...state.searchScope,
+					searchVolume: action.searchVolume
+				}
+			};
+		}
+		case Actions.SET_WORDCLOUD_SCOPE: {
+			return {
+				...state,
+				searchScope: {
+					...state.searchScope,
+					wordCloudScope: action.wordCloudScope
+				}
 			};
 		}
 		case Actions.SET_SEARCH_SUBMIT: {

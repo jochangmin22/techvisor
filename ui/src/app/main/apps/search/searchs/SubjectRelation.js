@@ -17,6 +17,7 @@ function SubjectRelation(props) {
 	const { searchText, searchNum } = props;
 	const subjectRelation = useSelector(({ searchApp }) => searchApp.searchs.subjectRelation);
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
+	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
 
 	const [vecData, setVecData] = useState(null);
 	const [modelType, setModelType] = useState(subjectRelation.modelType);
@@ -44,6 +45,7 @@ function SubjectRelation(props) {
 			setShowLoading(true);
 			const [, newApiParams] = parseSearchText(searchParams, null);
 			newApiParams.modelType = modelType;
+			newApiParams.searchScope = searchScope;
 			dispatch(Actions.resetSubjectRelationVec(subjectRelation.topic));
 			dispatch(Actions.updateSubjectRelation(newApiParams)).then(() => {
 				setShowLoading(false);
@@ -82,8 +84,8 @@ function SubjectRelation(props) {
 				{vecData && vecData.length !== 0 && !showLoading ? (
 					<SubjectTable data={vecData} />
 				) : (
-					<SpinLoading delay={20000} />
-				)}
+						<SpinLoading delay={20000} />
+					)}
 			</Paper>
 		</SubjectContext.Provider>
 	);

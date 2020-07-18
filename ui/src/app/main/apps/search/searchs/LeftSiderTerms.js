@@ -26,6 +26,7 @@ import * as Actions from '../store/actions';
 import { showMessage } from 'app/store/actions';
 
 // TODO: change focus next textField
+// TODO: DnD word chip
 const useStyles = makeStyles(theme => ({
 	root: {
 		'& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
@@ -88,10 +89,9 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	const { options, defaultFormValue } = LeftConfig;
 	const [searchVolume, setSearchVolume] = useState('SUM');
 
-	// const [anchorEl, setAnchorEl] = useState(null);
-
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const searchSubmit = useSelector(({ searchApp }) => searchApp.searchs.searchSubmit);
+	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
 
 	const [submitted, setSubmitted] = useState(searchSubmit);
 
@@ -266,6 +266,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 			return;
 		}
 		newApiParams['searchVolume'] = searchVolume;
+		newApiParams['searchScope'] = searchScope;
 
 		dispatch(Actions.setSearchLoading(true));
 		dispatch(Actions.clearSearchs());
@@ -470,17 +471,9 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 							value: item,
 							label: item
 						}))}
-						onChange={e => handleChipChange(e, 'patentOffice')}
-						// onChange={handleChange}
-						// onChange={value =>
-						//     handleChipChange(value, "patentOffice")
-						// }
+						onChange={v => handleChipChange(v, 'patentOffice')}
 						placeholder="특허 기관"
 						textFieldProps={{
-							// label: "날짜 종류",
-							// InputLabelProps: {
-							//     shrink: true
-							// },
 							variant: 'outlined'
 						}}
 						styles={{
@@ -503,13 +496,9 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 							value: item,
 							label: item
 						}))}
-						onChange={value => handleChipChange(value, 'language')}
+						onChange={v => handleChipChange(v, 'language')}
 						placeholder="언어"
 						textFieldProps={{
-							// label: "날짜 종류",
-							// InputLabelProps: {
-							//     shrink: true
-							// },
 							variant: 'outlined'
 						}}
 						styles={{
@@ -532,14 +521,9 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 							value: item,
 							label: item
 						}))}
-						// onChange={value => handleChipChange(value, "status")}
-						onChange={value => handleChipChange(value, 'status')}
+						onChange={v => handleChipChange(v, 'status')}
 						placeholder="상태"
 						textFieldProps={{
-							// label: "날짜 종류",
-							// InputLabelProps: {
-							//     shrink: true
-							// },
 							variant: 'outlined'
 						}}
 						styles={{
@@ -606,13 +590,9 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 							value: item,
 							label: item
 						}))}
-						onChange={value => handleChipChange(value, 'ipType')}
+						onChange={v => handleChipChange(v, 'ipType')}
 						placeholder="종류"
 						textFieldProps={{
-							// label: "날짜 종류",
-							// InputLabelProps: {
-							//     shrink: true
-							// },
 							variant: 'outlined'
 						}}
 						styles={{
@@ -666,7 +646,6 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
                         ))}
                     </Select> */}
 				</div>
-				{/* </div> */}
 			</div>
 		</FuseScrollbars>
 	);

@@ -9,6 +9,7 @@ export const SET_CLICKED_SEARCH_ID = '[SEARCH APP] SET CLICKED SEARCH ID';
 export const SET_SEARCH_PARAMS = '[SEARCH APP] SET SEARCH PARAMS';
 export const SET_SEARCH_NUM = '[SEARCH APP] SET SEARCH NUM';
 export const SET_SEARCH_VOLUME = '[SEARCH APP] SET SEARCH VOLUME';
+export const SET_WORDCLOUD_SCOPE = '[SEARCH APP] SET WORDCLOUD SCOPE';
 export const SET_SEARCH_SUBMIT = '[SEARCH APP] SET SEARCH SUBMIT';
 
 export const SET_MOCK_DATA = '[SEARCH APP] SET MOCK DATA';
@@ -153,6 +154,13 @@ export function setSearchVolume(data) {
 	return {
 		type: SET_SEARCH_VOLUME,
 		searchVolume: data
+	};
+}
+
+export function setWordCloudScope(data) {
+	return {
+		type: SET_WORDCLOUD_SCOPE,
+		wordCloudScope: data
 	};
 }
 

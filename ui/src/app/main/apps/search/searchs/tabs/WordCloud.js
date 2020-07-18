@@ -11,7 +11,8 @@ import { showMessage } from 'app/store/actions/fuse';
 import _ from '@lodash';
 import debounce from 'lodash/debounce';
 import randomColor from 'randomcolor';
-import WordCloudToobar from './components/WordCloudToobar';
+// import WordCloudToobar from './components/WordCloudToobar';
+import WordCloudMenu from './components/WordCloudMenu';
 
 function WordCloud(props) {
 	const dispatch = useDispatch();
@@ -30,7 +31,8 @@ function WordCloud(props) {
 		// eslint-disable-next-line
 	}, [entities]);
 
-	function handleClick(value, name = 'terms') {
+	function handleClick(chart, value, name = 'terms') {
+		chart.setOption({ animation: false });
 		const newArray = form[name];
 		const newValue = value.trim();
 		let existCheck = true;
@@ -60,10 +62,12 @@ function WordCloud(props) {
 
 		const [newParams] = parseSearchText(form, null);
 		dispatch(Actions.setSearchParams(newParams));
+		chart.setOption({ animation: true });
+		return;
 	}
 
 	const drawChart = () => {
-		// if (!entities.data) return;
+		if (!entities || entities.length === 0) return;
 
 		if (echart) {
 			echart.dispose();
@@ -78,111 +82,64 @@ function WordCloud(props) {
 			tooltip: {
 				pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
 			},
+			toolbox: {
+				bottom: 10,
+				right: 10,
+				feature: {
+					saveAsImage: {
+						show: true,
+						name: 'ipgrim 워드클라우드',
+						title: '이미지로 저장',
+						lang: ['Click to Save']
+					}
+				}
+			},
 			series: [
 				{
 					type: 'wordCloud',
-
-					// The shape of the "cloud" to draw. Can be any polar equation represented as a
-					// callback function, or a keyword present. Available presents are circle (default),
-					// cardioid (apple or heart shape curve, the most known polar equation), diamond (
-					// alias of square), triangle-forward, triangle, (alias of triangle-upright, pentagon, and star.
-
-					shape: 'pentagon',
-
-					// A silhouette image which the white area will be excluded from drawing texts.
-					// The shape option will continue to apply as the shape of the cloud to grow.
-
-					// maskImage: maskImage,
-					// maskImage: false,
-
-					// Folllowing left/top/width/height/right/bottom are used for positioning the word cloud
-					// Default to be put in the center and has 75% x 80% size.
-
+					shape: 'pentagon', // circle, cardioid, diamond, triangle-forward, triangle, pentagon, star
+					maskImage: false,
 					left: 'center',
 					top: 'center',
-					width: '100%',
-					height: '100%',
+					width: '90%',
+					height: '90%',
 					right: null,
 					bottom: null,
-
-					// Text size range which the value in data will be mapped to.
-					// Default to have minimum 12px and maximum 60px size.
-
-					sizeRange: [15, 60],
-
-					// Text rotation range and step in degree. Text will be rotated randomly in range [-90, 90] by rotationStep 45
-
+					sizeRange: [12, 60],
 					rotationRange: [0, 0],
-					rotationStep: 90,
-
-					// size of the grid in pixels for marking the availability of the canvas
-					// the larger the grid size, the bigger the gap between words.
-
+					// rotationStep: 90,
 					gridSize: 8,
-
-					// set to true to allow word being draw partly outside of the canvas.
-					// Allow word bigger than the size of the canvas to be drawn
 					drawOutOfBound: false,
 
 					// Global text style
 					textStyle: {
 						normal: {
 							fontFamily: 'Noto Sans KR',
-							fontWeight: 'bold',
+							fontWeight: '500',
 							// Color can be a callback function or a color string
 							color: function () {
 								return randomColor({
-									luminosity: 'bright',
-									hue: 'blue',
+									luminosity: 'bright', // bright, light, dark or random
+									hue: 'blue', // red, orange, yellow, green, blue, purple, pink, monochrome or random
 									format: 'rgb'
-									// luminosity: "bright" // bright, light, dark or random
-									// hue: "blue", // red, orange, yellow, green, blue, purple, pink, monochrome or random
 								});
 							}
-							// color: function () {
-							// 	// Random color
-							// 	return (
-							// 		'rgb(' +
-							// 		[
-							// 			Math.round(Math.random() * 160),
-							// 			Math.round(Math.random() * 160),
-							// 			Math.round(Math.random() * 160)
-							// 		].join(',') +
-							// 		')'
-							// 	);
-							// }
 						},
 						emphasis: {
 							shadowBlur: 10,
 							shadowColor: '#333'
 						}
 					},
-
-					// Data is an array. Each array item must have name and value property.
 					data: entities
-					// data: [
-					// 	{
-					// 		name: 'Farrah Abraham',
-					// 		value: 366,
-					// 		// Style of single text
-					// 		textStyle: {
-					// 			normal: {},
-					// 			emphasis: {}
-					// 		}
-					// 	}
-					// ]
 				}
 			]
 		};
-
-		// setSeries(option.series);
-		// setXAxis(option.xAxis);
-
 		myChart.setOption(option);
 
 		myChart.on('click', param => {
-			console.log(param);
-			handleClick(param.name);
+			if (param.name) {
+				handleClick(myChart, param.name);
+			}
 		});
 	};
 
@@ -205,7 +162,9 @@ function WordCloud(props) {
 
 	return (
 		<Paper className="w-full h-full rounded-8 shadow-none">
-			<WordCloudToobar />
+			<div className="flex justify-end">
+				<WordCloudMenu />
+			</div>
 			<div id="main" className="w-full h-360" ref={chartRef}></div>
 		</Paper>
 	);

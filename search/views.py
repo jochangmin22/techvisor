@@ -16,8 +16,9 @@ from .search import (
     parse_search_applicant_trend,
     parse_search_similar
 )
+
 # from .test import parse_test
-from .nlp import kr_nlp
+from .nlp import kr_nlp, parse_wordcloud, parse_vec
 from .news import parse_news, parse_news_nlp, parse_related_company, parse_news_sa
 from .matrix import parse_matrix, parse_matrix_dialog
 
@@ -86,7 +87,7 @@ def get_search_similar(request):
 
 
 def get_wordcloud(request):
-    return kr_nlp(request, "wordcloud")
+    return parse_wordcloud(request)
 
 
 def get_topic(request):
@@ -94,7 +95,7 @@ def get_topic(request):
 
 
 def get_vec(request):
-    return kr_nlp(request, "vec")
+    return parse_vec(request)
 
 
 def get_news(request):

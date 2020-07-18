@@ -2,17 +2,27 @@ import { useForm } from '@fuse/hooks';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
-// import ChecklistModel from 'app/main/apps/scrumboard/model/ChecklistModel';
-import React, { useEffect, useState } from 'react';
 import ToolbarMenu from './ToolbarMenu';
-import { RadioGroup, FormControlLabel, Radio, FormLabel, FormControl, MenuItem, Select } from '@material-ui/core';
+import Tooltip from '@material-ui/core/Tooltip';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Radio from '@material-ui/core/Radio';
+import FormLabel from '@material-ui/core/FormLabel';
+import FormControl from '@material-ui/core/FormControl';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import { useSelector, useDispatch } from 'react-redux';
+import * as Actions from '../../../store/actions';
+import React, { useState } from 'react';
 
 function WordCloudMenu(props) {
+	const dispatch = useDispatch();
+	const wordCloudScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope.wordCloudScope);
 	const [anchorEl, setAnchorEl] = useState(null);
 
 	const [value, setValue] = React.useState('구문');
 
-	const { form: menuForm, handleChange, setForm, setInForm } = useForm({ 단위: '구문', 출력수: 100 });
+	const { form, handleChange, setForm, setInForm } = useForm(wordCloudScope);
 
 	// const handleChange = event => {
 	// 	setValue(event.target.value);
@@ -36,33 +46,40 @@ function WordCloudMenu(props) {
 		if (isFormInvalid()) {
 			return;
 		}
+		dispatch(Actions.setWordCloudScope(form));
 		// props.onAddCheckList(new ChecklistModel(form));
 		handleMenuClose();
 	}
 
 	return (
 		<div>
-			<IconButton color="inherit" onClick={handleMenuOpen}>
-				<Icon>more_vert</Icon>
-			</IconButton>
+			<Tooltip title="워드클라우드 설정">
+				<IconButton onClick={handleMenuOpen}>
+					<Icon>more_vert</Icon>
+				</IconButton>
+			</Tooltip>
 			<ToolbarMenu state={anchorEl} onClose={handleMenuClose}>
 				<form onSubmit={handleSubmit} className="p-16 flex flex-col">
+					<FormControl className="flex min-w-96 mb-24" component="fieldset">
+						<FormLabel component="legend">검색범위</FormLabel>
+						<Select aria-label="검색범위" name="volume" value={form.volume} onChange={handleChange}>
+							{['요약', '청구항', '발명의 설명'].map(key => (
+								<MenuItem value={key} key={key}>
+									{key}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
 					<FormControl className="flex" component="fieldset">
 						<FormLabel component="legend">키워드 단위</FormLabel>
-						<RadioGroup
-							aria-label="키워드 단위"
-							name="단위"
-							value={menuForm.단위}
-							onChange={handleChange}
-							row
-						>
+						<RadioGroup aria-label="키워드 단위" name="unit" value={form.unit} onChange={handleChange} row>
 							<FormControlLabel value="구문" control={<Radio />} label="구문" />
 							<FormControlLabel value="워드" control={<Radio />} label="워드" />
 						</RadioGroup>
 					</FormControl>
 					<FormControl className="flex min-w-96 mb-24" component="fieldset">
 						<FormLabel component="legend">워드 출력수</FormLabel>
-						<Select labelId="워드 출력수" name="출력수" value={menuForm.출력수} onChange={handleChange}>
+						<Select labelId="워드 출력수" name="output" value={form.output} onChange={handleChange}>
 							{[50, 100, 150, 200].map(key => (
 								<MenuItem value={key} key={key}>
 									{key}
