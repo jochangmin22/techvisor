@@ -6,7 +6,7 @@ import Select from '@material-ui/core/Select';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import * as Actions from '../../store/actions';
+import { getSimilar, resetSimilar, updateSimilarModelType } from '../../store/searchSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import SimilarTable from './SimilarTable';
 
@@ -34,10 +34,10 @@ function Similar(props) {
 
 	useEffect(() => {
 		if (modelType) {
-			dispatch(Actions.updateSimilarModelType(modelType));
+			dispatch(updateSimilarModelType(modelType));
 			setShowLoading(true);
-			dispatch(Actions.resetSimilar());
-			dispatch(Actions.getSimilar({ appNo: appNo, modelType: modelType })).then(() => {
+			dispatch(resetSimilar());
+			dispatch(getSimilar({ appNo: appNo, modelType: modelType })).then(() => {
 				setShowLoading(false);
 			});
 		}

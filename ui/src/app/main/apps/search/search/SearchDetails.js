@@ -15,8 +15,21 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import withReducer from 'app/store/withReducer';
 import { Link } from 'react-router-dom';
 import Highlighter from 'react-highlight-words';
-import reducer from '../store/reducers';
-import * as Actions from '../store/actions';
+import reducer from '../store';
+import {
+	getSearch,
+	getQuote,
+	getFamily,
+	getIpcCpc,
+	getRnd,
+	getLegal,
+	getRegisterFee,
+	getRightHolder,
+	getApplicant,
+	getApplicantTrend,
+	getSimilar,
+	resetSearch
+} from '../store/searchSlice';
 
 import PatInfo from './tabs/PatInfo';
 import Specification from './tabs/Specification';
@@ -50,25 +63,25 @@ function SearchDetails(props) {
 
 	useEffect(() => {
 		const params = { appNo: appNo };
-		dispatch(Actions.resetSearch());
-		dispatch(Actions.getSearch(params));
-		dispatch(Actions.getQuote(params));
-		dispatch(Actions.getFamily(params));
-		dispatch(Actions.getLegal(params));
-		dispatch(Actions.getSimilar(params));
-		dispatch(Actions.getIpcCpc(params));
-		dispatch(Actions.getRnd(params));
+		dispatch(resetSearch());
+		dispatch(getSearch(params));
+		dispatch(getQuote(params));
+		dispatch(getFamily(params));
+		dispatch(getLegal(params));
+		dispatch(getSimilar(params));
+		dispatch(getIpcCpc(params));
+		dispatch(getRnd(params));
 		if (cusNo) {
 			const params = { cusNo: cusNo };
-			dispatch(Actions.getApplicant(params));
-			dispatch(Actions.getApplicantTrend(params));
+			dispatch(getApplicant(params));
+			dispatch(getApplicantTrend(params));
 		}
 		if (rgNo) {
 			const params = { rgNo: rgNo };
-			dispatch(Actions.getRegisterFee(params));
-			dispatch(Actions.getRightHolder(params));
+			dispatch(getRegisterFee(params));
+			dispatch(getRightHolder(params));
 		}
-		// dispatch(Actions.getRightfullOrder({appNo: appNo}));
+		// dispatch(getRightfullOrder({appNo: appNo}));
 		// eslint-disable-next-line
 	}, [dispatch, props.match.params]);
 

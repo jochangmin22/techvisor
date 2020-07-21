@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import clsx from 'clsx';
 import _ from '@lodash';
 import * as Actions from 'app/main/search/store/actions';
-import reducer from '../../store/reducers';
+import reducer from '../../store';
 // import ApplicantMTable from "./ApplicantMTable";
 import ApplicantRTable from './ApplicantRTable';
 // import ApplicantTable from "./ApplicantTable";
@@ -41,7 +41,7 @@ function ApplicantMenu(props) {
 	// }, [searchText]);
 
 	const handleOnChange = useDebounce(searchText => {
-		dispatch(Actions.getApplicantTable(searchText));
+		dispatch(getApplicantTable(searchText));
 	}, 0);
 
 	useEffect(() => {
@@ -74,8 +74,8 @@ function ApplicantMenu(props) {
 		}
 		setApplicantForm(newApplicantForm.name);
 		// setApplicantForm(searchText);
-		// dispatch(Actions.getApplicantTable(newApplicantForm.name));
-		// dispatch(Actions.getApplicantTable(searchText));
+		// dispatch(getApplicantTable(newApplicantForm.name));
+		// dispatch(getApplicantTable(searchText));
 		// const newSearchText = new ApplicantModel(newApplicantForm);
 		// setApplicantForm(
 		//     _.setIn(applicantForm, newSearchText.id, newSearchText)
@@ -162,9 +162,7 @@ function ApplicantMenu(props) {
 									<IconButton
 										className="w-32 h-32 mx-4 p-0"
 										aria-label="close"
-										onClick={ev =>
-											dispatch(Actions.toggleApplicantClickAway(applicantClickAwayOpen))
-										}
+										onClick={ev => dispatch(toggleApplicantClickAway(applicantClickAwayOpen))}
 									>
 										<Icon fontSize="small">close</Icon>
 									</IconButton>
@@ -200,7 +198,7 @@ function ApplicantMenu(props) {
                                     size="small"
                                     color="secondary"
                                     // onClick={() => {
-                                    //     dispatch(Actions.doSearch());
+                                    //     dispatch(doSearch());
                                     // }}
                                 >
                                     <span className="hidden sm:flex">

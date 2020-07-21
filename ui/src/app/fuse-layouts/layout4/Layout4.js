@@ -184,7 +184,7 @@ function Layout4(props) {
 									config.footer.position === 'below' &&
 									config.footer.style === 'fixed' && <FooterLayout4 />}
 
-								{config.settingsPanel.display && <SettingsPanel />}
+								<SettingsPanel />
 							</div>
 
 							{config.navbar.display && config.navbar.position === 'right' && <NavbarWrapperLayout4 />}

@@ -110,7 +110,7 @@ function ApplicantMTable(props) {
 	// const selectedApplicantIds = useSelector(({ searchApp }) => searchApp.applicant.selectedApplicantIds);
 
 	// useEffect(() => {
-	//     // dispatch(Actions.getApplicantTable());
+	//     // dispatch(getApplicantTable());
 	// }, [dispatch]);
 
 	const [filteredData, setFilteredData] = useState(applicants);

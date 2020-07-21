@@ -5,8 +5,8 @@ import Typography from '@material-ui/core/Typography';
 import withReducer from 'app/store/withReducer';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from './store/actions/index';
-import reducer from './store/reducers';
+import { toggleQuickPanel } from './store/stateSlice';
+import reducer from './store';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -25,7 +25,7 @@ function QuickPanel(props) {
 			classes={{ paper: classes.root }}
 			open={state}
 			anchor="right"
-			onClose={ev => dispatch(Actions.toggleQuickPanel())}
+			onClose={ev => dispatch(toggleQuickPanel())}
 		>
 			<FuseScrollbars>
 				<Typography>Quick Panel</Typography>

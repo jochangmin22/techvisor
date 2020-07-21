@@ -85,7 +85,7 @@ function NewsArticles(props) {
 						if (row) {
 							window.open(row.original.link, '_blank');
 							// props.history.push(row.original.link);
-							// dispatch(Actions.openEditContactDialog(row.original));
+							// dispatch(openEditContactDialog(row.original));
 						}
 					}}
 				/>

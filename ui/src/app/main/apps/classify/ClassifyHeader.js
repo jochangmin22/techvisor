@@ -9,8 +9,8 @@ import FuseAnimate from '@fuse/core/FuseAnimate';
 import { useSelector, useDispatch } from 'react-redux';
 import withReducer from 'app/store/withReducer';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
-
-import * as Actions from './store/actions';
+import { selectMainTheme } from 'app/store/fuse/settingsSlice';
+import { setClassify } from './store/classifySlice';
 import reducer from '../search/store/reducers';
 import RawDataRatio from './header/RawDataRatio';
 import HeaderGrid from './header/HeaderGrid';
@@ -27,12 +27,12 @@ const useStyles = makeStyles(theme => ({
 function ClassifyHeader(props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
-	const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
+	const mainTheme = useSelector(selectMainTheme);
 	const searchs = useSelector(({ searchApp }) => searchApp.searchs.entities);
 
 	useEffect(() => {
 		if (searchs) {
-			dispatch(Actions.setClassify(searchs));
+			dispatch(setClassify(searchs));
 		}
 	}, [searchs, dispatch]);
 	const [data, setData] = useState([]);
@@ -325,7 +325,7 @@ function ClassifyHeader(props) {
 
 	// useEffect(() => {
 	//     if (data) {
-	//         dispatch(Actions.setClassify(data));
+	//         dispatch(setClassify(data));
 	//     }
 	// }, [data, dispatch]);
 

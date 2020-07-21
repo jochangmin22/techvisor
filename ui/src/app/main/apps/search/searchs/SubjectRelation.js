@@ -9,7 +9,7 @@ import SubjectChips from './components/SubjectChips';
 import SubjectTable from './components/SubjectTable';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
-import * as Actions from '../store/actions';
+import { updateSubjectRelation, resetSubjectRelationVec, updateSubjectRelationModelType } from '../store/searchsSlice';
 import parseSearchText from '../inc/parseSearchText';
 
 function SubjectRelation(props) {
@@ -41,17 +41,19 @@ function SubjectRelation(props) {
 
 	useEffect(() => {
 		if (modelType) {
-			dispatch(Actions.updateSubjectRelationModelType(modelType));
 			setShowLoading(true);
-			const [, newApiParams] = parseSearchText(searchParams, null);
-			newApiParams.modelType = modelType;
-			newApiParams.searchScope = searchScope;
-			dispatch(Actions.resetSubjectRelationVec(subjectRelation.topic));
-			dispatch(Actions.updateSubjectRelation(newApiParams)).then(() => {
+			dispatch(updateSubjectRelationModelType(modelType));
+			const [, params] = parseSearchText(searchParams, null);
+			const subParams = {
+				searchScope: searchScope,
+				subjectRelation: { modelType: modelType, keywordvec: '' }
+			};
+			dispatch(resetSubjectRelationVec(subjectRelation.topic));
+			dispatch(updateSubjectRelation({ params, subParams })).then(() => {
 				setShowLoading(false);
 			});
 		}
-	}, [dispatch, searchParams, subjectRelation.topic, modelType]);
+	}, [dispatch, searchParams, subjectRelation.topic, modelType, searchScope]);
 
 	if (!subjectRelation || subjectRelation.length === 0) {
 		return <SpinLoading />;
@@ -84,8 +86,8 @@ function SubjectRelation(props) {
 				{vecData && vecData.length !== 0 && !showLoading ? (
 					<SubjectTable data={vecData} />
 				) : (
-						<SpinLoading delay={20000} />
-					)}
+					<SpinLoading delay={20000} />
+				)}
 			</Paper>
 		</SubjectContext.Provider>
 	);

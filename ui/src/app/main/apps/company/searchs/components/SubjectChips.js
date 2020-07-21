@@ -32,8 +32,8 @@ function SubjectChips(props) {
 		// handle both searchText and searchNum
 		if (searchNum !== '') {
 			setShowLoading(true);
-			dispatch(Actions.resetSubjectRelationVec(topic));
-			dispatch(Actions.updateSubjectRelation({ searchNum: searchNum, keywordvec: value })).then(() => {
+			dispatch(resetSubjectRelationVec(topic));
+			dispatch(updateSubjectRelation({ searchNum: searchNum, keywordvec: value })).then(() => {
 				setShowLoading(true);
 			});
 		} else {
@@ -41,8 +41,8 @@ function SubjectChips(props) {
 			const [, newApiParams] = parseSearchText(searchParams, null);
 			newApiParams.keywordvec = value; // updateSubjectRelation 에서만 이 line 추가
 
-			dispatch(Actions.resetSubjectRelationVec(topic));
-			dispatch(Actions.updateSubjectRelation(newApiParams)).then(() => {
+			dispatch(resetSubjectRelationVec(topic));
+			dispatch(updateSubjectRelation(newApiParams)).then(() => {
 				setShowLoading(false);
 			});
 		}

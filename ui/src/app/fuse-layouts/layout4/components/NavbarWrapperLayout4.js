@@ -2,10 +2,12 @@ import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
 import { makeStyles, ThemeProvider } from '@material-ui/core/styles';
 import NavbarMobileToggleFab from 'app/fuse-layouts/shared-components/NavbarMobileToggleFab';
-import * as Actions from 'app/store/actions';
 import clsx from 'clsx';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { navbarCloseFolded, navbarOpenFolded, navbarCloseMobile } from 'app/store/fuse/navbarSlice';
+import { selectNavbarTheme } from 'app/store/fuse/settingsSlice';
+
 import NavbarLayout4 from './NavbarLayout4';
 
 const navbarWidth = 280;
@@ -120,7 +122,7 @@ const useStyles = makeStyles(theme => ({
 function NavbarWrapperLayout4(props) {
 	const dispatch = useDispatch();
 	const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
-	const navbarTheme = useSelector(({ fuse }) => fuse.settings.navbarTheme);
+	const navbarTheme = useSelector(selectNavbarTheme);
 	const navbar = useSelector(({ fuse }) => fuse.navbar);
 
 	const classes = useStyles();
@@ -142,8 +144,8 @@ function NavbarWrapperLayout4(props) {
 								foldedAndOpened && classes.foldedAndOpened,
 								foldedAndClosed && classes.foldedAndClosed
 							)}
-							onMouseEnter={() => foldedAndClosed && dispatch(Actions.navbarOpenFolded())}
-							onMouseLeave={() => foldedAndOpened && dispatch(Actions.navbarCloseFolded())}
+							onMouseEnter={() => foldedAndClosed && dispatch(navbarOpenFolded())}
+							onMouseLeave={() => foldedAndOpened && dispatch(navbarCloseFolded())}
 							style={{ backgroundColor: navbarTheme.palette.background.default }}
 						>
 							<NavbarLayout4 className={classes.navbarContent} />
@@ -158,7 +160,7 @@ function NavbarWrapperLayout4(props) {
 							classes={{
 								paper: classes.navbar
 							}}
-							onClose={() => dispatch(Actions.navbarCloseMobile())}
+							onClose={() => dispatch(navbarCloseMobile())}
 							ModalProps={{
 								keepMounted: true // Better open performance on mobile.
 							}}

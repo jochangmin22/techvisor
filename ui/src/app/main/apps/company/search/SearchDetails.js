@@ -11,8 +11,8 @@ import FusePageCarded from '@fuse/core/FusePageCarded';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import withReducer from 'app/store/withReducer';
 import { Link } from 'react-router-dom';
-import reducer from '../store/reducers';
-import * as Actions from '../store/actions';
+import reducer from '../store';
+import { getCompanyInfo } from '../store/searchSlice';
 import searchData from './components/searchData';
 
 import CompanyInfo from './components/CompanyInfo';
@@ -39,11 +39,11 @@ function SearchDetails(props) {
 
 	useEffect(() => {
 		// if (stockCode) {
-		// 	dispatch(Actions.getStock({ kiscode: companyInfo.stockCode }));
+		// 	dispatch(getStock({ kiscode: companyInfo.stockCode }));
 		// }
-		// dispatch(Actions.resetSearch());
+		// dispatch(resetSearch());
 		if (companyId) {
-			dispatch(Actions.getCompanyInfo({ corp_code: companyId }));
+			dispatch(getCompanyInfo({ corp_code: companyId }));
 		}
 	}, [dispatch, companyId]);
 

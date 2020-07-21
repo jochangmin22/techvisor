@@ -7,15 +7,16 @@ import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { ThemeProvider } from '@material-ui/core/styles';
+import { selectMainTheme } from 'app/store/fuse/settingsSlice';
 import withReducer from 'app/store/withReducer';
-import reducer from './store/reducers';
+import reducer from './store';
 import parseSearchText from './inc/parseSearchText';
-import * as Actions from './store/actions';
-// import { showMessage } from 'app/store/actions/fuse';
+import { clearSearchText, setSearchParams, setSearchNum, setSearchSubmit } from './store/searchsSlice';
+// import { showMessage } from 'app/store/fuse/messageSlice';
 
 function SearchHeader(props) {
 	const dispatch = useDispatch();
-	const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
+	const mainTheme = useSelector(selectMainTheme);
 	const searchLoading = useSelector(({ searchApp }) => searchApp.searchs.searchLoading);
 	const searchNum = useSelector(({ searchApp }) => searchApp.searchs.searchParams.searchNum);
 	const searchText = useSelector(({ searchApp }) => searchApp.searchs.searchParams.searchText);
@@ -58,29 +59,29 @@ function SearchHeader(props) {
 		const match = inputSearchText.match(numberRegexp);
 		if (match) {
 			// number search ?
-			dispatch(Actions.setSearchNum(inputSearchText));
-			dispatch(Actions.setSearchSubmit(true));
-			// dispatch(Actions.setSearchLoading(true));
-			// dispatch(Actions.clearSearchs());
-			// dispatch(Actions.clearWidgetsData());
-			// dispatch(Actions.getSearchsNum({ searchNum: inputSearchText })).then(() => {
-			// 	dispatch(Actions.getWordCloud({ searchNum: inputSearchText }));
-			// 	dispatch(Actions.getSubjectRelation({ searchNum: inputSearchText }));
-			// 	dispatch(Actions.setSearchLoading(false));
+			dispatch(setSearchNum(inputSearchText));
+			dispatch(setSearchSubmit(true));
+			// dispatch(setSearchLoading(true));
+			// dispatch(clearSearchs());
+			// dispatch(clearWidgetsData());
+			// dispatch(getSearchsNum({ searchNum: inputSearchText })).then(() => {
+			// 	dispatch(getWordCloud({ searchNum: inputSearchText }));
+			// 	dispatch(getSubjectRelation({ searchNum: inputSearchText }));
+			// 	dispatch(setSearchLoading(false));
 			// });
 		} else {
 			const [newParams] = parseSearchText(null, inputSearchText); // not use first args searchParams (null)
 			newParams['searchNum'] = ''; // prevent uncontrolled error
-			dispatch(Actions.setSearchParams(newParams));
-			dispatch(Actions.setSearchSubmit(true));
+			dispatch(setSearchParams(newParams));
+			dispatch(setSearchSubmit(true));
 			// console.log('onSearchSubmit -> newParams', newParams);
-			// dispatch(Actions.setSearchLoading(true));
-			// dispatch(Actions.clearSearchs());
-			// dispatch(Actions.clearWidgetsData());
-			// dispatch(Actions.getSearchs(newApiParams)).then(() => {
-			// 	dispatch(Actions.getWordCloud(newApiParams));
-			// 	dispatch(Actions.getSubjectRelation(newApiParams));
-			// 	dispatch(Actions.setSearchLoading(false));
+			// dispatch(setSearchLoading(true));
+			// dispatch(clearSearchs());
+			// dispatch(clearWidgetsData());
+			// dispatch(getSearchs(newApiParams)).then(() => {
+			// 	dispatch(getWordCloud(newApiParams));
+			// 	dispatch(getSubjectRelation(newApiParams));
+			// 	dispatch(setSearchLoading(false));
 			// });
 		}
 	}
@@ -113,7 +114,7 @@ function SearchHeader(props) {
 							'aria-label': 'Search'
 						}}
 					/>
-					<IconButton onClick={() => dispatch(Actions.clearSearchText())} className="mx-8">
+					<IconButton onClick={() => dispatch(clearSearchText())} className="mx-8">
 						<Icon>close</Icon>
 					</IconButton>
 				</form>

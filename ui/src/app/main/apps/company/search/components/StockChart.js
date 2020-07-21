@@ -7,7 +7,7 @@ import echarts from 'echarts';
 import moment from 'moment';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useSelector, useDispatch } from 'react-redux';
-import * as Actions from '../../store/actions';
+import { setChartType } from '../../store/searchSlice';
 import debounce from 'lodash/debounce';
 import clsx from 'clsx';
 import { chartTypes } from 'app/main/apps/lib/variables';
@@ -51,7 +51,7 @@ function StockChart(props) {
 
 	function handleChangeRange(range) {
 		setCurrentRange(range);
-		dispatch(Actions.setChartType(range));
+		dispatch(setChartType(range));
 	}
 
 	useEffect(() => {

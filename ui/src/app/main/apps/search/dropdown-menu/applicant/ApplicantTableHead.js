@@ -116,7 +116,7 @@ function ApplicantTableHead(props) {
 								<MenuList>
 									<MenuItem
 										onClick={() => {
-											// dispatch(Actions.saveList(selectedContactIds));
+											// dispatch(saveList(selectedContactIds));
 											closeSelectedProductsMenu();
 										}}
 									>
@@ -127,7 +127,7 @@ function ApplicantTableHead(props) {
 									</MenuItem>
 									<MenuItem
 										onClick={() => {
-											// dispatch(Actions.downloadList(selectedContactIds));
+											// dispatch(downloadList(selectedContactIds));
 											closeSelectedProductsMenu();
 										}}
 									>
@@ -138,7 +138,7 @@ function ApplicantTableHead(props) {
 									</MenuItem>
 									<MenuItem
 										onClick={() => {
-											// dispatch(Actions.downloadList(selectedContactIds));
+											// dispatch(downloadList(selectedContactIds));
 											closeSelectedProductsMenu();
 										}}
 									>

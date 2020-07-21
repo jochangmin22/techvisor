@@ -7,14 +7,15 @@ import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { ThemeProvider } from '@material-ui/core/styles';
+import { selectMainTheme } from 'app/store/fuse/settingsSlice';
 import withReducer from 'app/store/withReducer';
-import reducer from './store/reducers';
+import reducer from './store';
 import parseSearchText from './inc/parseSearchText';
-import * as Actions from './store/actions';
+import { setSearchNum, setSearchSubmit, setSearchParams, clearSearchText } from './store/searchsSlice';
 
 function SearchHeader(props) {
 	const dispatch = useDispatch();
-	const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
+	const mainTheme = useSelector(selectMainTheme);
 	const searchLoading = useSelector(({ companyApp }) => companyApp.searchs.searchLoading);
 	const searchNum = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchNum);
 	const searchText = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchText);
@@ -50,13 +51,13 @@ function SearchHeader(props) {
 		const match = inputSearchText.match(numberRegexp);
 		if (match) {
 			// number search ?
-			dispatch(Actions.setSearchNum(inputSearchText));
-			dispatch(Actions.setSearchSubmit(true));
+			dispatch(setSearchNum(inputSearchText));
+			dispatch(setSearchSubmit(true));
 		} else {
 			const [newParams] = parseSearchText(null, inputSearchText); // not use first args searchParams (null)
 			newParams['searchNum'] = ''; // prevent uncontrolled error
-			dispatch(Actions.setSearchParams(newParams));
-			dispatch(Actions.setSearchSubmit(true));
+			dispatch(setSearchParams(newParams));
+			dispatch(setSearchSubmit(true));
 		}
 	}
 
@@ -88,7 +89,7 @@ function SearchHeader(props) {
 								'aria-label': 'Search'
 							}}
 						/>
-						<IconButton onClick={() => dispatch(Actions.clearSearchText())} className="mx-8">
+						<IconButton onClick={() => dispatch(clearSearchText())} className="mx-8">
 							<Icon>close</Icon>
 						</IconButton>
 					</form>

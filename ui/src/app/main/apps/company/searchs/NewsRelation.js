@@ -18,8 +18,8 @@ function NewsRelation(props) {
 	const showLoadingValue = useMemo(() => ({ showLoading, setShowLoading }), [showLoading, setShowLoading]);
 
 	useEffect(() => {
-		dispatch(Actions.getNews({ searchText: searchText })).then(() => {
-			dispatch(Actions.getNewsSA({ searchText: searchText }));
+		dispatch(getNews({ searchText: searchText })).then(() => {
+			dispatch(getNewsSA({ searchText: searchText }));
 		});
 	}, [dispatch, searchText]);
 

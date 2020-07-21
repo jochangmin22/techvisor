@@ -11,7 +11,7 @@ import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import parseSearchText from '../../inc/parseSearchText';
 import LeftConfig from '../setLeftConfig';
 import * as Actions from '../../store/actions';
-import { showMessage } from 'app/store/actions/fuse';
+import { showMessage } from 'app/store/fuse/messageSlice';
 import _ from '@lodash';
 import WordCloudToobar from './components/WordCloudToobar';
 // import WordCloudFilterMenu from './components/WordCloudFilterMenu';
@@ -78,10 +78,10 @@ function WordCloud(props) {
 		}
 		setForm(_.set({ ...form }, name, newArray));
 
-		dispatch(Actions.setSearchSubmit(true));
+		dispatch(setSearchSubmit(true));
 
 		const [newParams] = parseSearchText(form, null);
-		dispatch(Actions.setSearchParams(newParams));
+		dispatch(setSearchParams(newParams));
 	}
 
 	const handleResize = debounce(() => {

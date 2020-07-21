@@ -137,7 +137,7 @@ function ClassifyList(props) {
                                 }}
                                 onChange={event => {
                                     event.target.checked
-                                        ? dispatch(Actions.selectAllClassify())
+                                        ? dispatch(selectAllClassify())
                                         : dispatch(
                                               Actions.deSelectAllClassify()
                                           );

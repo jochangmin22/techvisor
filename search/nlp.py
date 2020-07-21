@@ -7,7 +7,7 @@ from operator import itemgetter
 from gensim.models import Word2Vec
 from gensim.models import FastText
 from .searchs import parse_searchs, parse_searchs_num
-from .utils import get_redis_key
+from .utils import get_redis_key, dictfetchall
 # caching with redis
 from django.core.cache import cache
 from django.conf import settings
@@ -19,7 +19,7 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 def kr_nlp(request, category=""):
     """ konlpy 관련 기능 """
 
-    mainKey, subKey, params = get_redis_key(request)
+    mainKey, subKey, params, _ = get_redis_key(request)
 
     # Redis {
     context = cache.get(mainKey)
@@ -224,7 +224,7 @@ def kr_nlp(request, category=""):
 def parse_wordcloud(request):
     """ wordcloud 관련 기능 """
 
-    mainKey, subKey, params = get_redis_key(request)
+    _, subKey, params, _ = get_redis_key(request)
 
     # Redis {
     sub_context = cache.get(subKey)    
@@ -241,7 +241,7 @@ def parse_wordcloud(request):
     try:  # handle NoneType error
         taged_docs = nlp_raw.split()
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
-        tuple_taged_docs = tuple(taged_docs)  # list to tuble
+        # tuple_taged_docs = tuple(taged_docs)  # list to tuble
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
             return HttpResponse( "[]", content_type="text/plain; charset=utf-8")
     except:
@@ -277,18 +277,18 @@ def parse_wordcloud(request):
 
 def parse_vec(request):
     """ 빈도수 단어로 연관 단어 추출 (처음은 맨 앞단어로) """
-    mainKey, subKey, params = get_redis_key(request)
+    mainKey, _, params, subParams = get_redis_key(request)
+
+    _keywordvec = subParams['subjectRelation']['keywordvec'] if subParams['subjectRelation']['keywordvec'] else None
+    _modelType = subParams['subjectRelation']['modelType'] or None
 
     # Redis {
     context = cache.get(mainKey)
-
     if context:
-        _keywordvec = request.GET.get("keywordvec", None)
-        if context['modelType'] and request.GET.get("modelType"):
-            _modelType = request.GET.get("modelType") if context['modelType'] != request.GET.get("modelType") else None
+        if context['modelType'] and _modelType:
+            _modelType = _modelType if context['modelType'] != _modelType else None
         else:
             _modelType = None
-
         if context['vec'] and not _keywordvec and not _modelType:
             return HttpResponse(json.dumps(context['vec'], ensure_ascii=False))
           
@@ -315,9 +315,9 @@ def parse_vec(request):
     sublist = dict(_sublist)
 
     # select first topic word if no related word is specified
-    keywordvec = request.GET.get("keywordvec", list(sublist.keys())[0])
+    keywordvec = _keywordvec or list(sublist.keys())[0]
 
-    modelType = request.GET.get("modelType", "word2vec")
+    modelType = _modelType or "word2vec"
 
     # 연관 단어 추출
     # 기존 방법 {        
@@ -426,8 +426,3 @@ def parse_vec(request):
 
     return HttpResponse(json.dumps(res, ensure_ascii=False))
 
-
-def dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
-    columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]

@@ -20,7 +20,7 @@ const routeConfigs = [
 	LogoutConfig,
 	LoginConfig,
 	RegisterConfig,
-	LogoutConfig
+	LogoutConfig,
 	// CallbackConfig
 ];
 

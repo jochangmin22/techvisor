@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback } from 'react';
 import { useEffect } from 'react';
-import * as Actions from '../store/actions';
+import { closeMatrixDialog } from '../store/searchsSlice';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -27,7 +27,7 @@ function MatrixDialog() {
 	}, [matrixDialog.props.open, initDialog]);
 
 	function closeDialog() {
-		dispatch(Actions.closeMatrixDialog());
+		dispatch(closeMatrixDialog());
 	}
 
 	if (!matrixDialog.data) {

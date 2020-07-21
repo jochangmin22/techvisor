@@ -82,9 +82,7 @@ function SearchDialog(props) {
 	}, [searchDialog.props.open, initDialog]);
 
 	function closeSearchDialog() {
-		searchDialog.type === 'edit'
-			? dispatch(Actions.closeEditSearchDialog())
-			: dispatch(Actions.closeNewSearchDialog());
+		searchDialog.type === 'edit' ? dispatch(closeEditSearchDialog()) : dispatch(closeNewSearchDialog());
 	}
 
 	function handleLabelMenuOpen(event) {
@@ -266,7 +264,7 @@ function SearchDialog(props) {
 								inputProps={{
 									'aria-label': 'Search'
 								}}
-								onChange={ev => dispatch(Actions.setSearchExtendText(ev))}
+								onChange={ev => dispatch(setSearchExtendText(ev))}
 								required
 								variant="outlined"
 							/>
@@ -323,7 +321,7 @@ function SearchDialog(props) {
 						variant="contained"
 						color="primary"
 						onClick={() => {
-							dispatch(Actions.setExtend(form));
+							dispatch(setExtend(form));
 							closeSearchDialog();
 						}}
 						disabled={!canBeSubmitted()}

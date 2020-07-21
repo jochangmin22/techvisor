@@ -10,8 +10,8 @@ import SummaryList from './SummaryList';
 import SummaryHeader from './SummaryHeader';
 import SummarySidebarContent from './SummarySidebarContent';
 import SummaryDialog from './SummaryDialog';
-import * as Actions from './store/actions';
-import reducer from './store/reducers';
+import { openNewSummaryDialog } from './store/summarySlice';
+import reducer from './store';
 
 const useStyles = makeStyles({
 	addButton: {
@@ -29,12 +29,12 @@ function SummaryApp(props) {
 	const pageLayout = useRef(null);
 
 	useEffect(() => {
-		// dispatch(Actions.getSummary(props.match.params));
-		// dispatch(Actions.getUserData());
+		// dispatch(getSummary(props.match.params));
+		// dispatch(getUserData());
 	}, [dispatch, props.match.params]);
 
 	useEffect(() => {
-		// dispatch(Actions.getSummary(props.match.params));
+		// dispatch(getSummary(props.match.params));
 	}, [dispatch, props.match.params]);
 
 	return (
@@ -58,7 +58,7 @@ function SummaryApp(props) {
 					color="primary"
 					aria-label="add"
 					className={classes.addButton}
-					onClick={ev => dispatch(Actions.openNewSummaryDialog())}
+					onClick={ev => dispatch(openNewSummaryDialog())}
 				>
 					<Icon>person_add</Icon>
 				</Fab>

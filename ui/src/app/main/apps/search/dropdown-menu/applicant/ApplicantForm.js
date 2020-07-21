@@ -56,7 +56,7 @@ function ApplicantForm(props) {
 					// checked={newApplicantForm.completed}
 					// onChange={toggleCompleted}
 					// onChange={handleChange}
-					onChange={ev => dispatch(Actions.appendSearchText(ev))}
+					onChange={ev => dispatch(appendSearchText(ev))}
 					onClick={ev => handleApplicantChange(ev, label)}
 					value={label}
 				/>

@@ -26,7 +26,7 @@ function WordCloud(props) {
 
 	useEffect(() => {
 		if (props.searchText) {
-			dispatch(Actions.getWordCloud(props.searchText));
+			dispatch(getWordCloud(props.searchText));
 		}
 	}, [dispatch, props.searchText]);
 

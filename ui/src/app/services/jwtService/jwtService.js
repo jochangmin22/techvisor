@@ -47,7 +47,7 @@ class JwtService extends FuseUtils.EventEmitter {
 
 	createUser = data => {
 		return new Promise((resolve, reject) => {
-			axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, data).then(response => {
+			axios.post('/api/auth/register', data).then(response => {
 				if (response.data.user) {
 					this.setSession(response.data.access_token);
 					resolve(response.data.user);
@@ -61,7 +61,7 @@ class JwtService extends FuseUtils.EventEmitter {
 	signInWithEmailAndPassword = (email, password) => {
 		return new Promise((resolve, reject) => {
 			axios
-				.post(`${process.env.REACT_APP_API_URL}/api/auth`, {
+				.get('/api/auth', {
 					data: {
 						email,
 						password
@@ -78,28 +78,10 @@ class JwtService extends FuseUtils.EventEmitter {
 		});
 	};
 
-	signInWithEmail = email => {
-		return new Promise((resolve, reject) => {
-			axios
-				.post(`${process.env.REACT_APP_API_URL}/api/auth_start`, {
-					data: {
-						email
-					}
-				})
-				.then(response => {
-					if (response.data.signed) {
-						resolve(response.data.signed);
-					} else {
-						reject(response.data.signed);
-					}
-				});
-		});
-	};
-
 	signInWithToken = () => {
 		return new Promise((resolve, reject) => {
 			axios
-				.post(`${process.env.REACT_APP_API_URL}/api/auth/access-token`, {
+				.get('/api/auth/access-token', {
 					data: {
 						access_token: this.getAccessToken()
 					}
@@ -110,18 +92,18 @@ class JwtService extends FuseUtils.EventEmitter {
 						resolve(response.data.user);
 					} else {
 						this.logout();
-						Promise.reject(new Error('Failed to login with token.'));
+						reject(new Error('Failed to login with token.'));
 					}
 				})
 				.catch(error => {
 					this.logout();
-					Promise.reject(new Error('Failed to login with token.'));
+					reject(new Error('Failed to login with token.'));
 				});
 		});
 	};
 
 	updateUserData = user => {
-		return axios.post(`${process.env.REACT_APP_API_URL}/api/auth/user/update`, {
+		return axios.post('/api/auth/user/update', {
 			user
 		});
 	};
@@ -156,40 +138,6 @@ class JwtService extends FuseUtils.EventEmitter {
 
 	getAccessToken = () => {
 		return window.localStorage.getItem('jwt_access_token');
-	};
-	// 404 : 코드없음 -> null
-	// 403 : 코드사용 -> name
-	// 410 : 코드만료 -> error
-	// 200 : 사용자 없음 -> email, register_token
-	// 200 : 사용자 있음 인증메일 -> email_auth ㅣlogged 갱신 -> user, profile, token
-	getToken = code => {
-		return new Promise((resolve, reject) => {
-			axios
-				.get(`${process.env.REACT_APP_API_URL}/api/auth/verify/${code}`)
-				.then(response => {
-					console.log('response', response.data);
-					// 200 : {email, register_token} or 201: { user:,profile:,token }
-					// if (response.status === 200) {
-					// 	resolve(response.data);
-					// }
-					resolve(response.data);
-				})
-				.catch(error => {
-					console.log('error', error.response.code);
-					reject(error);
-					// Promise.reject(new Error('Not Found'));
-					// console.log('error', 'fdf');
-					// if (response.status === 404) {
-					// 	reject(response.status);
-					// } else if (response.status === 403) {
-					// 	reject(response.name);
-					// } else if (response.status === 410) {
-					// 	reject(response.error);
-					// } else {
-					// 	reject(response.error);
-					// }
-				});
-		});
 	};
 }
 

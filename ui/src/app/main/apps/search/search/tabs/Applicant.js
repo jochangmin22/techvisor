@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { useSelector, useDispatch } from 'react-redux';
-import * as Actions from '../../store/actions';
+import { getApplicant, getApplicantTrend } from '../../store/searchSlice';
 import ApplicantTrend from './ApplicantTrend';
 import ApplicantIpc from './ApplicantIpc';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
@@ -29,8 +29,8 @@ function Applicant(props) {
 	useEffect(() => {
 		setShowLoading(true);
 		const params = { cusNo: 출원인코드1 };
-		dispatch(Actions.getApplicantTrend(params));
-		dispatch(Actions.getApplicant(params)).then(() => {
+		dispatch(getApplicantTrend(params));
+		dispatch(getApplicant(params)).then(() => {
 			setShowLoading(false);
 		});
 	}, [dispatch, 출원인코드1]);

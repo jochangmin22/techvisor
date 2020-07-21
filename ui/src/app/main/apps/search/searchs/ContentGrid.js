@@ -10,7 +10,7 @@ import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
 import { withRouter } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
-import * as Actions from '../store/actions';
+import { updateCols } from '../store/searchsSlice';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/dist/styles/ag-grid.css';
@@ -182,7 +182,7 @@ function ContentGrid(props) {
 	const [data, setData] = useState(searchs);
 
 	const handleOnChange = useDebounce(cols => {
-		dispatch(Actions.updateCols(cols));
+		dispatch(updateCols(cols));
 	}, 300);
 
 	const highlightWords = searchParams.terms.flatMap(x => x.toString().split(' ').join(',').split(','));
@@ -222,10 +222,10 @@ function ContentGrid(props) {
 		// gridColumnApi = params.columnApi;
 		// params.api.setDatasource(dataSource);
 		const updateData = data => {
-			var idSequence = 1;
-			data.forEach(function (item) {
-				item.id = idSequence++;
-			});
+			// let idSequence = 1;
+			// data.forEach(function (item) {
+			// 	item.id = idSequence++;
+			// });
 			var fakeServer = new FakeServer(data);
 			var datasource = ServerSideDatasource(fakeServer);
 			params.api.setServerSideDatasource(datasource);

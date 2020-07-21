@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Typography from '@material-ui/core/Typography';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
-import * as Actions from './store/actions';
+import { setMockData } from './store/searchsSlice';
 // import { authRoles } from "app/auth";
 import ContentGrid from './searchs/ContentGrid';
 // import ContentVisual from './searchs/ContentVisual';
@@ -21,7 +21,7 @@ function CompanyContent(props) {
 
 	// 개발용 mock data 넣기
 	useEffect(() => {
-		dispatch(Actions.setMockData(searchData));
+		dispatch(setMockData(searchData));
 		// eslint-disable-next-line
 	}, []);
 

@@ -4,9 +4,10 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { selectFooterTheme } from 'app/store/fuse/settingsSlice';
 
 function FooterLayout4(props) {
-	const footerTheme = useSelector(({ fuse }) => fuse.settings.footerTheme);
+	const footerTheme = useSelector(selectFooterTheme);
 
 	return (
 		<ThemeProvider theme={footerTheme}>

@@ -12,10 +12,9 @@ import _ from '@lodash';
 import { Line } from 'rc-progress';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import parseSearchText from '../../inc/parseSearchText';
-import LeftConfig from '../setLeftConfig';
-import * as Actions from '../../store/actions';
-import { showMessage } from 'app/store/actions/fuse';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import { setSearchParams, setSearchSubmit, initialState } from '../../store/searchsSlice';
+import { showMessage } from 'app/store/fuse/messageSlice';
 
 const useStyles = makeStyles(theme => ({
 	word: {
@@ -30,12 +29,11 @@ function SubjectTable(props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	const { defaultFormValue } = LeftConfig;
-	const [form, setForm] = useState(searchParams ? searchParams : defaultFormValue);
+	const [form, setForm] = useState(searchParams || initialState.searchParams);
 
 	function handleClick(value, name = 'terms') {
 		const newArray = form[name];
-		const newValue = value.trim();
+		const newValue = value.trim().replace(' ', '_');
 		let existCheck = true;
 		newArray.map(arr => {
 			if (arr.includes(newValue)) {
@@ -59,10 +57,10 @@ function SubjectTable(props) {
 		}
 		setForm(_.set({ ...form }, name, newArray));
 
-		dispatch(Actions.setSearchSubmit(true));
+		dispatch(setSearchSubmit(true));
 
-		const [newParams] = parseSearchText(form, null);
-		dispatch(Actions.setSearchParams(newParams));
+		const [_params] = parseSearchText(form, null);
+		dispatch(setSearchParams(_params));
 	}
 
 	if (!props) {

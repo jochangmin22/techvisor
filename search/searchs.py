@@ -35,11 +35,11 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
     """ 쿼리 실행 및 결과 저장 """
-    mainKey, subKey, params = get_redis_key(request)
+    mainKey, subKey, params, subParams = get_redis_key(request)
 
     context = cache.get(mainKey)
     sub_context = cache.get(subKey)
-
+    
     if context and context['raw'] and mode == "begin":
         return JsonResponse(context['raw'], safe=False)
 
@@ -53,11 +53,10 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
         return context['raw']
 
     with connection.cursor() as cursor:
-
         # 검색범위 선택
-        if params['searchVolume'] == 'SUMA':
+        if subParams['searchScope']['searchVolume'] == 'SUMA':
             searchVolume = '중'
-        elif params['searchVolume'] == 'ALL':
+        elif subParams['searchScope']['searchVolume'] == 'ALL':
             searchVolume = '대'
         else:
             searchVolume = '소'
@@ -114,9 +113,9 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
         # npl and mtx parse
         for i in range(len(row)):
             # x += row[i]["요약token"].split()
-            if params['volume'] == '요약':
+            if subParams['searchScope']['wordCloudScope']['volume'] == '요약':
                 nlp_raw += row[i]["요약token"] if row[i]["요약token"] else "" + " "
-            elif params['volume'] == '청구항':
+            elif subParams['searchScope']['wordCloudScope']['volume'] == '청구항':
                 nlp_raw += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
 
             # 전체항token과 요약token은 nlp_raw에 넘겨줬으므로 바로 제거 - row는 list of dictionaries 형태임
@@ -144,7 +143,7 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
         #     nlp_raw = nlp_raw[:-1]
 
         # 요약token tokenizer
-        if params['unit'] == '구문':
+        if subParams['searchScope']['wordCloudScope']['unit'] == '구문':
             nlp_raw = ' '.join(tokenizer_phrase(nlp_raw) if nlp_raw else '')
         else:            
             nlp_raw = ' '.join(tokenizer(nlp_raw) if nlp_raw else '')
@@ -183,7 +182,7 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
 def parse_searchs_num(request, mode="begin"):  # mode : begin, nlp, query
     """ 쿼리 실행 및 결과 저장 ; 번호검색 """
 
-    mainKey, subKey, params = get_redis_key(request)
+    mainKey, subKey, params, subParams = get_redis_key(request)
 
     context = cache.get(mainKey)
     sub_context = cache.get(subKey)
@@ -236,9 +235,9 @@ def parse_searchs_num(request, mode="begin"):  # mode : begin, nlp, query
         mtx_raw = deepcopy(row)
         # nlp, mtx parse
         for i in range(len(row)):
-            if params['volume'] == '요약':
+            if subParams['searchScope']['wordCloudScope']['volume'] == '요약':
                 nlp_raw += row[i]["요약token"] if row[i]["요약token"] else "" + " "
-            elif params['volume'] == '청구항':
+            elif subParams['searchScope']['wordCloudScope']['volume'] == '청구항':
                 nlp_raw += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
 
             # 전체항token과 요약token은 nlp_raw에 넘겨줬으므로 바로 제거 - row는 list of dictionaries 형태임
@@ -542,10 +541,10 @@ def parse_query(request):
     """ 쿼리 확인용 """
     return HttpResponse(parse_searchs(request, mode="query"), content_type="text/plain; charset=utf-8")
 
-def dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
-    columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+# def dictfetchall(cursor):
+#     "Return all rows from a cursor as a dict"
+#     columns = [col[0] for col in cursor.description]
+#     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
 # NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
@@ -567,7 +566,7 @@ def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
 def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     mecab = Mecab()
     STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
-    saving = None
+    saving = ''
     close = None
     raw_list = []
     for word, tag in mecab.pos(raw):
@@ -580,7 +579,7 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
             if saving:
                 if '_' in saving:
                     raw_list.append(saving)            
-                saving = None
+                saving = ''
     return raw_list      
 
 def tokenizer_pos(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):

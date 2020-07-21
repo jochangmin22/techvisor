@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import withReducer from 'app/store/withReducer';
-import reducer from './store/reducers';
+import reducer from './store';
 
 import CompanyHeader from './CompanyHeader';
 import CompanyAppSidebarHeader from './CompanyAppSidebarHeader';

@@ -15,6 +15,7 @@ import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 
 import { ThemeProvider } from '@material-ui/core/styles';
+import { selectMainTheme } from 'app/store/fuse/settingsSlice';
 import FuseAnimate from '@fuse/core/FuseAnimate';
 import { useDispatch, useSelector } from 'react-redux';
 // import { Link } from "react-router-dom";
@@ -35,7 +36,7 @@ function SurveyAnnounce(props) {
 	//     ({ searchApp }) => searchApp.applicant.applicantClickAwayOpen
 	// );
 
-	const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
+	const mainTheme = useSelector(selectMainTheme);
 
 	return (
 		<ThemeProvider theme={mainTheme}>
@@ -76,7 +77,7 @@ function SurveyAnnounce(props) {
                         inputProps={{
                             'aria-label': 'Search'
                         }}
-                        onChange={ev => dispatch(Actions.setSearchText(ev))}
+                        onChange={ev => dispatch(setSearchText(ev))}
                     />
                 </Paper>
             </div> */}

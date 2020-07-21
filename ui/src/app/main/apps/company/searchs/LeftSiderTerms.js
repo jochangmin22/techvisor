@@ -113,7 +113,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		// Sync from leftSidebar to header
 		const [newParams, newApiParams] = parseSearchText(form, null);
 
-		dispatch(Actions.setSearchParams(newParams));
+		dispatch(setSearchParams(newParams));
 
 		if (submitted) {
 			// onSearch(form);
@@ -138,7 +138,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	React.useImperativeHandle(ref, () => {
 		return {
 			clearTerms() {
-				dispatch(Actions.clearSearchText());
+				dispatch(clearSearchText());
 				setForm({ ...defaultFormValue });
 				setDateState({ ...dateState, startDate: '', endDate: '' });
 				setSearchVolume('SUM');
@@ -230,23 +230,23 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		}
 		newApiParams['searchVolume'] = searchVolume;
 
-		dispatch(Actions.setSearchLoading(true));
-		dispatch(Actions.clearSearchs());
+		dispatch(setSearchLoading(true));
+		dispatch(clearSearchs());
 		if (num === '') {
-			dispatch(Actions.getSearchs(newApiParams)).then(() => {
-				// dispatch(Actions.getWordCloud(newApiParams));
-				// dispatch(Actions.getSubjectRelation(newApiParams));
-				// dispatch(Actions.getMatrix(newApiParams));
-				dispatch(Actions.setSearchLoading(false));
-				dispatch(Actions.setSearchSubmit(false));
+			dispatch(getSearchs(newApiParams)).then(() => {
+				// dispatch(getWordCloud(newApiParams));
+				// dispatch(getSubjectRelation(newApiParams));
+				// dispatch(getMatrix(newApiParams));
+				dispatch(setSearchLoading(false));
+				dispatch(setSearchSubmit(false));
 			});
 		} else {
-			dispatch(Actions.getSearchsNum({ searchNum: num })).then(() => {
-				// dispatch(Actions.getWordCloud({ searchNum: num }));
-				// dispatch(Actions.getSubjectRelation({ searchNum: num }));
-				// dispatch(Actions.getMatrix(newApiParams));
-				dispatch(Actions.setSearchLoading(false));
-				dispatch(Actions.setSearchSubmit(false));
+			dispatch(getSearchsNum({ searchNum: num })).then(() => {
+				// dispatch(getWordCloud({ searchNum: num }));
+				// dispatch(getSubjectRelation({ searchNum: num }));
+				// dispatch(getMatrix(newApiParams));
+				dispatch(setSearchLoading(false));
+				dispatch(setSearchSubmit(false));
 			});
 		}
 		setSubmitted(false);

@@ -37,7 +37,7 @@ function OptionsMenu(props) {
 	}
 
 	function handleCreate(note) {
-		// dispatch(Actions.createNote(note));
+		// dispatch(createNote(note));
 		handleFormClose();
 	}
 

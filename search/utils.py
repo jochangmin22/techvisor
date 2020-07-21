@@ -1,43 +1,30 @@
 import json
 
 def get_redis_key(request):
-    params = {}
-    for value in [
-        "searchText",
-        "searchNum",
-        "searchVolume",
-        "dateType",
-        "startDate",
-        "endDate",
-        "inventor",
-        "assignee",
-        "patentOffice",
-        "language",
-        "status",
-        "ipType",
-    ]:
-        params[value] = request.GET.get(value,'')
+    "Return mainKey, subKey, params, subParams"
+    params = request.GET.get('params','')
+    params = json.loads(params)
 
     mainKey = "¶".join(params.values()) if params['searchNum'] == '' else params['searchNum']
 
-    # searchScope
-    param_scope = request.GET.get('searchScope')
-    param_scope = json.loads(param_scope)
+    subParams = request.GET.get('subParams','')
+    subParams = json.loads(subParams)
 
-    for value in [
-		"volume",
-        "unit",
-        # "output"
-    ]:
-        params[value] = param_scope['wordCloudScope'][value]
 
     # one more key to be used for a separate searchScope
-    subKey = "¶".join(params.values()) if params['searchNum'] == '' else params['searchNum']   
+    subKey = mainKey + "¶".join(list(NestedDictValues(subParams))) if params['searchNum'] == '' else params['searchNum']   
 
-    return mainKey, subKey, params
+    return mainKey, subKey, params, subParams
 
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
     columns = [col[0] for col in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]    
+
+def NestedDictValues(d):
+    for v in d.values():
+        if isinstance(v, dict):
+            yield from NestedDictValues(v)
+        else:
+            yield str(v)
   

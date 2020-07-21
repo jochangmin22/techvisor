@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { useDispatch } from 'react-redux';
-import * as Actions from '../../store/actions';
+import { getRegisterFee, getRightHolder } from '../../store/searchSlice';
 import { Typography } from '@material-ui/core';
 import FuseAnimate from '@fuse/core/FuseAnimate';
 import GradeTableRightHolder from './components/GradeTableRightHolder';
@@ -25,8 +25,8 @@ function Grade(props) {
 	useEffect(() => {
 		if (rgNo) {
 			const params = { rgNo: rgNo };
-			dispatch(Actions.getRegisterFee(params));
-			dispatch(Actions.getRightHolder(params));
+			dispatch(getRegisterFee(params));
+			dispatch(getRightHolder(params));
 		}
 	}, [dispatch, rgNo]);
 

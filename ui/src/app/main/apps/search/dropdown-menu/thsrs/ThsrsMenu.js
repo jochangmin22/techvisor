@@ -50,7 +50,7 @@ function ThsrsMenu(props) {
 	}
 
 	function handleCreate(note) {
-		// dispatch(Actions.createNote(note));
+		// dispatch(createNote(note));
 		handleFormClose();
 	}
 
@@ -87,7 +87,7 @@ function ThsrsMenu(props) {
 		if (isFormInValid()) {
 			return;
 		}
-		dispatch(Actions.getThsrs(newThsrsForm.name));
+		dispatch(getThsrs(newThsrsForm.name));
 		// const newThsrs = new ThsrsModel(newThsrsForm);
 		// setThsrsForm(_.setIn(thsrsForm, newThsrs.id, newThsrs));
 		resetForm();
@@ -128,7 +128,7 @@ function ThsrsMenu(props) {
 							<IconButton
 								className="w-32 h-32 mx-4 p-0"
 								aria-label="close"
-								onClick={ev => dispatch(Actions.toggleThsrsClickAway(thsrsClickAwayOpen))}
+								onClick={ev => dispatch(toggleThsrsClickAway(thsrsClickAwayOpen))}
 							>
 								<Icon fontSize="small">close</Icon>
 							</IconButton>

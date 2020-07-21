@@ -1,6 +1,9 @@
 from django.db import connection
 from collections import Counter
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from .utils import get_redis_key
+import json
+
 from .searchs import parse_searchs, parse_searchs_num
 
 # caching with redis
@@ -18,30 +21,7 @@ def parse_matrix(request):
     2. mtx_row [요약token] 에 각 topic이 포함되는 [연도별, 기술별, 기업별] 횟수 list
     """
 
-    params = {}
-    for value in [
-        "searchText",
-        "searchNum",
-        "searchVolume",
-        "dateType",
-        "startDate",
-        "endDate",
-        "inventor",
-        "assignee",
-        "patentOffice",
-        "language",
-        "status",
-        "ipType",
-    ]:
-        params[value] = request.GET.get(value,'')
-    apiParams = "¶".join(
-        params.values()) if params['searchNum'] == '' else params['searchNum']
-
-    category = request.GET.get('category') if request.GET.get('category') else "연도별"
-
-    # Redis {
-    context = cache.get(apiParams)
-    # Redis }
+    mainKey, _, params, subParams = get_redis_key(request)
 
     # nlp_raw, mtx_raw 가져오기
     try:
@@ -55,33 +35,36 @@ def parse_matrix(request):
     except:
         mtx_raw = []
 
+    # Redis {
+    context = cache.get(mainKey)
+    # Redis }
+
     # topic 가져오기
     try:
-        topic = context['vec']['topic'] if context and context['vec'] and context['vec']['topic'] else get_topic(
-            nlp_raw)
+        topic = context['vec']['topic'] if context and context['vec'] and context['vec']['topic'] else get_topic(nlp_raw)
     except:
         topic = []
-
-    if category == '연도별':
+        
+    if subParams['matrix']['category'] == '연도별':
         countField = '출원일자'
-    elif category == '기술별':
+    elif subParams['matrix']['category'] == '기술별':
         countField = 'ipc요약'
-    elif category == '기업별':
+    elif subParams['matrix']['category'] == '기업별':
         countField = '출원인1'
 
-    # mtx_raw의 요약token에서 topic 20 이 포함되는 [출원년, ipc요약, 출원인1] count 
+    # mtx_raw의 요약token에서 topic 20 이 포함되는 [출원일자, ipc요약, 출원인1] count 
     # (mtx_raw는 출원번호, 출원일자(년), 출원인1, ipc요약, 요약token 로 구성)
     mlist = []  # list of dic
     all_list = {}  # dic of list of dic
     matrixMax = 0
     try:
         for j in range(len(topic)):  # topic 20
-            temp = [d for d in mtx_raw if topic[j] in d['요약token']]
+            temp = [d for d in mtx_raw if topic[j].replace("_"," ") in d['요약token']]
             temp2 = Counter(c[countField] for c in temp)
-            max_value = max(list(temp2.values()))
+            max_value = max(list(temp2.values()), default=0)
             matrixMax = max_value if matrixMax < max_value else matrixMax
             mlist.append(temp2)
-            all_list[topic[j]] = mlist
+            all_list[topic[j].replace("_"," ")] = mlist
             mlist = []
     except:
         pass

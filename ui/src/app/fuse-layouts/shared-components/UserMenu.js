@@ -6,10 +6,10 @@ import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
 import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
-import * as authActions from 'app/auth/store/actions';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { logoutUser } from 'app/auth/store/userSlice';
 
 function UserMenu(props) {
 	const dispatch = useDispatch();
@@ -27,26 +27,30 @@ function UserMenu(props) {
 
 	return (
 		<>
-			<Button className="h-64" onClick={userMenuClick}>
+			<Button className="min-h-40" onClick={userMenuClick}>
 				{user.data.photoURL ? (
 					<Avatar className="" alt="user photo" src={user.data.photoURL} />
 				) : (
 					// <Avatar className="">{user.data.displayName[0]}</Avatar>
 					<Typography className="text-14 font-medium pl-16">로그인</Typography>
 				)}
-
-				<div className="hidden md:flex flex-col mx-12 items-start">
-					<Typography component="span" className="normal-case font-600 flex">
+				<div className="hidden md:flex flex-col mx-4 items-end">
+					<Typography component="span" className="normal-case font-bold flex">
 						{user.data.displayName}
 					</Typography>
 					<Typography className="text-11 capitalize" color="textSecondary">
 						{user.role.toString()}
+						{/* {(!user.role || (Array.isArray(user.role) && user.role.length === 0)) && 'Guest'} */}
 					</Typography>
 				</div>
-
 				<Icon className="text-16 hidden sm:flex" variant="action">
 					keyboard_arrow_down
 				</Icon>
+				{/* {user.data.photoURL ? (
+					<Avatar className="mx-4" alt="user photo" src={user.data.photoURL} />
+				) : (
+					<Avatar className="mx-4">{user.data.displayName[0]}</Avatar>
+				)} */}
 			</Button>
 
 			<Popover
@@ -96,7 +100,7 @@ function UserMenu(props) {
 						</MenuItem>
 						<MenuItem
 							onClick={() => {
-								dispatch(authActions.logoutUser());
+								dispatch(logoutUser());
 								userMenuClose();
 							}}
 						>

@@ -40,7 +40,7 @@ function ToolbarChip(props) {
 						// label={_.find(props.data, { id: label }).출원인대표명}
 						// onDelete={ev => handleToggleLabel(ev, n.특허고객대표번호)}
 						// onDelete={ev => handleToggleChip(ev, n, props)}
-						onDelete={ev => dispatch(Actions.toggleInSelectedApplicants(n))}
+						onDelete={ev => dispatch(toggleInSelectedApplicants(n))}
 						// onDelete= {(evt, data) => alert('You want to delete ' + data.length + ' rows')}
 						className={classes.chip}
 						// className="mr-8 my-8"
@@ -157,8 +157,8 @@ function ApplicantRTable(props) {
 									}}
 									onChange={event => {
 										event.target.checked
-											? dispatch(Actions.selectAllApplicants())
-											: dispatch(Actions.deSelectAllApplicants());
+											? dispatch(selectAllApplicants())
+											: dispatch(deSelectAllApplicants());
 									}}
 									checked={
 										selectedApplicantIds.length === Object.keys(filteredData).length &&

@@ -22,8 +22,20 @@ import clsx from 'clsx';
 import _ from '@lodash';
 import LeftConfig from './setLeftConfig';
 import parseSearchText from '../inc/parseSearchText';
-import * as Actions from '../store/actions';
-import { showMessage } from 'app/store/actions';
+import {
+	getSearchs,
+	getSearchsNum,
+	getWordCloud,
+	getSubjectRelation,
+	getMatrix,
+	clearSearchs,
+	clearSearchText,
+	setSearchLoading,
+	setSearchParams,
+	setSearchSubmit,
+	initialState
+} from '../store/searchsSlice';
+import { showMessage } from 'app/store/fuse/messageSlice';
 
 // TODO: change focus next textField
 // TODO: DnD word chip
@@ -109,8 +121,8 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 
 	useUpdateEffect(() => {
 		// Sync from leftSidebar to header
-		const [newParams, newApiParams] = parseSearchText(form, null);
-		dispatch(Actions.setSearchParams(newParams));
+		const [_params, params] = parseSearchText(form, null);
+		dispatch(setSearchParams(_params));
 
 		function checkValidate() {
 			if (
@@ -144,7 +156,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 
 		if (checkValidate() && submitted) {
 			// onSearch(form);
-			onSearch(newApiParams, form.searchNum);
+			onSearch(params, form.searchNum);
 		}
 		// eslint-disable-next-line
 	}, [form, searchVolume]);
@@ -170,11 +182,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	React.useImperativeHandle(ref, () => {
 		return {
 			clearTerms() {
-				dispatch(Actions.clearSearchText());
-				setForm({ ...defaultFormValue });
-				setDateState({ ...dateState, startDate: '', endDate: '' });
-				setSearchVolume('SUM');
-				setSubmitted(searchSubmit);
+				dispatch(clearSearchText());
 			}
 		};
 	});
@@ -260,31 +268,42 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		setSubmitted(true);
 	}
 
-	function onSearch(newApiParams, num = '') {
-		// check if newApiParams is empty
-		if (Object.keys(newApiParams).every(k => newApiParams[k] === '')) {
+	function onSearch(mainParams, num = '') {
+		// check if mainParams is empty
+		if (Object.keys(mainParams).every(k => mainParams[k] === '')) {
 			return;
 		}
-		newApiParams['searchVolume'] = searchVolume;
-		newApiParams['searchScope'] = searchScope;
+		const params = {
+			params: mainParams,
+			subParams: {
+				searchScope: { ...searchScope, searchVolume: searchVolume },
+				matrix: initialState.matrix,
+				subjectRelation: initialState.subjectRelation
+			}
+		};
+		// const subParams = {
+		// 	searchScope: { ...searchScope, searchVolume: searchVolume },
+		// 	matrix: initialState.matrix,
+		// 	subjectRelation: initialState.subjectRelation
+		// };
 
-		dispatch(Actions.setSearchLoading(true));
-		dispatch(Actions.clearSearchs());
+		dispatch(setSearchLoading(true));
+		dispatch(clearSearchs());
 		if (num === '') {
-			dispatch(Actions.getSearchs(newApiParams)).then(() => {
-				dispatch(Actions.getWordCloud(newApiParams));
-				dispatch(Actions.getSubjectRelation(newApiParams));
-				dispatch(Actions.getMatrix(newApiParams));
-				dispatch(Actions.setSearchLoading(false));
-				dispatch(Actions.setSearchSubmit(false));
+			dispatch(getSearchs(params)).then(() => {
+				dispatch(getWordCloud(params));
+				dispatch(getSubjectRelation(params));
+				dispatch(getMatrix(params));
+				dispatch(setSearchLoading(false));
+				dispatch(setSearchSubmit(false));
 			});
 		} else {
-			dispatch(Actions.getSearchsNum({ searchNum: num })).then(() => {
-				dispatch(Actions.getWordCloud({ searchNum: num }));
-				dispatch(Actions.getSubjectRelation({ searchNum: num }));
-				// dispatch(Actions.getMatrix(newApiParams));
-				dispatch(Actions.setSearchLoading(false));
-				dispatch(Actions.setSearchSubmit(false));
+			dispatch(getSearchsNum({ searchNum: num })).then(() => {
+				dispatch(getWordCloud({ searchNum: num }));
+				dispatch(getSubjectRelation({ searchNum: num }));
+				// dispatch(getMatrix(params));
+				dispatch(setSearchLoading(false));
+				dispatch(setSearchSubmit(false));
 			});
 		}
 		setSubmitted(false);

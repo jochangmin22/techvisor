@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
 import NewsArticles from './components/NewsArticles';
 import RelatedCompany from './components/RelatedCompany';
-import * as Actions from '../store/actions';
+import { getNews, getNewsSA, getRelatedCompany } from '../store/searchsSlice';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 
 function NewsAnalysis(props) {
@@ -12,9 +12,9 @@ function NewsAnalysis(props) {
 	const dispatch = useDispatch();
 
 	useEffect(() => {
-		dispatch(Actions.getNews({ searchText: searchText })).then(() => {
-			dispatch(Actions.getNewsSA({ searchText: searchText }));
-			dispatch(Actions.getRelatedCompany({ searchText: searchText }));
+		dispatch(getNews({ searchText: searchText })).then(() => {
+			dispatch(getNewsSA({ searchText: searchText }));
+			dispatch(getRelatedCompany({ searchText: searchText }));
 		});
 	}, [searchText]);
 

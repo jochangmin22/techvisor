@@ -37,7 +37,7 @@ function ApplicantMenu(props) {
 	// }, [applicant]);
 
 	const handleOnChange = useDebounce(searchText => {
-		dispatch(Actions.getApplicantTable(searchText));
+		dispatch(getApplicantTable(searchText));
 	}, 0);
 
 	useEffect(() => {
@@ -71,8 +71,8 @@ function ApplicantMenu(props) {
 			return;
 		}
 		setApplicantForm(newApplicantForm.name);
-		// dispatch(Actions.getApplicantTable(newApplicantForm.name));
-		// dispatch(Actions.getApplicantTable(searchText));
+		// dispatch(getApplicantTable(newApplicantForm.name));
+		// dispatch(getApplicantTable(searchText));
 
 		// const newApplicant = new ApplicantModel(newApplicantForm);
 		// setApplicantForm(_.setIn(applicantForm, newApplicant.id, newApplicant));
@@ -158,9 +158,7 @@ function ApplicantMenu(props) {
 									<IconButton
 										className="w-32 h-32 mx-4 p-0"
 										aria-label="close"
-										onClick={ev =>
-											dispatch(Actions.toggleApplicantClickAway(applicantClickAwayOpen))
-										}
+										onClick={ev => dispatch(toggleApplicantClickAway(applicantClickAwayOpen))}
 									>
 										<Icon fontSize="small">close</Icon>
 									</IconButton>
@@ -196,7 +194,7 @@ function ApplicantMenu(props) {
                                     size="small"
                                     color="secondary"
                                     // onClick={() => {
-                                    //     dispatch(Actions.doSearch());
+                                    //     dispatch(doSearch());
                                     // }}
                                 >
                                     <span className="hidden sm:flex">

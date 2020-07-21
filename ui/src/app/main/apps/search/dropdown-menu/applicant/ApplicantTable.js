@@ -47,7 +47,7 @@ function ApplicantTable(props) {
 	});
 
 	useEffect(() => {
-		// dispatch(Actions.getApplicantTable());
+		// dispatch(getApplicantTable());
 	}, [dispatch]);
 
 	useEffect(() => {

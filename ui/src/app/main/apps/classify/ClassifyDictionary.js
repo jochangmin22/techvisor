@@ -1,27 +1,24 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import {
-	// TextField,
-	Button,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	Icon,
-	IconButton,
-	Typography,
-	Toolbar,
-	AppBar,
-	FormControl,
-	InputLabel,
-	Select,
-	MenuItem,
-	OutlinedInput
-} from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import Toolbar from '@material-ui/core/Toolbar';
+import AppBar from '@material-ui/core/AppBar';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
 import { DataGrid, GridColumn } from 'rc-easyui';
-import * as Actions from './store/actions';
-import reducer from './store/reducers';
+import { getDictionaries, setSelectedDictionary } from './store/classifySlice';
+import reducer from './store';
 // import _ from "@lodash";
 
 // import { useForm } from "@fuse/hooks";
@@ -46,13 +43,13 @@ function ClassifyDictionary() {
 	const [selectedCategory, setSelectedCategory] = useState('');
 
 	// useEffect(() => {
-	//     dispatch(Actions.getCategories());
+	//     dispatch(getCategories());
 	// }, [dispatch]);
 
 	useEffect(() => {
-		// dispatch(Actions.getCategories());
+		// dispatch(getCategories());
 		if (selectedCategory) {
-			dispatch(Actions.getDictionaries(selectedCategory));
+			dispatch(getDictionaries(selectedCategory));
 		}
 	}, [dispatch, selectedCategory]);
 
@@ -87,7 +84,7 @@ function ClassifyDictionary() {
 
 	function handleSelectedCategory(event) {
 		setSelectedCategory(event.target.value);
-		dispatch(Actions.setSelectedDictionary(event.target.value));
+		dispatch(setSelectedDictionary(event.target.value));
 	}
 
 	// function handleSearchText(event) {
@@ -208,7 +205,7 @@ function ClassifyDictionary() {
                             variant="contained"
                             color="primary"
                             onClick={() => {
-                                // dispatch(Actions.updateTodo(form));
+                                // dispatch(updateTodo(form));
                                 setOpenDialog(false);
                             }}
                         >

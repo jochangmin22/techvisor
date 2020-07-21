@@ -19,9 +19,8 @@ import _ from '@lodash';
 import clsx from 'clsx';
 import classifyState from './setClassifyState';
 import parseSearchText from '../../inc/parseSearchText';
-import LeftConfig from '../setLeftConfig';
-import * as Actions from '../../store/actions';
-import { showMessage } from 'app/store/actions/fuse';
+import { setSearchParams, initialState } from '../../store/searchsSlice';
+import { showMessage } from 'app/store/fuse/messageSlice';
 import { useUpdateEffect } from '@fuse/hooks';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 // TODO : Vitualize needed
@@ -97,7 +96,6 @@ const useStyles = makeStyles(theme => ({
 function Classify(props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
-	const { defaultFormValue } = LeftConfig;
 	const searchs = useSelector(({ searchApp }) => searchApp.searchs.entities);
 
 	const [currentRange, setCurrentRange] = useState('KR');
@@ -106,11 +104,11 @@ function Classify(props) {
 
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 
-	const [form, setForm] = useState(searchParams ? searchParams : defaultFormValue);
+	const [form, setForm] = useState(searchParams || initialState.searchParams);
 
 	useUpdateEffect(() => {
 		const [newParams] = parseSearchText(form, null);
-		dispatch(Actions.setSearchParams(newParams));
+		dispatch(setSearchParams(newParams));
 	}, [form]);
 
 	function handleClick(value, name = 'assignee') {

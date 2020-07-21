@@ -15,7 +15,13 @@ import {
 import { useForm } from '@fuse/hooks';
 import FuseUtils from '@fuse/utils/FuseUtils';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from './store/actions';
+import {
+	closeEditSummaryDialog,
+	closeNewSummaryDialog,
+	addSummary,
+	updateSummary,
+	removeSummary
+} from './store/summarySlice';
 
 const defaultFormState = {
 	id: '',
@@ -68,9 +74,7 @@ function SummaryDialog(props) {
 	}, [summaryDialog.props.open, initDialog]);
 
 	function closeComposeDialog() {
-		summaryDialog.type === 'edit'
-			? dispatch(Actions.closeEditSummaryDialog())
-			: dispatch(Actions.closeNewSummaryDialog());
+		summaryDialog.type === 'edit' ? dispatch(closeEditSummaryDialog()) : dispatch(closeNewSummaryDialog());
 	}
 
 	function canBeSubmitted() {
@@ -81,15 +85,15 @@ function SummaryDialog(props) {
 		event.preventDefault();
 
 		if (summaryDialog.type === 'new') {
-			dispatch(Actions.addSummary(form));
+			dispatch(addSummary(form));
 		} else {
-			dispatch(Actions.updateSummary(form));
+			dispatch(updateSummary(form));
 		}
 		closeComposeDialog();
 	}
 
 	function handleRemove() {
-		dispatch(Actions.removeSummary(form.id));
+		dispatch(removeSummary(form.id));
 		closeComposeDialog();
 	}
 

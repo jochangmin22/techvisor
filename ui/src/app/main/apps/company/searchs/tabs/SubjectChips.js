@@ -38,8 +38,8 @@ function SubjectChips(props) {
 		paramsCopy.assignee = searchParams.assignee.join(' and ');
 		paramsCopy.keywordvec = value; // updateSubjectRelation 에서만 이 line 추가
 
-		dispatch(Actions.resetSubjectRelationVec(topic));
-		dispatch(Actions.updateSubjectRelation(paramsCopy));
+		dispatch(resetSubjectRelationVec(topic));
+		dispatch(updateSubjectRelation(paramsCopy));
 	}
 
 	const [anchorEl, setAnchorEl] = React.useState(null);

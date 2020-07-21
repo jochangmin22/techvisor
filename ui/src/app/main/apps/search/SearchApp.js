@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import withReducer from 'app/store/withReducer';
-import reducer from './store/reducers';
+import reducer from './store';
 
 import SearchHeader from './SearchHeader';
 // import SearchToolbar from "./SearchToolbar";
@@ -66,7 +66,7 @@ function SearchApp(props) {
 	const [isLeftSidebar] = useState(true);
 
 	// useEffect(() => {
-	//     dispatch(Actions.getThsrs(props.match.params));
+	//     dispatch(getThsrs(props.match.params));
 	// }, [dispatch, props.match.params]);
 
 	// useEffect(() => {}, [isLeftSidebar]);

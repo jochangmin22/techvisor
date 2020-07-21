@@ -13,7 +13,13 @@ import Avatar from '@material-ui/core/Avatar';
 import { useForm } from '@fuse/hooks';
 import FuseUtils from '@fuse/utils/FuseUtils';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from './store/actions';
+import {
+	closeEditClassifyDialog,
+	closeNewClassifyDialog,
+	addClassify,
+	updateClassify,
+	removeClassify
+} from './store/classifySlice';
 
 const defaultFormState = {
 	id: '',
@@ -66,9 +72,7 @@ function ClassifyDialog(props) {
 	}, [classifyDialog.props.open, initDialog]);
 
 	function closeComposeDialog() {
-		classifyDialog.type === 'edit'
-			? dispatch(Actions.closeEditClassifyDialog())
-			: dispatch(Actions.closeNewClassifyDialog());
+		classifyDialog.type === 'edit' ? dispatch(closeEditClassifyDialog()) : dispatch(closeNewClassifyDialog());
 	}
 
 	function canBeSubmitted() {
@@ -79,15 +83,15 @@ function ClassifyDialog(props) {
 		event.preventDefault();
 
 		if (classifyDialog.type === 'new') {
-			dispatch(Actions.addClassify(form));
+			dispatch(addClassify(form));
 		} else {
-			dispatch(Actions.updateClassify(form));
+			dispatch(updateClassify(form));
 		}
 		closeComposeDialog();
 	}
 
 	function handleRemove() {
-		dispatch(Actions.removeClassify(form.id));
+		dispatch(removeClassify(form.id));
 		closeComposeDialog();
 	}
 

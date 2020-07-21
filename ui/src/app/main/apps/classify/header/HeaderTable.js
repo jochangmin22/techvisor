@@ -36,6 +36,7 @@ import _ from '@lodash';
 import { makeStyles } from '@material-ui/core/styles';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/core/styles';
+import { selectMainTheme } from 'app/store/fuse/settingsSlice';
 // import RawDataInfo from "./widgets/RawDataInfo";
 import RawDataRatio from './RawDataRatio';
 import {
@@ -155,7 +156,7 @@ fuzzyTextFilterFn.autoRemove = val => !val;
 
 function Table({ columns, data }) {
 	const classes = useStyles();
-	// const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
+	// const mainTheme = useSelector(selectMainTheme);
 	const filterTypes = React.useMemo(
 		() => ({
 			// Add a new fuzzyTextFilterFn filter type.
@@ -466,7 +467,7 @@ function Table({ columns, data }) {
 function HeaderTable(props) {
 	// const dispatch = useDispatch();
 	// const [filteredData, setFilteredData] = useState();
-	const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
+	const mainTheme = useSelector(selectMainTheme);
 	const columns = useMemo(
 		() => [
 			{

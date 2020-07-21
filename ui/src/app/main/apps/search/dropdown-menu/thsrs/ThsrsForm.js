@@ -56,7 +56,7 @@ function ThsrsForm(props) {
 					// checked={newThsrsForm.completed}
 					// onChange={toggleCompleted}
 					// onChange={handleChange}
-					onChange={ev => dispatch(Actions.appendSearchText(ev))}
+					onChange={ev => dispatch(appendSearchText(ev))}
 					onClick={ev => handleThsrsChange(ev, label)}
 					value={label}
 				/>

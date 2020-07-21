@@ -4,10 +4,9 @@ import 'echarts-wordcloud';
 import echarts from 'echarts';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import parseSearchText from '../../inc/parseSearchText';
-import LeftConfig from '../setLeftConfig';
 import { useSelector, useDispatch } from 'react-redux';
-import * as Actions from '../../store/actions';
-import { showMessage } from 'app/store/actions/fuse';
+import { setSearchSubmit, setSearchParams, initialState } from '../../store/searchsSlice';
+import { showMessage } from 'app/store/fuse/messageSlice';
 import _ from '@lodash';
 import debounce from 'lodash/debounce';
 import randomColor from 'randomcolor';
@@ -19,8 +18,7 @@ function WordCloud(props) {
 	const chartRef = useRef(null);
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.wordCloud);
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	const { defaultFormValue } = LeftConfig;
-	const [form, setForm] = useState(searchParams ? searchParams : defaultFormValue);
+	const [form, setForm] = useState(searchParams || initialState.searchParams);
 	const [echart, setEchart] = useState(null);
 
 	useEffect(() => {
@@ -58,10 +56,10 @@ function WordCloud(props) {
 		}
 		setForm(_.set({ ...form }, name, newArray));
 
-		dispatch(Actions.setSearchSubmit(true));
+		dispatch(setSearchSubmit(true));
 
 		const [newParams] = parseSearchText(form, null);
-		dispatch(Actions.setSearchParams(newParams));
+		dispatch(setSearchParams(newParams));
 		chart.setOption({ animation: true });
 		return;
 	}

@@ -77,7 +77,7 @@ const searchsReducer = function (state = initialState, action) {
 				...state,
 				entities: [],
 				wordCloud: [],
-				subjectRelation: []
+				subjectRelation: initialState.subjectRelation
 			};
 		}
 		case Actions.CLEAR_SEARCH_TEXT: {

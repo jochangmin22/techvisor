@@ -10,8 +10,8 @@ import ClassifyList from './ClassifyList';
 import ClassifyHeader from './ClassifyHeader';
 import ClassifySidebarContent from './ClassifySidebarContent';
 import ClassifyDialog from './ClassifyDialog';
-import * as Actions from './store/actions';
-import reducer from './store/reducers';
+import { openNewClassifyDialog } from './store/classifySlice';
+import reducer from './store';
 
 const useStyles = makeStyles({
 	addButton: {
@@ -29,12 +29,12 @@ function ClassifyApp(props) {
 	const pageLayout = useRef(null);
 
 	useEffect(() => {
-		// dispatch(Actions.getClassify(props.match.params));
-		// dispatch(Actions.getUserData());
+		// dispatch(getClassify(props.match.params));
+		// dispatch(getUserData());
 	}, [dispatch, props.match.params]);
 
 	useEffect(() => {
-		// dispatch(Actions.getClassify(props.match.params));
+		// dispatch(getClassify(props.match.params));
 	}, [dispatch, props.match.params]);
 
 	return (
@@ -58,7 +58,7 @@ function ClassifyApp(props) {
 					color="primary"
 					aria-label="add"
 					className={classes.addButton}
-					onClick={ev => dispatch(Actions.openNewClassifyDialog())}
+					onClick={ev => dispatch(openNewClassifyDialog())}
 				>
 					<Icon>person_add</Icon>
 				</Fab>

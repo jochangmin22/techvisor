@@ -12,7 +12,7 @@ import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { useSelector, useDispatch } from 'react-redux';
-import * as Actions from '../../../store/actions';
+import { setWordCloudScope } from '../../../store/searchsSlice';
 import React, { useState } from 'react';
 
 function WordCloudMenu(props) {
@@ -46,7 +46,7 @@ function WordCloudMenu(props) {
 		if (isFormInvalid()) {
 			return;
 		}
-		dispatch(Actions.setWordCloudScope(form));
+		dispatch(setWordCloudScope(form));
 		// props.onAddCheckList(new ChecklistModel(form));
 		handleMenuClose();
 	}

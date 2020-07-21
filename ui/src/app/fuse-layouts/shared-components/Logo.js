@@ -5,8 +5,8 @@ import React from 'react';
 const useStyles = makeStyles(theme => ({
 	root: {
 		'& .logo-icon': {
-			width: 100, // 46, //24,
-			height: 32, // 19, //24,
+			width: 100, // 24,
+			height: 32, // 24,
 			transition: theme.transitions.create(['width', 'height'], {
 				duration: theme.transitions.duration.shortest,
 				easing: theme.transitions.easing.easeInOut
@@ -31,11 +31,7 @@ function Logo() {
 	return (
 		<div className={clsx(classes.root, 'flex items-center')}>
 			<img className="logo-icon" src="assets/images/logos/logo_ipgrim_shadow.svg" alt="logo" />
-			{/* <Typography className="text-16 ml-12 font-bold logo-text text-xl tracking-tight" color="inherit">
-				IPGRIM
-			</Typography> */}
-			{/* <img className="logo-icon" src="assets/images/logos/fuse.svg" alt="logo" />
-			<Typography className="text-16 mx-12 font-light logo-text" color="inherit">
+			{/* <Typography className="text-16 mx-12 font-light logo-text" color="inherit">
 				FUSE
 			</Typography>
 			<div className={clsx(classes.reactBadge, 'react-badge flex items-center py-4 px-8 rounded')}>

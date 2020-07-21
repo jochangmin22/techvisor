@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import {
-	Button,
-	Hidden,
-	Icon,
-	IconButton,
-	// Input,
-	// Link,
-	Popover,
-	Typography
-} from '@material-ui/core';
-
+import Button from '@material-ui/core/Button';
+import Hidden from '@material-ui/core/Hidden';
+import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
+import Popover from '@material-ui/core/Popover';
+import Typography from '@material-ui/core/Typography';
 import FuseAnimate from '@fuse/core/FuseAnimate';
 import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
-
-import * as Actions from './store/actions';
+import { selectMainTheme } from 'app/store/fuse/settingsSlice';
+import { setSummary } from './store/summarySlice';
 import reducer from '../search/store/reducers';
 import HeaderGrid from './header/HeaderGrid';
 
@@ -31,11 +26,11 @@ const useStyles = makeStyles(theme => ({
 function SummaryHeader(props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
-	const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
+	const mainTheme = useSelector(selectMainTheme);
 	const searchs = useSelector(({ searchApp }) => searchApp.searchs.entities);
 	useEffect(() => {
 		if (searchs) {
-			dispatch(Actions.setSummary(searchs));
+			dispatch(setSummary(searchs));
 		}
 	}, [searchs, dispatch]);
 	const [data, setData] = useState([]);

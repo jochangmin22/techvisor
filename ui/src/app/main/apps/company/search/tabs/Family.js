@@ -4,7 +4,7 @@ import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 // import { useDispatch, useSelector } from "react-redux";
 // import withReducer from "app/store/withReducer";
 // import * as Actions from "../../store/actions";
-// import reducer from "../../store/reducers";
+// import reducer from '../../store';
 // import _ from "lodash";
 import clsx from 'clsx';
 
@@ -67,8 +67,8 @@ function Family(props) {
 	const classes = useStyles(props);
 
 	// useEffect(() => {
-	//     dispatch(Actions.getSearch());
-	//     // dispatch(Actions.getProjects());
+	//     dispatch(getSearch());
+	//     // dispatch(getProjects());
 	// }, [dispatch]);
 
 	return (

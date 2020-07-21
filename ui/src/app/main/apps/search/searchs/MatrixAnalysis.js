@@ -5,7 +5,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import { useSelector, useDispatch } from 'react-redux';
-import * as Actions from '../store/actions';
+import { getMatrix, getMatrixDialog, openMatrixDialog, updateMatrixCategory } from '../store/searchsSlice';
 // import { Draggable } from 'react-beautiful-dnd';
 // import Draggable from 'react-draggable';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
@@ -19,6 +19,7 @@ function MatrixAnalysis(props) {
 	const dispatch = useDispatch();
 	const matrix = useSelector(({ searchApp }) => searchApp.searchs.matrix);
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
+	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
 	const [selectedCategory, setSelectedCategory] = useState(matrix.category);
 	const [showLoading, setShowLoading] = useState(false);
 
@@ -30,14 +31,15 @@ function MatrixAnalysis(props) {
 
 	useEffect(() => {
 		if (selectedCategory) {
-			const [, newApiParams] = parseSearchText(searchParams, null);
-			newApiParams.category = selectedCategory;
 			setShowLoading(true);
-			dispatch(Actions.getMatrix(newApiParams)).then(() => {
+			dispatch(updateMatrixCategory(selectedCategory));
+			const [, params] = parseSearchText(searchParams, null);
+			const subParams = { searchScope: searchScope, matrix: { category: selectedCategory } };
+			dispatch(getMatrix({ params, subParams })).then(() => {
 				setShowLoading(false);
 			});
 		}
-	}, [dispatch, searchParams, selectedCategory]);
+	}, [dispatch, searchParams, searchScope, selectedCategory]);
 
 	// const defaultColumn = React.useMemo(
 	// 	() => ({
@@ -61,12 +63,12 @@ function MatrixAnalysis(props) {
 		function onCellClick(ev, props) {
 			ev.preventDefault();
 
-			const [, newApiParams] = parseSearchText(searchParams, null);
-			newApiParams.category = selectedCategory;
-			newApiParams.topic = props.column.id;
-			newApiParams.categoryValue = Object.values(props.row.values)[0];
-			dispatch(Actions.getMatrixDialog(newApiParams)).then(() => {
-				dispatch(Actions.openMatrixDialog());
+			const [, params] = parseSearchText(searchParams, null);
+			params.category = selectedCategory;
+			params.topic = props.column.id;
+			params.categoryValue = Object.values(props.row.values)[0];
+			dispatch(getMatrixDialog(params)).then(() => {
+				dispatch(openMatrixDialog());
 			});
 		}
 
@@ -255,7 +257,7 @@ function MatrixAnalysis(props) {
 								if (row) {
 									// window.open(row.original.link, '_blank');
 									// props.history.push(row.original.link);
-									// dispatch(Actions.openEditContactDialog(row.original));
+									// dispatch(openEditContactDialog(row.original));
 								}
 							}}
 						/>
