@@ -104,8 +104,8 @@ function SearchApp(props) {
 
 			// leftSidebarContent={<LeftQuickPanel />}
 			// sidebarInner
-			ref={pageLayout}
 			innerScroll
+			ref={pageLayout}
 		/>
 	) : (
 		<FusePageCarded

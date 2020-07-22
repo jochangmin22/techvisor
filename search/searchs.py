@@ -476,32 +476,33 @@ def tsquery_keywords(keyword="", fieldName=""):
             if val.endswith("*") or '*' in val:
                 val = val.replace("*", ":*")
             # handle Proximity Search
-            if ' adj' in val:
-                s = val[val.find("adj")+3:].split()[0]
+            if ' adj' in val.lower():
+                s = val.lower()[val.lower().find("adj")+3:].split()[0]
                 if s.isnumeric():
                     delimiter = "<" + s + ">"
                     val = val.replace(s, "")
                 else:
                     delimiter = "<1>"
 
-                val = val.replace("adj", delimiter)
+                val = re.sub(re.escape('adj'), delimiter, val, flags=re.IGNORECASE)                    
+                # val = val.replace("adj", delimiter)
             # A or B near C
             # A near B or C
             # A or B near C or D near E or F
             strNear = ""
-            if ' near' in val:
+            if ' near' in val.lower():
                 for v in re.split(" or ", val, flags=re.IGNORECASE):
                     # remove possible parenthesis
                     v = re.sub('[()]', '', v)
-                    if ' near' in v:
-                        s = v[v.find("near")+4:].split()[0]
+                    if ' near' in v.lower():
+                        s = v.lower()[v.lower().find("near")+4:].split()[0]
                         if s.isnumeric():
                             delimiter = "<" + s + ">"
                             v = v.replace(s, "")
                         else:
                             delimiter = "<1>"
 
-                        v = v.replace("near", delimiter)
+                        v = re.sub(re.escape('near'), delimiter, v, flags=re.IGNORECASE) 
                         temp = v.partition(" " + delimiter + " ")
 
                         # switch position between words and add it

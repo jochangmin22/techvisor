@@ -12,6 +12,7 @@ import debounce from 'lodash/debounce';
 import randomColor from 'randomcolor';
 // import WordCloudToobar from './components/WordCloudToobar';
 import WordCloudMenu from './components/WordCloudMenu';
+import { useUpdateEffect } from '@fuse/hooks';
 
 function WordCloud(props) {
 	const dispatch = useDispatch();
@@ -31,17 +32,17 @@ function WordCloud(props) {
 
 	function handleClick(chart, value, name = 'terms') {
 		chart.setOption({ animation: false });
-		const newArray = form[name];
-		const newValue = value.trim();
+		let array = [...form[name]];
+		const newValue = value.trim().replace(/\s+/g, ' ADJ1 ');
 		let existCheck = true;
-		newArray.map(arr => {
+		array.map(arr => {
 			if (arr.includes(newValue)) {
 				return (existCheck = false);
 			}
 			return true;
 		});
 		if (existCheck) {
-			newArray.push([newValue]);
+			array.push([newValue]);
 		} else {
 			dispatch(
 				showMessage({
@@ -54,15 +55,18 @@ function WordCloud(props) {
 				})
 			);
 		}
-		setForm(_.set({ ...form }, name, newArray));
+		setForm(_.set({ ...form }, name, array));
 
 		dispatch(setSearchSubmit(true));
 
-		const [newParams] = parseSearchText(form, null);
-		dispatch(setSearchParams(newParams));
 		chart.setOption({ animation: true });
 		return;
 	}
+
+	useUpdateEffect(() => {
+		const [_params] = parseSearchText(form, null);
+		dispatch(setSearchParams(_params));
+	}, [form]);
 
 	const drawChart = () => {
 		if (!entities || entities.length === 0) return;

@@ -70,11 +70,11 @@ function SearchHeader(props) {
 			// 	dispatch(setSearchLoading(false));
 			// });
 		} else {
-			const [newParams] = parseSearchText(null, inputSearchText); // not use first args searchParams (null)
-			newParams['searchNum'] = ''; // prevent uncontrolled error
-			dispatch(setSearchParams(newParams));
+			const [_params] = parseSearchText(null, inputSearchText); // Note that the first args of parseSearchText is null
+			_params['searchNum'] = ''; // prevent uncontrolled error
+			dispatch(setSearchParams(_params));
 			dispatch(setSearchSubmit(true));
-			// console.log('onSearchSubmit -> newParams', newParams);
+			// console.log('onSearchSubmit -> _params', _params);
 			// dispatch(setSearchLoading(true));
 			// dispatch(clearSearchs());
 			// dispatch(clearWidgetsData());

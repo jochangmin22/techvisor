@@ -75,8 +75,8 @@ export const updateSubjectRelation = createAsyncThunk(NAME + 'updateSubjectRelat
 
 const searchsAdapter = createEntityAdapter({});
 
-export const { selectAll: selectSearchs, selectById: selectSearchsById } = searchsAdapter.getSelectors(
-	state => state.searchApp.searchs
+export const { selectAll: selectSearchs, selectById: selectSearchById } = searchsAdapter.getSelectors(
+	state => state.searchApp.searchs.entities
 );
 
 export const initialState = {

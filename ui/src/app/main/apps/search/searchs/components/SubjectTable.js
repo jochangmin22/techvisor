@@ -15,6 +15,7 @@ import parseSearchText from '../../inc/parseSearchText';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { setSearchParams, setSearchSubmit, initialState } from '../../store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
+import { useUpdateEffect } from '@fuse/hooks';
 
 const useStyles = makeStyles(theme => ({
 	word: {
@@ -32,17 +33,17 @@ function SubjectTable(props) {
 	const [form, setForm] = useState(searchParams || initialState.searchParams);
 
 	function handleClick(value, name = 'terms') {
-		const newArray = form[name];
-		const newValue = value.trim().replace(' ', '_');
+		let array = [...form[name]];
+		const newValue = value.trim().replace(/\s+/g, ' ADJ1 ');
 		let existCheck = true;
-		newArray.map(arr => {
+		array.map(arr => {
 			if (arr.includes(newValue)) {
 				return (existCheck = false);
 			}
 			return true;
 		});
 		if (existCheck) {
-			newArray.push([newValue]);
+			array.push([newValue]);
 		} else {
 			dispatch(
 				showMessage({
@@ -55,13 +56,18 @@ function SubjectTable(props) {
 				})
 			);
 		}
-		setForm(_.set({ ...form }, name, newArray));
+		setForm(_.set({ ...form }, name, array));
 
 		dispatch(setSearchSubmit(true));
 
+		// const [_params] = parseSearchText(form, null);
+		// dispatch(setSearchParams(_params));
+	}
+
+	useUpdateEffect(() => {
 		const [_params] = parseSearchText(form, null);
 		dispatch(setSearchParams(_params));
-	}
+	}, [form]);
 
 	if (!props) {
 		return <SpinLoading />;

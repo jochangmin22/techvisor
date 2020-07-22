@@ -95,10 +95,12 @@ const BootstrapInput = withStyles(theme => ({
 	}
 }))(InputBase);
 
+const insert = (arr, index, newItem) => [...arr.slice(0, index), newItem, ...arr.slice(index + 1)];
+
 const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	const dispatch = useDispatch();
 	const classes = useStyles();
-	const { options, defaultFormValue } = LeftConfig;
+	const { options } = LeftConfig;
 	const [searchVolume, setSearchVolume] = useState('SUM');
 
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
@@ -117,7 +119,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		endDate: searchParams.endDate
 	});
 
-	const { form, handleChange, setForm } = useForm(searchParams ? { ...searchParams } : { ...defaultFormValue });
+	const { form, handleChange, setForm } = useForm(searchParams || initialState.searchParams);
 
 	useUpdateEffect(() => {
 		// Sync from leftSidebar to header
@@ -238,33 +240,39 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	// }
 
 	function handleAddChip(value, key, name) {
-		const newArray = form[name];
+		let array = [...form[name]];
 		const newValue = value.trim();
-		if (key !== null) {
-			// terms
-			if (newArray[key] === undefined)
-				// newArray.push(Array.isArray(value) ? value : [value]);
-				newArray.push([newValue]);
-			else newArray[key].push(newValue);
-		} else if (newArray === undefined) newArray.push([newValue]);
-		else newArray.push(newValue); // inventor, assignee
 
-		setForm(_.set({ ...form }, name, newArray));
+		if (array === undefined || array[key] === undefined) {
+			array.push([newValue]);
+		} else if (array[key] !== undefined) {
+			let newArrVal = [...array[key]];
+			newArrVal.push(newValue);
+			array = insert(array, key, newArrVal);
+		} else if (array !== undefined) {
+			array.push(newValue);
+		}
+
+		setForm(_.set({ ...form }, name, array));
 		setSubmitted(true);
 	}
 
 	function handleDeleteChip(index, key, name) {
-		const newArray = form[name];
+		let array = [...form[name]];
+
 		if (key !== null) {
 			// terms
-			newArray[key].splice(index, 1);
-			if (newArray[key].length === 0) {
-				newArray.splice(key, 1);
+			let newArrVal = [...array[key]];
+			newArrVal.splice(index, 1);
+			if (newArrVal.length === 0) {
+				array.splice(key, 1);
+			} else {
+				array = insert(array, key, newArrVal);
 			}
 		} else {
-			newArray.splice(index, 1); // inventor, assignee
+			array.splice(index, 1); // inventor, assignee
 		}
-		setForm(_.set({ ...form }, name, newArray));
+		setForm(_.set({ ...form }, name, array));
 		setSubmitted(true);
 	}
 
@@ -281,11 +289,6 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 				subjectRelation: initialState.subjectRelation
 			}
 		};
-		// const subParams = {
-		// 	searchScope: { ...searchScope, searchVolume: searchVolume },
-		// 	matrix: initialState.matrix,
-		// 	subjectRelation: initialState.subjectRelation
-		// };
 
 		dispatch(setSearchLoading(true));
 		dispatch(clearSearchs());
@@ -319,7 +322,6 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 			<div className="px-24 py-8">
 				<Typography variant="subtitle1">검색 범위</Typography>
 				<FormControl component="fieldset" className={classes.formControl}>
-					{/* <FormLabel component="legend">검색 범위</FormLabel> */}
 					<RadioGroup
 						aria-label="searchVolume"
 						name="searchVolume"
