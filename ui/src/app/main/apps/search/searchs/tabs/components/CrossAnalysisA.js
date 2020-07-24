@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import debounce from 'lodash/debounce';
 import echarts from 'echarts';
 import 'echarts/theme/blue';
+// import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 // const entities = [
 // 	{ 출원인: '삼성전자', 피인용수: '22', CPP: '4.4', 전체: '4', PII: '1.1', TS: '5.50', PFS: '0.75' },
@@ -15,7 +16,7 @@ import 'echarts/theme/blue';
 // 	{ 출원인: '마이크로소프트 코포레이션', 피인용수: '1', CPP: '0.5', 전체: '4', PII: '0.13', TS: '0.26', PFS: '0.6' }
 // ];
 
-function CrossAnalysis(props) {
+function CrossAnalysisA(props) {
 	const chartRef = useRef(null);
 	const [echart, setEchart] = useState(null);
 
@@ -31,7 +32,7 @@ function CrossAnalysis(props) {
 	}, [entities]);
 
 	const drawChart = () => {
-		// if (!entities.data) return;
+		// if (!entities || entities.length === 0) return;
 
 		if (echart) {
 			echart.dispose();
@@ -145,10 +146,6 @@ function CrossAnalysis(props) {
 				}
 			]
 		};
-
-		// setSeries(option.series);
-		// setXAxis(option.xAxis);
-
 		myChart.setOption(option);
 	};
 
@@ -165,11 +162,7 @@ function CrossAnalysis(props) {
 		};
 	}, [handleResize]);
 
-	// if (!searchs || searchs.length === 0) {
-	// 	return <SpinLoading />;
-	// }
-
-	// if (!data || data.length === 0) {
+	// if (!entities || entities.length === 0) {
 	// 	return <SpinLoading />;
 	// }
 
@@ -179,11 +172,10 @@ function CrossAnalysis(props) {
 				<Typography variant="body1" className="my-8">
 					CPP, PII, TS 및 PFS 교차분석
 				</Typography>
-				{/* <PopoverMsg title="CPP, PII, TS 및 PFS 교차분석" variant="body1" msg="" /> */}
 			</div>
 			<div id="main" className="w-full h-xs" ref={chartRef} />
 		</Paper>
 	);
 }
 
-export default React.memo(CrossAnalysis);
+export default CrossAnalysisA;

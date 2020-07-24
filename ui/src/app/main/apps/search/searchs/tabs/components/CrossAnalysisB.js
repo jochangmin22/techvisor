@@ -5,8 +5,9 @@ import Typography from '@material-ui/core/Typography';
 import debounce from 'lodash/debounce';
 import echarts from 'echarts';
 import 'echarts/theme/royal';
+// import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
-function CrossAnalysis(props) {
+function CrossAnalysisB(props) {
 	const chartRef = useRef(null);
 	const [echart, setEchart] = useState(null);
 
@@ -22,7 +23,7 @@ function CrossAnalysis(props) {
 	}, [entities]);
 
 	const drawChart = () => {
-		// if (!entities.data) return;
+		// if (!entities || entities.length === 0) return;
 
 		if (echart) {
 			echart.dispose();
@@ -348,10 +349,6 @@ function CrossAnalysis(props) {
 				}
 			]
 		};
-
-		// setSeries(option.series);
-		// setXAxis(option.xAxis);
-
 		myChart.setOption(option);
 	};
 
@@ -368,11 +365,7 @@ function CrossAnalysis(props) {
 		};
 	}, [handleResize]);
 
-	// if (!searchs || searchs.length === 0) {
-	// 	return <SpinLoading />;
-	// }
-
-	// if (!data || data.length === 0) {
+	// if (!entities || entities.length === 0) {
 	// 	return <SpinLoading />;
 	// }
 
@@ -388,4 +381,4 @@ function CrossAnalysis(props) {
 	);
 }
 
-export default React.memo(CrossAnalysis);
+export default CrossAnalysisB;
