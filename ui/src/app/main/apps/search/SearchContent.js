@@ -4,13 +4,14 @@ import Typography from '@material-ui/core/Typography';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { setMockData } from './store/searchsSlice';
 // import { authRoles } from "app/auth";
-import ContentGrid from './searchs/ContentGrid';
+// import ContentGrid from './searchs/ContentGrid';
 import ContentVisual from './searchs/ContentVisual';
 import SubjectRelation from './searchs/SubjectRelation';
 import MatrixAnalysis from './searchs/MatrixAnalysis';
 import NewsAnalysis from './searchs/NewsAnalysis';
 import EmptyMsg from './searchs/components/EmptyMsg';
 import searchData from './inc/searchDataNew';
+import ContentTable from './searchs/ContentTable';
 
 function SearchContent(props) {
 	const dispatch = useDispatch();
@@ -60,7 +61,8 @@ function SearchContent(props) {
 							<NewsAnalysis searchText={searchText} />
 						</div>
 						<div className="flex w-full h-full p-16 md:pt-0">
-							<ContentGrid />
+							{/* <ContentGrid /> */}
+							<ContentTable />
 						</div>
 					</div>
 				)}
