@@ -1,31 +1,24 @@
 const config = {
-	title: '비투윈 - 세로',
+	title: '비투윈 - 가로',
 	defaults: {
 		mode: 'fullwidth',
 		scroll: 'content',
 		navbar: {
-			display: true,
-			folded: true,
-			position: 'left'
+			display: true
 		},
 		toolbar: {
-			display: true,
-			style: 'fixed',
+			display: false,
 			position: 'below'
 		},
 		footer: {
 			display: false,
-			style: 'fixed',
-			position: 'below'
+			style: 'fixed'
 		},
 		leftSidePanel: {
 			display: true
 		},
 		rightSidePanel: {
 			display: false
-		},
-		settingsPanel: {
-			display: true
 		}
 	},
 	form: {
@@ -40,20 +33,10 @@ const config = {
 				{
 					name: 'Full Width',
 					value: 'fullwidth'
-				}
-			]
-		},
-		scroll: {
-			title: 'Scrollable Area',
-			type: 'radio',
-			options: [
-				{
-					name: 'Body',
-					value: 'body'
 				},
 				{
-					name: 'Content',
-					value: 'content'
+					name: 'Container',
+					value: 'container'
 				}
 			]
 		},
@@ -64,24 +47,6 @@ const config = {
 				display: {
 					title: 'Display',
 					type: 'switch'
-				},
-				folded: {
-					title: 'Folded',
-					type: 'switch'
-				},
-				position: {
-					title: 'Position',
-					type: 'radio',
-					options: [
-						{
-							name: 'Left',
-							value: 'left'
-						},
-						{
-							name: 'Right',
-							value: 'right'
-						}
-					]
 				}
 			}
 		},
@@ -92,20 +57,6 @@ const config = {
 				display: {
 					title: 'Display',
 					type: 'switch'
-				},
-				style: {
-					title: 'Style',
-					type: 'radio',
-					options: [
-						{
-							name: 'Fixed',
-							value: 'fixed'
-						},
-						{
-							name: 'Static',
-							value: 'static'
-						}
-					]
 				},
 				position: {
 					title: 'Position',
@@ -142,20 +93,6 @@ const config = {
 						{
 							name: 'Static',
 							value: 'static'
-						}
-					]
-				},
-				position: {
-					title: 'Position',
-					type: 'radio',
-					options: [
-						{
-							name: 'Above',
-							value: 'above'
-						},
-						{
-							name: 'Below',
-							value: 'below'
 						}
 					]
 				}

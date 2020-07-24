@@ -1,7 +1,7 @@
-import React from 'react';
 import QuickPanel from 'app/fuse-layouts/shared-components/quickPanel/QuickPanel';
+import React from 'react';
 
-function RightSideLayout4(props) {
+function RightSideLayout4() {
 	return (
 		<>
 			<QuickPanel />
