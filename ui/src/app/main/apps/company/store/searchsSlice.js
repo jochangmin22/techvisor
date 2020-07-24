@@ -4,119 +4,97 @@ import axios from 'axios';
 const URL = `${process.env.REACT_APP_API_URL}/api/company-app/searchs/`;
 const NAME = 'companyApp/search/';
 
-export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async (routeParams, { getState }) => {
-	routeParams = routeParams || getState().companyApp.search.routeParams;
+export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async params => {
 	const response = await axios.get(URL, {
-		params: routeParams
+		params: params
 	});
 	const data = await response.data;
 
 	// dispatch(setClickedSearchId(routeParams.appNo));
 
-	return {
-		data,
-		routeParams
-	};
+	return data;
 });
 
-export const getSearchsNum = createAsyncThunk(NAME + 'getSearchsNum', async (routeParams, { getState }) => {
-	routeParams = routeParams || getState().companyApp.search.routeParams;
+export const getSearchsNum = createAsyncThunk(NAME + 'getSearchsNum', async params => {
 	const response = await axios.get(URL + 'searchsnum', {
-		params: routeParams
+		params: params
 	});
 	const data = await response.data;
 
-	return {
-		data,
-		routeParams
-	};
+	return data;
 });
 
-export const getNews = createAsyncThunk(NAME + 'getNews', async (routeParams, { getState }) => {
-	routeParams = routeParams || getState().companyApp.search.routeParams;
+export const getNews = createAsyncThunk(NAME + 'getNews', async params => {
 	const response = await axios.get(URL + 'news', {
-		params: routeParams
+		params: params
 	});
 	const data = await response.data;
 
-	return {
-		data,
-		routeParams
-	};
+	return data;
 });
 
-export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async (routeParams, { getState }) => {
-	routeParams = routeParams || getState().companyApp.search.routeParams;
+export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async params => {
 	const response = await axios.get(URL + 'newssa', {
-		params: routeParams
+		params: params
 	});
 	const data = await response.data;
 
-	return { data, routeParams };
+	return data;
 });
 
-export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async (routeParams, { getState }) => {
-	routeParams = routeParams || getState().companyApp.search.routeParams;
+export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async params => {
 	const response = await axios.get(URL + 'relatedcompany', {
-		params: routeParams
+		params: params
 	});
 	const data = await response.data;
 
-	return { data, routeParams };
+	return data;
 });
 
-export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async (routeParams, { getState }) => {
-	routeParams = routeParams || getState().companyApp.search.routeParams;
+export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async params => {
 	const response = await axios.get(URL + 'matrix', {
-		params: routeParams
+		params: params
 	});
 	const data = await response.data;
 
-	return { data, routeParams };
+	return data;
 });
 
-export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async (routeParams, { getState }) => {
-	routeParams = routeParams || getState().companyApp.search.routeParams;
+export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async params => {
 	const response = await axios.get(URL + 'matrixdialog', {
-		params: routeParams
+		params: params
 	});
 	const data = await response.data;
 
-	return { data, routeParams };
+	return data;
 });
 
-export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async (routeParams, { getState }) => {
-	routeParams = routeParams || getState().companyApp.search.routeParams;
+export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async params => {
 	const response = await axios.get(URL + 'wordcloud', {
-		params: routeParams
+		params: params
 	});
 	const data = await response.data;
 
-	return { data, routeParams };
+	return data;
 });
 
-export const getSubjectRelation = createAsyncThunk(NAME + 'getSubjectRelation', async (routeParams, { getState }) => {
-	routeParams = routeParams || getState().companyApp.search.routeParams;
+export const getSubjectRelation = createAsyncThunk(NAME + 'getSubjectRelation', async params => {
 	const response = await axios.get(URL + 'vec', {
-		params: routeParams
+		params: params
 	});
 	const data = await response.data;
 
-	return { data, routeParams };
+	return data;
 });
 
-export const updateSubjectRelation = createAsyncThunk(
-	NAME + 'updateSubjectRelation',
-	async (routeParams, { getState }) => {
-		routeParams = routeParams || getState().companyApp.search.routeParams;
-		const response = await axios.get(URL + 'vec', {
-			params: routeParams
-		});
-		const data = await response.data;
+export const updateSubjectRelation = createAsyncThunk(NAME + 'updateSubjectRelation', async params => {
+	const response = await axios.get(URL + 'vec', {
+		params: params
+	});
+	const data = await response.data;
 
-		return { data, routeParams };
-	}
-);
+	return data;
+});
 
 const searchsAdapter = createEntityAdapter({});
 

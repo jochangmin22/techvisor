@@ -31,9 +31,9 @@ def get_crawl(request):
 def get_company_info(request):
     return crawl_dart(request)
 
-def get_topic(request):
-    return kr_nlp(request, "topic")
+# def get_topic(request):
+#     return kr_nlp(request, "topic")
 
 
-def get_vec(request):
-    return kr_nlp(request, "vec")
+# def get_vec(request):
+#     return kr_nlp(request, "vec")

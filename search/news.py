@@ -37,7 +37,8 @@ display = 100 # 각 키워드 당 검색해서 저장할 기사 수
 
 def clean_keyword(keyword):
     """ 불필요한 단어 제거 """
-    res = keyword.replace(" and","").replace( " or","")
+    # res = keyword.lower().replace(" and","").replace( " or","").replace(" adj")
+    res = re.sub(' and| or| adj[0-9]| near[0-9]', '', keyword, flags=re.IGNORECASE)
     return res 
 
 def parse_news(request, mode="needJson"): # mode : needJson, noJson
@@ -81,10 +82,10 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
     rescode = response.getcode()
     if(rescode==200):
         response_body_str = response.read().decode('utf-8')
-        json_acceptable_string = response_body_str.replace("'", "\"")
+        # json_acceptable_string = response_body_str.replace("'", "\"")
         response_body = json.loads(response_body_str)
-        title_link = {}
-        link_description = {}
+        # title_link = {}
+        # link_description = {}
         for i in range(0, len(response_body['items'])):
             # strip b tag
             response_body['items'][i]['title'] = re.sub('<[^<]+?>', '', response_body['items'][i]['title'].replace('&quot;', '\"'))

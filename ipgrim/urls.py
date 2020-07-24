@@ -96,6 +96,7 @@ urlpatterns = [
     re_path(r"^api/company-app/searchs/stock$", get_stock),
     re_path(r"^api/company-app/searchs/vec$", get_vec),
     re_path(r"^api/company-app/searchs/topic$", get_topic),
+    
     re_path(r"^api/company-app/search/stock$", csrf_exempt(get_stock)),
     re_path(r"^api/company-app/search/companyinfo$", csrf_exempt(get_company_info)),
     re_path(r"^api/company-app/search/crawlstock$", csrf_exempt(get_crawl)),
