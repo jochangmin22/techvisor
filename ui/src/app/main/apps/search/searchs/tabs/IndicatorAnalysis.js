@@ -49,7 +49,7 @@ function IndicatorAnalysis(props) {
 								key={index}
 								className="normal-case shadow-none px-16"
 								onClick={() => handleChangeRange(index)}
-								color={currentRange === index ? 'default' : 'disabled'}
+								color={currentRange === index ? 'default' : 'inherit'}
 								variant={currentRange === index ? 'contained' : 'text'}
 								size="small"
 							>

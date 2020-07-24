@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk, createEntityAdapter } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
 
 const URL = `${process.env.REACT_APP_API_URL}/api/company-app/search/`;
 const NAME = 'companyApp/search/';
