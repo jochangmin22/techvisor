@@ -14,6 +14,7 @@ import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import parseSearchText from '../inc/parseSearchText';
 import MatrixDialog from './MatrixDialog';
+import MatrixAnalysisMenu from './components/MatrixAnalysisMenu';
 
 function MatrixAnalysis(props) {
 	const dispatch = useDispatch();
@@ -202,30 +203,13 @@ function MatrixAnalysis(props) {
 	}
 
 	return (
-		<Paper className="w-full h-full rounded-8 shadow">
-			<div className="px-12 flex items-center">
+		<Paper className="w-full h-full rounded-8 shadow py-8">
+			<div className="px-12 flex items-center justify-between">
 				<PopoverMsg
 					title="매트릭스 분석"
 					msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 연도별, 기술별, 기업별 분석을 매트릭스 형태로 표시합니다."
 				/>
-				<FormControl>
-					<Select
-						className="w-128 px-12"
-						value={selectedCategory}
-						onChange={handleSelectedCategory}
-						// inputProps={{
-						// 	name: 'selectedCategory'
-						// }}
-						displayEmpty
-						// disableUnderline
-					>
-						{['연도별', '기술별', '기업별'].map(key => (
-							<MenuItem value={key} key={key}>
-								{key}
-							</MenuItem>
-						))}
-					</Select>
-				</FormControl>
+				<MatrixAnalysisMenu />
 			</div>
 			<FuseScrollbars className="h-40 px-12">
 				<div className="flex w-full ">
@@ -270,3 +254,21 @@ function MatrixAnalysis(props) {
 }
 
 export default MatrixAnalysis;
+// <FormControl>
+// 	<Select
+// 		className="w-128 px-12"
+// 		value={selectedCategory}
+// 		onChange={handleSelectedCategory}
+// 		// inputProps={{
+// 		// 	name: 'selectedCategory'
+// 		// }}
+// 		displayEmpty
+// 		// disableUnderline
+// 	>
+// 		{['연도별', '기술별', '기업별'].map(key => (
+// 			<MenuItem value={key} key={key}>
+// 				{key}
+// 			</MenuItem>
+// 		))}
+// 	</Select>
+// </FormControl>;

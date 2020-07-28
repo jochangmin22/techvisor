@@ -12,10 +12,10 @@ import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { useSelector, useDispatch } from 'react-redux';
-import { setWordCloudScope } from '../../../store/searchsSlice';
+import { setWordCloudScope } from '../../store/searchsSlice';
 import React, { useState } from 'react';
 
-function WordCloudMenu(props) {
+function MatrixAnalysisMenu(props) {
 	const dispatch = useDispatch();
 	const wordCloudScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope.wordCloudScope);
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -52,8 +52,8 @@ function WordCloudMenu(props) {
 	}
 
 	return (
-		<div>
-			<Tooltip title="워드클라우드 설정">
+		<>
+			<Tooltip title="매트릭스분석 설정">
 				<IconButton onClick={handleMenuOpen}>
 					<Icon>more_vert</Icon>
 				</IconButton>
@@ -61,9 +61,9 @@ function WordCloudMenu(props) {
 			<ToolbarMenu state={anchorEl} onClose={handleMenuClose}>
 				<form onSubmit={handleSubmit} className="p-16 flex flex-col">
 					<FormControl className="flex min-w-96 mb-24" component="fieldset">
-						<FormLabel component="legend">검색범위</FormLabel>
-						<Select aria-label="검색범위" name="volume" value={form.volume} onChange={handleChange}>
-							{['요약', '청구항', '발명의 설명'].map(key => (
+						<FormLabel component="legend">분석 항목</FormLabel>
+						<Select aria-label="분석 항목" value={form.modelType} onChange={handleChange} displayEmpty>
+							{['연도별', '기술별', '기업별'].map(key => (
 								<MenuItem value={key} key={key}>
 									{key}
 								</MenuItem>
@@ -77,7 +77,7 @@ function WordCloudMenu(props) {
 							<FormControlLabel value="워드" control={<Radio />} label="워드" />
 						</RadioGroup>
 					</FormControl>
-					<FormControl className="flex min-w-96 mb-24" component="fieldset">
+					{/* <FormControl className="flex min-w-96 mb-24" component="fieldset">
 						<FormLabel component="legend">워드 출력수</FormLabel>
 						<Select labelId="워드 출력수" name="output" value={form.output} onChange={handleChange}>
 							{[50, 100, 150, 200].map(key => (
@@ -86,7 +86,7 @@ function WordCloudMenu(props) {
 								</MenuItem>
 							))}
 						</Select>
-					</FormControl>
+					</FormControl> */}
 					<div className="flex">
 						<Button
 							color="secondary"
@@ -100,11 +100,11 @@ function WordCloudMenu(props) {
 					</div>
 				</form>
 			</ToolbarMenu>
-		</div>
+		</>
 	);
 }
 
-export default WordCloudMenu;
+export default MatrixAnalysisMenu;
 
 {
 	/* <div className="flex flex-row items-center justify-end">
