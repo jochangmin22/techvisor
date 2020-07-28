@@ -6,7 +6,7 @@ import operator
 from operator import itemgetter
 from gensim.models import Word2Vec
 from gensim.models import FastText
-from .searchs import parse_searchs, parse_searchs_num
+from .searchs import parse_searchs
 from .utils import get_redis_key, dictfetchall
 # caching with redis
 from django.core.cache import cache
@@ -27,19 +27,19 @@ def kr_nlp(request, category=""):
 
     if context:
         _keywordvec = request.GET.get("keywordvec", None)
-        if context['modelType'] and request.GET.get("modelType"):
+        if 'modelType' in context and request.GET.get("modelType"):
             _modelType = request.GET.get("modelType") if context['modelType'] != request.GET.get("modelType") else None
         else:
             _modelType = None            
 
-        if category == "topic" and context['topic']:
+        if category == "topic" and 'topic' in context:
             return HttpResponse(context['topic'], content_type="text/plain; charset=utf-8")
         # elif category == "wordcloud" and context['wordcloud']:
         #     return HttpResponse(context['wordcloud'])
-        elif category == "vec" and context['vec'] and not _keywordvec and not _modelType:
+        elif category == "vec" and 'vec' in context and not _keywordvec and not _modelType:
             return HttpResponse(json.dumps(context['vec'], ensure_ascii=False))
     if sub_context:
-        if category == "wordcloud" and sub_context['wordcloud']:
+        if category == "wordcloud" and 'wordcloud' in sub_context:
             return HttpResponse(sub_context['wordcloud'])             
     # Redis }
 
@@ -47,7 +47,7 @@ def kr_nlp(request, category=""):
 
     nlp_raw = []
 
-    nlp_raw = parse_searchs(request, mode="nlp") if params['searchNum'] == '' else parse_searchs_num(request, mode="nlp")
+    nlp_raw = parse_searchs(request, mode="nlp")
 
     try:  # handle NoneType error
         taged_docs = nlp_raw.split()
@@ -229,14 +229,14 @@ def parse_wordcloud(request):
     # Redis {
     sub_context = cache.get(subKey)    
 
-    if sub_context and sub_context['wordcloud']:
+    if sub_context and 'wordcloud' in sub_context:
         return HttpResponse(sub_context['wordcloud'])             
     # Redis }
 
     #///////////////////////////////////
     taged_docs = []
     nlp_raw = []
-    nlp_raw = parse_searchs(request, mode="nlp") if params['searchNum'] == '' else parse_searchs_num(request, mode="nlp")
+    nlp_raw = parse_searchs(request, mode="nlp")
 
     try:  # handle NoneType error
         taged_docs = nlp_raw.split()
@@ -279,25 +279,32 @@ def parse_vec(request):
     """ 빈도수 단어로 연관 단어 추출 (처음은 맨 앞단어로) """
     mainKey, _, params, subParams = get_redis_key(request)
 
-    _keywordvec = subParams['subjectRelation']['keywordvec'] if subParams['subjectRelation']['keywordvec'] else None
-    _modelType = subParams['subjectRelation']['modelType'] or None
+    try:
+        _keywordvec = subParams['subjectRelation']['keywordvec']
+    except KeyError:
+        _keywordvec = None
+
+    try:
+        _modelType = subParams['subjectRelation']['modelType']
+    except KeyError:
+        _modelType = None        
 
     # Redis {
     context = cache.get(mainKey)
     if context:
-        if context['modelType'] and _modelType:
+        if 'modelType' in context and _modelType:
             _modelType = _modelType if context['modelType'] != _modelType else None
         else:
             _modelType = None
-        if context['vec'] and not _keywordvec and not _modelType:
+        if 'vec' in context and not _keywordvec and not _modelType:
             return HttpResponse(json.dumps(context['vec'], ensure_ascii=False))
-          
+
     # Redis }
 
     #///////////////////////////////////
     taged_docs = []
     nlp_raw = []
-    nlp_raw = parse_searchs(request, mode="nlp") if params['searchNum'] == '' else parse_searchs_num(request, mode="nlp")
+    nlp_raw = parse_searchs(request, mode="nlp")
 
     try:  # handle NoneType error
         taged_docs = nlp_raw.split()

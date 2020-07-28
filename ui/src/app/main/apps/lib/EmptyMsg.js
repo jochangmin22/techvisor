@@ -15,7 +15,7 @@ function EmptyMsg(props) {
 				{props.msg}
 			</Typography>
 			<Typography className="hidden md:flex px-16 pb-24 mt-24 text-center" color="textSecondary">
-				시작하시려면 먼저 검색어를 입력하세요!..
+				{props.text ? props.text : '시작하시려면 먼저 검색어를 입력하세요!..'}
 			</Typography>
 		</div>
 	);

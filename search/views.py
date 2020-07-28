@@ -1,7 +1,7 @@
 # from django.shortcuts import render
 # from django.http import HttpResponse
 
-from .searchs import parse_searchs, parse_query, parse_searchs_num
+from .searchs import parse_searchs, parse_query
 from .search import (
     parse_search,
     parse_search_quote,
@@ -32,10 +32,6 @@ from .matrix import parse_matrix, parse_matrix_dialog
 
 def get_searchs(request):
     return parse_searchs(request)
-
-
-def get_searchs_num(request):
-    return parse_searchs_num(request)
 
 
 def get_query(request):

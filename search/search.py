@@ -554,7 +554,7 @@ def handleRedis(redisKey, keys, data="", mode="r"):
     """ read or write to redis """
     context = cache.get(redisKey)
     if mode == 'r':
-        if context and context[keys]:
+        if context and keys in context:
             return JsonResponse(context[keys], safe=False)
     if mode == 'w':
         if context is not None:

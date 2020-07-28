@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
@@ -6,17 +5,20 @@ import NewsArticles from './components/NewsArticles';
 import RelatedCompany from './components/RelatedCompany';
 import { getNews, getNewsSA, getRelatedCompany } from '../store/searchsSlice';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
 function NewsAnalysis(props) {
 	const { searchText } = props;
 	const dispatch = useDispatch();
 
 	useEffect(() => {
-		dispatch(getNews({ searchText: searchText })).then(() => {
-			dispatch(getNewsSA({ searchText: searchText }));
-			dispatch(getRelatedCompany({ searchText: searchText }));
-		});
-	}, [searchText]);
+		if (searchText && searchText.length > 0) {
+			dispatch(getNews({ searchText: searchText })).then(() => {
+				dispatch(getNewsSA({ searchText: searchText }));
+				dispatch(getRelatedCompany({ searchText: searchText }));
+			});
+		}
+	}, [dispatch, searchText]);
 
 	return (
 		<Paper className="w-full h-full rounded-8 shadow">
@@ -26,8 +28,14 @@ function NewsAnalysis(props) {
 					msg="검색어와 관련하여 머신러닝 기술을 기반으로 최근 100건의 뉴스의 긍정부정을 판단합니다."
 				/>
 			</div>
-			<NewsArticles searchText={searchText} />
-			<RelatedCompany searchText={searchText} />
+			{searchText.length === 0 ? (
+				<EmptyMsg icon="mic_none" msg="뉴스분석" text="키워드 검색에서만 관련 뉴스가 표시됩니다." />
+			) : (
+				<>
+					<NewsArticles searchText={searchText} />
+					<RelatedCompany searchText={searchText} />
+				</>
+			)}
 		</Paper>
 	);
 }

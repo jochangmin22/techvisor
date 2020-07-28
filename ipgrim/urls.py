@@ -19,7 +19,6 @@ from django.views.decorators.csrf import csrf_exempt  # post일 경우 필요
 
 from search.views import (
     get_searchs,
-    get_searchs_num,
     get_query,
     get_search,
     get_search_quote,
@@ -62,7 +61,6 @@ urlpatterns = [
     path("auth/google", google_callback),
     re_path(r"^api/search-app/query/$", get_query),
     re_path(r"^api/search-app/searchs/$", csrf_exempt(get_searchs)),
-    re_path(r"^api/search-app/searchs/num$", get_searchs_num),
     re_path(r"^api/search-app/searchs/wordcloud$", get_wordcloud),
     re_path(r"^api/search-app/searchs/vec$", get_vec),
     re_path(r"^api/search-app/searchs/topic$", get_topic),
@@ -92,7 +90,7 @@ urlpatterns = [
 
     re_path(r"^api/company-app/query$", get_companies_query),
     re_path(r"^api/company-app/searchs/$", get_companies),
-    re_path(r"^api/company-app/searchs/num$", get_companies_num),
+    re_path(r"^api/company-app/searchs/searchsnum$", get_companies_num),
     re_path(r"^api/company-app/searchs/stock$", get_stock),
     re_path(r"^api/company-app/searchs/vec$", get_vec),
     re_path(r"^api/company-app/searchs/topic$", get_topic),

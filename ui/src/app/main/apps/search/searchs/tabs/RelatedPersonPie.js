@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import debounce from 'lodash/debounce';
 import echarts from 'echarts';
 import 'echarts/theme/blue';
@@ -28,9 +32,8 @@ function calculateCnt(name, val, arr) {
 	return result;
 }
 
-function ApplicantInventorChart(props) {
+function RelatedPersonPie(props) {
 	const theme = useTheme();
-	const { name } = props;
 	const chartRef = useRef(null);
 	const [echart, setEchart] = useState(null);
 
@@ -38,10 +41,12 @@ function ApplicantInventorChart(props) {
 
 	const [data, setData] = useState({});
 
+	const [currentRange, setCurrentRange] = useState('출원인');
+
 	useEffect(() => {
 		function updateState(arr) {
 			['A', 'B'].map(key => {
-				data[key] = calculateCnt(name, key, arr);
+				data[key] = calculateCnt(currentRange, key, arr);
 				return setData(data);
 			});
 		}
@@ -51,7 +56,7 @@ function ApplicantInventorChart(props) {
 			drawChart();
 		}
 		// eslint-disable-next-line
-	}, [props.searchText, entities]);
+	}, [props.searchText, currentRange, entities]);
 
 	const drawChart = () => {
 		if (!data || data.length === 0) return;
@@ -88,7 +93,7 @@ function ApplicantInventorChart(props) {
 					restore: { show: true, title: '원래대로' },
 					saveAsImage: {
 						show: true,
-						name: `ipgrim ${name} 차트`,
+						name: `ipgrim ${currentRange} 차트`,
 						title: '이미지로 저장',
 						lang: ['Click to Save']
 					}
@@ -116,7 +121,7 @@ function ApplicantInventorChart(props) {
 					data: data.B
 				},
 				{
-					name: name,
+					name: currentRange,
 					type: 'pie',
 					radius: ['40%', '55%'],
 					center: ['40%', '50%'],
@@ -151,14 +156,33 @@ function ApplicantInventorChart(props) {
 
 	return (
 		<Paper className="w-full h-full shadow-none">
-			<div className="flex justify-center border-b-1">
+			<div className="flex items-center justify-between border-b-1">
+				<div>
+					{['출원인', '발명자'].map((key, index) => (
+						<Button
+							className="normal-case shadow-none px-16"
+							key={index}
+							onClick={() => setCurrentRange(key)}
+							color={currentRange === key ? 'default' : 'inherit'}
+							variant={currentRange === key ? 'contained' : 'text'}
+							size="small"
+						>
+							{key}
+						</Button>
+					))}
+				</div>
 				<Typography variant="body1" className="my-8">
-					{name}별
+					{currentRange} 동향
 				</Typography>
+				<IconButton>
+					<Tooltip title="크게 보기">
+						<FullscreenIcon fontSize="small" />
+					</Tooltip>
+				</IconButton>
 			</div>
 			<div id="main" className="w-full h-360" ref={chartRef} />
 		</Paper>
 	);
 }
 
-export default ApplicantInventorChart;
+export default RelatedPersonPie;

@@ -12,7 +12,6 @@ import withReducer from 'app/store/withReducer';
 import reducer from './store';
 import parseSearchText from './inc/parseSearchText';
 import { clearSearchText, setSearchParams, setSearchNum, setSearchSubmit } from './store/searchsSlice';
-// import { showMessage } from 'app/store/fuse/messageSlice';
 
 function SearchHeader(props) {
 	const dispatch = useDispatch();
@@ -40,14 +39,7 @@ function SearchHeader(props) {
 		setInputSearchText(value || '');
 	}, [searchText, searchNum]);
 
-	// useEffect(() => {
-	// 	setInputSearchText(searchNum);
-	// }, [searchNum]);
-
 	const handleChange = useCallback(event => setInputSearchText(event.target.value), []);
-	// function onInputChange(ev) {
-	// 	setInputSearchText(ev.target.value);
-	// }
 
 	function onSearchSubmit(ev) {
 		ev.preventDefault();
@@ -59,30 +51,14 @@ function SearchHeader(props) {
 		const match = inputSearchText.match(numberRegexp);
 		if (match) {
 			// number search ?
+			dispatch(clearSearchText());
 			dispatch(setSearchNum(inputSearchText));
 			dispatch(setSearchSubmit(true));
-			// dispatch(setSearchLoading(true));
-			// dispatch(clearSearchs());
-			// dispatch(clearWidgetsData());
-			// dispatch(getSearchsNum({ searchNum: inputSearchText })).then(() => {
-			// 	dispatch(getWordCloud({ searchNum: inputSearchText }));
-			// 	dispatch(getSubjectRelation({ searchNum: inputSearchText }));
-			// 	dispatch(setSearchLoading(false));
-			// });
 		} else {
 			const [_params] = parseSearchText(null, inputSearchText); // Note that the first args of parseSearchText is null
 			_params['searchNum'] = ''; // prevent uncontrolled error
 			dispatch(setSearchParams(_params));
 			dispatch(setSearchSubmit(true));
-			// console.log('onSearchSubmit -> _params', _params);
-			// dispatch(setSearchLoading(true));
-			// dispatch(clearSearchs());
-			// dispatch(clearWidgetsData());
-			// dispatch(getSearchs(newApiParams)).then(() => {
-			// 	dispatch(getWordCloud(newApiParams));
-			// 	dispatch(getSubjectRelation(newApiParams));
-			// 	dispatch(setSearchLoading(false));
-			// });
 		}
 	}
 
@@ -108,7 +84,6 @@ function SearchHeader(props) {
 						autoComplete="off"
 						fullWidth
 						value={inputSearchText}
-						// onChange={onInputChange}
 						onChange={handleChange}
 						inputProps={{
 							'aria-label': 'Search'

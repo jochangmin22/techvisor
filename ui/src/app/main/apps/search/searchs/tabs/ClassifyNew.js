@@ -1,34 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
-import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
-// import TableContainer from '@material-ui/core/TableContainer';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-// import { PropTypes } from "prop-types";
-// import { FixedSizeList } from "react-window";
-import { makeStyles } from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/styles';
 import _ from '@lodash';
-import clsx from 'clsx';
 import { company, government } from 'app/main/apps/lib/variables';
 import parseSearchText from '../../inc/parseSearchText';
 import { setSearchParams, setSearchSubmit, initialState } from '../../store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useUpdateEffect } from '@fuse/hooks';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 // TODO : Vitualize needed
 // TODO : 테이블 높이 조정 nested 화
 // FIXME : 테이블 항목 클릭하면 검색옵션에 삽입되게
-
 const classifyState = {
 	PUB: {
 		label: '공공기관',
+		maxValue: 0,
 		data: [
 			{
 				name: '출원인 1',
@@ -38,6 +29,7 @@ const classifyState = {
 	},
 	COMP: {
 		label: '기업',
+		maxValue: 0,
 		data: [
 			{
 				name: '출원인 1',
@@ -47,6 +39,7 @@ const classifyState = {
 	},
 	PERS: {
 		label: '개인',
+		maxValue: 0,
 		data: [
 			{
 				name: '출원인 1',
@@ -56,75 +49,8 @@ const classifyState = {
 	}
 };
 
-const useStyles = makeStyles(theme => ({
-	root: {
-		width: '100%',
-		marginTop: theme.spacing(3),
-		padding: theme.spacing(1)
-	},
-	// table: {
-	//     minWidth: 199,
-	//     padding: theme.spacing(1)
-	// },
-	// tableWrapper: {
-	//     overflowX: "auto"
-	// },
-	sizeSmall: {
-		paddingTop: 2,
-		paddingBottom: 2
-	},
-	tableHead: {
-		fontSize: 11,
-		fontWeight: 600,
-		flexGrow: 0,
-		flexShrink: 1,
-		flexBasis: 'auto',
-		padding: 2
-	},
-	tableRow: {
-		fontSize: 11,
-		padding: 2
-		// fontWeight: 600
-	}
-	// toolbar: {
-	//     height: 28,
-	//     minHeight: 28,
-	//     padding: theme.spacing(1)
-	// },
-	// spacer: {
-	//     flexGrow: 0,
-	//     flexShrink: 1,
-	//     flexBasis: "auto"
-	// },
-	// caption: {
-	//     fontSize: 10
-	// }
-}));
-
-// function renderRow(props) {
-//     const { data, index, style } = props;
-//     const item = data[index];
-
-//     return (
-//         <ListItem
-//             key={index}
-//             role={undefined}
-//             dense
-//             style={style}
-//             button
-//             // onClick={handleToggle(value)}
-//         >
-//             <ListItemIcon>
-//                 <div>{index + 1}</div>
-//             </ListItemIcon>
-//             <ListItemText style={style} primary={item.name} />
-//             <ListItemSecondaryAction>{item.value}</ListItemSecondaryAction>
-//         </ListItem>
-//     );
-// }
-
 function Classify(props) {
-	const classes = useStyles();
+	const theme = useTheme();
 	const dispatch = useDispatch();
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.entities);
 
@@ -174,8 +100,9 @@ function Classify(props) {
 				.map((value, key) => ({ name: key, value: value.length }))
 				.orderBy(['value'], ['desc'])
 				// .splice(0, 10)
-				.defaultsDeep({})
 				.value();
+
+			a = _.isEmpty(a) ? {} : a;
 
 			// https://stackoverflow.com/questions/46226572/lodash-filter-by-single-value-and-value-in-array
 			try {
@@ -210,8 +137,9 @@ function Classify(props) {
 				.map((value, key) => ({ name: key, value: value.length }))
 				.orderBy(['value'], ['desc'])
 				// .splice(0, 10)
-				.defaultsDeep({})
 				.value();
+
+			b = _.isEmpty(b) ? {} : b;
 
 			try {
 				// PERS.label = "개인";
@@ -219,6 +147,14 @@ function Classify(props) {
 			} catch (e) {
 				re.PERS = [];
 			}
+			// re.PUB = _.isEmpty(re.PUB) ? [] : re.PUB;
+			// re.COMP = _.isEmpty(re.COMP) ? [] : re.COMP;
+			// re.PERS = _.isEmpty(re.PERS) ? [] : re.PERS;
+
+			// _.set(data, "rows.KR.PUB", PUB);
+			// _.set(data, "rows.KR.COMP", COMP);
+			// _.set(data, "rows.KR.PERS", PERS);
+			// setData(data);
 
 			return re;
 		}
@@ -239,15 +175,48 @@ function Classify(props) {
 					data: payload.PERS
 				}
 			};
+			// console.log(payload);
+			// console.log(updatedState);
 			return updatedState;
 		}
 
 		if (entities) {
 			setData(updateState(getStats(entities)));
-			// getStats(entities);
+			// getStats(searchs);
 		}
 		// eslint-disable-next-line
 	}, [props.searchText, entities]);
+
+	const columns = useMemo(() => {
+		return [
+			{
+				Header: '출원인명',
+				accessor: 'name',
+				className: 'text-11 p-4',
+				sortable: true,
+				width: 80
+				// Cell: row => (
+				// 	<span>
+				// 		<span
+				// 			style={{
+				// 				color: theme.palette.primary.main,
+				// 				transition: 'all .3s ease'
+				// 			}}
+				// 		>
+				// 			&#10625;
+				// 		</span>{' '}
+				// 		{row.value}
+				// 	</span>
+				// )
+			},
+			{
+				header: '건수',
+				accessor: 'value',
+				className: 'text-11 p-4',
+				sortable: true
+			}
+		];
+	}, [theme.palette.primary.main]);
 
 	if (!entities || entities.length === 0) {
 		return <SpinLoading />;
@@ -262,48 +231,22 @@ function Classify(props) {
 			<Paper className="w-full shadow-none">
 				<div className="flex flex-col sm:flex sm:flex-row p-8 container">
 					{['PUB', 'COMP', 'PERS'].map((v, index) => (
-						<Card className="flex w-full sm:w-1/3 flex-col rounded-8 shadow p-8" key={index}>
+						<Paper className="flex w-full sm:w-1/3 flex-col rounded-8 shadow p-8" key={index}>
 							<Typography variant="body1">{data[v].label}</Typography>
-							<FuseScrollbars className="w-full max-h-320">
-								<Table className={classes.sizeSmall} stickyHeader>
-									<TableHead>
-										<TableRow>
-											<TableCell className={classes.tableHead}></TableCell>
-											<TableCell component="th" className={classes.tableHead}>
-												출원인명
-											</TableCell>
-											<TableCell
-												className={clsx(classes.tableHead, 'w-28')}
-												component="th"
-												align="right"
-											>
-												건수
-											</TableCell>
-										</TableRow>
-									</TableHead>
-									<TableBody>
-										{data[v].data.map((row, index) => (
-											<TableRow className="cursor-pointer" key={row.name}>
-												<TableCell className={classes.tableRow} component="th" scope="row">
-													{index + 1}
-												</TableCell>
-												<TableCell
-													className={classes.tableRow}
-													onClick={() => {
-														handleClick(row.name);
-													}}
-												>
-													{row.name}
-												</TableCell>
-												<TableCell className={classes.tableRow} align="right">
-													{row.value}
-												</TableCell>
-											</TableRow>
-										))}
-									</TableBody>
-								</Table>
+							<FuseScrollbars className="w-full max-h-384">
+								<EnhancedTable
+									columns={columns}
+									data={data[v].data}
+									size="small"
+									showFooter={false}
+									onRowClick={(ev, row) => {
+										if (row) {
+											handleClick(row.name);
+										}
+									}}
+								/>
 							</FuseScrollbars>
-						</Card>
+						</Paper>
 					))}
 				</div>
 			</Paper>
@@ -311,3 +254,40 @@ function Classify(props) {
 	);
 }
 export default Classify;
+// <Table className={classes.sizeSmall} stickyHeader>
+// 	<TableHead>
+// 		<TableRow>
+// 			<TableCell className={classes.tableHead}></TableCell>
+// 			<TableCell component="th" className={classes.tableHead}>
+// 				출원인명
+// 			</TableCell>
+// 			<TableCell
+// 				className={clsx(classes.tableHead, 'w-28')}
+// 				component="th"
+// 				align="right"
+// 			>
+// 				건수
+// 			</TableCell>
+// 		</TableRow>
+// 	</TableHead>
+// 	<TableBody>
+// 		{data.rows[currentRange][v].data.map((row, index) => (
+// 			<TableRow className="cursor-pointer" key={row.name}>
+// 				<TableCell className={classes.tableRow} component="th" scope="row">
+// 					{index + 1}
+// 				</TableCell>
+// 				<TableCell
+// 					className={classes.tableRow}
+// 					onClick={() => {
+// 						handleClick(row.name);
+// 					}}
+// 				>
+// 					{row.name}
+// 				</TableCell>
+// 				<TableCell className={classes.tableRow} align="right">
+// 					{row.value}
+// 				</TableCell>
+// 			</TableRow>
+// 		))}
+// 	</TableBody>
+// </Table>;

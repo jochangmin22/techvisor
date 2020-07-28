@@ -141,7 +141,8 @@ const EnhancedTable = ({
 								return (
 									<TableCell
 										{...cell.getCellProps()}
-										className={clsx('px-12 py-6', cell.column.className)}
+										// className={clsx('px-12 py-6', cell.column.className)}
+										className={cell.column.className}
 									>
 										{cell.render('Cell')}
 									</TableCell>
