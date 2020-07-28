@@ -4,7 +4,7 @@ from django.http import JsonResponse, HttpResponse
 from .utils import get_redis_key
 import json
 
-from .searchs import parse_searchs, parse_searchs_num
+from .searchs import parse_searchs
 
 # caching with redis
 from django.core.cache import cache
@@ -21,17 +21,16 @@ def parse_matrix(request):
     2. mtx_row [요약token] 에 각 topic이 포함되는 [연도별, 기술별, 기업별] 횟수 list
     """
 
-    mainKey, _, params, subParams = get_redis_key(request)
+    mainKey, _, _, subParams = get_redis_key(request)
 
     # nlp_raw, mtx_raw 가져오기
     try:
         nlp_raw = parse_searchs(
-            request, mode="nlp") if params['searchNum'] == '' else parse_searchs_num(request, mode="nlp")
+            request, mode="nlp")
     except:
         nlp_raw = []
     try:
-        mtx_raw = parse_searchs(request, mode="matrix") if params['searchNum'] == '' else parse_searchs_num(
-            request, mode="matrix")
+        mtx_raw = parse_searchs(request, mode="matrix")
     except:
         mtx_raw = []
 

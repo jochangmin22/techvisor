@@ -24,7 +24,6 @@ import LeftConfig from './setLeftConfig';
 import parseSearchText from '../inc/parseSearchText';
 import {
 	getSearchs,
-	getSearchsNum,
 	getWordCloud,
 	getSubjectRelation,
 	getMatrix,
@@ -257,7 +256,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		setSubmitted(true);
 	}
 
-	function handleDeleteChip(index, key, name) {
+	function handleDeleteChip(value, index, key, name) {
 		let array = [...form[name]];
 
 		if (key !== null) {
@@ -292,23 +291,23 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 
 		dispatch(setSearchLoading(true));
 		dispatch(clearSearchs());
-		if (num === '') {
-			dispatch(getSearchs(params)).then(() => {
-				dispatch(getWordCloud(params));
-				dispatch(getSubjectRelation(params));
-				dispatch(getMatrix(params));
-				dispatch(setSearchLoading(false));
-				dispatch(setSearchSubmit(false));
-			});
-		} else {
-			dispatch(getSearchsNum({ searchNum: num })).then(() => {
-				dispatch(getWordCloud({ searchNum: num }));
-				dispatch(getSubjectRelation({ searchNum: num }));
-				// dispatch(getMatrix(params));
-				dispatch(setSearchLoading(false));
-				dispatch(setSearchSubmit(false));
-			});
-		}
+		// if (num === '') {
+		dispatch(getSearchs(params)).then(() => {
+			dispatch(getWordCloud(params));
+			dispatch(getSubjectRelation(params));
+			dispatch(getMatrix(params));
+			dispatch(setSearchLoading(false));
+			dispatch(setSearchSubmit(false));
+		});
+		// } else {
+		// 	dispatch(searchNum: num })).then(() => {
+		// 		dispatch(getWordCloud({ searchNum: num }));
+		// 		dispatch(getSubjectRelation({ searchNum: num }));
+		// 		// dispatch(getMatrix(params));
+		// 		dispatch(setSearchLoading(false));
+		// 		dispatch(setSearchSubmit(false));
+		// 	});
+		// }
 		setSubmitted(false);
 	}
 

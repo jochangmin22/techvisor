@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import { useSelector, useDispatch } from 'react-redux';
 import { getMatrix, getMatrixDialog, openMatrixDialog, updateMatrixCategory } from '../store/searchsSlice';
@@ -12,6 +9,7 @@ import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 import parseSearchText from '../inc/parseSearchText';
 import MatrixDialog from './MatrixDialog';
 import MatrixAnalysisMenu from './components/MatrixAnalysisMenu';
@@ -24,9 +22,9 @@ function MatrixAnalysis(props) {
 	const [selectedCategory, setSelectedCategory] = useState(matrix.category);
 	const [showLoading, setShowLoading] = useState(false);
 
-	function handleSelectedCategory(event) {
-		setSelectedCategory(event.target.value);
-	}
+	// function handleSelectedCategory(event) {
+	// 	setSelectedCategory(event.target.value);
+	// }
 
 	// const { setShowLoading } = useContext(SubjectContext);
 
@@ -198,7 +196,9 @@ function MatrixAnalysis(props) {
 	// 	[matrix, selectedCategory]
 	// );
 
-	if (!data || data.length === 0) {
+	const isEmpty = data.length === 0;
+
+	if (!data) {
 		return <SpinLoading />;
 	}
 
@@ -211,42 +211,48 @@ function MatrixAnalysis(props) {
 				/>
 				<MatrixAnalysisMenu />
 			</div>
-			<FuseScrollbars className="h-40 px-12">
-				<div className="flex w-full ">
-					{/* {matrix.entities && (
-						<Chip label={selectedCategory} key={selectedCategory} size="small" className="mx-4" />
-					)} */}
-					{matrix.entities &&
-						Object.entries(matrix.entities).map(([key]) => (
-							// <Chip label={value} key={value} size="small" onClick={() => handleClick(value)} />
-							// <Draggable>
-							<Chip label={key} key={key} size="small" className="mx-4" />
-							// </Draggable>
-						))}
-				</div>
-			</FuseScrollbars>
-			{showLoading ? (
-				<SpinLoading />
+			{isEmpty ? (
+				<EmptyMsg icon="blur_linear" msg="매트릭스 분석" text="검색결과가 적어서 분석할 데이타가 부족합니다." />
 			) : (
 				<>
-					<FuseScrollbars className="max-h-360 px-6">
-						<EnhancedTable
-							columns={columns}
-							// defaultColumn={defaultColumn}
-							data={data}
-							size="small"
-							pageSize={8}
-							pageOptions={[8, 16, 24]}
-							onRowClick={(ev, row) => {
-								if (row) {
-									// window.open(row.original.link, '_blank');
-									// props.history.push(row.original.link);
-									// dispatch(openEditContactDialog(row.original));
-								}
-							}}
-						/>
+					<FuseScrollbars className="h-40 px-12">
+						<div className="flex w-full ">
+							{/* {matrix.entities && (
+						<Chip label={selectedCategory} key={selectedCategory} size="small" className="mx-4" />
+					)} */}
+							{matrix.entities &&
+								Object.entries(matrix.entities).map(([key]) => (
+									// <Chip label={value} key={value} size="small" onClick={() => handleClick(value)} />
+									// <Draggable>
+									<Chip label={key} key={key} size="small" className="mx-4" />
+									// </Draggable>
+								))}
+						</div>
 					</FuseScrollbars>
-					<MatrixDialog />
+					{showLoading ? (
+						<SpinLoading />
+					) : (
+						<>
+							<FuseScrollbars className="max-h-360 px-6">
+								<EnhancedTable
+									columns={columns}
+									// defaultColumn={defaultColumn}
+									data={data}
+									size="small"
+									pageSize={8}
+									pageOptions={[8, 16, 24]}
+									onRowClick={(ev, row) => {
+										if (row) {
+											// window.open(row.original.link, '_blank');
+											// props.history.push(row.original.link);
+											// dispatch(openEditContactDialog(row.original));
+										}
+									}}
+								/>
+							</FuseScrollbars>
+							<MatrixDialog />
+						</>
+					)}
 				</>
 			)}
 		</Paper>

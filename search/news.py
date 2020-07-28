@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 
 from .models import disclosure
-from .searchs import parse_searchs, parse_searchs_num
+from .searchs import parse_searchs
 from .nlp import kr_nlp
 
 # caching with redis
@@ -34,11 +34,9 @@ api_url = settings.NAVER['news_api_url']
 
 display = 100 # 각 키워드 당 검색해서 저장할 기사 수
 
-
 def clean_keyword(keyword):
     """ 불필요한 단어 제거 """
-    # res = keyword.lower().replace(" and","").replace( " or","").replace(" adj")
-    res = re.sub(' and| or| adj[0-9]| near[0-9]', '', keyword, flags=re.IGNORECASE)
+    res = re.sub(' and| or| adj[0-9]| near[0-9]|[()]|["]|.AP|.INV|.CRTY|.LANG|.STAT|.TYPE', '', keyword, flags=re.IGNORECASE)
     return res 
 
 def parse_news(request, mode="needJson"): # mode : needJson, noJson
@@ -65,7 +63,7 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
     context = cache.get(apiParams)    
     # is there data in redis?
     # yes
-    if context and context['news']:
+    if context and 'news' in context:
        return JsonResponse(context['news'], safe=False)
 
     # No     
@@ -133,11 +131,11 @@ def parse_news_nlp(request, mode="needJson"):
     # is there data in Redis
     context = cache.get(apiParams)
     # yes
-    if context and context['news_nlp']:
+    if context and 'news_nlp' in context:
         return JsonResponse(context['news_nlp'], safe=False)
     
     # no
-    news = context['news'] if  context and context['news'] else parse_news(request, mode="noJson")
+    news = context['news'] if context and 'news' in context else parse_news(request, mode="noJson")
 
     news_nlp = ""
     if news:
@@ -180,12 +178,12 @@ def parse_related_company(request, mode="needJson"):
     # is there data in Redis
     context = cache.get(apiParams)
     # yes
-    if context and context['company']:
+    if context and 'company' in context:
         return JsonResponse(context['company'], safe=False)
     
     # no
-    news = context['news'] if context and context['news'] else parse_news(request, mode="noJson")
-    news_nlp = context['news_nlp'] if context and context['news_nlp'] else parse_news_nlp(request, mode="noJson")
+    news = context['news'] if context and 'news' in context else parse_news(request, mode="noJson")
+    news_nlp = context['news_nlp'] if context and 'news_nlp' in context else parse_news_nlp(request, mode="noJson")
     # return JsonResponse(news, safe=False)
 
     # redis save {
@@ -246,7 +244,7 @@ def parse_news_sa(request):
 
     # is there data in Redis
     context = cache.get(apiParams)
-    news = context['news'] if context and context['news'] else parse_news(request, mode="noJson")
+    news = context['news'] if context and 'news' in context else parse_news(request, mode="noJson")
 
     token = ''
     if news:

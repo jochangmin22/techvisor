@@ -39,17 +39,17 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
 
     context = cache.get(mainKey)
     sub_context = cache.get(subKey)
-    
-    if context and context['raw'] and mode == "begin":
+
+    if context and 'raw' in context and mode == "begin":
         return JsonResponse(context['raw'], safe=False)
 
-    if sub_context and sub_context['nlp_raw'] and mode == 'nlp':
+    if sub_context and 'nlp_raw' in sub_context and mode == 'nlp':
         return sub_context['nlp_raw']
 
-    if context and context['mtx_raw'] and mode == 'matrix':
+    if context and 'mtx_raw' in context and mode == 'matrix':
         return context['mtx_raw']
 
-    if context and context['raw'] and mode == 'matrix_dialog':
+    if context and 'raw' in context and mode == 'matrix_dialog':
         return context['raw']
 
     with connection.cursor() as cursor:
@@ -60,36 +60,55 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
             searchVolume = '대'
         else:
             searchVolume = '소'
-        # to_tsquery 형태로 parse
-        whereTermsA = tsquery_keywords(
-            params["searchText"], '전문' + searchVolume)
-        # whereTermsB = like_keywords(params["searchText"], "출원인1")
-        # 출원인 포함은 db 성능 개선하고 나중에
-        # whereTermsAll = ("((" + whereTermsA + ") or " if whereTermsA else "") + ("("+ whereTermsB + ")) and " if whereTermsB else "")
-        whereTermsAll = ("((" + whereTermsA + ")) and " if whereTermsA else "")
 
-        whereInventor = (
-            like_keywords(params["inventor"],
-                          "발명자1") if params["inventor"] else ""
-        )
-        whereAssignee = (
-            like_keywords(params["assignee"],
-                          "출원인1") if params["assignee"] else ""
-        )
-        whereOther = parse_Others(
-            params["dateType"],
-            params["startDate"],
-            params["endDate"],
-            params["status"],
-            params["ipType"],
-        )
+        whereAll = ""
+
+        # 번호검색
+        if params['searchNum']:
+            # fields without "-"
+            for value in ["출원번호", "공개번호", "등록번호"]:
+                whereAll += value + "::text like '%" + \
+                    params["searchNum"].replace("-","") + "%' or "
+
+            # TODO : hyphen refine
+            # fields with "-"
+            for value in ["우선권주장출원번호1", "우선권주장출원번호2", "우선권주장출원번호3", "우선권주장출원번호4", "우선권주장출원번호5", "우선권주장출원번호6", "우선권주장출원번호7", "우선권주장출원번호8", "우선권주장출원번호9", "우선권주장출원번호10"]:
+                whereAll += value + "::text like '%" + \
+                    params["searchNum"] + "%' or "
+            if whereAll.endswith(" or "):
+                whereAll = whereAll[:-4]            
+        # 키워드 검색
+        else: 
+            # to_tsquery 형태로 parse
+            whereTermsA = tsquery_keywords(
+                params["searchText"], '전문' + searchVolume)
+            # whereTermsB = like_keywords(params["searchText"], "출원인1")
+            # 출원인 포함은 db 성능 개선하고 나중에
+            # whereTermsAll = ("((" + whereTermsA + ") or " if whereTermsA else "") + ("("+ whereTermsB + ")) and " if whereTermsB else "")
+            whereTermsAll = ("((" + whereTermsA + ")) and " if whereTermsA else "")
+
+            whereInventor = (
+                like_keywords(params["inventor"],
+                            "발명자1") if params["inventor"] else ""
+            )
+            whereAssignee = (
+                like_keywords(params["assignee"],
+                            "출원인1") if params["assignee"] else ""
+            )
+            whereOther = parse_Others(
+                params["dateType"],
+                params["startDate"],
+                params["endDate"],
+                params["status"],
+                params["ipType"],
+            )
+            whereAll = whereTermsAll + ("(" + whereInventor + ") and " if whereInventor else "") + (
+                "(" + whereAssignee + ") and " if whereAssignee else "") + whereOther
+            if whereAll.endswith(" and "):
+                whereAll = whereAll[:-5]                  
 
         query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token, 전체항token FROM 공개공보 WHERE ' + \
-            whereTermsAll + ("(" + whereInventor + ") and " if whereInventor else "") + (
-                "(" + whereAssignee + ") and " if whereAssignee else "") + whereOther
-
-        if query.endswith(" and "):
-            query = query[:-5]
+            whereAll
 
         if mode == "query":  # mode가 query면 여기서 분기
             return query
@@ -170,115 +189,6 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
     new_sub_context['wordcloud'] = []    
     cache.set(subKey, new_sub_context, CACHE_TTL)    
     # redis 저장 }
-
-    if mode == "begin":
-        return JsonResponse(row, safe=False)
-    elif mode == "nlp":
-        return nlp_raw
-    elif mode == "matrix":
-        return mtx_raw
-
-
-def parse_searchs_num(request, mode="begin"):  # mode : begin, nlp, query
-    """ 쿼리 실행 및 결과 저장 ; 번호검색 """
-
-    mainKey, subKey, params, subParams = get_redis_key(request)
-
-    context = cache.get(mainKey)
-    sub_context = cache.get(subKey)
-
-    if context and context['raw'] and mode == "begin":
-        return JsonResponse(context['raw'], safe=False)
-
-    if sub_context and sub_context['nlp_raw'] and mode == 'nlp':
-        return sub_context['nlp_raw']
-
-    if context and context['mtx_raw'] and mode == 'matrix':
-        return context['mtx_raw']        
-
-    if context and context['raw'] and mode == 'matrix_dialog':
-        return context['raw']
-
-    with connection.cursor() as cursor:
-        whereNum = ""
-        # fields without "-"
-        for value in ["출원번호", "공개번호", "등록번호"]:
-            whereNum += value + "::text like '%" + \
-                params["searchNumNoHyphens"] + "%' or "
-
-        # TODO : hyphen refine
-        # fields with "-"
-        for value in ["우선권주장출원번호1", "우선권주장출원번호2", "우선권주장출원번호3", "우선권주장출원번호4", "우선권주장출원번호5", "우선권주장출원번호6", "우선권주장출원번호7", "우선권주장출원번호8", "우선권주장출원번호9", "우선권주장출원번호10"]:
-            whereNum += value + "::text like '%" + \
-                params["searchNum"] + "%' or "
-        if whereNum.endswith(" or "):
-            whereNum = whereNum[:-4]
-
-        query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token, 전체항token FROM 공개공보 WHERE ' + whereNum
-
-        if mode == "query":  # mode가 query면 여기서 분기
-            return query
-
-        cursor.execute(
-            "SET work_mem to '100MB';"
-            + query
-        )
-        row = dictfetchall(cursor)
-
-    # return HttpResponse(query, content_type="text/plain; charset=utf-8")
-
-    nlp_raw = ""
-    mtx_raw = []
-    # x = []
-    if row:
-
-        mtx_raw = deepcopy(row)
-        # nlp, mtx parse
-        for i in range(len(row)):
-            if subParams['searchScope']['wordCloudScope']['volume'] == '요약':
-                nlp_raw += row[i]["요약token"] if row[i]["요약token"] else "" + " "
-            elif subParams['searchScope']['wordCloudScope']['volume'] == '청구항':
-                nlp_raw += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
-
-            # 전체항token과 요약token은 nlp_raw에 넘겨줬으므로 바로 제거 - row는 list of dictionaries 형태임
-            del row[i]["요약token"]
-            del row[i]["전체항token"]
-
-            # matrix는 출원일자, 출원인1, ipc요약, 요약token만 사용
-            mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]
-            del mtx_raw[i]["등록사항"]
-            del mtx_raw[i]["발명의명칭(국문)"]
-            del mtx_raw[i]["발명의명칭(영문)"]
-            del mtx_raw[i]["출원인코드1"]
-            del mtx_raw[i]["출원인국가코드1"]
-            del mtx_raw[i]["발명자1"]
-            del mtx_raw[i]["발명자국가코드1"]
-            del mtx_raw[i]["등록일자"]
-            del mtx_raw[i]["공개일자"]
-            # del mtx_raw[i][:4]
-            # del mtx_raw[i][6:12]
-
-        if nlp_raw.endswith(" "):
-            nlp_raw = nlp_raw[:-1]
-    else:  # 결과값 없을 때 처리
-        row = []
-
-    # Redis 저장 {
-    new_context = {}
-    # new_context['nlp_raw'] = nlp_raw
-    new_context['mtx_raw'] = mtx_raw
-    new_context['raw'] = row
-    # new_context['wordcloud'] = []
-    new_context['vec'] = []
-    new_context['modelType'] = ''
-    new_context['matrix'] = []
-    cache.set(mainKey, new_context, CACHE_TTL)
-
-    new_sub_context = {}
-    new_sub_context['nlp_raw'] = nlp_raw
-    new_sub_context['wordcloud'] = []    
-    cache.set(subKey, new_sub_context, CACHE_TTL)      
-    # Redis 저장 }
 
     if mode == "begin":
         return JsonResponse(row, safe=False)

@@ -9,30 +9,32 @@ import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import { updateSubjectRelation, resetSubjectRelationVec, updateSubjectRelationModelType } from '../store/searchsSlice';
 import parseSearchText from '../inc/parseSearchText';
 import SubjectRelatonMenu from './components/SubjectRelationMenu';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
 function SubjectRelation(props) {
 	const dispatch = useDispatch();
 	const { searchText, searchNum } = props;
 	const subjectRelation = useSelector(({ searchApp }) => searchApp.searchs.subjectRelation);
+	const { topic, vec } = subjectRelation;
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
 
-	const [vecData, setVecData] = useState(null);
+	const [data, setData] = useState(null);
 	const [modelType, setModelType] = useState(subjectRelation.modelType);
 	const [showLoading, setShowLoading] = useState(false);
 
 	const showLoadingValue = useMemo(() => ({ showLoading, setShowLoading }), [showLoading, setShowLoading]);
 
-	function handleModelType(event) {
-		setModelType(event.target.value);
-	}
+	// function handleModelType(event) {
+	// 	setModelType(event.target.value);
+	// }
 
 	useEffect(() => {
 		if (subjectRelation === null) {
-			setVecData(null);
+			setData(null);
 		} else {
-			if (subjectRelation.vec !== undefined) {
-				setVecData(subjectRelation.vec);
+			if (vec !== undefined) {
+				setData(vec);
 			}
 		}
 	}, [subjectRelation]);
@@ -46,14 +48,16 @@ function SubjectRelation(props) {
 				searchScope: searchScope,
 				subjectRelation: { modelType: modelType, keywordvec: '' }
 			};
-			dispatch(resetSubjectRelationVec(subjectRelation.topic));
+			dispatch(resetSubjectRelationVec(topic));
 			dispatch(updateSubjectRelation({ params, subParams })).then(() => {
 				setShowLoading(false);
 			});
 		}
-	}, [dispatch, searchParams, subjectRelation.topic, modelType, searchScope]);
+	}, [dispatch, searchParams, topic, modelType, searchScope]);
 
-	if (!subjectRelation || subjectRelation.length === 0) {
+	const isEmpty = topic.length === 0 && vec.length === 0;
+
+	if (!subjectRelation) {
 		return <SpinLoading />;
 	}
 
@@ -76,16 +80,26 @@ function SubjectRelation(props) {
 						</Select>
 					</FormControl> */}
 				</div>
-				<SubjectChips
-					searchText={searchText}
-					searchNum={searchNum}
-					topic={subjectRelation.topic}
-					modelType={modelType}
-				/>
-				{vecData && vecData.length !== 0 && !showLoading ? (
-					<SubjectTable data={vecData} />
+				{isEmpty ? (
+					<EmptyMsg
+						icon="blur_linear"
+						msg="핵심 주제어"
+						text="검색결과가 적어서 분석할 데이터가 부족합니다."
+					/>
 				) : (
-					<SpinLoading delay={20000} />
+					<>
+						<SubjectChips
+							searchText={searchText}
+							searchNum={searchNum}
+							topic={topic}
+							modelType={modelType}
+						/>
+						{data && data.length !== 0 && !showLoading ? (
+							<SubjectTable data={data} />
+						) : (
+							<SpinLoading delay={20000} />
+						)}
+					</>
 				)}
 			</Paper>
 		</SubjectContext.Provider>

@@ -12,7 +12,7 @@ import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { useSelector, useDispatch } from 'react-redux';
-import { setWordCloudScope } from '../../../store/searchsSlice';
+import { setWordCloudScope, setSearchSubmit } from '../../../store/searchsSlice';
 import React, { useState } from 'react';
 
 function WordCloudMenu(props) {
@@ -20,13 +20,7 @@ function WordCloudMenu(props) {
 	const wordCloudScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope.wordCloudScope);
 	const [anchorEl, setAnchorEl] = useState(null);
 
-	const [value, setValue] = React.useState('구문');
-
-	const { form, handleChange, setForm, setInForm } = useForm(wordCloudScope);
-
-	// const handleChange = event => {
-	// 	setValue(event.target.value);
-	// };
+	const { form, handleChange } = useForm(wordCloudScope);
 
 	function handleMenuOpen(event) {
 		setAnchorEl(event.currentTarget);

@@ -9,11 +9,11 @@ import PropTypes from 'prop-types';
 
 import WordCloud from './tabs/WordCloud';
 import Classify from './tabs/Classify';
-import EmptyMsg from './components/EmptyMsg';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 import IndicatorAnalysis from './tabs/IndicatorAnalysis';
 import AppChart from './tabs/AppChart';
 import IpcPie from './tabs/IpcPie';
-import ApplicantInventorChart from './tabs/ApplicantInventorChart';
+import RelatedPersonPie from './tabs/RelatedPersonPie';
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -97,13 +97,9 @@ function ContentVisual(props) {
 					className={classes.tabs}
 				>
 					{/* <Hidden xsDown> */}
-					<Tab label="지표분석" className={classes.tab} {...a11yProps(0)} />
-					<Tab label="워드클" className={classes.tab} {...a11yProps(1)} />
-					<Tab label="연도별" className={classes.tab} {...a11yProps(2)} />
-					<Tab label="기술별" className={classes.tab} {...a11yProps(3)} />
-					<Tab label="주체별" className={classes.tab} {...a11yProps(4)} />
-					<Tab label="출원인" className={classes.tab} {...a11yProps(5)} />
-					<Tab label="발명자" className={classes.tab} {...a11yProps(6)} />
+					{['지표분석', '워드클', '연도별', '기술별', '주체별', '인명별'].map((key, index) => (
+						<Tab label={key} key={key} className={classes.tab} {...a11yProps(index)} />
+					))}
 					{/* </Hidden> */}
 
 					{/* <Hidden smUp>
@@ -134,25 +130,11 @@ function ContentVisual(props) {
 			</TabPanel>
 			<TabPanel value={tabValue} index={2}>
 				{tabValue === 2 &&
-					(isEmpty ? (
-						<EmptyMsg icon="photo" msg="연도별 출원건수" />
-					) : (
-						<div className="flex w-full">
-							{/* <AppNum searchText={searchText} /> */}
-							<AppChart searchText={searchText} />
-						</div>
-					))}
+					(isEmpty ? <EmptyMsg icon="photo" msg="연도별 출원건수" /> : <AppChart searchText={searchText} />)}
 			</TabPanel>
 			<TabPanel value={tabValue} index={3}>
 				{tabValue === 3 &&
-					(isEmpty ? (
-						<EmptyMsg icon="layers" msg="기술분야별 동향" />
-					) : (
-						<div className="flex w-full">
-							{/* <IpcPolar searchText={searchText} /> */}
-							<IpcPie searchText={searchText} />
-						</div>
-					))}
+					(isEmpty ? <EmptyMsg icon="layers" msg="기술분야별 동향" /> : <IpcPie searchText={searchText} />)}
 			</TabPanel>
 			<TabPanel value={tabValue} index={4}>
 				{tabValue === 4 &&
@@ -165,19 +147,9 @@ function ContentVisual(props) {
 			<TabPanel value={tabValue} index={5}>
 				{tabValue === 5 &&
 					(isEmpty ? (
-						<EmptyMsg icon="assessment" msg="출원인별 동향" />
+						<EmptyMsg icon="assessment" msg="인명정보 동향" />
 					) : (
-						// <ApplicantsBar searchText={searchText} />
-						<ApplicantInventorChart searchText={searchText} name="출원인" />
-					))}
-			</TabPanel>
-			<TabPanel value={tabValue} index={6}>
-				{tabValue === 6 &&
-					(isEmpty ? (
-						<EmptyMsg icon="assessment" msg="발명자별 동향" />
-					) : (
-						// <InventorsBar searchText={searchText} />
-						<ApplicantInventorChart searchText={searchText} name="발명자" />
+						<RelatedPersonPie searchText={searchText} />
 					))}
 			</TabPanel>
 		</div>

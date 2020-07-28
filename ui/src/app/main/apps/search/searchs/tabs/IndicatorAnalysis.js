@@ -9,7 +9,7 @@ import CrossAnalysisB from './components/CrossAnalysisB';
 import Button from '@material-ui/core/Button';
 
 function IndicatorAnalysis(props) {
-	const { searchText, inventor, assignee } = props;
+	const { searchText, searchNum, inventor, assignee } = props;
 	const [selectedCategory, setSelectedCategory] = useState('출원인별');
 	const [currentRange, setCurrentRange] = useState(0);
 
@@ -21,7 +21,7 @@ function IndicatorAnalysis(props) {
 		setCurrentRange(range);
 	}
 
-	const isEmpty = !!(!searchText && !inventor && !assignee);
+	const isEmpty = !!(!searchText && !searchNum && !inventor && !assignee);
 
 	useEffect(() => {}, [props]);
 
