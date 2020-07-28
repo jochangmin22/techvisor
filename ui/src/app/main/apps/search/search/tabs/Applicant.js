@@ -7,9 +7,9 @@ import { makeStyles } from '@material-ui/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { useSelector, useDispatch } from 'react-redux';
 import { getApplicant, getApplicantTrend } from '../../store/searchSlice';
-import ApplicantTrend from './ApplicantTrend';
-import ApplicantIpc from './ApplicantIpc';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import ApplicantPie from './ApplicantPie';
+import ApplicantLine from './ApplicantLine';
 
 const useStyles = makeStyles(theme => ({
 	primaryColor: {
@@ -23,7 +23,7 @@ function Applicant(props) {
 	const { 출원인코드1, 출원인1, 출원인주소1, 출원인국가코드1 } = props.search;
 
 	const applicant = useSelector(({ searchApp }) => searchApp.search.applicant);
-	const applicantTrend = useSelector(({ searchApp }) => searchApp.search.applicantTrend);
+	const entities = useSelector(({ searchApp }) => searchApp.search.applicantTrend);
 	const [showLoading, setShowLoading] = useState(false);
 
 	useEffect(() => {
@@ -72,10 +72,10 @@ function Applicant(props) {
 					</div>
 				</Paper>
 				<div className="w-full md:w-2/3 md:pr-8 items-center justify-center">
-					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantTrend applicantTrend={applicantTrend} />}
+					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantLine entities={entities} />}
 				</div>
 				<div className="w-full md:w-1/3 md:pl-8 items-center justify-center">
-					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantIpc applicantTrend={applicantTrend} />}
+					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantPie entities={entities} />}
 				</div>
 			</>
 		</FuseAnimateGroup>

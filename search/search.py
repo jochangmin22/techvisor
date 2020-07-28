@@ -492,7 +492,8 @@ def parse_search_applicant_trend(request):
         # cursor.execute("SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereCusNo)
         # cursor.execute("SELECT left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereCusNo)
         # query = "SELECT left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereCusNo
-        query = "SELECT left(출원일자::text,4) 출원년, ipc요약 FROM 공개공보 " + whereCusNo
+        # query = "SELECT left(출원일자::text,4) 출원년, ipc요약 FROM 공개공보 " + whereCusNo
+        query = "SELECT 출원일자, 공개일자, 등록일자, 출원번호, ipc요약 FROM 공개공보 " + whereCusNo
         cursor.execute(query)
         row = dictfetchall(cursor)
 

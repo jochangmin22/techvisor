@@ -5,17 +5,15 @@ import Box from '@material-ui/core/Box';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
-
 import PropTypes from 'prop-types';
 
 import WordCloud from './tabs/WordCloud';
-import AppNum from './tabs/AppNum';
-import IpcPolar from './tabs/IpcPolar';
 import Classify from './tabs/Classify';
-import ApplicantsBar from './tabs/ApplicantsBar';
-import InventorsBar from './tabs/InventorsBar';
 import EmptyMsg from './components/EmptyMsg';
 import IndicatorAnalysis from './tabs/IndicatorAnalysis';
+import AppChart from './tabs/AppChart';
+import IpcPie from './tabs/IpcPie';
+import ApplicantInventorChart from './tabs/ApplicantInventorChart';
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -140,7 +138,8 @@ function ContentVisual(props) {
 						<EmptyMsg icon="photo" msg="연도별 출원건수" />
 					) : (
 						<div className="flex w-full">
-							<AppNum searchText={searchText} />
+							{/* <AppNum searchText={searchText} /> */}
+							<AppChart searchText={searchText} />
 						</div>
 					))}
 			</TabPanel>
@@ -150,7 +149,8 @@ function ContentVisual(props) {
 						<EmptyMsg icon="layers" msg="기술분야별 동향" />
 					) : (
 						<div className="flex w-full">
-							<IpcPolar searchText={searchText} />
+							{/* <IpcPolar searchText={searchText} /> */}
+							<IpcPie searchText={searchText} />
 						</div>
 					))}
 			</TabPanel>
@@ -167,7 +167,8 @@ function ContentVisual(props) {
 					(isEmpty ? (
 						<EmptyMsg icon="assessment" msg="출원인별 동향" />
 					) : (
-						<ApplicantsBar searchText={searchText} />
+						// <ApplicantsBar searchText={searchText} />
+						<ApplicantInventorChart searchText={searchText} name="출원인" />
 					))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={6}>
@@ -175,7 +176,8 @@ function ContentVisual(props) {
 					(isEmpty ? (
 						<EmptyMsg icon="assessment" msg="발명자별 동향" />
 					) : (
-						<InventorsBar searchText={searchText} />
+						// <InventorsBar searchText={searchText} />
+						<ApplicantInventorChart searchText={searchText} name="발명자" />
 					))}
 			</TabPanel>
 		</div>

@@ -102,9 +102,9 @@ function WordCloud(props) {
 					shape: 'pentagon', // circle, cardioid, diamond, triangle-forward, triangle, pentagon, star
 					maskImage: false,
 					left: 'center',
-					top: 'center',
+					top: 0, //'center',
 					width: '90%',
-					height: '90%',
+					height: '80%',
 					right: null,
 					bottom: null,
 					sizeRange: [12, 60],
