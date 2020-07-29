@@ -1,8 +1,9 @@
 from django.db import connection
 from collections import Counter
 from django.http import JsonResponse, HttpResponse
-from .utils import get_redis_key
+from .utils import get_redis_key, dictfetchall
 import json
+import re
 
 from .searchs import parse_searchs
 
@@ -40,9 +41,13 @@ def parse_matrix(request):
 
     # topic 가져오기
     try:
-        topic = context['vec']['topic'] if context and context['vec'] and context['vec']['topic'] else get_topic(nlp_raw)
+        topic = context['vec']['topic']
     except:
-        topic = []
+        try:
+            topic = get_topic(nlp_raw)
+        except:
+            topic = []
+
         
     if subParams['matrix']['category'] == '연도별':
         countField = '출원일자'
@@ -76,27 +81,33 @@ def parse_matrix_dialog(request):
     전체목록에서 3가지 필터 (topic, category, category value)
     """
     # TODO : apply redis if necessary
-    category = request.GET.get('category') if request.GET.get('category') else "연도별"
-    selectedTopic = request.GET.get('topic') if request.GET.get('topic') else ""
-    selectedCategoryValue = request.GET.get('categoryValue') if request.GET.get('categoryValue') else ""
+    _, _, params, _ = get_redis_key(request)
 
-
-    if category == '연도별':
+    if params['category'] == '연도별':
         countField = 'left(출원일자,4)'
-    elif category == '기술별':
+    elif params['category'] == '기술별':
         countField = 'ipc요약'
-    elif category == '기업별':
+    elif params['category'] == '기업별':
         countField = '출원인1'
 
-    whereTopic =  ' and 요약token like \'%' + selectedTopic + '%\'' if category != selectedTopic else '' # click on the category itself?
+    if params['category'] == params['topic']:
+       whereTopic = '' # prevent from click on the category itself
+    else:    
+        if ' ' in params['topic']:
+            val = re.sub(re.escape(' '), ' <1> ', params['topic'], flags=re.IGNORECASE)
+            whereTopic = ' and 요약token @@ to_tsquery(\'(' + val + ')\')'
+        else:
+            whereTopic = ' and 요약token like \'%' + params['topic'] + '%\'' 
+
+    whereAll = whereTopic + ' and ' + countField + '= \'' + params['categoryValue'] + '\''
 
     # 3가지 필터된 목록 구하기 
     query = parse_searchs(request, mode="query")
+
     with connection.cursor() as cursor:    
-        query += whereTopic + ' and ' + countField + '= \'' + selectedCategoryValue + '\''
+        query += whereAll
         cursor.execute(query)
         row = dictfetchall(cursor)
-
     return JsonResponse(row, safe=False)
 
 
@@ -122,8 +133,3 @@ def get_topic(nlp_raw):
 
     return topic
 
-
-def dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
-    columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]

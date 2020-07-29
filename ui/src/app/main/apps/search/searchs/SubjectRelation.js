@@ -55,7 +55,7 @@ function SubjectRelation(props) {
 		}
 	}, [dispatch, searchParams, topic, modelType, searchScope]);
 
-	const isEmpty = topic.length === 0 && vec.length === 0;
+	const isEmpty = !!(!topic && !vec);
 
 	if (!subjectRelation) {
 		return <SpinLoading />;

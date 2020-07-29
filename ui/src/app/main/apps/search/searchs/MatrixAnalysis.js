@@ -66,7 +66,8 @@ function MatrixAnalysis(props) {
 			params.category = selectedCategory;
 			params.topic = props.column.id;
 			params.categoryValue = Object.values(props.row.values)[0];
-			dispatch(getMatrixDialog(params)).then(() => {
+			const subParams = { searchScope: searchScope, matrix: { category: selectedCategory } };
+			dispatch(getMatrixDialog({ params, subParams })).then(() => {
 				dispatch(openMatrixDialog());
 			});
 		}
@@ -196,7 +197,7 @@ function MatrixAnalysis(props) {
 	// 	[matrix, selectedCategory]
 	// );
 
-	const isEmpty = data.length === 0;
+	const isEmpty = !!(data.length === 0);
 
 	if (!data) {
 		return <SpinLoading />;

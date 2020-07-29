@@ -6,19 +6,25 @@ import RelatedCompany from './components/RelatedCompany';
 import { getNews, getNewsSA, getRelatedCompany } from '../store/searchsSlice';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
+import parseSearchText from '../inc/parseSearchText';
+import { useSelector } from 'react-redux';
 
 function NewsAnalysis(props) {
 	const { searchText } = props;
 	const dispatch = useDispatch();
+	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
+	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
 
 	useEffect(() => {
 		if (searchText && searchText.length > 0) {
-			dispatch(getNews({ searchText: searchText })).then(() => {
-				dispatch(getNewsSA({ searchText: searchText }));
-				dispatch(getRelatedCompany({ searchText: searchText }));
+			const [, params] = parseSearchText(searchParams, null);
+			const subParams = { searchScope: searchScope };
+			dispatch(getNews({ params, subParams })).then(() => {
+				dispatch(getNewsSA({ params, subParams }));
+				dispatch(getRelatedCompany({ params, subParams }));
 			});
 		}
-	}, [dispatch, searchText]);
+	}, [dispatch, searchParams, searchScope, searchText]);
 
 	return (
 		<Paper className="w-full h-full rounded-8 shadow">

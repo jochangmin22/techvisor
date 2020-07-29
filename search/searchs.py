@@ -35,36 +35,55 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
     """ 쿼리 실행 및 결과 저장 """
+
     mainKey, subKey, params, subParams = get_redis_key(request)
 
     context = cache.get(mainKey)
     sub_context = cache.get(subKey)
 
-    if context and 'raw' in context and mode == "begin":
-        return JsonResponse(context['raw'], safe=False)
+    if mode == "begin":
+        try:
+            if context['raw']:
+                return JsonResponse(context['raw'], safe=False)
+        except:
+            pass
 
-    if sub_context and 'nlp_raw' in sub_context and mode == 'nlp':
-        return sub_context['nlp_raw']
+    if mode == "nlp":
+        try:
+            if sub_context['nlp_raw']:
+                return sub_context['nlp_raw']
+        except:
+            pass
 
-    if context and 'mtx_raw' in context and mode == 'matrix':
-        return context['mtx_raw']
+    if mode == "matrix":
+        try:
+            if context['mtx_raw']:
+                return context['mtx_raw']
+        except:
+            pass
 
-    if context and 'raw' in context and mode == 'matrix_dialog':
-        return context['raw']
+    if mode == "matrix_dialog":
+        try:
+            if context['raw']:
+                return context['raw']
+        except:
+            pass
 
     with connection.cursor() as cursor:
         # 검색범위 선택
-        if subParams['searchScope']['searchVolume'] == 'SUMA':
-            searchVolume = '중'
-        elif subParams['searchScope']['searchVolume'] == 'ALL':
-            searchVolume = '대'
-        else:
+        try:
+            if subParams['searchScope']['searchVolume'] == 'SUMA':
+                searchVolume = '중'
+            elif subParams['searchScope']['searchVolume'] == 'ALL':
+                searchVolume = '대'
+            else:
+                searchVolume = '소'
+        except:
             searchVolume = '소'
 
-        whereAll = ""
-
         # 번호검색
-        if params['searchNum']:
+        if 'searchNum' in params and params['searchNum']:
+            whereAll = ""
             # fields without "-"
             for value in ["출원번호", "공개번호", "등록번호"]:
                 whereAll += value + "::text like '%" + \
@@ -107,8 +126,8 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
             if whereAll.endswith(" and "):
                 whereAll = whereAll[:-5]                  
 
-        query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token, 전체항token FROM 공개공보 WHERE ' + \
-            whereAll
+        query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token, 전체항token FROM 공개공보 WHERE (' + \
+            whereAll + ")"
 
         if mode == "query":  # mode가 query면 여기서 분기
             return query
@@ -179,9 +198,9 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
     new_context['mtx_raw'] = mtx_raw
     new_context['raw'] = row
     # new_context['wordcloud'] = []
-    new_context['vec'] = []
-    new_context['modelType'] = ''
-    new_context['matrix'] = []
+    # new_context['vec'] = []
+    # new_context['modelType'] = ''
+    # new_context['matrix'] = []
     cache.set(mainKey, new_context, CACHE_TTL)
 
     new_sub_context = {}
@@ -451,11 +470,6 @@ def tsquery_keywords(keyword="", fieldName=""):
 def parse_query(request):
     """ 쿼리 확인용 """
     return HttpResponse(parse_searchs(request, mode="query"), content_type="text/plain; charset=utf-8")
-
-# def dictfetchall(cursor):
-#     "Return all rows from a cursor as a dict"
-#     columns = [col[0] for col in cursor.description]
-#     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
 # NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)

@@ -203,9 +203,9 @@ def parse_companies(request, mode="begin"): # mode : begin, nlp, query
     new_context['nlp_raw'] = nlp_raw
     new_context['mtx_raw'] = mtx_raw
     new_context['raw'] = row
-    new_context['wordcloud'] = []
-    new_context['vec'] = []
-    new_context['matrix'] = []
+    # new_context['wordcloud'] = []
+    # new_context['vec'] = []
+    # new_context['matrix'] = []
     cache.set(apiParams, new_context, CACHE_TTL)
     # redis 저장 }
 
