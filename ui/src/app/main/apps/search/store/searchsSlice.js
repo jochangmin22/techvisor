@@ -11,29 +11,22 @@ export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async (params, s
 	return data;
 });
 
-export const getSearchsNum = createAsyncThunk(NAME + 'getSearchsNum', async params => {
-	const response = await axios.get(URL + 'searchsnum', { params });
+export const getNews = createAsyncThunk(NAME + 'getNews', async (params, subParams) => {
+	const response = await axios.get(URL + 'news', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getNews = createAsyncThunk(NAME + 'getNews', async params => {
-	const response = await axios.get(URL + 'news', { params });
+export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async (params, subParams) => {
+	const response = await axios.get(URL + 'newssa', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async params => {
-	const response = await axios.get(URL + 'newssa', { params });
-	const data = await response.data;
-
-	return data;
-});
-
-export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async params => {
-	const response = await axios.get(URL + 'relatedcompany', { params });
+export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async (params, subParams) => {
+	const response = await axios.get(URL + 'relatedcompany', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -45,8 +38,8 @@ export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async (params, sub
 	return data;
 });
 
-export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async params => {
-	const response = await axios.get(URL + 'matrixdialog', { params });
+export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async (params, subParams) => {
+	const response = await axios.get(URL + 'matrixdialog', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -199,9 +192,6 @@ const searchsSlice = createSlice({
 	extraReducers: {
 		[getSearchs.fulfilled]: (state, action) => {
 			state.entities = action.payload;
-		},
-		[getSearchsNum.fulfilled]: (state, action) => {
-			state.searchNum = action.payload;
 		},
 		[getNews.fulfilled]: (state, action) => {
 			state.news = action.payload;

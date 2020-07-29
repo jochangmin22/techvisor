@@ -1,4 +1,6 @@
 from django.db import connection
+from django.http import JsonResponse
+from django.http import HttpResponse
 import pandas as pd
 import numpy as np
 import json
@@ -10,8 +12,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import random
 
-from django.http import JsonResponse
-from django.http import HttpResponse
+# from .utils import get_redis_key, dictfetchall
 from django.conf import settings
 
 # 형태소 분석기 선언
@@ -147,7 +148,7 @@ def w2b_value(documents, topn, abstract):
     return [w for s, w in sorted_sims]
 
 def cosine_value(documents, topn, sents_sim, abstract):
-    '''cosine simility'''
+    '''cosine similarity'''
 
     vectorizer = CountVectorizer(min_df=1, tokenizer=lam)
     sparse_docs = vectorizer.fit_transform(sents_sim)
@@ -225,7 +226,7 @@ def similarity_original(df_sim):
 
 
 
-    '''cosine simility'''
+    '''cosine similarity'''
 
     vectorizer = CountVectorizer(min_df=1, tokenizer=lam)
     sparse_docs = vectorizer.fit_transform(sents_sim)
@@ -251,7 +252,3 @@ def similarity_original(df_sim):
     '''topic model'''
     return
 
-def dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
-    columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]    

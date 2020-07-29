@@ -62,7 +62,7 @@ function Similar(props) {
 					/>
 					<FormControl>
 						<Select className="w-160 px-12" value={modelType} onChange={handleModelType} displayEmpty>
-							{['doc2vec', 'cosine simility'].map(key => (
+							{['doc2vec', 'cosine similarity'].map(key => (
 								<MenuItem value={key} key={key}>
 									{key}
 								</MenuItem>

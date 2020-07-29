@@ -354,7 +354,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 							placeholder=" or + Synonym"
 							// clearInputValueOnChange={true}
 							onAdd={chip => handleAddChip(chip, key, 'terms')}
-							onDelete={(chip, index) => handleDeleteChip(index, key, 'terms')}
+							onDelete={(chip, index) => handleDeleteChip(chip, index, key, 'terms')}
 							key={key}
 						/>
 					))}

@@ -33,7 +33,6 @@ from search.views import (
     get_search_applicant_trend,
     get_search_similar,
     get_wordcloud,
-    get_topic,
     get_vec,
     get_news,
     get_news_sa,
@@ -63,7 +62,6 @@ urlpatterns = [
     re_path(r"^api/search-app/searchs/$", csrf_exempt(get_searchs)),
     re_path(r"^api/search-app/searchs/wordcloud$", get_wordcloud),
     re_path(r"^api/search-app/searchs/vec$", get_vec),
-    re_path(r"^api/search-app/searchs/topic$", get_topic),
     re_path(r"^api/search-app/searchs/news$", get_news),
     re_path(r"^api/search-app/searchs/newssa$", csrf_exempt(get_news_sa)),
     re_path(r"^api/search-app/searchs/newsnlp$", csrf_exempt(get_news_nlp)),
@@ -93,7 +91,6 @@ urlpatterns = [
     re_path(r"^api/company-app/searchs/searchsnum$", get_companies_num),
     re_path(r"^api/company-app/searchs/stock$", get_stock),
     re_path(r"^api/company-app/searchs/vec$", get_vec),
-    re_path(r"^api/company-app/searchs/topic$", get_topic),
     
     re_path(r"^api/company-app/search/stock$", csrf_exempt(get_stock)),
     re_path(r"^api/company-app/search/companyinfo$", csrf_exempt(get_company_info)),

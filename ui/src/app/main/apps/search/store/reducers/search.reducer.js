@@ -14,7 +14,7 @@ const initialState = {
 	applicantTrend: null,
 	similar: {
 		entities: [],
-		modelType: 'doc2vec' // ['doc2vec', 'cosine simility'],
+		modelType: 'doc2vec' // ['doc2vec', 'cosine similarity'],
 	}
 };
 
