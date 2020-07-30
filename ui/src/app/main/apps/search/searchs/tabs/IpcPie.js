@@ -7,15 +7,20 @@ import echarts from 'echarts';
 import 'echarts/theme/blue';
 import _ from '@lodash';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import { ipc } from 'app/main/apps/lib/variables';
 import { useTheme } from '@material-ui/core';
 
 function calculateCnt(arr) {
 	const filterA = 'ipc요약';
 
+	function ipcSwap(ref) {
+		return Object.keys(ipc).includes(ref) ? ref + '(' + ipc[ref].substring(0, 5) + '...)' : ref;
+	}
+
 	const result = _.chain(arr)
 		.filter(item => !!item[filterA])
 		.groupBy(filterA)
-		.map((value, key) => ({ name: key, value: value.length }))
+		.map((value, key) => ({ name: ipcSwap(key), value: value.length }))
 		.orderBy(['value'], ['desc'])
 		.splice(0, 12)
 		.defaultsDeep({ name: [], value: [] })
