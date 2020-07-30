@@ -12,17 +12,17 @@ import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { useSelector, useDispatch } from 'react-redux';
-import { setWordCloudScope } from '../../store/searchsSlice';
+import { setWordCloudOptions } from '../../store/searchsSlice';
 import React, { useState } from 'react';
 
 function MatrixAnalysisMenu(props) {
 	const dispatch = useDispatch();
-	const wordCloudScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope.wordCloudScope);
+	const wordCloudOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions.wordCloudOptions);
 	const [anchorEl, setAnchorEl] = useState(null);
 
 	const [value, setValue] = React.useState('구문');
 
-	const { form, handleChange, setForm, setInForm } = useForm(wordCloudScope);
+	const { form, handleChange, setForm, setInForm } = useForm(wordCloudOptions);
 
 	// const handleChange = event => {
 	// 	setValue(event.target.value);
@@ -46,7 +46,7 @@ function MatrixAnalysisMenu(props) {
 		if (isFormInvalid()) {
 			return;
 		}
-		dispatch(setWordCloudScope(form));
+		dispatch(setWordCloudOptions(form));
 		// props.onAddCheckList(new ChecklistModel(form));
 		handleMenuClose();
 	}

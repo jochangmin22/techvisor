@@ -22,37 +22,29 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function SubjectChips(props) {
-	const { searchNum, topic, modelType } = props;
+	const { topic, modelType } = props;
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
+	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
 
 	const { setShowLoading } = useContext(SubjectContext);
 
 	function handleClick(value) {
-		// handle both searchText and searchNum
-		if (searchNum !== '') {
-			setShowLoading(true);
-			// dispatch(resetSubjectRelationVec(topic));
-			dispatch(updateSubjectRelation({ searchNum: searchNum, keywordvec: value })).then(() => {
-				setShowLoading(true);
-			});
-		} else {
-			setShowLoading(true);
-			const [, params] = parseSearchText(searchParams, null);
-			const subParams = {
-				searchScope: searchScope,
-				subjectRelation: { modelType: modelType, keywordvec: value }
-			};
-			// params.keywordvec = value;
-			// params.modelType = modelType;
+		setShowLoading(true);
+		const [, params] = parseSearchText(searchParams, null);
+		const subParams = {
+			analysisOptions: analysisOptions,
+			subjectRelation: { modelType: modelType, keywordvec: value }
+		};
+		// params.keywordvec = value;
+		// params.modelType = modelType;
 
-			// dispatch(resetSubjectRelationVec(topic));
-			dispatch(updateSubjectRelation({ params, subParams })).then(() => {
-				setShowLoading(false);
-			});
-		}
+		// dispatch(resetSubjectRelationVec(topic));
+		dispatch(updateSubjectRelation({ params, subParams })).then(() => {
+			setShowLoading(false);
+		});
+		// }
 	}
 
 	return topic ? (

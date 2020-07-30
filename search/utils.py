@@ -1,4 +1,5 @@
 import json
+import re
 
 def get_redis_key(request):
     "Return mainKey, subKey, params, subParams"
@@ -11,7 +12,7 @@ def get_redis_key(request):
     subParams = json.loads(subParams)
 
 
-    # one more key to be used for a separate searchScope
+    # one more key to be used for a separated from searchParams
     subKey = mainKey + "¶".join(list(NestedDictValues(subParams))) if params['searchNum'] == '' else params['searchNum']   
 
     return mainKey, subKey, params, subParams
@@ -27,4 +28,17 @@ def NestedDictValues(d):
             yield from NestedDictValues(v)
         else:
             yield str(v)
+
+TAG_RE = re.compile(r'<[^>]+>')
+
+def remove_tags(text):
+    return TAG_RE.sub('', text)
+
+
+def remove_brackets(text):
+    return re.sub("[\(\[].*?[\)\]]", "", text)
+
+
+def remove_punc(text):
+    return re.sub("[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]", ' ', text)            
   

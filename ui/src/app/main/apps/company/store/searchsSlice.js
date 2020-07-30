@@ -104,6 +104,7 @@ const initialState = {
 		searchText: '',
 		searchNum: '',
 		terms: [],
+		searchVolume: '', // '','SUMA', 'ALL'
 		dateType: '',
 		startDate: '',
 		endDate: '',
@@ -114,11 +115,10 @@ const initialState = {
 		status: [],
 		ipType: []
 	},
-	searchScope: {
-		searchVolume: '',
-		wordCloudScope: {
+	analysisOptions: {
+		wordCloudOptions: {
 			volume: '요약',
-			unit: '구문', // '워드',
+			unit: '구문', // '구문', '워드',
 			output: 50
 		}
 	},
@@ -183,10 +183,10 @@ const searchsSlice = createSlice({
 			state.searchParams.searchNum = action.payload;
 		},
 		setSearchVolume: (state, action) => {
-			state.searchScope.searchVolume = action.payload;
+			state.searchParams.searchVolume = action.payload;
 		},
-		setWordCloudScope: (state, action) => {
-			state.searchScope.wordCloudScope = action.payload;
+		setWordCloudOptions: (state, action) => {
+			state.analysisOptions.wordCloudOptions = action.payload;
 		},
 		setSearchSubmit: (state, action) => {
 			state.searchSubmit = action.payload;
@@ -255,7 +255,7 @@ export const {
 	setSearchParams,
 	setSearchNum,
 	setSearchVolume,
-	setWordCloudScope,
+	setWordCloudOptions,
 	setSearchSubmit,
 	updateMatrixCategory,
 	openMatrixDialog,

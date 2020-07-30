@@ -7453,7 +7453,9 @@ const searchData = {
 	],
 	searchParams: {
 		searchText: '텍스트 and 인식 and 이미지',
+		searchNum: '',
 		terms: [['텍스트'], ['인식'], ['이미지']],
+		searchVolume: 'SUM',
 		assignee: [],
 		inventor: [],
 		dateType: '',
@@ -7462,14 +7464,12 @@ const searchData = {
 		patentOffice: [],
 		language: [],
 		status: [],
-		ipType: [],
-		searchNum: ''
+		ipType: []
 	},
-	searchScope: {
-		searchVolume: "",
-		wordCloudScope: {
+	analysisOptions: {
+		wordCloudOptions: {
 			volume: '요약',
-			unit: "구문",
+			unit: '구문',
 			output: 50
 		}
 	},

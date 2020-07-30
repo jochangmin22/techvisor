@@ -146,6 +146,7 @@ export default function parseSearchText(params, inputSearchText) {
 		newParams.language = newParams.language !== undefined ? newParams.language : [];
 		newParams.status = newParams.status !== undefined ? newParams.status : [];
 		newParams.ipType = newParams.ipType !== undefined ? newParams.ipType : [];
+		newParams.searchVolume = newParams.searchVolume !== undefined ? newParams.searchVolume : 'SUM';
 		/**
 		 * create api parameters
 		 */

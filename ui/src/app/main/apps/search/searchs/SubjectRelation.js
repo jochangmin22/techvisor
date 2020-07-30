@@ -13,11 +13,11 @@ import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
 function SubjectRelation(props) {
 	const dispatch = useDispatch();
-	const { searchText, searchNum } = props;
+	const { searchText } = props;
 	const subjectRelation = useSelector(({ searchApp }) => searchApp.searchs.subjectRelation);
 	const { topic, vec } = subjectRelation;
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
+	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
 
 	const [data, setData] = useState(null);
 	const [modelType, setModelType] = useState(subjectRelation.modelType);
@@ -45,7 +45,7 @@ function SubjectRelation(props) {
 			dispatch(updateSubjectRelationModelType(modelType));
 			const [, params] = parseSearchText(searchParams, null);
 			const subParams = {
-				searchScope: searchScope,
+				analysisOptions: analysisOptions,
 				subjectRelation: { modelType: modelType, keywordvec: '' }
 			};
 			dispatch(resetSubjectRelationVec(topic));
@@ -53,7 +53,7 @@ function SubjectRelation(props) {
 				setShowLoading(false);
 			});
 		}
-	}, [dispatch, searchParams, topic, modelType, searchScope]);
+	}, [dispatch, searchParams, topic, modelType, analysisOptions]);
 
 	const isEmpty = !!(!topic && !vec);
 
@@ -88,12 +88,7 @@ function SubjectRelation(props) {
 					/>
 				) : (
 					<>
-						<SubjectChips
-							searchText={searchText}
-							searchNum={searchNum}
-							topic={topic}
-							modelType={modelType}
-						/>
+						<SubjectChips searchText={searchText} topic={topic} modelType={modelType} />
 						{data && data.length !== 0 && !showLoading ? (
 							<SubjectTable data={data} />
 						) : (

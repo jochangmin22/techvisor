@@ -5,7 +5,7 @@ import echarts from 'echarts';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import parseSearchText from '../../inc/parseSearchText';
 import { useSelector, useDispatch } from 'react-redux';
-import { setSearchSubmit, setSearchParams, initialState } from '../../store/searchsSlice';
+import { setSearchSubmit, setSearchParams, getWordCloud, initialState } from '../../store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import _ from '@lodash';
 import debounce from 'lodash/debounce';
@@ -14,13 +14,22 @@ import randomColor from 'randomcolor';
 import WordCloudMenu from './components/WordCloudMenu';
 import { useUpdateEffect } from '@fuse/hooks';
 
-function WordCloud(props) {
+function WordCloud() {
 	const dispatch = useDispatch();
 	const chartRef = useRef(null);
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.wordCloud);
+	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const [form, setForm] = useState(searchParams || initialState.searchParams);
 	const [echart, setEchart] = useState(null);
+
+	useEffect(() => {
+		const [, params] = parseSearchText(searchParams, null);
+		const subParams = {
+			analysisOptions: analysisOptions
+		};
+		dispatch(getWordCloud({ params, subParams }));
+	}, [dispatch, searchParams, analysisOptions]);
 
 	useEffect(() => {
 		if (entities) {

@@ -62,8 +62,8 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
     # No     
     min_name = clean_keyword(params['searchText'])
 
-    # 단어 5개 넘으면 네이버 뉴스 검색에서 안먹는듯
-    min_name = ' '.join(min_name.split(' ')[0:5])
+    # 단어 5개 넘으면 네이버 뉴스 검색에서 안먹는듯 - 역순으로 자름
+    min_name = ' '.join(min_name.split(' ')[-5:])
 
     # min_name = "하이브리드 자동차"
     encText = urllib.parse.quote(min_name)

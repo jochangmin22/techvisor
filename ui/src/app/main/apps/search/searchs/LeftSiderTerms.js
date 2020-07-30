@@ -104,7 +104,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const searchSubmit = useSelector(({ searchApp }) => searchApp.searchs.searchSubmit);
-	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
+	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
 
 	const [submitted, setSubmitted] = useState(searchSubmit);
 
@@ -189,6 +189,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	});
 
 	function handleRadioChange(ev) {
+		setForm(_.set({ ...form }, ev.target.name, ev.target.value));
 		setSearchVolume(ev.target.value);
 		setSubmitted(true);
 	}
@@ -283,7 +284,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		const params = {
 			params: mainParams,
 			subParams: {
-				searchScope: { ...searchScope, searchVolume: searchVolume },
+				analysisOptions: analysisOptions,
 				matrix: initialState.matrix,
 				subjectRelation: initialState.subjectRelation
 			}
@@ -291,7 +292,6 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 
 		dispatch(setSearchLoading(true));
 		dispatch(clearSearchs());
-		// if (num === '') {
 		dispatch(getSearchs(params)).then(() => {
 			dispatch(getWordCloud(params));
 			dispatch(getSubjectRelation(params));
@@ -299,15 +299,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 			dispatch(setSearchLoading(false));
 			dispatch(setSearchSubmit(false));
 		});
-		// } else {
-		// 	dispatch(searchNum: num })).then(() => {
-		// 		dispatch(getWordCloud({ searchNum: num }));
-		// 		dispatch(getSubjectRelation({ searchNum: num }));
-		// 		// dispatch(getMatrix(params));
-		// 		dispatch(setSearchLoading(false));
-		// 		dispatch(setSearchSubmit(false));
-		// 	});
-		// }
+
 		setSubmitted(false);
 	}
 
@@ -462,13 +454,6 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 						clearInputValueOnChange
 						onAdd={chip => handleAddChip(chip, null, 'inventor')}
 						onDelete={(chip, index) => handleDeleteChip(chip, index, null, 'inventor')}
-						// InputProps={{
-						//     startAdornment: (
-						//         <InputAdornment position="start">
-						//             <People color="action" />
-						//         </InputAdornment>
-						//     )
-						// }}
 						variant="outlined"
 					/>
 				</FormControl>

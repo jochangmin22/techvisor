@@ -12,15 +12,15 @@ import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { useSelector, useDispatch } from 'react-redux';
-import { setWordCloudScope, setSearchSubmit } from '../../../store/searchsSlice';
+import { setWordCloudOptions } from '../../../store/searchsSlice';
 import React, { useState } from 'react';
 
-function WordCloudMenu(props) {
+function WordCloudMenu() {
 	const dispatch = useDispatch();
-	const wordCloudScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope.wordCloudScope);
+	const wordCloudOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions.wordCloudOptions);
 	const [anchorEl, setAnchorEl] = useState(null);
 
-	const { form, handleChange } = useForm(wordCloudScope);
+	const { form, handleChange } = useForm(wordCloudOptions);
 
 	function handleMenuOpen(event) {
 		setAnchorEl(event.currentTarget);
@@ -40,7 +40,7 @@ function WordCloudMenu(props) {
 		if (isFormInvalid()) {
 			return;
 		}
-		dispatch(setWordCloudScope(form));
+		dispatch(setWordCloudOptions(form));
 		// props.onAddCheckList(new ChecklistModel(form));
 		handleMenuClose();
 	}
@@ -55,10 +55,10 @@ function WordCloudMenu(props) {
 			<ToolbarMenu state={anchorEl} onClose={handleMenuClose}>
 				<form onSubmit={handleSubmit} className="p-16 flex flex-col">
 					<FormControl className="flex min-w-96 mb-24" component="fieldset">
-						<FormLabel component="legend">검색범위</FormLabel>
+						<FormLabel component="legend">분석범위</FormLabel>
 						<Select aria-label="검색범위" name="volume" value={form.volume} onChange={handleChange}>
-							{['요약', '청구항', '발명의 설명'].map(key => (
-								<MenuItem value={key} key={key}>
+							{['요약', '청구항', '발명의 설명(추후 지원)'].map(key => (
+								<MenuItem value={key} key={key} disabled={key === '발명의 설명(추후 지원)'}>
 									{key}
 								</MenuItem>
 							))}
@@ -99,22 +99,3 @@ function WordCloudMenu(props) {
 }
 
 export default WordCloudMenu;
-
-{
-	/* <div className="flex flex-row items-center justify-end">
-<FormControl className="min-w-136">
-	<InputLabel id="검색범위">검색범위</InputLabel>
-	<Select labelId="검색범위" value={selectedVolume} onChange={handleSelectedVolume}>
-		{['요약', '청구항', '발명의 설명'].map(key => (
-			<MenuItem value={key} key={key}>
-				{key}
-			</MenuItem>
-		))}
-	</Select>
-</FormControl>
-<RadioGroup aria-label="anonymous" name="anonymous" value={false} row>
-	<FormControlLabel value="true" control={<Radio />} label="Yes" />
-	<FormControlLabel value="false" control={<Radio />} label="No" />
-</RadioGroup>
-</div> */
-}

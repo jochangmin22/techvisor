@@ -18,7 +18,7 @@ function MatrixAnalysis(props) {
 	const dispatch = useDispatch();
 	const matrix = useSelector(({ searchApp }) => searchApp.searchs.matrix);
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
+	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
 	const [selectedCategory, setSelectedCategory] = useState(matrix.category);
 	const [showLoading, setShowLoading] = useState(false);
 
@@ -33,12 +33,12 @@ function MatrixAnalysis(props) {
 			setShowLoading(true);
 			dispatch(updateMatrixCategory(selectedCategory));
 			const [, params] = parseSearchText(searchParams, null);
-			const subParams = { searchScope: searchScope, matrix: { category: selectedCategory } };
+			const subParams = { analysisOptions: analysisOptions, matrix: { category: selectedCategory } };
 			dispatch(getMatrix({ params, subParams })).then(() => {
 				setShowLoading(false);
 			});
 		}
-	}, [dispatch, searchParams, searchScope, selectedCategory]);
+	}, [dispatch, searchParams, analysisOptions, selectedCategory]);
 
 	// const defaultColumn = React.useMemo(
 	// 	() => ({
@@ -66,7 +66,7 @@ function MatrixAnalysis(props) {
 			params.category = selectedCategory;
 			params.topic = props.column.id;
 			params.categoryValue = Object.values(props.row.values)[0];
-			const subParams = { searchScope: searchScope, matrix: { category: selectedCategory } };
+			const subParams = { analysisOptions: analysisOptions, matrix: { category: selectedCategory } };
 			dispatch(getMatrixDialog({ params, subParams })).then(() => {
 				dispatch(openMatrixDialog());
 			});

@@ -13,18 +13,18 @@ function NewsAnalysis(props) {
 	const { searchText } = props;
 	const dispatch = useDispatch();
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
+	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
 
 	useEffect(() => {
 		if (searchText && searchText.length > 0) {
 			const [, params] = parseSearchText(searchParams, null);
-			const subParams = { searchScope: searchScope };
+			const subParams = { analysisOptions: analysisOptions };
 			dispatch(getNews({ params, subParams })).then(() => {
 				dispatch(getNewsSA({ params, subParams }));
 				dispatch(getRelatedCompany({ params, subParams }));
 			});
 		}
-	}, [dispatch, searchParams, searchScope, searchText]);
+	}, [dispatch, searchParams, analysisOptions, searchText]);
 
 	return (
 		<Paper className="w-full h-full rounded-8 shadow">

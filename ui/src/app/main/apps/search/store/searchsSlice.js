@@ -45,8 +45,8 @@ export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async 
 	return data;
 });
 
-export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async params => {
-	const response = await axios.get(URL + 'wordcloud', { params });
+export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async (params, subParams) => {
+	const response = await axios.get(URL + 'wordcloud', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -78,6 +78,7 @@ export const initialState = {
 		searchText: '',
 		searchNum: '',
 		terms: [],
+		searchVolume: 'SUM', // 'SUM','SUMA', 'ALL'
 		dateType: '',
 		startDate: '',
 		endDate: '',
@@ -88,11 +89,10 @@ export const initialState = {
 		status: [],
 		ipType: []
 	},
-	searchScope: {
-		searchVolume: '',
-		wordCloudScope: {
+	analysisOptions: {
+		wordCloudOptions: {
 			volume: '요약',
-			unit: '구문', // '워드',
+			unit: '구문', // '구문', '워드',
 			output: 50
 		}
 	},
@@ -161,10 +161,10 @@ const searchsSlice = createSlice({
 			state.searchParams.searchNum = action.payload;
 		},
 		setSearchVolume: (state, action) => {
-			state.searchScope.searchVolume = action.payload;
+			state.searchParams.searchVolume = action.payload;
 		},
-		setWordCloudScope: (state, action) => {
-			state.searchScope.wordCloudScope = action.payload;
+		setWordCloudOptions: (state, action) => {
+			state.analysisOptions.wordCloudOptions = action.payload;
 		},
 		setSearchSubmit: (state, action) => {
 			state.searchSubmit = action.payload;
@@ -236,7 +236,7 @@ export const {
 	setSearchParams,
 	setSearchNum,
 	setSearchVolume,
-	setWordCloudScope,
+	setWordCloudOptions,
 	setSearchSubmit,
 	updateMatrixCategory,
 	openMatrixDialog,

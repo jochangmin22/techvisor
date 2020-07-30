@@ -112,9 +112,10 @@ def parse_matrix_dialog(request):
 
 
 def get_topic(nlp_raw):
-    taged_docs = []
+    # taged_docs = []
     try:  # handle NoneType error
-        taged_docs = nlp_raw.split()
+        # taged_docs = nlp_raw.split()
+        taged_docs = nlp_raw
         tuple_taged_docs = tuple(taged_docs)  # list to tuble
     except:
         return JsonResponse("{}", safe=False)

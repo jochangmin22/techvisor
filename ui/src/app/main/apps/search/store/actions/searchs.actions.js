@@ -157,7 +157,7 @@ export function setSearchVolume(data) {
 	};
 }
 
-export function setWordCloudScope(data) {
+export function setWordCloudOptions(data) {
 	return {
 		type: SET_WORDCLOUD_SCOPE,
 		wordCloudScope: data

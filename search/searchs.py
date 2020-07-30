@@ -8,7 +8,7 @@ from konlpy.tag import Mecab
 from copy import deepcopy
 import json
 
-from .utils import get_redis_key, dictfetchall
+from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
 # from .similarity import similarity
 
 # caching with redis
@@ -72,11 +72,11 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
     with connection.cursor() as cursor:
         # 검색범위 선택
         try:
-            if subParams['searchScope']['searchVolume'] == 'SUMA':
-                searchVolume = '중'
-            elif subParams['searchScope']['searchVolume'] == 'ALL':
+            if params['searchVolume'] == 'ALL':
                 searchVolume = '대'
-            else:
+            elif params['searchVolume'] == 'SUMA':
+                searchVolume = '중'
+            elif params['searchVolume'] == 'SUM':
                 searchVolume = '소'
         except:
             searchVolume = '소'
@@ -140,7 +140,7 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
 
     
 
-    nlp_raw = ""
+    nlp_raw = ''
     mtx_raw = []
     # tsv_content = ""
     # x = []
@@ -151,9 +151,9 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
         # npl and mtx parse
         for i in range(len(row)):
             # x += row[i]["요약token"].split()
-            if subParams['searchScope']['wordCloudScope']['volume'] == '요약':
+            if subParams['analysisOptions']['wordCloudOptions']['volume'] == '요약':
                 nlp_raw += row[i]["요약token"] if row[i]["요약token"] else "" + " "
-            elif subParams['searchScope']['wordCloudScope']['volume'] == '청구항':
+            elif subParams['analysisOptions']['wordCloudOptions']['volume'] == '청구항':
                 nlp_raw += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
 
             # 전체항token과 요약token은 nlp_raw에 넘겨줬으므로 바로 제거 - row는 list of dictionaries 형태임
@@ -172,19 +172,24 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
             del mtx_raw[i]["발명자국가코드1"]
             del mtx_raw[i]["등록일자"]
             del mtx_raw[i]["공개일자"]
-
+            del mtx_raw[i]["전체항token"]
             # del mtx_raw[i][:4]
             # del mtx_raw[i][6:12]
 
-        # tsv_content = json.dumps(x, ensure_ascii=False)
-        # if nlp_raw.endswith(" "):
-        #     nlp_raw = nlp_raw[:-1]
 
         # 요약token tokenizer
-        if subParams['searchScope']['wordCloudScope']['unit'] == '구문':
-            nlp_raw = ' '.join(tokenizer_phrase(nlp_raw) if nlp_raw else '')
-        else:            
-            nlp_raw = ' '.join(tokenizer(nlp_raw) if nlp_raw else '')
+        if subParams['analysisOptions']['wordCloudOptions']['unit'] == '구문':
+            # nlp_raw = ' '.join(tokenizer_phrase(nlp_raw) if nlp_raw else '')
+            try:
+                nlp_raw = tokenizer_phrase(nlp_raw)
+            except:
+                nlp_raw = []
+        elif subParams['analysisOptions']['wordCloudOptions']['unit'] == '워드':            
+            # nlp_raw = ' '.join(tokenizer(nlp_raw) if nlp_raw else '')
+            try:
+                nlp_raw = tokenizer(nlp_raw)
+            except:
+                nlp_raw = []
         # nlp_raw = ' '.join(tokenizer_pos(nlp_raw) if nlp_raw else '')
     else:  # 결과값 없을 때 처리
         row = []
@@ -205,7 +210,7 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
 
     new_sub_context = {}
     new_sub_context['nlp_raw'] = nlp_raw
-    new_sub_context['wordcloud'] = []    
+    # new_sub_context['wordcloud'] = []    
     cache.set(subKey, new_sub_context, CACHE_TTL)    
     # redis 저장 }
 
@@ -471,15 +476,18 @@ def parse_query(request):
     """ 쿼리 확인용 """
     return HttpResponse(parse_searchs(request, mode="query"), content_type="text/plain; charset=utf-8")
 
+raw_len_limit = 20000
 
 # NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
 def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
+    ''' raw token화 (raw_len_limit 단어 길이로 제한; 넘으면 mecab error)'''    
+    raw = remove_punc(remove_brackets(remove_tags(raw)))    
     mecab = Mecab()
     STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
     try:
         return [
             word
-            for word, tag in mecab.pos(raw) if len(word) > 1 and tag in pos and word not in STOPWORDS
+            for word, tag in mecab.pos(raw[:raw_len_limit]) if tag in pos and word not in STOPWORDS # and len(word) > 1
             # if len(word) > 1 and tag in pos and word not in stopword
             # if tag in pos
             # and not type(word) == float
@@ -489,12 +497,15 @@ def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
 
 
 def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
+    ''' raw token화 (raw_len_limit 단어 길이로 제한; 넘으면 mecab error)'''
+    raw = remove_punc(remove_brackets(remove_tags(raw)))
     mecab = Mecab()
     STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
+    STOPWORDS_PHRASE = getattr(settings, 'STOPWORDS_PHRASE', DEFAULT_TIMEOUT)
     saving = ''
     close = None
     raw_list = []
-    for word, tag in mecab.pos(raw):
+    for word, tag in mecab.pos(raw[:raw_len_limit]):
         if tag in pos:
             if word not in STOPWORDS: # and len(word) > 1:
                 saving = saving + '_' + word if saving and close else word
@@ -502,7 +513,7 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
         else:
             close= False
             if saving:
-                if '_' in saving:
+                if '_' in saving and saving not in STOPWORDS_PHRASE:
                     raw_list.append(saving)            
                 saving = ''
     return raw_list      

@@ -18,7 +18,7 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 def parse_wordcloud(request):
     """ wordcloud 관련 기능 """
 
-    _, subKey, _, _ = get_redis_key(request)
+    _, subKey, _, subParams = get_redis_key(request)
 
     # Redis {
     sub_context = cache.get(subKey)    
@@ -31,12 +31,18 @@ def parse_wordcloud(request):
     # Redis }
 
     #///////////////////////////////////
-    taged_docs = []
-    nlp_raw = []
-    nlp_raw = parse_searchs(request, mode="nlp")
+    try:
+        unitNumber = subParams['analysisOptions']['wordCloudOptions']['output']
+    except:
+        unitNumber = 50        
+
+    # taged_docs = []
+    # nlp_raw = []
+    # nlp_raw = parse_searchs(request, mode="nlp")
 
     try:  # handle NoneType error
-        taged_docs = nlp_raw.split()
+        # taged_docs = nlp_raw.split()
+        taged_docs = parse_searchs(request, mode="nlp")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         # tuple_taged_docs = tuple(taged_docs)  # list to tuble
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
@@ -54,7 +60,7 @@ def parse_wordcloud(request):
             sublist[word] = 1
 
     sublist = sorted(
-        sublist.items(), key=operator.itemgetter(1), reverse=True)[:50]
+        sublist.items(), key=operator.itemgetter(1), reverse=True)[:unitNumber]
 
     fields = ["name", "value"]
     dicts = [dict(zip(fields, d)) for d in sublist]
@@ -105,18 +111,19 @@ def parse_vec(request):
     # Redis }
 
     #///////////////////////////////////
-    taged_docs = []
-    nlp_raw = []
-    nlp_raw = parse_searchs(request, mode="nlp")
+    # taged_docs = []
+    # nlp_raw = []
+    # nlp_raw = parse_searchs(request, mode="nlp")
 
     try:  # handle NoneType error
-        taged_docs = nlp_raw.split()
+        # taged_docs = nlp_raw.split()
+        taged_docs = parse_searchs(request, mode="nlp")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         tuple_taged_docs = tuple(taged_docs)  # list to tuble
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
-            return HttpResponse("{topic: [], vec: []}" , content_type="text/plain; charset=utf-8")
+            return HttpResponse("{topic: [], vec: [], keywordvec: '', modelType: 'word2vec'}" , content_type="text/plain; charset=utf-8")
     except:
-        return HttpResponse("{topic: [], vec: []}", content_type="text/plain; charset=utf-8")    
+        return HttpResponse("{topic: [], vec: [], keywordvec: '', modelType: 'word2vec'}", content_type="text/plain; charset=utf-8")    
     #///////////////////////////////////
 
     # 빈도수 단어 
