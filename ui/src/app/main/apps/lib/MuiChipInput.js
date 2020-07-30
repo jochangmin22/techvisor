@@ -46,7 +46,7 @@ function MuiChipInput(props) {
 
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const searchSubmit = useSelector(({ searchApp }) => searchApp.searchs.searchSubmit);
-	const searchScope = useSelector(({ searchApp }) => searchApp.searchs.searchScope);
+	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
 
 	const [submitted, setSubmitted] = useState(searchSubmit);
 

@@ -60,7 +60,7 @@ urlpatterns = [
     path("auth/google", google_callback),
     re_path(r"^api/search-app/query/$", get_query),
     re_path(r"^api/search-app/searchs/$", csrf_exempt(get_searchs)),
-    re_path(r"^api/search-app/searchs/wordcloud$", get_wordcloud),
+    re_path(r"^api/search-app/searchs/wordcloud$", csrf_exempt(get_wordcloud)),
     re_path(r"^api/search-app/searchs/vec$", get_vec),
     re_path(r"^api/search-app/searchs/news$", get_news),
     re_path(r"^api/search-app/searchs/newssa$", csrf_exempt(get_news_sa)),
