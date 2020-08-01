@@ -9,6 +9,7 @@ import _ from '@lodash';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { ipc } from 'app/main/apps/lib/variables';
 import { useTheme } from '@material-ui/core';
+import IpcPiePopover from './components/IpcPiePopover';
 
 function calculateCnt(arr) {
 	const filterA = 'ipc요약';
@@ -138,6 +139,7 @@ function IpcPie(props) {
 				<Typography variant="body1" className="my-8">
 					IPC 분포
 				</Typography>
+				<IpcPiePopover />
 			</div>
 			<div id="main" className="w-full h-360" ref={chartRef} />
 		</Paper>
