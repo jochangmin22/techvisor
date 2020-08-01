@@ -114,22 +114,3 @@ function MatrixAnalysisMenu(props) {
 }
 
 export default MatrixAnalysisMenu;
-
-{
-	/* <div className="flex flex-row items-center justify-end">
-<FormControl className="min-w-136">
-	<InputLabel id="검색범위">검색범위</InputLabel>
-	<Select labelId="검색범위" value={selectedVolume} onChange={handleSelectedVolume}>
-		{['요약', '청구항', '발명의 설명'].map(key => (
-			<MenuItem value={key} key={key}>
-				{key}
-			</MenuItem>
-		))}
-	</Select>
-</FormControl>
-<RadioGroup aria-label="anonymous" name="anonymous" value={false} row>
-	<FormControlLabel value="true" control={<Radio />} label="Yes" />
-	<FormControlLabel value="false" control={<Radio />} label="No" />
-</RadioGroup>
-</div> */
-}

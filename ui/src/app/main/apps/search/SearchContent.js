@@ -49,7 +49,7 @@ function SearchContent(props) {
 				) : (
 					<div className="flex flex-wrap w-full h-460 items-start justify-center">
 						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16">
-							<SubjectRelation searchText={searchText} />
+							<SubjectRelation />
 						</div>
 						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pl-0">
 							<ContentVisual searchText={searchText} inventor={inventor} assignee={assignee} />

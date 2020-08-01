@@ -11,15 +11,13 @@ import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import SubjectRelatonMenu from './components/SubjectRelationMenu';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
-function SubjectRelation(props) {
+function SubjectRelation() {
 	const dispatch = useDispatch();
-	const { searchText } = props;
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.subjectRelation);
 	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
 	const { topic, vec } = entities;
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 
-	const [modelType, setModelType] = useState(analysisOptions.subjectRelationOptions.modelType);
 	const [showLoading, setShowLoading] = useState(false);
 
 	const showLoadingValue = useMemo(() => ({ showLoading, setShowLoading }), [showLoading, setShowLoading]);
@@ -30,6 +28,7 @@ function SubjectRelation(props) {
 			analysisOptions: analysisOptions
 		};
 		dispatch(getSubjectRelation({ params, subParams }));
+		// eslint-disable-next-line
 	}, [dispatch, searchParams, analysisOptions.subjectRelationOptions]);
 
 	useEffect(() => {}, [entities]);
@@ -92,7 +91,7 @@ function SubjectRelation(props) {
 					/>
 				) : (
 					<>
-						<SubjectChips searchText={searchText} topic={topic} modelType={modelType} />
+						<SubjectChips topic={topic} />
 						{entities && entities.length !== 0 && !showLoading ? (
 							<SubjectTable data={entities.vec} />
 						) : (

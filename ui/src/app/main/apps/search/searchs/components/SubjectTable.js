@@ -72,6 +72,7 @@ function SubjectTable() {
 			analysisOptions: analysisOptions
 		};
 		dispatch(getSubjectRelationVec({ params, subParams }));
+		// eslint-disable-next-line
 	}, [dispatch, searchParams, analysisOptions.subjectRelationOptions.keywordvec]);
 
 	// if (!entities) {

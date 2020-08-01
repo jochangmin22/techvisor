@@ -29,6 +29,7 @@ function MatrixAnalysis(props) {
 		dispatch(getMatrix({ params, subParams })).then(() => {
 			setShowLoading(false);
 		});
+		// eslint-disable-next-line
 	}, [dispatch, searchParams, analysisOptions.matrixOptions]);
 
 	const columns = React.useMemo(() => {
@@ -94,6 +95,7 @@ function MatrixAnalysis(props) {
 						sortable: true
 					}
 			  ];
+		// eslint-disable-next-line
 	}, [dispatch, searchParams, matrix, category]);
 
 	const groupBy = (obj, category) => {

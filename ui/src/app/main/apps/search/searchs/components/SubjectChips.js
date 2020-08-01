@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function SubjectChips(props) {
-	const { topic, modelType } = props;
+	const { topic } = props;
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
