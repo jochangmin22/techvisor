@@ -6,7 +6,7 @@ import operator
 from operator import itemgetter
 from gensim.models import Word2Vec
 from gensim.models import FastText
-from .searchs import parse_searchs
+from .searchs import parse_nlp
 from .utils import get_redis_key
 # caching with redis
 from django.core.cache import cache
@@ -42,7 +42,7 @@ def parse_wordcloud(request):
 
     try:  # handle NoneType error
         # taged_docs = nlp_raw.split()
-        taged_docs = parse_searchs(request, mode="nlp")
+        taged_docs = parse_nlp(request, analType="wordCloud")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         # tuple_taged_docs = tuple(taged_docs)  # list to tuble
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
@@ -125,11 +125,10 @@ def parse_vec(request):
 
     try:  # handle NoneType error
         # taged_docs = nlp_raw.split()
-        taged_docs = parse_searchs(request, mode="nlp")
+        taged_docs = parse_nlp(request, analType="subjectRelation")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         tuple_taged_docs = tuple(taged_docs)  # list to tuble
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
-            # return HttpResponse("{topic: [], vec: [], keywordvec: '', modelType: 'word2vec'}" , content_type="text/plain; charset=utf-8")
             return HttpResponse("{topic: [], vec: []}" , content_type="text/plain; charset=utf-8")
     except:
         return HttpResponse("{topic: [], vec: []}", content_type="text/plain; charset=utf-8")    

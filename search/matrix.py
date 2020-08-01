@@ -5,7 +5,7 @@ from .utils import get_redis_key, dictfetchall
 import json
 import re
 
-from .searchs import parse_searchs
+from .searchs import parse_searchs, parse_nlp
 
 # caching with redis
 from django.core.cache import cache
@@ -24,28 +24,29 @@ def parse_matrix(request):
 
     _, subKey, _, subParams = get_redis_key(request)
 
-    # nlp_raw, mtx_raw 가져오기
-    try:
-        nlp_raw = parse_searchs(request, mode="nlp")
-    except:
-        nlp_raw = []
-    try:
-        mtx_raw = parse_searchs(request, mode="matrix")
-    except:
-        mtx_raw = []
-
     # Redis {
-    sub_context = cache.get(subKey)
+    sub_context = cache.get(subKey)    
+
+    try:
+        if sub_context['matrix']:
+            return JsonResponse(sub_context['matrix'], safe=False)
+    except:
+        pass        
     # Redis }
+
+
+    # nlp_token, mtx_raw 가져오기
+    nlp_token = parse_nlp(request, analType="matrix")
+
+    mtx_raw = parse_searchs(request, mode="matrix")
 
     # topic 가져오기
     try:
-        topic = sub_context['vec']['topic']
+        unitNumber = subParams['analysisOptions']['matrixOptions']['output']
     except:
-        try:
-            topic = get_topic(nlp_raw)
-        except:
-            topic = []
+        unitNumber = 20   
+
+    topic = get_topic(nlp_token, unitNumber)
         
     if subParams['analysisOptions']['matrixOptions']['category'] == '연도별':
         countField = '출원일자'
@@ -54,7 +55,7 @@ def parse_matrix(request):
     elif subParams['analysisOptions']['matrixOptions']['category'] == '기업별':
         countField = '출원인1'
 
-    # mtx_raw의 요약token에서 topic 20 이 포함되는 [출원일자, ipc요약, 출원인1] count 
+    # mtx_raw의 요약token에서 topic 20 (unitNumber) 이 포함되는 [출원일자, ipc요약, 출원인1] count 
     # (mtx_raw는 출원번호, 출원일자(년), 출원인1, ipc요약, 요약token 로 구성)
     mlist = []  # list of dic
     all_list = {}  # dic of list of dic
@@ -72,23 +73,43 @@ def parse_matrix(request):
         pass
 
     res =  {"entities": all_list, "max": matrixMax}
+
+    # Redis {
+    try:
+        sub_context['matrix'] = res
+        cache.set(subKey, sub_context, CACHE_TTL)
+    except:
+        pass        
+    # Redis }
+
     return JsonResponse(res, safe=False)
 
 def parse_matrix_dialog(request):
     """ 
     전체목록에서 3가지 필터 (topic, category, category value)
     """
-    # TODO : apply redis if necessary
-    _, _, params, _ = get_redis_key(request)
 
-    if params['category'] == '연도별':
+    _, subKey, params, subParams = get_redis_key(request)
+
+    # Redis {
+    sub_context = cache.get(subKey)    
+
+    try:
+        if sub_context['matrix_dialog']:
+            return JsonResponse(sub_context['matrix_dialog'], safe=False)
+    except:
+        pass        
+    # Redis }
+
+
+    if subParams['analysisOptions']['matrixOptions']['category'] == '연도별':
         countField = 'left(출원일자,4)'
-    elif params['category'] == '기술별':
+    elif subParams['analysisOptions']['matrixOptions']['category'] == '기술별':
         countField = 'ipc요약'
-    elif params['category'] == '기업별':
+    elif subParams['analysisOptions']['matrixOptions']['category'] == '기업별':
         countField = '출원인1'
 
-    if params['category'] == params['topic']:
+    if subParams['analysisOptions']['matrixOptions']['category'] == params['topic']:
        whereTopic = '' # prevent from click on the category itself
     else:    
         if ' ' in params['topic']:
@@ -106,14 +127,23 @@ def parse_matrix_dialog(request):
         query += whereAll
         cursor.execute(query)
         row = dictfetchall(cursor)
+
+    # Redis {
+    try:
+        sub_context['matrix_dialog'] = row
+        cache.set(subKey, sub_context, CACHE_TTL)
+    except:
+        pass        
+    # Redis }
+
     return JsonResponse(row, safe=False)
 
 
-def get_topic(nlp_raw):
+def get_topic(nlp_token, unitNumber):
     # taged_docs = []
     try:  # handle NoneType error
-        # taged_docs = nlp_raw.split()
-        taged_docs = nlp_raw
+        # taged_docs = nlp_token.split()
+        taged_docs = nlp_token
         tuple_taged_docs = tuple(taged_docs)  # list to tuble
     except:
         return JsonResponse("{}", safe=False)
@@ -121,9 +151,8 @@ def get_topic(nlp_raw):
     if taged_docs == [] or taged_docs == [[]]:  # result is empty
         return JsonResponse("{}", safe=False)
 
-    topic_num = 20
     count = Counter(tuple_taged_docs)
-    _sublist = count.most_common(topic_num)
+    _sublist = count.most_common(unitNumber)
     sublist = dict(_sublist)
 
     topic = []  # --- topic 반복 횟수는 제거

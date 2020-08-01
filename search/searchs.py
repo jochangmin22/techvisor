@@ -33,13 +33,14 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 # IPC요약(IPCM)
 # 출원인 대표명화 코드(WAP)
 
-def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
-    """ 쿼리 실행 및 결과 저장 """
+def parse_searchs(request, mode="begin"):
+    """ 쿼리 실행 및 결과 저장
+        mode : begin, nlp, query, matrix
+    """
 
-    mainKey, subKey, params, subParams = get_redis_key(request)
+    mainKey, _, params, _ = get_redis_key(request)
 
     context = cache.get(mainKey)
-    sub_context = cache.get(subKey)
 
     if mode == "begin":
         try:
@@ -48,26 +49,20 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
         except:
             pass
 
-    if mode == "nlp":
+    elif mode == "nlp":
         try:
-            if sub_context['nlp_raw']:
-                return sub_context['nlp_raw']
+            if context['raw_abstract'] and context['raw_claims']:
+                return context['raw_abstract'], context['raw_claims']
         except:
             pass
 
-    if mode == "matrix":
+    elif mode == "matrix":
         try:
             if context['mtx_raw']:
                 return context['mtx_raw']
         except:
             pass
 
-    if mode == "matrix_dialog":
-        try:
-            if context['raw']:
-                return context['raw']
-        except:
-            pass
 
     with connection.cursor() as cursor:
         # 검색범위 선택
@@ -140,23 +135,20 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
 
     
 
-    nlp_raw = ''
+    raw_abstract = ''
+    raw_claims = ''
     mtx_raw = []
-    # tsv_content = ""
-    # x = []
+
     if row:
         # matrix list 생성
         mtx_raw = deepcopy(row)
 
         # npl and mtx parse
         for i in range(len(row)):
-            # x += row[i]["요약token"].split()
-            if subParams['analysisOptions']['wordCloudOptions']['volume'] == '요약':
-                nlp_raw += row[i]["요약token"] if row[i]["요약token"] else "" + " "
-            elif subParams['analysisOptions']['wordCloudOptions']['volume'] == '청구항':
-                nlp_raw += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
+            raw_abstract += row[i]["요약token"] if row[i]["요약token"] else "" + " "
+            raw_claims += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
 
-            # 전체항token과 요약token은 nlp_raw에 넘겨줬으므로 바로 제거 - row는 list of dictionaries 형태임
+            # 전체항token과 요약token은 raw_abstract,raw_claims에 넘겨줬으므로 바로 제거 - row는 list of dictionaries 형태임
             del row[i]["요약token"]
             del row[i]["전체항token"]
 
@@ -176,51 +168,75 @@ def parse_searchs(request, mode="begin"):  # mode : begin, nlp, query
             # del mtx_raw[i][:4]
             # del mtx_raw[i][6:12]
 
-
-        # 요약token tokenizer
-        if subParams['analysisOptions']['wordCloudOptions']['unit'] == '구문':
-            # nlp_raw = ' '.join(tokenizer_phrase(nlp_raw) if nlp_raw else '')
-            try:
-                nlp_raw = tokenizer_phrase(nlp_raw)
-            except:
-                nlp_raw = []
-        elif subParams['analysisOptions']['wordCloudOptions']['unit'] == '워드':            
-            # nlp_raw = ' '.join(tokenizer(nlp_raw) if nlp_raw else '')
-            try:
-                nlp_raw = tokenizer(nlp_raw)
-            except:
-                nlp_raw = []
-        # nlp_raw = ' '.join(tokenizer_pos(nlp_raw) if nlp_raw else '')
     else:  # 결과값 없을 때 처리
         row = []
 
     # ''' 유사도 처리 '''
     # result=similarity(row)
     # return JsonResponse(result, safe=False)
+
     # redis 저장 {
     new_context = {}
-    # new_context['nlp_raw'] = nlp_raw
     new_context['mtx_raw'] = mtx_raw
     new_context['raw'] = row
-    # new_context['wordcloud'] = []
-    # new_context['vec'] = []
-    # new_context['modelType'] = ''
-    # new_context['matrix'] = []
+    new_context['raw_abstract'] = raw_abstract
+    new_context['raw_claims'] = raw_claims
     cache.set(mainKey, new_context, CACHE_TTL)
-
-    new_sub_context = {}
-    new_sub_context['nlp_raw'] = nlp_raw
-    # new_sub_context['wordcloud'] = []    
-    cache.set(subKey, new_sub_context, CACHE_TTL)    
     # redis 저장 }
 
     if mode == "begin":
         return JsonResponse(row, safe=False)
     elif mode == "nlp":
-        return nlp_raw
+        return raw_abstract, raw_claims
     elif mode == "matrix":
-        return mtx_raw
+        return mtx_raw          
+ 
 
+def parse_nlp(request, analType="wordCloud"):
+    """ 쿼리 실행 및 결과 저장
+        analType : wordCloud, matrix, subjectRelation
+    """
+
+    _, subKey, _, subParams = get_redis_key(request)
+
+    #### Create a new SubKey to distinguish analysis type 
+    newSubKey = subKey + '¶' + analType
+
+    sub_context = cache.get(newSubKey)
+
+    try:
+        if sub_context['nlp_token']:
+            return sub_context['nlp_token']
+    except:
+        pass
+
+    raw_abstract, raw_claims = parse_searchs(request, mode="nlp")
+
+    nlp_raw = ''
+    nlp_token = ''
+
+    if subParams['analysisOptions'][analType +'Options']['volume'] == '요약':
+        nlp_raw = raw_abstract
+    elif subParams['analysisOptions'][analType +'Options']['volume'] == '청구항':
+        nlp_raw = raw_claims        
+
+    # tokenizer
+    if subParams['analysisOptions'][analType +'Options']['unit'] == '구문':
+        try:
+            nlp_token = tokenizer_phrase(nlp_raw)
+        except:
+            nlp_token = []
+    elif subParams['analysisOptions'][analType +'Options']['unit'] == '워드':            
+        try:
+            nlp_token = tokenizer(nlp_raw)
+        except:
+            nlp_token = []        
+
+    new_sub_context = {}
+    new_sub_context['nlp_token'] = nlp_token
+    cache.set(newSubKey, new_sub_context, CACHE_TTL)
+
+    return nlp_token
 
 def parse_keywords(keyword="", fieldName=""):
     """ keyword를 split 해서 순열로 like query 생성 """
