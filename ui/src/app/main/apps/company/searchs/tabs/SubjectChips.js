@@ -38,7 +38,7 @@ function SubjectChips(props) {
 		paramsCopy.assignee = searchParams.assignee.join(' and ');
 		paramsCopy.keywordvec = value; // updateSubjectRelation 에서만 이 line 추가
 
-		dispatch(resetSubjectRelationVec(topic));
+		dispatch(resetSubjectRelationVec());
 		dispatch(updateSubjectRelation(paramsCopy));
 	}
 

@@ -6,7 +6,7 @@ import RelatedCompany from './components/RelatedCompany';
 import { getNews, getNewsSA, getRelatedCompany } from '../store/searchsSlice';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-import parseSearchText from '../inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import { useSelector } from 'react-redux';
 
 function NewsAnalysis(props) {
@@ -24,7 +24,8 @@ function NewsAnalysis(props) {
 				dispatch(getRelatedCompany({ params, subParams }));
 			});
 		}
-	}, [dispatch, searchParams, analysisOptions, searchText]);
+		// eslint-disable-next-line
+	}, [dispatch, searchParams, searchText]);
 
 	return (
 		<Paper className="w-full h-full rounded-8 shadow">
@@ -38,7 +39,7 @@ function NewsAnalysis(props) {
 				<EmptyMsg icon="mic_none" msg="뉴스분석" text="키워드 검색에서만 관련 뉴스가 표시됩니다." />
 			) : (
 				<>
-					<NewsArticles searchText={searchText} />
+					<NewsArticles />
 					<RelatedCompany searchText={searchText} />
 				</>
 			)}

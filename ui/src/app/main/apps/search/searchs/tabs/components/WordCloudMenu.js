@@ -41,7 +41,6 @@ function WordCloudMenu() {
 			return;
 		}
 		dispatch(setWordCloudOptions(form));
-		// props.onAddCheckList(new ChecklistModel(form));
 		handleMenuClose();
 	}
 
@@ -56,7 +55,7 @@ function WordCloudMenu() {
 				<form onSubmit={handleSubmit} className="p-16 flex flex-col">
 					<FormControl className="flex min-w-96 mb-24" component="fieldset">
 						<FormLabel component="legend">분석범위</FormLabel>
-						<Select aria-label="검색범위" name="volume" value={form.volume} onChange={handleChange}>
+						<Select aria-label="분석범위" name="volume" value={form.volume} onChange={handleChange}>
 							{['요약', '청구항', '발명의 설명(추후 지원)'].map(key => (
 								<MenuItem value={key} key={key} disabled={key === '발명의 설명(추후 지원)'}>
 									{key}
