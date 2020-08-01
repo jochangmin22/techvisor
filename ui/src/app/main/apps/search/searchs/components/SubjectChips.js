@@ -4,9 +4,8 @@ import Chip from '@material-ui/core/Chip';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import parseSearchText from '../../inc/parseSearchText';
-// import { updateSubjectRelation, resetSubjectRelationVec } from '../../store/searchsSlice';
-import { updateSubjectRelation } from '../../store/searchsSlice';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import { getSubjectRelationVec, setSubjectRelationOptions } from '../../store/searchsSlice';
 import SubjectContext from '../SubjectContext';
 
 const useStyles = makeStyles(theme => ({
@@ -32,25 +31,24 @@ function SubjectChips(props) {
 
 	function handleClick(value) {
 		setShowLoading(true);
+		const subjectRelationOptions = { ...analysisOptions.subjectRelationOptions, keywordvec: value };
 		const [, params] = parseSearchText(searchParams, null);
 		const subParams = {
-			analysisOptions: analysisOptions,
-			subjectRelation: { modelType: modelType, keywordvec: value }
+			analysisOptions: {
+				...analysisOptions,
+				subjectRelationOptions
+			}
 		};
-		// params.keywordvec = value;
-		// params.modelType = modelType;
-
-		// dispatch(resetSubjectRelationVec(topic));
-		dispatch(updateSubjectRelation({ params, subParams })).then(() => {
+		dispatch(setSubjectRelationOptions(subjectRelationOptions));
+		dispatch(getSubjectRelationVec({ params, subParams })).then(() => {
 			setShowLoading(false);
 		});
-		// }
 	}
 
 	return topic ? (
 		<FuseScrollbars className="flex flex-no-overflow items-center overflow-x-auto">
 			<div className={clsx(topic && topic.length > 0 ? '' : 'hidden', classes.root)}>
-				{topic.map((value, index) => (
+				{topic.map(value => (
 					<Chip label={value} key={value} size="small" onClick={() => handleClick(value)} />
 				))}
 			</div>

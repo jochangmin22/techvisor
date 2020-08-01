@@ -59,12 +59,22 @@ export const getSubjectRelation = createAsyncThunk(NAME + 'getSubjectRelation', 
 	return data;
 });
 
-export const updateSubjectRelation = createAsyncThunk(NAME + 'updateSubjectRelation', async (params, subParams) => {
-	const response = await axios.get(URL + 'vec', { params: params, subParams: subParams });
-	const data = await response.data;
+export const getSubjectRelationVec = createAsyncThunk(
+	NAME + 'getSubjectRelationVec',
+	async (params, subParams, { dispatch }) => {
+		const response = dispatch(getSubjectRelation({ params, subParams }));
+		const data = response.data;
 
-	return data;
-});
+		return data;
+	}
+);
+
+// export const updateSubjectRelation = createAsyncThunk(NAME + 'updateSubjectRelation', async (params, subParams) => {
+// 	const response = await axios.get(URL + 'vec', { params: params, subParams: subParams });
+// 	const data = await response.data;
+
+// 	return data;
+// });
 
 const searchsAdapter = createEntityAdapter({});
 
@@ -94,6 +104,19 @@ export const initialState = {
 			volume: '요약',
 			unit: '구문', // '구문', '워드',
 			output: 50
+		},
+		subjectRelationOptions: {
+			keywordvec: '',
+			modelType: 'word2vec', // 'word2vec','fasttext','etc'
+			volume: '요약',
+			unit: '구문', // '구문', '워드',
+			output: 20
+		},
+		matrixOptions: {
+			category: '연도별', // '국가별', '연도별', '기술별', '기업별'
+			volume: '요약',
+			unit: '구문', // '구문', '워드',
+			output: 20
 		}
 	},
 	searchLoading: null,
@@ -108,7 +131,7 @@ export const initialState = {
 	relatedCompany: [],
 	matrix: {
 		entities: [],
-		category: '연도별', // ['국가별', '연도별', '기술별', '기업별'],
+		// category: '연도별', // ['국가별', '연도별', '기술별', '기업별'],
 		max: 0
 	},
 	matrixDialog: {
@@ -120,9 +143,7 @@ export const initialState = {
 	wordCloud: [],
 	subjectRelation: {
 		topic: [],
-		vec: [],
-		keywordvec: '',
-		modelType: 'word2vec' // ['word2vec','fasttext']
+		vec: []
 	}
 };
 
@@ -166,6 +187,12 @@ const searchsSlice = createSlice({
 		setWordCloudOptions: (state, action) => {
 			state.analysisOptions.wordCloudOptions = action.payload;
 		},
+		setSubjectRelationOptions: (state, action) => {
+			state.analysisOptions.subjectRelationOptions = action.payload;
+		},
+		setMatrixOptions: (state, action) => {
+			state.analysisOptions.matrixOptions = action.payload;
+		},
 		setSearchSubmit: (state, action) => {
 			state.searchSubmit = action.payload;
 		},
@@ -181,12 +208,16 @@ const searchsSlice = createSlice({
 		updateCols: (state, action) => {
 			state.cols = action.payload;
 		},
+		// getSubjectRelationVec: (state, action) => {
+		// 	const data = dispatch(getSubjectRelation(state));
+		// 	state.subjectRelation.vec = data.vec;
+		// },
 		resetSubjectRelationVec: (state, action) => {
 			// state.subjectRelation = { ...state.subjectRelation, vec: [], topic: action.payload };
-			state.subjectRelation.vec = initialState.subjectRelation.vec;
+			state.subjectRelation = { ...initialState.subjectRelation, vec: initialState.subjectRelation.vec };
 		},
 		updateSubjectRelationModelType: (state, action) => {
-			state.subjectRelation.modelType = action.payload;
+			state.analysisOptions.subjectRelationOptions = action.payload;
 		}
 	},
 	extraReducers: {
@@ -221,7 +252,10 @@ const searchsSlice = createSlice({
 		// [updateSubjectRelation.pending]: (state, action) => {
 		// 	resetSubjectRelationVec();
 		// },
-		[updateSubjectRelation.fulfilled]: (state, action) => {
+		[getSubjectRelationVec.pending]: (state, action) => {
+			state.subjectRelation = { ...state.subjectRelation, vec: initialState.subjectRelation.vec };
+		},
+		[getSubjectRelationVec.fulfilled]: (state, action) => {
 			state.subjectRelation = { ...state.subjectRelation, vec: action.payload.vec };
 		}
 	}
@@ -237,11 +271,14 @@ export const {
 	setSearchNum,
 	setSearchVolume,
 	setWordCloudOptions,
+	setSubjectRelationOptions,
+	setMatrixOptions,
 	setSearchSubmit,
 	updateMatrixCategory,
 	openMatrixDialog,
 	closeMatrixDialog,
 	updateCols,
+	// updateSubjectRelationVec,
 	resetSubjectRelationVec,
 	updateSubjectRelationModelType
 } = searchsSlice.actions;

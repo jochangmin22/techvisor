@@ -22,12 +22,11 @@ def parse_matrix(request):
     2. mtx_row [요약token] 에 각 topic이 포함되는 [연도별, 기술별, 기업별] 횟수 list
     """
 
-    mainKey, _, _, subParams = get_redis_key(request)
+    _, subKey, _, subParams = get_redis_key(request)
 
     # nlp_raw, mtx_raw 가져오기
     try:
-        nlp_raw = parse_searchs(
-            request, mode="nlp")
+        nlp_raw = parse_searchs(request, mode="nlp")
     except:
         nlp_raw = []
     try:
@@ -36,24 +35,23 @@ def parse_matrix(request):
         mtx_raw = []
 
     # Redis {
-    context = cache.get(mainKey)
+    sub_context = cache.get(subKey)
     # Redis }
 
     # topic 가져오기
     try:
-        topic = context['vec']['topic']
+        topic = sub_context['vec']['topic']
     except:
         try:
             topic = get_topic(nlp_raw)
         except:
             topic = []
-
         
-    if subParams['matrix']['category'] == '연도별':
+    if subParams['analysisOptions']['matrixOptions']['category'] == '연도별':
         countField = '출원일자'
-    elif subParams['matrix']['category'] == '기술별':
+    elif subParams['analysisOptions']['matrixOptions']['category'] == '기술별':
         countField = 'ipc요약'
-    elif subParams['matrix']['category'] == '기업별':
+    elif subParams['analysisOptions']['matrixOptions']['category'] == '기업별':
         countField = '출원인1'
 
     # mtx_raw의 요약token에서 topic 20 이 포함되는 [출원일자, ipc요약, 출원인1] count 

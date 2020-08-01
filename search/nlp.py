@@ -82,29 +82,37 @@ def parse_wordcloud(request):
 
 def parse_vec(request):
     """ 빈도수 단어로 연관 단어 추출 (처음은 맨 앞단어로) """
-    mainKey, _, _, subParams = get_redis_key(request)
+    _, subKey, _, subParams = get_redis_key(request)
 
+    #///////////////////////////////////
     try:
-        _keywordvec = subParams['subjectRelation']['keywordvec']
-    except:
-        _keywordvec = None
-
-    try:
-        _modelType = subParams['subjectRelation']['modelType']
-    except:
-        _modelType = None        
-
-    # Redis {
-    context = cache.get(mainKey)
-    try:
-        if context['modelType'] != _modelType:
-            _modelType = _modelType
+        _modelType = subParams['analysisOptions']['subjectRelationOptions']['modelType']
     except:
         _modelType = None
 
     try:
-        if not _keywordvec and not _modelType and context['vec']:        
-            return HttpResponse(json.dumps(context['vec'], ensure_ascii=False))
+        _keywordvec = subParams['analysisOptions']['subjectRelationOptions']['keywordvec']
+    except:
+        _keywordvec = None
+
+    try:
+        unitNumber = subParams['analysisOptions']['subjectRelationOptions']['output']
+    except:
+        unitNumber = 20            
+
+    # Redis {
+    sub_context = cache.get(subKey)
+
+    # try:
+    #     if sub_context['modelType'] != _modelType:
+    #         _modelType = _modelType
+    # except:
+    #     _modelType = None
+
+    try:
+        # if not _keywordvec and not _modelType and sub_context['vec']:        
+        if sub_context['vec']:        
+            return HttpResponse(json.dumps(sub_context['vec'], ensure_ascii=False))
     except:
         pass
 
@@ -121,14 +129,15 @@ def parse_vec(request):
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         tuple_taged_docs = tuple(taged_docs)  # list to tuble
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
-            return HttpResponse("{topic: [], vec: [], keywordvec: '', modelType: 'word2vec'}" , content_type="text/plain; charset=utf-8")
+            # return HttpResponse("{topic: [], vec: [], keywordvec: '', modelType: 'word2vec'}" , content_type="text/plain; charset=utf-8")
+            return HttpResponse("{topic: [], vec: []}" , content_type="text/plain; charset=utf-8")
     except:
-        return HttpResponse("{topic: [], vec: [], keywordvec: '', modelType: 'word2vec'}", content_type="text/plain; charset=utf-8")    
+        return HttpResponse("{topic: [], vec: []}", content_type="text/plain; charset=utf-8")    
     #///////////////////////////////////
 
     # 빈도수 단어 
     count = Counter(tuple_taged_docs)
-    _sublist = count.most_common(20)
+    _sublist = count.most_common(unitNumber)
     sublist = dict(_sublist)
 
     # select first topic word if no related word is specified
@@ -217,7 +226,7 @@ def parse_vec(request):
 
     # wordtovec_result = model.wv.similarity('actor', 'actress') #similarity: 두 단어의 유사도를 계산
     try:
-        wordtovec_result = model.wv.most_similar(keywordvec, topn=20)  # most_similar: 가장 유사한 단어를 출력
+        wordtovec_result = model.wv.most_similar(keywordvec, topn=unitNumber)  # most_similar: 가장 유사한 단어를 출력
     except:
         # error handle "word '...' not in vocabulary"
         return JsonResponse('{"vec":[{"label":"없음","value":0}]}', safe=False)
@@ -237,10 +246,11 @@ def parse_vec(request):
     res = {"topic": sublist_result_remove, "vec": d}
 
     # Redis {
-    if context is not None:
-        context['vec'] = res
-        context['modelType'] = modelType
-        cache.set(mainKey, context, CACHE_TTL)
+    try:
+        sub_context['vec'] = res
+        cache.set(subKey, sub_context, CACHE_TTL)
+    except:
+        pass        
     # Redis }
 
     return HttpResponse(json.dumps(res, ensure_ascii=False))

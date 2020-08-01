@@ -12,21 +12,15 @@ import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { useSelector, useDispatch } from 'react-redux';
-import { setWordCloudOptions } from '../../store/searchsSlice';
+import { setMatrixOptions } from '../../store/searchsSlice';
 import React, { useState } from 'react';
 
 function MatrixAnalysisMenu(props) {
 	const dispatch = useDispatch();
-	const wordCloudOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions.wordCloudOptions);
+	const matrixOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions.matrixOptions);
 	const [anchorEl, setAnchorEl] = useState(null);
 
-	const [value, setValue] = React.useState('구문');
-
-	const { form, handleChange, setForm, setInForm } = useForm(wordCloudOptions);
-
-	// const handleChange = event => {
-	// 	setValue(event.target.value);
-	// };
+	const { form, handleChange } = useForm(matrixOptions);
 
 	function handleMenuOpen(event) {
 		setAnchorEl(event.currentTarget);
@@ -46,8 +40,7 @@ function MatrixAnalysisMenu(props) {
 		if (isFormInvalid()) {
 			return;
 		}
-		dispatch(setWordCloudOptions(form));
-		// props.onAddCheckList(new ChecklistModel(form));
+		dispatch(setMatrixOptions(form));
 		handleMenuClose();
 	}
 
@@ -62,9 +55,25 @@ function MatrixAnalysisMenu(props) {
 				<form onSubmit={handleSubmit} className="p-16 flex flex-col">
 					<FormControl className="flex min-w-96 mb-24" component="fieldset">
 						<FormLabel component="legend">분석 항목</FormLabel>
-						<Select aria-label="분석 항목" value={form.modelType} onChange={handleChange} displayEmpty>
+						<Select
+							aria-label="분석 항목"
+							name="category"
+							value={form.category}
+							onChange={handleChange}
+							displayEmpty
+						>
 							{['연도별', '기술별', '기업별'].map(key => (
 								<MenuItem value={key} key={key}>
+									{key}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+					<FormControl className="flex min-w-96 mb-24" component="fieldset">
+						<FormLabel component="legend">분석범위</FormLabel>
+						<Select aria-label="분석범위" name="volume" value={form.volume} onChange={handleChange}>
+							{['요약', '청구항', '발명의 설명(추후 지원)'].map(key => (
+								<MenuItem value={key} key={key} disabled={key === '발명의 설명(추후 지원)'}>
 									{key}
 								</MenuItem>
 							))}
@@ -77,16 +86,16 @@ function MatrixAnalysisMenu(props) {
 							<FormControlLabel value="워드" control={<Radio />} label="워드" />
 						</RadioGroup>
 					</FormControl>
-					{/* <FormControl className="flex min-w-96 mb-24" component="fieldset">
+					<FormControl className="flex min-w-96 mb-24" component="fieldset">
 						<FormLabel component="legend">워드 출력수</FormLabel>
 						<Select labelId="워드 출력수" name="output" value={form.output} onChange={handleChange}>
-							{[50, 100, 150, 200].map(key => (
+							{[20, 50, 100, 150, 200].map(key => (
 								<MenuItem value={key} key={key}>
 									{key}
 								</MenuItem>
 							))}
 						</Select>
-					</FormControl> */}
+					</FormControl>
 					<div className="flex">
 						<Button
 							color="secondary"

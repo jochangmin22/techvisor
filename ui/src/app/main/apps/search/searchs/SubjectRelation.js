@@ -6,58 +6,62 @@ import SubjectChips from './components/SubjectChips';
 import SubjectTable from './components/SubjectTable';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
-import { updateSubjectRelation, resetSubjectRelationVec, updateSubjectRelationModelType } from '../store/searchsSlice';
-import parseSearchText from '../inc/parseSearchText';
+import { getSubjectRelation } from '../store/searchsSlice';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import SubjectRelatonMenu from './components/SubjectRelationMenu';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
 function SubjectRelation(props) {
 	const dispatch = useDispatch();
 	const { searchText } = props;
-	const subjectRelation = useSelector(({ searchApp }) => searchApp.searchs.subjectRelation);
-	const { topic, vec } = subjectRelation;
-	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
+	const entities = useSelector(({ searchApp }) => searchApp.searchs.subjectRelation);
 	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
+	const { topic, vec } = entities;
+	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 
-	const [data, setData] = useState(null);
-	const [modelType, setModelType] = useState(subjectRelation.modelType);
+	const [modelType, setModelType] = useState(analysisOptions.subjectRelationOptions.modelType);
 	const [showLoading, setShowLoading] = useState(false);
 
 	const showLoadingValue = useMemo(() => ({ showLoading, setShowLoading }), [showLoading, setShowLoading]);
 
-	// function handleModelType(event) {
-	// 	setModelType(event.target.value);
-	// }
-
 	useEffect(() => {
-		if (subjectRelation === null) {
-			setData(null);
-		} else {
-			if (vec !== undefined) {
-				setData(vec);
-			}
-		}
-	}, [subjectRelation]);
+		const [, params] = parseSearchText(searchParams, null);
+		const subParams = {
+			analysisOptions: analysisOptions
+		};
+		dispatch(getSubjectRelation({ params, subParams }));
+	}, [dispatch, searchParams, analysisOptions.subjectRelationOptions]);
 
-	useEffect(() => {
-		if (modelType) {
-			setShowLoading(true);
-			dispatch(updateSubjectRelationModelType(modelType));
-			const [, params] = parseSearchText(searchParams, null);
-			const subParams = {
-				analysisOptions: analysisOptions,
-				subjectRelation: { modelType: modelType, keywordvec: '' }
-			};
-			dispatch(resetSubjectRelationVec(topic));
-			dispatch(updateSubjectRelation({ params, subParams })).then(() => {
-				setShowLoading(false);
-			});
-		}
-	}, [dispatch, searchParams, topic, modelType, analysisOptions]);
+	useEffect(() => {}, [entities]);
+
+	// useEffect(() => {
+	// 	if (entities === null) {
+	// 		setData(null);
+	// 	} else {
+	// 		if (vec !== undefined) {
+	// 			setData(vec);
+	// 		}
+	// 	}
+	// }, [entities]);
+
+	// useEffect(() => {
+	// 	if (modelType) {
+	// 		setShowLoading(true);
+	// 		dispatch(updateSubjectRelationModelType(modelType));
+	// 		const [, params] = parseSearchText(searchParams, null);
+	// 		const subParams = {
+	// 			subjectRelation: { modelType: modelType, keywordvec: '' }
+	// 		};
+	// 		dispatch(resetSubjectRelationVec());
+	// 		dispatch(getSubjectRelation({ params, subParams })).then(() => {
+	// 			setShowLoading(false);
+	// 		});
+	// 	}
+	// }, [dispatch, searchParams, topic, modelType]);
 
 	const isEmpty = !!(!topic && !vec);
 
-	if (!subjectRelation) {
+	if (!entities) {
 		return <SpinLoading />;
 	}
 
@@ -89,8 +93,8 @@ function SubjectRelation(props) {
 				) : (
 					<>
 						<SubjectChips searchText={searchText} topic={topic} modelType={modelType} />
-						{data && data.length !== 0 && !showLoading ? (
-							<SubjectTable data={data} />
+						{entities && entities.length !== 0 && !showLoading ? (
+							<SubjectTable data={entities.vec} />
 						) : (
 							<SpinLoading delay={20000} />
 						)}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import { useSelector, useDispatch } from 'react-redux';
-import { getMatrix, getMatrixDialog, openMatrixDialog, updateMatrixCategory } from '../store/searchsSlice';
+import { getMatrix, getMatrixDialog, openMatrixDialog } from '../store/searchsSlice';
 // import { Draggable } from 'react-beautiful-dnd';
 // import Draggable from 'react-draggable';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
@@ -10,42 +10,26 @@ import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-import parseSearchText from '../inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import MatrixDialog from './MatrixDialog';
 import MatrixAnalysisMenu from './components/MatrixAnalysisMenu';
 
 function MatrixAnalysis(props) {
 	const dispatch = useDispatch();
 	const matrix = useSelector(({ searchApp }) => searchApp.searchs.matrix);
-	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
-	const [selectedCategory, setSelectedCategory] = useState(matrix.category);
+	const { category } = analysisOptions.matrixOptions;
+	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const [showLoading, setShowLoading] = useState(false);
 
-	// function handleSelectedCategory(event) {
-	// 	setSelectedCategory(event.target.value);
-	// }
-
-	// const { setShowLoading } = useContext(SubjectContext);
-
 	useEffect(() => {
-		if (selectedCategory) {
-			setShowLoading(true);
-			dispatch(updateMatrixCategory(selectedCategory));
-			const [, params] = parseSearchText(searchParams, null);
-			const subParams = { analysisOptions: analysisOptions, matrix: { category: selectedCategory } };
-			dispatch(getMatrix({ params, subParams })).then(() => {
-				setShowLoading(false);
-			});
-		}
-	}, [dispatch, searchParams, analysisOptions, selectedCategory]);
-
-	// const defaultColumn = React.useMemo(
-	// 	() => ({
-	// 		width: 80
-	// 	}),
-	// 	[]
-	// );
+		setShowLoading(true);
+		const [, params] = parseSearchText(searchParams, null);
+		const subParams = { analysisOptions: analysisOptions };
+		dispatch(getMatrix({ params, subParams })).then(() => {
+			setShowLoading(false);
+		});
+	}, [dispatch, searchParams, analysisOptions.matrixOptions]);
 
 	const columns = React.useMemo(() => {
 		function getColor(value) {
@@ -63,10 +47,9 @@ function MatrixAnalysis(props) {
 			ev.preventDefault();
 
 			const [, params] = parseSearchText(searchParams, null);
-			params.category = selectedCategory;
 			params.topic = props.column.id;
 			params.categoryValue = Object.values(props.row.values)[0];
-			const subParams = { analysisOptions: analysisOptions, matrix: { category: selectedCategory } };
+			const subParams = { analysisOptions: analysisOptions };
 			dispatch(getMatrixDialog({ params, subParams })).then(() => {
 				dispatch(openMatrixDialog());
 			});
@@ -75,8 +58,8 @@ function MatrixAnalysis(props) {
 		return matrix.entities
 			? [
 					{
-						Header: selectedCategory,
-						accessor: selectedCategory,
+						Header: category,
+						accessor: category,
 						className: 'text-14 text-left max-w-96 overflow-hidden',
 						sortable: true,
 						Cell: props => (
@@ -105,15 +88,15 @@ function MatrixAnalysis(props) {
 			  )
 			: [
 					{
-						Header: selectedCategory,
-						accessor: selectedCategory,
+						Header: category,
+						accessor: category,
 						className: 'text-11 text-center',
 						sortable: true
 					}
 			  ];
-	}, [dispatch, searchParams, matrix.max, matrix.entities, selectedCategory]);
+	}, [dispatch, searchParams, matrix, category]);
 
-	const groupBy = (obj, selectedCategory) => {
+	const groupBy = (obj, category) => {
 		const keys = Object.keys(obj);
 		const mapping = keys.reduce((acc, k) => {
 			obj[k].forEach(item => {
@@ -122,7 +105,7 @@ function MatrixAnalysis(props) {
 					if (!tracked) {
 						acc[yearKey] = {
 							// year: yearKey
-							[selectedCategory]: yearKey
+							[category]: yearKey
 						};
 					}
 					acc[yearKey][k] = (acc[yearKey][k] | 0) + item[yearKey];
@@ -133,9 +116,9 @@ function MatrixAnalysis(props) {
 		return Object.values(mapping);
 	};
 
-	const data = React.useMemo(() => (matrix.entities ? groupBy(matrix.entities, selectedCategory) : []), [
+	const data = React.useMemo(() => (matrix.entities ? groupBy(matrix.entities, category) : []), [
 		matrix.entities,
-		selectedCategory
+		category
 	]);
 
 	// const data = React.useMemo(
@@ -194,7 +177,7 @@ function MatrixAnalysis(props) {
 	// 			  // 		return container;
 	// 			  //   })
 	// 			  [],
-	// 	[matrix, selectedCategory]
+	// 	[matrix, category]
 	// );
 
 	const isEmpty = !!(data.length === 0);
@@ -219,7 +202,7 @@ function MatrixAnalysis(props) {
 					<FuseScrollbars className="h-40 px-12">
 						<div className="flex w-full ">
 							{/* {matrix.entities && (
-						<Chip label={selectedCategory} key={selectedCategory} size="small" className="mx-4" />
+						<Chip label={category} key={category} size="small" className="mx-4" />
 					)} */}
 							{matrix.entities &&
 								Object.entries(matrix.entities).map(([key]) => (
@@ -264,10 +247,10 @@ export default MatrixAnalysis;
 // <FormControl>
 // 	<Select
 // 		className="w-128 px-12"
-// 		value={selectedCategory}
+// 		value={category}
 // 		onChange={handleSelectedCategory}
 // 		// inputProps={{
-// 		// 	name: 'selectedCategory'
+// 		// 	name: 'category'
 // 		// }}
 // 		displayEmpty
 // 		// disableUnderline

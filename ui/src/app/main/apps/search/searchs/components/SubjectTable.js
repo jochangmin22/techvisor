@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MuiTable from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -11,9 +11,9 @@ import clsx from 'clsx';
 import _ from '@lodash';
 import { Line } from 'rc-progress';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import parseSearchText from '../../inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import { setSearchParams, setSearchSubmit, initialState } from '../../store/searchsSlice';
+import { getSubjectRelationVec, setSearchParams, setSearchSubmit, initialState } from '../../store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useUpdateEffect } from '@fuse/hooks';
 
@@ -25,10 +25,12 @@ const useStyles = makeStyles(theme => ({
 }));
 
 // TODO : 클릭한 핵심 키워드 (Chip)도 표시
-function SubjectTable(props) {
+function SubjectTable() {
 	const theme = useTheme();
 	const classes = useStyles();
 	const dispatch = useDispatch();
+	const entities = useSelector(({ searchApp }) => searchApp.searchs.subjectRelation.vec);
+	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const [form, setForm] = useState(searchParams || initialState.searchParams);
 
@@ -49,19 +51,12 @@ function SubjectTable(props) {
 				showMessage({
 					message: '이미 포함되어 있습니다.',
 					autoHideDuration: 2000
-					// anchorOrigin: {
-					// 	vertical: 'top',
-					// 	horizontal: 'right'
-					// }
 				})
 			);
 		}
 		setForm(_.set({ ...form }, name, array));
 
 		dispatch(setSearchSubmit(true));
-
-		// const [_params] = parseSearchText(form, null);
-		// dispatch(setSearchParams(_params));
 	}
 
 	useUpdateEffect(() => {
@@ -69,11 +64,23 @@ function SubjectTable(props) {
 		dispatch(setSearchParams(_params));
 	}, [form]);
 
-	if (!props) {
-		return <SpinLoading />;
-	}
+	useEffect(() => {}, [entities]);
 
-	return (
+	useEffect(() => {
+		const [, params] = parseSearchText(searchParams, null);
+		const subParams = {
+			analysisOptions: analysisOptions
+		};
+		dispatch(getSubjectRelationVec({ params, subParams }));
+	}, [dispatch, searchParams, analysisOptions.subjectRelationOptions.keywordvec]);
+
+	// if (!entities) {
+	// 	return <SpinLoading />;
+	// }
+
+	return !entities ? (
+		<SpinLoading />
+	) : (
 		<FuseScrollbars className="max-h-288 px-12 py-0 items-center">
 			<MuiTable stickyHeader size="small">
 				<TableHead>
@@ -85,7 +92,7 @@ function SubjectTable(props) {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{props.data.map(row => (
+					{entities.map(row => (
 						<TableRow className="cursor-pointer" key={row.label}>
 							{/*onClick={event => handleClick(row.label)}>*/}
 							<TableCell
