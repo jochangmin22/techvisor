@@ -10,7 +10,7 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import { selectMainTheme } from 'app/store/fuse/settingsSlice';
 import withReducer from 'app/store/withReducer';
 import reducer from './store';
-import parseSearchText from './inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import { setSearchNum, setSearchSubmit, setSearchParams, clearSearchText } from './store/searchsSlice';
 
 function SearchHeader(props) {

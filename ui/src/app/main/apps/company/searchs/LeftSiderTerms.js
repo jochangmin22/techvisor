@@ -24,7 +24,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import _ from '@lodash';
 import LeftConfig from './setLeftConfig';
-import parseSearchText from '../inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import * as Actions from '../store/actions';
 
 // FIXME : make date TextField to uncontrolled

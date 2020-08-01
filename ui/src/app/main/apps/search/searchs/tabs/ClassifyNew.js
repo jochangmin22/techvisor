@@ -7,7 +7,7 @@ import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useTheme } from '@material-ui/styles';
 import _ from '@lodash';
 import { company, government } from 'app/main/apps/lib/variables';
-import parseSearchText from '../../inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import { setSearchParams, setSearchSubmit, initialState } from '../../store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useUpdateEffect } from '@fuse/hooks';

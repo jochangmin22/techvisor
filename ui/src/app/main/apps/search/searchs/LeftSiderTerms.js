@@ -21,7 +21,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import _ from '@lodash';
 import LeftConfig from './setLeftConfig';
-import parseSearchText from '../inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import {
 	getSearchs,
 	getWordCloud,
@@ -284,9 +284,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		const params = {
 			params: mainParams,
 			subParams: {
-				analysisOptions: analysisOptions,
-				matrix: initialState.matrix,
-				subjectRelation: initialState.subjectRelation
+				analysisOptions: analysisOptions
 			}
 		};
 

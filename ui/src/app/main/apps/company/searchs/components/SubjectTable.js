@@ -12,7 +12,7 @@ import clsx from 'clsx';
 import _ from '@lodash';
 import { Line } from 'rc-progress';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import parseSearchText from '../../inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import LeftConfig from '../setLeftConfig';
 import * as Actions from '../../store/actions';
 import { showMessage } from 'app/store/fuse/messageSlice';

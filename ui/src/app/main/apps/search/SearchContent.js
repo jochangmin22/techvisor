@@ -10,7 +10,7 @@ import SubjectRelation from './searchs/SubjectRelation';
 import MatrixAnalysis from './searchs/MatrixAnalysis';
 import NewsAnalysis from './searchs/NewsAnalysis';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-import searchData from './inc/searchDataNew';
+import searchData from 'app/main/apps/lib/searchDataNew';
 import ContentTable from './searchs/ContentTable';
 
 function SearchContent(props) {

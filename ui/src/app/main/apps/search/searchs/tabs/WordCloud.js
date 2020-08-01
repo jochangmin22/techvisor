@@ -3,7 +3,7 @@ import Paper from '@material-ui/core/Paper';
 import 'echarts-wordcloud';
 import echarts from 'echarts';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import parseSearchText from '../../inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSearchSubmit, setSearchParams, getWordCloud, initialState } from '../../store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -29,7 +29,8 @@ function WordCloud() {
 			analysisOptions: analysisOptions
 		};
 		dispatch(getWordCloud({ params, subParams }));
-	}, [dispatch, searchParams, analysisOptions]);
+		// eslint-disable-next-line
+	}, [analysisOptions.wordCloudOptions]);
 
 	useEffect(() => {
 		if (entities) {

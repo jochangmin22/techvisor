@@ -4,7 +4,7 @@ import Chip from '@material-ui/core/Chip';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import parseSearchText from '../../inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import * as Actions from '../../store/actions';
 import SubjectContext from '../SubjectContext';
 
@@ -32,7 +32,7 @@ function SubjectChips(props) {
 		// handle both searchText and searchNum
 		if (searchNum !== '') {
 			setShowLoading(true);
-			dispatch(resetSubjectRelationVec(topic));
+			dispatch(resetSubjectRelationVec());
 			dispatch(updateSubjectRelation({ searchNum: searchNum, keywordvec: value })).then(() => {
 				setShowLoading(true);
 			});
@@ -41,7 +41,7 @@ function SubjectChips(props) {
 			const [, newApiParams] = parseSearchText(searchParams, null);
 			newApiParams.keywordvec = value; // updateSubjectRelation 에서만 이 line 추가
 
-			dispatch(resetSubjectRelationVec(topic));
+			dispatch(resetSubjectRelationVec());
 			dispatch(updateSubjectRelation(newApiParams)).then(() => {
 				setShowLoading(false);
 			});

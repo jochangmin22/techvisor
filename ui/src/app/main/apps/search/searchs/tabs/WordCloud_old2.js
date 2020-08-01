@@ -8,7 +8,7 @@ import Paper from '@material-ui/core/Paper';
 import { useSelector, useDispatch } from 'react-redux';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import parseSearchText from '../../inc/parseSearchText';
+import parseSearchText from 'app/main/apps/lib/parseSearchText';
 import LeftConfig from '../setLeftConfig';
 import * as Actions from '../../store/actions';
 import { showMessage } from 'app/store/fuse/messageSlice';

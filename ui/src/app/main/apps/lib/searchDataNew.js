@@ -7471,6 +7471,19 @@ const searchData = {
 			volume: '요약',
 			unit: '구문',
 			output: 50
+		},
+		subjectRelationOptions: {
+			keywordvec: '',
+			modelType: 'word2vec', // 'word2vec','fasttext','etc'
+			volume: '요약',
+			unit: '구문', // '구문', '워드',
+			output: 20
+		},
+		matrixOptions: {
+			category: '연도별', // '국가별', '연도별', '기술별', '기업별'
+			volume: '요약',
+			unit: '구문', // '구문', '워드',
+			output: 20
 		}
 	},
 	searchLoading: false,
@@ -8812,8 +8825,7 @@ const searchData = {
 				}
 			]
 		},
-		max: 38,
-		category: '연도별'
+		max: 38
 	},
 	matrixDialog: {
 		props: {
@@ -9127,8 +9139,7 @@ const searchData = {
 				label: '위반 차량',
 				value: 0.6241400241851807
 			}
-		],
-		modelType: 'word2vec'
+		]
 	}
 };
 export default searchData;
