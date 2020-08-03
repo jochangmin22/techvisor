@@ -36,15 +36,9 @@ def parse_wordcloud(request):
     except:
         unitNumber = 50        
 
-    # taged_docs = []
-    # nlp_raw = []
-    # nlp_raw = parse_searchs(request, mode="nlp")
-
     try:  # handle NoneType error
-        # taged_docs = nlp_raw.split()
         taged_docs = parse_nlp(request, analType="wordCloud")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
-        # tuple_taged_docs = tuple(taged_docs)  # list to tuble
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
             return HttpResponse( "[]", content_type="text/plain; charset=utf-8")
     except:
@@ -103,14 +97,7 @@ def parse_vec(request):
     # Redis {
     sub_context = cache.get(subKey)
 
-    # try:
-    #     if sub_context['modelType'] != _modelType:
-    #         _modelType = _modelType
-    # except:
-    #     _modelType = None
-
     try:
-        # if not _keywordvec and not _modelType and sub_context['vec']:        
         if sub_context['vec']:        
             return HttpResponse(json.dumps(sub_context['vec'], ensure_ascii=False))
     except:
@@ -119,12 +106,7 @@ def parse_vec(request):
     # Redis }
 
     #///////////////////////////////////
-    # taged_docs = []
-    # nlp_raw = []
-    # nlp_raw = parse_searchs(request, mode="nlp")
-
     try:  # handle NoneType error
-        # taged_docs = nlp_raw.split()
         taged_docs = parse_nlp(request, analType="subjectRelation")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         tuple_taged_docs = tuple(taged_docs)  # list to tuble
@@ -144,33 +126,6 @@ def parse_vec(request):
 
     modelType = _modelType or "word2vec"
 
-    # 연관 단어 추출
-    # 기존 방법 {        
-    # topic_num = 20  # 단어수 설정
-    # dictionary = corpora.Dictionary(taged_docs)
-    # corpus = [dictionary.doc2bow(text) for text in taged_docs]
-    # tfidf = models.TfidfModel(corpus, id2word=dictionary)
-    # corpus_tfidf = tfidf[corpus]
-    # corpus_tfidf_list = [doc for doc in corpus_tfidf]
-    # taged_docs = list(tuple_taged_docs)
-
-    # 워드투벡 수치 조정하기
-    # size- 키워드 간 분석벡터 수 조정, window-주변단어 앞 뒤 갯수
-    # min_count-코퍼스 내 빈도 ( )개 미만 단어는 분석 제외
-    # workers-CPU쿼드 코어 사용, iter-학습 횟수, sg-분석방법론 [0]CBOW / [1]Skip-Gram
-
-    # model = Word2Vec(
-    #     sentences=[taged_docs],
-    #     size=100,  # 500,
-    #     window=3,
-    #     min_count=5,  # 2,
-    #     workers=4,
-    #     iter=100,  # 300,
-    #     sg=1,
-    # )
-
-    # 기존 방법 }
-
     # 옵션 설정
     num_features = 300  # 문자 벡터 차원 수
     min_word_count = 3  # 최소 문자 수
@@ -178,7 +133,7 @@ def parse_vec(request):
     window_context = 5  # 문자열 창 크기
     # downsampling = 1e-3  # 문자 빈도수 Downsample
 
-    # taged_docs가 너무 작으면 1로 조정
+    ###### taged_docs가 너무 작으면 1로 조정
     min_word_count = min_word_count if len(taged_docs) > 30 else 1
 
     # word2vec 모델 학습
@@ -187,24 +142,18 @@ def parse_vec(request):
                         workers=num_workers,
                         size=num_features,
                         min_count=min_word_count,
-                        iter=100,
+                        # iter=100,
                         window=window_context, sg=0)
                    
-
-    # modelRaw = Word2Vec(sentences=[taged_docs],
-    #                             workers=num_workers,
-    #                             size=num_features,
-    #                             min_count=min_word_count,
-    #                             window=window_context, sg=0)
 
     # fasttext 모델 학습
     elif modelType == 'fasttext':
         model = FastText(sentences=[taged_docs],
-                            workers=num_workers,
-                            size=num_features,
-                            min_count=min_word_count,
-                            iter=100,
-                            window=window_context, sg=0)
+                        workers=num_workers,
+                        size=num_features,
+                        min_count=min_word_count,
+                        # iter=100,
+                        window=window_context, sg=0)
 
     # 기존에 처음 설정한 word2vec 모델 학습
     else:
@@ -217,13 +166,6 @@ def parse_vec(request):
                         window=3, sg=1
     )                                
 
-    # modelRaw_ft = FastText(newSentsRaw,
-    #                     workers=num_workers,
-    #                     size=num_features,
-    #                     min_count=min_word_count,
-    #                     window=window_context, sg=0)          
-
-    # wordtovec_result = model.wv.similarity('actor', 'actress') #similarity: 두 단어의 유사도를 계산
     try:
         wordtovec_result = model.wv.most_similar(keywordvec, topn=unitNumber)  # most_similar: 가장 유사한 단어를 출력
     except:

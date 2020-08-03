@@ -138,7 +138,7 @@ def parse_searchs(request, mode="begin"):
     raw_abstract = ''
     raw_claims = ''
     mtx_raw = []
-
+    entriesToRemove = ('등록사항', '발명의명칭(국문)', '발명의명칭(영문)', '출원인코드1', '출원인국가코드1', '발명자1', '발명자국가코드1', '등록일자', '공개일자')
     if row:
         # matrix list 생성
         mtx_raw = deepcopy(row)
@@ -152,21 +152,11 @@ def parse_searchs(request, mode="begin"):
             del row[i]["요약token"]
             del row[i]["전체항token"]
 
-            # matrix는 출원번호, 출원일자, 출원인1, ipc요약, 요약token만 사용
+            # matrix는 출원번호, 출원일자, 출원인1, ipc요약, 요약token, 전체항token만 사용
+            for k in entriesToRemove:
+                mtx_raw[i].pop(k, None)
+
             mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]
-            # del mtx_raw[i]["rows_count"]
-            del mtx_raw[i]["등록사항"]
-            del mtx_raw[i]["발명의명칭(국문)"]
-            del mtx_raw[i]["발명의명칭(영문)"]
-            del mtx_raw[i]["출원인코드1"]
-            del mtx_raw[i]["출원인국가코드1"]
-            del mtx_raw[i]["발명자1"]
-            del mtx_raw[i]["발명자국가코드1"]
-            del mtx_raw[i]["등록일자"]
-            del mtx_raw[i]["공개일자"]
-            del mtx_raw[i]["전체항token"]
-            # del mtx_raw[i][:4]
-            # del mtx_raw[i][6:12]
 
     else:  # 결과값 없을 때 처리
         row = []
@@ -192,14 +182,14 @@ def parse_searchs(request, mode="begin"):
         return mtx_raw          
  
 
-def parse_nlp(request, analType="wordCloud"):
+def parse_nlp(request, analType):
     """ 쿼리 실행 및 결과 저장
         analType : wordCloud, matrix, subjectRelation
     """
 
     _, subKey, _, subParams = get_redis_key(request)
 
-    #### Create a new SubKey to distinguish analysis type 
+    #### Create a new SubKey to distinguish each analysis type 
     newSubKey = subKey + '¶' + analType
 
     sub_context = cache.get(newSubKey)
@@ -215,18 +205,20 @@ def parse_nlp(request, analType="wordCloud"):
     nlp_raw = ''
     nlp_token = ''
 
-    if subParams['analysisOptions'][analType +'Options']['volume'] == '요약':
+    analType = analType + 'Options'
+
+    if subParams['analysisOptions'][analType]['volume'] == '요약':
         nlp_raw = raw_abstract
-    elif subParams['analysisOptions'][analType +'Options']['volume'] == '청구항':
+    elif subParams['analysisOptions'][analType]['volume'] == '청구항':
         nlp_raw = raw_claims        
 
     # tokenizer
-    if subParams['analysisOptions'][analType +'Options']['unit'] == '구문':
+    if subParams['analysisOptions'][analType]['unit'] == '구문':
         try:
             nlp_token = tokenizer_phrase(nlp_raw)
         except:
             nlp_token = []
-    elif subParams['analysisOptions'][analType +'Options']['unit'] == '워드':            
+    elif subParams['analysisOptions'][analType]['unit'] == '워드':            
         try:
             nlp_token = tokenizer(nlp_raw)
         except:

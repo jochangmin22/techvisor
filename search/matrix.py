@@ -55,6 +55,11 @@ def parse_matrix(request):
     elif subParams['analysisOptions']['matrixOptions']['category'] == '기업별':
         countField = '출원인1'
 
+    if subParams['analysisOptions']['matrixOptions']['volume'] == '요약':
+        targetField = '요약token'
+    elif subParams['analysisOptions']['matrixOptions']['volume'] == '청구항':
+        targetField = '전체항token'        
+
     # mtx_raw의 요약token에서 topic 20 (unitNumber) 이 포함되는 [출원일자, ipc요약, 출원인1] count 
     # (mtx_raw는 출원번호, 출원일자(년), 출원인1, ipc요약, 요약token 로 구성)
     mlist = []  # list of dic
@@ -62,7 +67,7 @@ def parse_matrix(request):
     matrixMax = 0
     try:
         for j in range(len(topic)):  # topic 20
-            temp = [d for d in mtx_raw if topic[j].replace("_"," ") in d['요약token']]
+            temp = [d for d in mtx_raw if topic[j].replace("_"," ") in d[targetField]]
             temp2 = Counter(c[countField] for c in temp)
             max_value = max(list(temp2.values()), default=0)
             matrixMax = max_value if matrixMax < max_value else matrixMax
@@ -109,14 +114,19 @@ def parse_matrix_dialog(request):
     elif subParams['analysisOptions']['matrixOptions']['category'] == '기업별':
         countField = '출원인1'
 
+    if subParams['analysisOptions']['matrixOptions']['volume'] == '요약':
+        targetField = '요약token'
+    elif subParams['analysisOptions']['matrixOptions']['volume'] == '청구항':
+        targetField = '전체항token'          
+
     if subParams['analysisOptions']['matrixOptions']['category'] == params['topic']:
        whereTopic = '' # prevent from click on the category itself
     else:    
         if ' ' in params['topic']:
             val = re.sub(re.escape(' '), ' <1> ', params['topic'], flags=re.IGNORECASE)
-            whereTopic = ' and 요약token @@ to_tsquery(\'(' + val + ')\')'
+            whereTopic = ' and '+ targetField +' @@ to_tsquery(\'(' + val + ')\')'
         else:
-            whereTopic = ' and 요약token like \'%' + params['topic'] + '%\'' 
+            whereTopic = ' and '+ targetField +' like \'%' + params['topic'] + '%\'' 
 
     whereAll = whereTopic + ' and ' + countField + '= \'' + params['categoryValue'] + '\''
 

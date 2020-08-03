@@ -246,6 +246,9 @@ const searchsSlice = createSlice({
 		[getWordCloud.fulfilled]: (state, action) => {
 			state.wordCloud = action.payload;
 		},
+		[getSubjectRelation.pending]: (state, action) => {
+			state.subjectRelation = { ...state.subjectRelation, vec: initialState.subjectRelation.vec };
+		},
 		[getSubjectRelation.fulfilled]: (state, action) => {
 			state.subjectRelation = action.payload;
 		},

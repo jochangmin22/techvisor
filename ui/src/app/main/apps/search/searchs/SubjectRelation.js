@@ -27,36 +27,12 @@ function SubjectRelation() {
 		const subParams = {
 			analysisOptions: analysisOptions
 		};
+
 		dispatch(getSubjectRelation({ params, subParams }));
 		// eslint-disable-next-line
 	}, [dispatch, searchParams, analysisOptions.subjectRelationOptions]);
 
 	useEffect(() => {}, [entities]);
-
-	// useEffect(() => {
-	// 	if (entities === null) {
-	// 		setData(null);
-	// 	} else {
-	// 		if (vec !== undefined) {
-	// 			setData(vec);
-	// 		}
-	// 	}
-	// }, [entities]);
-
-	// useEffect(() => {
-	// 	if (modelType) {
-	// 		setShowLoading(true);
-	// 		dispatch(updateSubjectRelationModelType(modelType));
-	// 		const [, params] = parseSearchText(searchParams, null);
-	// 		const subParams = {
-	// 			subjectRelation: { modelType: modelType, keywordvec: '' }
-	// 		};
-	// 		dispatch(resetSubjectRelationVec());
-	// 		dispatch(getSubjectRelation({ params, subParams })).then(() => {
-	// 			setShowLoading(false);
-	// 		});
-	// 	}
-	// }, [dispatch, searchParams, topic, modelType]);
 
 	const isEmpty = !!(!topic && !vec);
 
@@ -73,15 +49,6 @@ function SubjectRelation() {
 						msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 핵심키워드와 비교하여 유사 관계를 표시합니다."
 					/>
 					<SubjectRelatonMenu />
-					{/* <FormControl>
-						<Select className="w-128 px-12" value={modelType} onChange={handleModelType} displayEmpty>
-							{['word2vec', 'fasttext', 'btowin'].map(key => (
-								<MenuItem value={key} key={key}>
-									{key}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl> */}
 				</div>
 				{isEmpty ? (
 					<EmptyMsg
@@ -92,11 +59,7 @@ function SubjectRelation() {
 				) : (
 					<>
 						<SubjectChips topic={topic} />
-						{entities && entities.length !== 0 && !showLoading ? (
-							<SubjectTable data={entities.vec} />
-						) : (
-							<SpinLoading delay={20000} />
-						)}
+						{entities && entities.length !== 0 ? <SubjectTable /> : <SpinLoading delay={20000} />}
 					</>
 				)}
 			</Paper>

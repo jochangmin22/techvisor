@@ -75,13 +75,11 @@ function SubjectTable() {
 		// eslint-disable-next-line
 	}, [dispatch, searchParams, analysisOptions.subjectRelationOptions.keywordvec]);
 
-	// if (!entities) {
-	// 	return <SpinLoading />;
-	// }
+	if (entities && entities.length === 0) {
+		return <SpinLoading delay={20000} />;
+	}
 
-	return !entities ? (
-		<SpinLoading />
-	) : (
+	return (
 		<FuseScrollbars className="max-h-288 px-12 py-0 items-center">
 			<MuiTable stickyHeader size="small">
 				<TableHead>
