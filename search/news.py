@@ -8,7 +8,6 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 
 from .models import disclosure
-from .searchs import parse_searchs
 
 from .utils import get_redis_key
 

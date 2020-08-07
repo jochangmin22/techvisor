@@ -48,9 +48,19 @@ function SubjectChips(props) {
 	return topic ? (
 		<FuseScrollbars className="flex flex-no-overflow items-center overflow-x-auto">
 			<div className={clsx(topic && topic.length > 0 ? '' : 'hidden', classes.root)}>
-				{topic.map(value => (
-					<Chip label={value} key={value} size="small" onClick={() => handleClick(value)} />
-				))}
+				{topic.map(value => {
+					const selectedValue =
+						value === analysisOptions.subjectRelationOptions.keywordvec ? 'primary' : 'default';
+					return (
+						<Chip
+							label={value}
+							key={value}
+							size="small"
+							color={selectedValue}
+							onClick={() => handleClick(value)}
+						/>
+					);
+				})}
 			</div>
 		</FuseScrollbars>
 	) : (
