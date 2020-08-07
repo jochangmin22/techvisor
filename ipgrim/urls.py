@@ -40,6 +40,7 @@ from search.views import (
     get_related_company,
     get_matrix,
     get_matrix_dialog,
+    get_indicator
 )
 from company.views import (
     get_companies, get_companies_query, get_companies_num, get_company, get_stock, get_crawl, get_company_info)
@@ -68,6 +69,7 @@ urlpatterns = [
     re_path(r"^api/search-app/searchs/relatedcompany$", csrf_exempt(get_related_company)),
     re_path(r"^api/search-app/searchs/matrix$", get_matrix),
     re_path(r"^api/search-app/searchs/matrixdialog$", get_matrix_dialog),
+    re_path(r"^api/search-app/searchs/indicator$", get_indicator),
     # path("api/search-app/thsrs/<str:keyword>/", get_thsrs),
     # path("api/search-app/applicant", get_applicant),
     # path("api/search-app/applicant/<str:keyword>/", get_applicant),

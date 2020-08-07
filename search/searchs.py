@@ -35,7 +35,7 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 def parse_searchs(request, mode="begin"):
     """ 쿼리 실행 및 결과 저장
-        mode : begin, nlp, query, matrix
+        mode : begin, nlp, query, matrix, indicator
     """
 
     mainKey, _, params, _ = get_redis_key(request)
@@ -60,6 +60,13 @@ def parse_searchs(request, mode="begin"):
         try:
             if context['mtx_raw']:
                 return context['mtx_raw']
+        except:
+            pass
+
+    elif mode == "indicator":
+        try:
+            if context['raw']:
+                return context['raw']
         except:
             pass
 
@@ -180,6 +187,8 @@ def parse_searchs(request, mode="begin"):
         return raw_abstract, raw_claims
     elif mode == "matrix":
         return mtx_raw          
+    elif mode == "indicator":
+        return row          
  
 
 def parse_nlp(request, analType):

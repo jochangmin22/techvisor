@@ -5,22 +5,42 @@ import Typography from '@material-ui/core/Typography';
 import debounce from 'lodash/debounce';
 import echarts from 'echarts';
 import 'echarts/theme/royal';
-// import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import _ from '@lodash';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import { useTheme } from '@material-ui/core';
+
+function calculateCnt(arr) {
+	const l = _.chain(arr)
+		.orderBy(['cnt', 'cpp', 'pfs', 'pii', 'ts'], ['desc', 'desc', 'desc', 'desc', 'desc'])
+		.slice(0, 10)
+		.defaultsDeep({ name: [], cnt: [], cpp: [], pfs: [], pii: [], ts: [] })
+		.value();
+
+	// const name = l.map(({ name }) => [name]);
+	const res = l.map(({ cpp, pfs, cnt, name }) => [parseFloat(cpp), parseFloat(pfs), cnt, name, name]);
+	return res;
+}
 
 function CrossAnalysisB(props) {
+	const theme = useTheme();
 	const chartRef = useRef(null);
 	const [echart, setEchart] = useState(null);
 
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.indicator);
 
-	// const data = useMemo(() => entities, []);
+	const [data, setData] = useState([]);
 
 	useEffect(() => {
-		if (entities) {
-			drawChart();
+		if (entities && entities.length > 0) {
+			setData(calculateCnt(entities));
 		}
 		// eslint-disable-next-line
-	}, [entities]);
+	}, [props.searchText, entities]);
+
+	useEffect(() => {
+		drawChart();
+		// eslint-disable-next-line
+	}, [data]);
 
 	const drawChart = () => {
 		// if (!entities || entities.length === 0) return;
@@ -30,33 +50,45 @@ function CrossAnalysisB(props) {
 			setEchart(null);
 		}
 
-		const myChart = echarts.init(chartRef.current, 'royal');
+		const myChart = echarts.init(chartRef.current, 'blue');
 		setEchart(myChart);
 
-		const option = {
+		let option = {
+			color: [
+				theme.palette.primary.dark,
+				theme.palette.primary.main,
+				theme.palette.primary.light,
+				theme.palette.secondary.dark,
+				theme.palette.secondary.main,
+				theme.palette.secondary.light
+			],
 			grid: {
 				left: '3%',
-				right: '25%',
+				right: '35%',
 				bottom: '3%',
 				containLabel: true
 			},
 			tooltip: {
-				// trigger: 'axis',
-				showDelay: 0,
-				formatter: function (params) {
-					if (params.value.length > 1) {
-						return params.seriesName + ' :<br/>CPP ' + params.value[0] + ' PFS ' + params.value[1];
-					} else {
-						return params.seriesName + ' :<br/>' + params.name + ' : ' + params.value + ' ';
-					}
-				},
-				axisPointer: {
-					show: true,
-					type: 'cross',
-					lineStyle: {
-						type: 'dashed',
-						width: 1
-					}
+				padding: 10,
+				backgroundColor: 'rgba(50,50,50,0.7)',
+				borderColor: '#777',
+				borderWidth: 1,
+				formatter: function (obj) {
+					var value = obj.value;
+					return (
+						'<div style="border-bottom: 1px solid rgba(255,255,255,.3); font-size: 12px;padding-bottom: 7px;margin-bottom: 7px">' +
+						value[3] +
+						' (' +
+						value[2] +
+						')' +
+						'</div>' +
+						' CPP : ' +
+						value[0] +
+						'<br>' +
+						' PFS : ' +
+						value[1] +
+						'<br>'
+					);
 				}
 			},
 			toolbox: {
@@ -86,269 +118,141 @@ function CrossAnalysisB(props) {
 				right: 10,
 				top: '15%',
 				orient: 'vertical',
-				data: ['KR', 'US', 'NZ', 'CA', 'FR', 'GB', 'NL', 'CH', 'JP', 'CN', 'DE', 'IL']
+				data: data.map(a => a[3])
 			},
-			xAxis: [
-				{
-					type: 'value',
-					name: 'PFS',
-					scale: true,
-					axisLabel: {
-						formatter: '{value}'
-					},
-					splitLine: {
-						show: false
+			xAxis: {
+				type: 'value',
+				name: 'CPP',
+				splitLine: {
+					lineStyle: {
+						type: 'dashed'
 					}
 				}
-			],
-			yAxis: [
-				{
-					type: 'value',
-					name: 'CPP',
-					scale: true,
-					axisLabel: {
-						formatter: '{value}'
-					},
-					splitLine: {
-						show: false
+				// splitNumber: 20
+			},
+			yAxis: {
+				type: 'value',
+				name: 'PFS',
+				splitLine: {
+					lineStyle: {
+						type: 'dashed'
 					}
 				}
-			],
+			},
 			series: [
-				{
-					name: '평균CPP',
-					type: 'scatter',
-					data: [[3, 1.1]],
-					markArea: {
-						silent: true,
-						itemStyle: {
-							color: 'transparent',
-							borderWidth: 1,
-							borderType: 'dashed'
-						},
-						data: [
-							[
-								{
-									name: '평균 피인용비(CPP)',
-									xAxis: 'min',
-									yAxis: 'min'
-								},
-								{
-									xAxis: 'max',
-									yAxis: 'max'
-								}
-							]
-						]
-					},
-					// markPoint: {
-					// 	data: [
-					// 		{ type: 'max', name: '最大值' },
-					// 		{ type: 'min', name: '最小值' }
-					// 	]
-					// },
-					markLine: {
-						lineStyle: {
-							type: 'solid'
-						},
-						data: [{ type: 'average', name: 'CPP' }, { xAxis: 160 }]
-					}
-				},
-				{
-					name: '평균 Family size',
-					type: 'scatter',
-					data: [[6.1, 5]],
-					markArea: {
-						silent: true,
-						itemStyle: {
-							color: 'transparent',
-							borderWidth: 1,
-							borderType: 'dashed'
-						},
-						data: [
-							[
-								{
-									xAxis: 'min',
-									yAxis: 'min'
-								},
-								{
-									name: '평균 Family size',
-									xAxis: 'min',
-									yAxis: 'max'
-								}
-							]
-						]
-					},
-					markPoint: {
-						data: [
-							{ type: 'max', name: 'PFS' },
-							{ type: 'min', name: 'CPP' }
-						]
-					},
-					markLine: {
-						lineStyle: {
-							type: 'dashed'
-						},
-						data: [{ type: 'average', name: 'PFS' }, { xAxis: 'average' }]
-					}
-				},
-				{
-					name: 'KR',
-					type: 'scatter',
-					data: [[3, 2]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'US',
-					type: 'scatter',
-					data: [[5, 2]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'NZ',
-					type: 'scatter',
-					data: [[3.5, 2.3]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'JP',
-					type: 'scatter',
-					data: [[4.2, 0.9]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'IL',
-					type: 'scatter',
-					data: [[5.8, 1.2]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'CH',
-					type: 'scatter',
-					data: [[6.1, 0.4]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'CN',
-					type: 'scatter',
-					data: [[6, 0]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'CA',
-					type: 'scatter',
-					data: [[6.2, 4]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'FR',
-					type: 'scatter',
-					data: [[7, 2.6]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'GB',
-					type: 'scatter',
-					data: [[10, 1.8]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'DE',
-					type: 'scatter',
-					data: [[9.5, 0.2]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				},
-				{
-					name: 'NL',
-					type: 'scatter',
-					data: [[14.5, 2.4]],
-					label: {
-						normal: {
-							show: true,
-							position: 'top',
-							distance: 4,
-							formatter: '{a}'
-						}
-					}
-				}
+				// {
+				// 	name: '평균CPP',
+				// 	type: 'scatter',
+				// 	data: [[3, 1.1]],
+				// 	markArea: {
+				// 		silent: true,
+				// 		itemStyle: {
+				// 			color: 'transparent',
+				// 			borderWidth: 1,
+				// 			borderType: 'dashed'
+				// 		},
+				// 		data: [
+				// 			[
+				// 				{
+				// 					name: '평균 피인용비(CPP)',
+				// 					xAxis: 'min',
+				// 					yAxis: 'min'
+				// 				},
+				// 				{
+				// 					xAxis: 'max',
+				// 					yAxis: 'max'
+				// 				}
+				// 			]
+				// 		]
+				// 	},
+				// 	// markPoint: {
+				// 	// 	data: [
+				// 	// 		{ type: 'max', name: '最大值' },
+				// 	// 		{ type: 'min', name: '最小值' }
+				// 	// 	]
+				// 	// },
+				// 	markLine: {
+				// 		lineStyle: {
+				// 			type: 'solid'
+				// 		},
+				// 		data: [{ type: 'average', name: 'CPP' }, { xAxis: 160 }]
+				// 	}
+				// },
+				// {
+				// 	name: '평균 Family size',
+				// 	type: 'scatter',
+				// 	data: [[6.1, 5]],
+				// 	markArea: {
+				// 		silent: true,
+				// 		itemStyle: {
+				// 			color: 'transparent',
+				// 			borderWidth: 1,
+				// 			borderType: 'dashed'
+				// 		},
+				// 		data: [
+				// 			[
+				// 				{
+				// 					xAxis: 'min',
+				// 					yAxis: 'min'
+				// 				},
+				// 				{
+				// 					name: '평균 Family size',
+				// 					xAxis: 'min',
+				// 					yAxis: 'max'
+				// 				}
+				// 			]
+				// 		]
+				// 	},
+				// 	markPoint: {
+				// 		data: [
+				// 			{ type: 'max', name: 'PFS' },
+				// 			{ type: 'min', name: 'CPP' }
+				// 		]
+				// 	},
+				// 	markLine: {
+				// 		lineStyle: {
+				// 			type: 'dashed'
+				// 		},
+				// 		data: [{ type: 'average', name: 'PFS' }, { xAxis: 'average' }]
+				// 	}
+				// },
 			]
 		};
+		echarts.util.each(data, function (val, idx) {
+			option.series.push({
+				name: val[3],
+				data: [val],
+				type: 'scatter',
+				symbolSize: Math.sqrt(val[2]) * 10,
+				emphasis: {
+					label: {
+						show: true,
+						formatter: function (param) {
+							return param.data[3];
+						},
+						position: 'top'
+					}
+				},
+				itemStyle: {
+					shadowBlur: 10,
+					opacity: 0.7,
+					// shadowColor: 'rgba(120, 36, 50, 0.5)',
+					shadowOffsetX: 2,
+					shadowOffsetY: 2
+					// color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [
+					// 	{
+					// 		offset: 0,
+					// 		color: 'rgb(251, 118, 123)'
+					// 	},
+					// 	{
+					// 		offset: 1,
+					// 		color: 'rgb(204, 46, 72)'
+					// 	}
+					// ])
+				}
+			});
+		});
+
 		myChart.setOption(option);
 	};
 
@@ -365,9 +269,9 @@ function CrossAnalysisB(props) {
 		};
 	}, [handleResize]);
 
-	// if (!entities || entities.length === 0) {
-	// 	return <SpinLoading />;
-	// }
+	if (!entities || entities.length === 0) {
+		return <SpinLoading />;
+	}
 
 	return (
 		<Paper className="w-full h-full shadow-none">

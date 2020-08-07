@@ -69,12 +69,12 @@ export const getSubjectRelationVec = createAsyncThunk(
 	}
 );
 
-// export const updateSubjectRelation = createAsyncThunk(NAME + 'updateSubjectRelation', async (params, subParams) => {
-// 	const response = await axios.get(URL + 'vec', { params: params, subParams: subParams });
-// 	const data = await response.data;
+export const getIndicator = createAsyncThunk(NAME + 'getIndicator', async (params, subParams) => {
+	const response = await axios.get(URL + 'indicator', { params: params, subParams: subParams });
+	const data = await response.data;
 
-// 	return data;
-// });
+	return data;
+});
 
 const searchsAdapter = createEntityAdapter({});
 
@@ -161,11 +161,12 @@ const searchsSlice = createSlice({
 			state.subjectRelation = subjectRelation;
 		},
 		clearSearchs: (state, action) => {
-			const { entities, wordCloud, subjectRelation } = initialState;
+			const { entities, wordCloud, subjectRelation, indicator } = initialState;
 
 			state.entities = entities;
 			state.wordCloud = wordCloud;
 			state.subjectRelation = subjectRelation;
+			state.indicator = indicator;
 		},
 		clearSearchText: (state, action) => initialState,
 
@@ -208,16 +209,8 @@ const searchsSlice = createSlice({
 		updateCols: (state, action) => {
 			state.cols = action.payload;
 		},
-		// getSubjectRelationVec: (state, action) => {
-		// 	const data = dispatch(getSubjectRelation(state));
-		// 	state.subjectRelation.vec = data.vec;
-		// },
 		resetSubjectRelationVec: (state, action) => {
-			// state.subjectRelation = { ...state.subjectRelation, vec: [], topic: action.payload };
 			state.subjectRelation = { ...initialState.subjectRelation, vec: initialState.subjectRelation.vec };
-		},
-		updateSubjectRelationModelType: (state, action) => {
-			state.analysisOptions.subjectRelationOptions = action.payload;
 		}
 	},
 	extraReducers: {
@@ -252,14 +245,14 @@ const searchsSlice = createSlice({
 		[getSubjectRelation.fulfilled]: (state, action) => {
 			state.subjectRelation = action.payload;
 		},
-		// [updateSubjectRelation.pending]: (state, action) => {
-		// 	resetSubjectRelationVec();
-		// },
 		[getSubjectRelationVec.pending]: (state, action) => {
 			state.subjectRelation = { ...state.subjectRelation, vec: initialState.subjectRelation.vec };
 		},
 		[getSubjectRelationVec.fulfilled]: (state, action) => {
 			state.subjectRelation = { ...state.subjectRelation, vec: action.payload.vec };
+		},
+		[getIndicator.fulfilled]: (state, action) => {
+			state.indicator = action.payload;
 		}
 	}
 });
@@ -281,9 +274,7 @@ export const {
 	openMatrixDialog,
 	closeMatrixDialog,
 	updateCols,
-	// updateSubjectRelationVec,
-	resetSubjectRelationVec,
-	updateSubjectRelationModelType
+	resetSubjectRelationVec
 } = searchsSlice.actions;
 
 export default searchsSlice.reducer;
