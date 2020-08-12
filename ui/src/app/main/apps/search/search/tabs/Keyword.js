@@ -4,7 +4,7 @@ import Chip from '@material-ui/core/Chip';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import WordCloud from './WordCloud';
 

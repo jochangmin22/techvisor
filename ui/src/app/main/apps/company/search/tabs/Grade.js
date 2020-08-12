@@ -7,7 +7,7 @@ import Paper from '@material-ui/core/Paper';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
-import { withStyles, makeStyles } from '@material-ui/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
 	root: {

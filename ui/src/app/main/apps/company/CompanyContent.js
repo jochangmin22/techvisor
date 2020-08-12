@@ -4,13 +4,9 @@ import Typography from '@material-ui/core/Typography';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { setMockData } from './store/searchsSlice';
 // import { authRoles } from "app/auth";
-import ContentGrid from './searchs/ContentGrid';
-// import ContentVisual from './searchs/ContentVisual';
-// import SubjectRelation from './searchs/SubjectRelation';
-// import MatrixAnalysis from './searchs/MatrixAnalysis';
-// import NewsRelation from './searchs/NewsRelation';
 import EmptyMsg from './searchs/components/EmptyMsg';
-import searchData from './inc/searchData';
+import searchData from 'app/main/apps/lib/searchDataNew';
+import ContentTable from './searchs/ContentTable';
 
 function CompanyContent(props) {
 	const dispatch = useDispatch();
@@ -46,20 +42,8 @@ function CompanyContent(props) {
 				{!searchText ? (
 					<EmptyMsg icon="chat" msg="검색결과" />
 				) : (
-					<div className="flex flex-wrap w-full h-384 items-start justify-center">
-						{/* <div className="flex flex-col w-full h-full md:w-1/2 p-16">
-							<SubjectRelation searchText={searchText} searchNum={searchNum} />
-						</div>
-						<div className="flex flex-col w-full h-full md:w-1/2 p-16 pl-0">
-							<ContentVisual searchText={searchText} inventor={inventor} assignee={assignee} />
-						</div>
-						<div className="flex flex-col w-full h-full md:w-1/2 p-16 pt-0">
-							<MatrixAnalysis searchText={searchText} searchNum={searchNum} />
-						</div>
-						<div className="flex flex-col w-full h-full md:w-1/2 p-16 pt-0 pl-0">
-							<NewsRelation searchText={searchText} />
-						</div> */}
-						<ContentGrid />
+					<div className="flex flex-wrap w-full h-460 items-start justify-center">
+						<ContentTable />
 					</div>
 				)}
 			</FuseAnimateGroup>

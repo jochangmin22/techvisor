@@ -4,7 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Collapse from '@material-ui/core/Collapse';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 // import Highlighter from 'react-highlight-words';
 import SelectionHighlighter from 'react-highlight-selection';

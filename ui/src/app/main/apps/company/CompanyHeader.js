@@ -11,7 +11,7 @@ import { selectMainTheme } from 'app/store/fuse/settingsSlice';
 import withReducer from 'app/store/withReducer';
 import reducer from './store';
 import parseSearchText from 'app/main/apps/lib/parseSearchText';
-import { setSearchNum, setSearchSubmit, setSearchParams, clearSearchText } from './store/searchsSlice';
+import { clearSearchText, setSearchParams, setSearchNum, setSearchSubmit } from './store/searchsSlice';
 
 function SearchHeader(props) {
 	const dispatch = useDispatch();
@@ -51,50 +51,49 @@ function SearchHeader(props) {
 		const match = inputSearchText.match(numberRegexp);
 		if (match) {
 			// number search ?
+			dispatch(clearSearchText());
 			dispatch(setSearchNum(inputSearchText));
 			dispatch(setSearchSubmit(true));
 		} else {
-			const [newParams] = parseSearchText(null, inputSearchText); // not use first args searchParams (null)
-			newParams['searchNum'] = ''; // prevent uncontrolled error
-			dispatch(setSearchParams(newParams));
+			const [_params] = parseSearchText(null, inputSearchText); // Note that the first args of parseSearchText is null
+			_params['searchNum'] = ''; // prevent uncontrolled error
+			dispatch(setSearchParams(_params));
 			dispatch(setSearchSubmit(true));
 		}
 	}
 
 	return (
 		<ThemeProvider theme={mainTheme}>
-			<div className="flex flex-1">
-				<Paper className="flex items-center w-full h-48 sm:h-56 p-16 pl-4 md:pl-16 rounded-8 " elevation={1}>
-					<Hidden lgUp>
-						<IconButton
-							onClick={ev => props.pageLayout.current.toggleLeftSidebar()}
-							aria-label="open left sidebar"
-						>
-							<Icon>menu</Icon>
-						</IconButton>
-					</Hidden>
+			<Paper className="flex items-center w-full h-48 sm:h-56 p-16 pl-4 md:pl-16 rounded-8 " elevation={1}>
+				<Hidden lgUp>
+					<IconButton
+						onClick={ev => props.pageLayout.current.toggleLeftSidebar()}
+						aria-label="open left sidebar"
+					>
+						<Icon>menu</Icon>
+					</IconButton>
+				</Hidden>
 
-					{searchLoading ? <CircularProgress size={24} /> : <Icon color="action">search</Icon>}
-					<form className="flex items-center w-full h-full" onSubmit={onSearchSubmit}>
-						<Input
-							name="searchText"
-							placeholder="Search"
-							className="pl-16"
-							disableUnderline
-							autoComplete="off"
-							fullWidth
-							value={inputSearchText}
-							onChange={handleChange}
-							inputProps={{
-								'aria-label': 'Search'
-							}}
-						/>
-						<IconButton onClick={() => dispatch(clearSearchText())} className="mx-8">
-							<Icon>close</Icon>
-						</IconButton>
-					</form>
-				</Paper>
-			</div>
+				{searchLoading ? <CircularProgress size={24} /> : <Icon color="action">search</Icon>}
+				<form className="flex items-center w-full h-full" onSubmit={onSearchSubmit}>
+					<Input
+						name="searchText"
+						placeholder="Search"
+						className="pl-16"
+						disableUnderline
+						autoComplete="off"
+						fullWidth
+						value={inputSearchText}
+						onChange={handleChange}
+						inputProps={{
+							'aria-label': 'Search'
+						}}
+					/>
+					<IconButton onClick={() => dispatch(clearSearchText())} className="mx-8">
+						<Icon>close</Icon>
+					</IconButton>
+				</form>
+			</Paper>
 		</ThemeProvider>
 	);
 }

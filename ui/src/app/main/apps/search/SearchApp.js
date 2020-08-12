@@ -3,17 +3,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import withReducer from 'app/store/withReducer';
 import reducer from './store';
-
 import SearchHeader from './SearchHeader';
-// import SearchToolbar from "./SearchToolbar";
 import SearchAppSidebarHeader from './SearchAppSidebarHeader';
 import SearchAppSidebarContent from './SearchAppSidebarContent';
 import SearchContent from './SearchContent';
-// import DrawerMain from "./searchs/DrawerMain";
-// import PersistentDrawerLeft from "./SearchContent";
-// import ThsrsMenu from "./dropdown-menu/thsrs/ThsrsMenu";
-// import OptionsMenu from "./dropdown-menu/options/OptionsMenu";
-// import ApplicantMenu from './dropdown-menu/applicant/ApplicantMenu';
 
 const drawerWidth = 320;
 const headerHeight = 168;
@@ -47,29 +40,12 @@ const useStyles = makeStyles(theme => ({
 		height: headerHeight,
 		minHeight: headerHeight
 	}
-	// layoutRoot: {},
-	// layoutHeader: {
-	//     height: 79,
-	//     minHeight: 79,
-	//     backgroundColor: "#FFFFFF",
-	//     background: "rgba(0, 0, 0, 0.45)",
-	//     [theme.breakpoints.down("md")]: {
-	//         height: 200,
-	//         minHeight: 200
-	//     }
-	// }
 }));
 
 function SearchApp(props) {
 	const classes = useStyles();
 	const pageLayout = useRef(null);
 	const [isLeftSidebar] = useState(true);
-
-	// useEffect(() => {
-	//     dispatch(getThsrs(props.match.params));
-	// }, [dispatch, props.match.params]);
-
-	// useEffect(() => {}, [isLeftSidebar]);
 
 	return isLeftSidebar ? (
 		<FusePageCarded
@@ -84,26 +60,9 @@ function SearchApp(props) {
 				sidebarHeader: classes.sidebarHeader
 			}}
 			header={<SearchHeader pageLayout={pageLayout} />}
-			content={
-				<>
-					{/* <ThsrsMenu /> */}
-					{/* <ApplicantMenu /> */}
-					{/* <OptionsMenu /> */}
-					{/* <ContentToolbar pageLayout={pageLayout} /> */}
-					{/* <PersistentDrawerLeft pageLayout={pageLayout} /> */}
-					<SearchContent props={props} />
-					{/* <DrawerMain props={props} /> */}
-					{/* <SearchContent props={props} /> */}
-				</>
-			}
+			content={<SearchContent props={props} />}
 			leftSidebarHeader={<SearchAppSidebarHeader />}
 			leftSidebarContent={<SearchAppSidebarContent pageLayout={pageLayout} />}
-			// header={<SearchHeader pageLayout={pageLayout} />}
-			// contentToolbar={<ContentToolbar pageLayout={pageLayout} />}
-			// contentToolbar={<SearchToolbar props={props} />}
-
-			// leftSidebarContent={<LeftQuickPanel />}
-			// sidebarInner
 			innerScroll
 			ref={pageLayout}
 		/>
@@ -118,12 +77,7 @@ function SearchApp(props) {
 				sidebarHeader: classes.sidebarHeader
 			}}
 			header={<SearchHeader pageLayout={pageLayout} />}
-			content={
-				<>
-					{/* <ApplicantMenu /> */}
-					<SearchContent props={props} />
-				</>
-			}
+			content={<SearchContent props={props} />}
 			ref={pageLayout}
 			innerScroll
 		/>

@@ -4,7 +4,7 @@ import { CircularProgress, Typography, Paper, Button } from '@material-ui/core';
 import { HorizontalBar, Doughnut } from 'react-chartjs-2';
 // import randomColor from "randomcolor";
 import _ from 'lodash';
-import { useTheme } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
 
 const nationality = {
 	'01': '서울',

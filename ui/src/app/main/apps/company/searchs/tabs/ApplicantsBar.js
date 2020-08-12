@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { CircularProgress, Typography, Paper, Button } from '@material-ui/core';
-import { useTheme } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
 import { HorizontalBar, Doughnut } from 'react-chartjs-2';
 // import randomColor from "randomcolor";
 import _ from 'lodash';

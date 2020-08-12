@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableRow, Paper, AppBar, Toolbar } from '@material-ui/core';
-import { withStyles, makeStyles } from '@material-ui/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import Highlighter from 'react-highlight-words';
 

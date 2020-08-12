@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
-import { useTheme } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';

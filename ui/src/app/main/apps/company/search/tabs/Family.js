@@ -8,7 +8,7 @@ import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 // import _ from "lodash";
 import clsx from 'clsx';
 
-import { withStyles, makeStyles } from '@material-ui/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
 	root: {

@@ -7,7 +7,7 @@ import { HorizontalBar, Doughnut } from 'react-chartjs-2';
 import 'chartjs-plugin-datalabels';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import _ from 'lodash';
-import { useTheme } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
 
 const nationality = {
 	'01': '서울',

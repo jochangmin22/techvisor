@@ -3,7 +3,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { useSelector, useDispatch } from 'react-redux';
 import { getApplicant, getApplicantTrend } from '../../store/searchSlice';

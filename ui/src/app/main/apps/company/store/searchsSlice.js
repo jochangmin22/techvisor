@@ -4,93 +4,73 @@ import axios from 'axios';
 const URL = `${process.env.REACT_APP_API_URL}/api/company-app/searchs/`;
 const NAME = 'companyApp/search/';
 
-export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async params => {
-	const response = await axios.get(URL, {
-		params: params
-	});
-	const data = await response.data;
-
-	// dispatch(setClickedSearchId(routeParams.appNo));
-
-	return data;
-});
-
-export const getSearchsNum = createAsyncThunk(NAME + 'getSearchsNum', async params => {
-	const response = await axios.get(URL + 'searchsnum', {
-		params: params
-	});
+export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async (params, subParams) => {
+	const response = await axios.get(URL, { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getNews = createAsyncThunk(NAME + 'getNews', async params => {
-	const response = await axios.get(URL + 'news', {
-		params: params
-	});
+export const getNews = createAsyncThunk(NAME + 'getNews', async (params, subParams) => {
+	const response = await axios.get(URL + 'news', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async params => {
-	const response = await axios.get(URL + 'newssa', {
-		params: params
-	});
+export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async (params, subParams) => {
+	const response = await axios.get(URL + 'newssa', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async params => {
-	const response = await axios.get(URL + 'relatedcompany', {
-		params: params
-	});
+export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async (params, subParams) => {
+	const response = await axios.get(URL + 'relatedcompany', { params: params, subParams: subParams });
+	const data = await response.data;
+
+	return data;
+});
+export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async (params, subParams) => {
+	const response = await axios.get(URL + 'matrix', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async params => {
-	const response = await axios.get(URL + 'matrix', {
-		params: params
-	});
+export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async (params, subParams) => {
+	const response = await axios.get(URL + 'matrixdialog', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async params => {
-	const response = await axios.get(URL + 'matrixdialog', {
-		params: params
-	});
+export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async (params, subParams) => {
+	const response = await axios.get(URL + 'wordcloud', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async params => {
-	const response = await axios.get(URL + 'wordcloud', {
-		params: params
-	});
+export const getSubjectRelation = createAsyncThunk(NAME + 'getSubjectRelation', async (params, subParams) => {
+	const response = await axios.get(URL + 'vec', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getSubjectRelation = createAsyncThunk(NAME + 'getSubjectRelation', async params => {
-	const response = await axios.get(URL + 'vec', {
-		params: params
-	});
-	const data = await response.data;
+export const getSubjectRelationVec = createAsyncThunk(
+	NAME + 'getSubjectRelationVec',
+	async (params, subParams, { dispatch }) => {
+		const response = dispatch(getSubjectRelation({ params, subParams }));
+		const data = response.data;
 
-	return data;
-});
+		return data;
+	}
+);
 
-export const updateSubjectRelation = createAsyncThunk(NAME + 'updateSubjectRelation', async params => {
-	const response = await axios.get(URL + 'vec', {
-		params: params
-	});
+export const getIndicator = createAsyncThunk(NAME + 'getIndicator', async (params, subParams) => {
+	const response = await axios.get(URL + 'indicator', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -98,13 +78,16 @@ export const updateSubjectRelation = createAsyncThunk(NAME + 'updateSubjectRelat
 
 const searchsAdapter = createEntityAdapter({});
 
-const initialState = {
+export const { selectAll: selectSearchs, selectById: selectSearchById } = searchsAdapter.getSelectors(
+	state => state.searchApp.searchs.entities
+);
+export const initialState = {
 	entities: [],
 	searchParams: {
 		searchText: '',
 		searchNum: '',
 		terms: [],
-		searchVolume: '', // '','SUMA', 'ALL'
+		searchVolume: 'SUM', // 'SUM','SUMA', 'ALL'
 		dateType: '',
 		startDate: '',
 		endDate: '',
@@ -120,6 +103,19 @@ const initialState = {
 			volume: '요약',
 			unit: '구문', // '구문', '워드',
 			output: 50
+		},
+		subjectRelationOptions: {
+			keywordvec: '',
+			modelType: 'word2vec', // 'word2vec','fasttext','etc'
+			volume: '요약',
+			unit: '구문', // '구문', '워드',
+			output: 20
+		},
+		matrixOptions: {
+			category: '연도별', // '국가별', '연도별', '기술별', '기업별'
+			volume: '요약',
+			unit: '구문', // '구문', '워드',
+			output: 20
 		}
 	},
 	searchLoading: null,
@@ -134,7 +130,7 @@ const initialState = {
 	relatedCompany: [],
 	matrix: {
 		entities: [],
-		category: '연도별', // ['국가별', '연도별', '기술별', '기업별'],
+		// category: '연도별', // ['국가별', '연도별', '기술별', '기업별'],
 		max: 0
 	},
 	matrixDialog: {
@@ -146,8 +142,7 @@ const initialState = {
 	wordCloud: [],
 	subjectRelation: {
 		topic: [],
-		vec: [],
-		modelType: 'word2vec' // ['word2vec','fasttext']
+		vec: []
 	}
 };
 
@@ -156,20 +151,24 @@ const searchsSlice = createSlice({
 	initialState: searchsAdapter.getInitialState(initialState),
 	reducers: {
 		setMockData: (state, action) => {
-			state.entities = action.entities;
-			state.searchParams = action.searchParams;
-			state.matrix = action.matrix;
-			state.wordCloud = action.wordCloud;
-			state.subjectRelation = action.subjectRelation;
+			const { entities, searchParams, matrix, wordCloud, subjectRelation } = action.payload;
+
+			state.entities = entities;
+			state.searchParams = searchParams;
+			state.matrix = matrix;
+			state.wordCloud = wordCloud;
+			state.subjectRelation = subjectRelation;
 		},
 		clearSearchs: (state, action) => {
-			state.entities = [];
-			state.wordCloud = [];
-			state.subjectRelation = [];
+			const { entities, wordCloud, subjectRelation, indicator } = initialState;
+
+			state.entities = entities;
+			state.wordCloud = wordCloud;
+			state.subjectRelation = subjectRelation;
+			state.indicator = indicator;
 		},
-		clearSearchText: (state, action) => {
-			state = initialState;
-		},
+		clearSearchText: (state, action) => initialState,
+
 		setSearchLoading: (state, action) => {
 			state.searchLoading = action.payload;
 		},
@@ -188,6 +187,12 @@ const searchsSlice = createSlice({
 		setWordCloudOptions: (state, action) => {
 			state.analysisOptions.wordCloudOptions = action.payload;
 		},
+		setSubjectRelationOptions: (state, action) => {
+			state.analysisOptions.subjectRelationOptions = action.payload;
+		},
+		setMatrixOptions: (state, action) => {
+			state.analysisOptions.matrixOptions = action.payload;
+		},
 		setSearchSubmit: (state, action) => {
 			state.searchSubmit = action.payload;
 		},
@@ -198,50 +203,55 @@ const searchsSlice = createSlice({
 			state.matrixDialog.props.open = true;
 		},
 		closeMatrixDialog: (state, action) => {
-			state.matrixDialog.props.open = false;
-			state.matrixDialog.data = false;
+			state.matrixDialog = initialState.matrixDialog;
 		},
 		updateCols: (state, action) => {
 			state.cols = action.payload;
 		},
 		resetSubjectRelationVec: (state, action) => {
-			state.searchsubjectRelation.vec = [];
-			state.searchsubjectRelation.topic = action.payload;
-		},
-		updateSubjectRelationModelType: (state, action) => {
-			state.subjectRelation.modelType = action.payload;
+			state.subjectRelation = { ...initialState.subjectRelation, vec: initialState.subjectRelation.vec };
 		}
 	},
 	extraReducers: {
 		[getSearchs.fulfilled]: (state, action) => {
-			state.search = action.payload;
-		},
-		[getSearchsNum.fulfilled]: (state, action) => {
-			state.quote = action.payload;
+			state.entities = action.payload;
 		},
 		[getNews.fulfilled]: (state, action) => {
-			state.family = action.payload;
+			state.news = action.payload;
 		},
 		[getNewsSA.fulfilled]: (state, action) => {
-			state.ipcCpc = action.payload;
+			state.newsSA = action.payload;
 		},
 		[getRelatedCompany.fulfilled]: (state, action) => {
-			state.rnd = action.payload;
+			state.relatedCompany = action.payload;
 		},
 		[getMatrix.fulfilled]: (state, action) => {
-			state.legal = action.payload;
+			const { entities, max } = action.payload;
+			state.matrix = { ...state.matrix, entities: entities, max: max };
 		},
 		[getMatrixDialog.fulfilled]: (state, action) => {
-			state.registerFee = action.payload;
+			state.matrixDialog = {
+				...state.matrixDialog,
+				data: action.payload
+			};
 		},
 		[getWordCloud.fulfilled]: (state, action) => {
-			state.rightfullOrder = action.payload;
+			state.wordCloud = action.payload;
+		},
+		[getSubjectRelation.pending]: (state, action) => {
+			state.subjectRelation = { ...state.subjectRelation, vec: initialState.subjectRelation.vec };
 		},
 		[getSubjectRelation.fulfilled]: (state, action) => {
-			state.rightHolder = action.payload;
+			state.subjectRelation = action.payload;
 		},
-		[updateSubjectRelation.fulfilled]: (state, action) => {
-			state.applicant = action.payload;
+		[getSubjectRelationVec.pending]: (state, action) => {
+			state.subjectRelation = { ...state.subjectRelation, vec: initialState.subjectRelation.vec };
+		},
+		[getSubjectRelationVec.fulfilled]: (state, action) => {
+			state.subjectRelation = { ...state.subjectRelation, vec: action.payload.vec };
+		},
+		[getIndicator.fulfilled]: (state, action) => {
+			state.indicator = action.payload;
 		}
 	}
 });
@@ -256,6 +266,8 @@ export const {
 	setSearchNum,
 	setSearchVolume,
 	setWordCloudOptions,
+	setSubjectRelationOptions,
+	setMatrixOptions,
 	setSearchSubmit,
 	updateMatrixCategory,
 	openMatrixDialog,

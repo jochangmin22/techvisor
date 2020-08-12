@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { CircularProgress, Typography, Paper, Button } from '@material-ui/core';
 import { Line } from 'react-chartjs-2';
-import { useTheme } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
 import _ from '@lodash';
 
 function AppNum(props) {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Card from '@material-ui/core/Card';
 import Icon from '@material-ui/core/Icon';
 import Typography from '@material-ui/core/Typography';
-import { useTheme } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
 import _ from '@lodash';
 import clsx from 'clsx';
 

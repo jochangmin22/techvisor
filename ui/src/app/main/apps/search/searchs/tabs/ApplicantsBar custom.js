@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
-import { useTheme } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
 import { HorizontalBar, Doughnut } from 'react-chartjs-2';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import _ from 'lodash';

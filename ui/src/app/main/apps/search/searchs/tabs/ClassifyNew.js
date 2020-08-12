@@ -4,7 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import { useTheme } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
 import _ from '@lodash';
 import { company, government } from 'app/main/apps/lib/variables';
 import parseSearchText from 'app/main/apps/lib/parseSearchText';

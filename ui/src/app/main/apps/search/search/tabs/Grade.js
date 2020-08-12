@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Paper from '@material-ui/core/Paper';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { useDispatch } from 'react-redux';
 import { getRegisterFee, getRightHolder } from '../../store/searchSlice';
