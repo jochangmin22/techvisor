@@ -8,14 +8,40 @@ import 'echarts/theme/blue';
 import _ from '@lodash';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useTheme } from '@material-ui/core';
-import CrossAPopover from './CrossAPopover';
+import PopoverContent from 'app/main/apps/lib/PopoverContent';
 // import SpinLoading from 'app/main/apps/lib/SpinLoading';
+
+const content = (
+	<>
+		<Typography variant="body1" className="mb-8">
+			피인용도지수(Cites Per Patent, CPP)
+		</Typography>
+		<Typography variant="caption" className="text-gray-600">
+			피인용이 높을 수록 영향력이 크며, 특허수 대비 인용수를 기준으로 계산됩니다.
+		</Typography>
+		<Typography variant="body1" className="my-8">
+			영향력지수(Patent Impact Index, PII)
+		</Typography>
+		<Typography variant="caption" className="text-gray-600">
+			PII가 높을 수록 소유한 기술의 질적 수준이 높으며, CPP를 전체 등록특허의 피인용도로 나눈 값으로 계산됩니다.
+		</Typography>
+		<Typography variant="body1" className="my-8">
+			기술력지수(Technology Strength, TS)
+		</Typography>
+		<Typography variant="caption" className="text-gray-600">
+			TS가 높을 수록 기술적 역량이 크며, CPP에 특허건수를 곱한 값으로 계산됩니다.
+		</Typography>
+		<Typography variant="body1" className="my-8">
+			시장확보지수(Patent Family Size, PFS)
+		</Typography>
+		<Typography variant="caption" className="text-gray-600">
+			패밀리 보유 건이 많은 척도로 많을 수록 시장력이 강합니다. 특허수 대비 패밀리수를 기준으로 계산됩니다.
+		</Typography>
+	</>
+);
 
 function calculateCnt(arr) {
 	const result = _.chain(arr)
-		// .filter(item => !!item[filterType])
-		// .groupBy(filterType)
-		// .map((value, key) => ({ name: key, value: value }))
 		.orderBy(['cnt', 'cpp', 'pfs', 'pii', 'ts'], ['desc', 'desc', 'desc', 'desc', 'desc'])
 		.slice(0, 20)
 		.defaultsDeep({ name: [], cnt: [], cpp: [], pfs: [], pii: [], ts: [] })
@@ -225,10 +251,7 @@ function CrossAnalysisA(props) {
 	return (
 		<Paper className="w-full h-full shadow-none">
 			<div className="flex justify-center border-b-1">
-				<Typography variant="body1" className="my-8">
-					CPP, PII, TS 및 PFS 교차분석
-				</Typography>
-				<CrossAPopover />
+				<PopoverContent content={content} title="CPP, PII, TS 및 PFS 교차분석" variant="body1" />
 			</div>
 			<div id="main" className="w-full h-xs" ref={chartRef} />
 		</Paper>
