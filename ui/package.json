@@ -54,7 +54,7 @@
 		"qs": "6.9.4",
 		"randomcolor": "^0.6.2",
 		"raw-loader": "4.0.1",
-		"rc-easyui": "^1.1.26",
+		"rc-easyui": "^1.1.27",
 		"rc-progress": "^3.0.0",
 		"react": "16.13.1",
 		"react-autosuggest": "10.0.2",

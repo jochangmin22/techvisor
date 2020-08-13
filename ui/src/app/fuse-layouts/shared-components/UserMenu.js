@@ -27,7 +27,7 @@ function UserMenu(props) {
 
 	return (
 		<>
-			<Button className="min-h-40" onClick={userMenuClick}>
+			<Button className="min-h-32" onClick={userMenuClick}>
 				{user.data.photoURL ? (
 					<Avatar className="" alt="user photo" src={user.data.photoURL} />
 				) : (

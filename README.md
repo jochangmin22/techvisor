@@ -1,6 +1,6 @@
 # 설치방법
 
--   아마콘다 가상환경 python 3.6.10 (tensorflow를 위해 3.6대 유지)
+-   아마콘다 가상환경 python 3.7.7 (tensorflow를 위해 3.7대 유지)
 -   django
 -   django rest framework
 -   react
@@ -12,7 +12,7 @@
     삭제
       conda remove --name [name] --all
     설치
-      conda create -n [name] python=3.6.8
+      conda create -n [name] python=3.7.7
     캐시 삭제
       conda clean --all
     콘다 버전업
