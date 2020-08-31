@@ -4,7 +4,7 @@ import Chip from '@material-ui/core/Chip';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import * as Actions from '../../store/actions';
 import SubjectContext from '../SubjectContext';
 
@@ -38,7 +38,7 @@ function SubjectChips(props) {
 			});
 		} else {
 			setShowLoading(true);
-			const [, newApiParams] = parseSearchText(searchParams, null);
+			const [, newApiParams] = parseSearchOptions(searchParams);
 			newApiParams.keywordvec = value; // updateSubjectRelation 에서만 이 line 추가
 
 			dispatch(resetSubjectRelationVec());

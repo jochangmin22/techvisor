@@ -55,7 +55,7 @@ function SearchHeader(props) {
 			dispatch(setSearchNum(inputSearchText));
 			dispatch(setSearchSubmit(true));
 		} else {
-			const [_params] = parseSearchText(null, inputSearchText); // Note that the first args of parseSearchText is null
+			const [_params] = parseSearchText(null, 'top', inputSearchText); // Note that the first args of parseSearchText is null
 			_params['searchNum'] = ''; // prevent uncontrolled error
 			dispatch(setSearchParams(_params));
 			dispatch(setSearchSubmit(true));

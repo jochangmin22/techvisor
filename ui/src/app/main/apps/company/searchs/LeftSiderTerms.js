@@ -111,7 +111,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 
 	useUpdateEffect(() => {
 		// Sync from leftSidebar to header
-		const [newParams, newApiParams] = parseSearchText(form, null);
+		const [newParams, newApiParams] = parseSearchOptions(form);
 
 		dispatch(setSearchParams(newParams));
 

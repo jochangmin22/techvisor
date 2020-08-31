@@ -6,7 +6,7 @@ import RelatedCompany from './components/RelatedCompany';
 import { getNews, getNewsSA, getRelatedCompany } from '../store/searchsSlice';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import { useSelector } from 'react-redux';
 
 function NewsAnalysis(props) {
@@ -17,7 +17,7 @@ function NewsAnalysis(props) {
 
 	useEffect(() => {
 		if (searchText && searchText.length > 0) {
-			const [, params] = parseSearchText(searchParams, null);
+			const [, params] = parseSearchOptions(searchParams);
 			const subParams = { analysisOptions: analysisOptions };
 			dispatch(getNews({ params, subParams })).then(() => {
 				dispatch(getNewsSA({ params, subParams }));

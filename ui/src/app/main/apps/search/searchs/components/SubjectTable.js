@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import _ from '@lodash';
 import { Line } from 'rc-progress';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { getSubjectRelationVec, setSearchParams, setSearchSubmit, initialState } from '../../store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -35,8 +35,9 @@ function SubjectTable() {
 	const [form, setForm] = useState(searchParams || initialState.searchParams);
 
 	function handleClick(value, name = 'terms') {
-		let array = [...form[name]];
-		const newValue = value.trim().replace(/\s+/g, ' ADJ1 ');
+		// let array = [...form[name]];
+		let array = [...searchParams[name]];
+		const newValue = value.trim().replace(/\s+/g, ' adj1 ');
 		let existCheck = true;
 		array.map(arr => {
 			if (arr.includes(newValue)) {
@@ -60,14 +61,14 @@ function SubjectTable() {
 	}
 
 	useUpdateEffect(() => {
-		const [_params] = parseSearchText(form, null);
+		const [_params] = parseSearchOptions(form);
 		dispatch(setSearchParams(_params));
 	}, [form]);
 
 	useEffect(() => {}, [entities]);
 
 	useEffect(() => {
-		const [, params] = parseSearchText(searchParams, null);
+		const [, params] = parseSearchOptions(searchParams);
 		const subParams = {
 			analysisOptions: analysisOptions
 		};
@@ -131,4 +132,4 @@ function SubjectTable() {
 	);
 }
 
-export default SubjectTable;
+export default React.memo(SubjectTable);

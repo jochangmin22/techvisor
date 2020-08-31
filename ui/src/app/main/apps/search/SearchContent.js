@@ -48,10 +48,10 @@ function SearchContent(props) {
 					<EmptyMsg icon="chat" msg="검색결과" />
 				) : (
 					<div className="flex flex-wrap w-full h-460 items-start justify-center">
-						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16">
+						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pt-0">
 							<SubjectRelation />
 						</div>
-						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pl-0">
+						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pl-0 md:pt-0">
 							<ContentVisual searchText={searchText} inventor={inventor} assignee={assignee} />
 						</div>
 						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pt-0">

@@ -7,7 +7,7 @@ import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useTheme } from '@material-ui/core/styles';
 import _ from '@lodash';
 import { company, government } from 'app/main/apps/lib/variables';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import { setSearchParams, setSearchSubmit, initialState } from '../../store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useUpdateEffect } from '@fuse/hooks';
@@ -61,7 +61,7 @@ function Classify(props) {
 	const [form, setForm] = useState(searchParams || initialState.searchParams);
 
 	useUpdateEffect(() => {
-		const [newParams] = parseSearchText(form, null);
+		const [newParams] = parseSearchOptions(form);
 		dispatch(setSearchParams(newParams));
 	}, [form]);
 

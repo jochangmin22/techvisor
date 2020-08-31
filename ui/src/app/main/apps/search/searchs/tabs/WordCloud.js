@@ -3,7 +3,7 @@ import Paper from '@material-ui/core/Paper';
 import 'echarts-wordcloud';
 import echarts from 'echarts';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSearchSubmit, setSearchParams, getWordCloud, initialState } from '../../store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -24,7 +24,7 @@ function WordCloud() {
 	const [echart, setEchart] = useState(null);
 
 	useEffect(() => {
-		const [, params] = parseSearchText(searchParams, null);
+		const [, params] = parseSearchOptions(searchParams);
 		const subParams = {
 			analysisOptions: analysisOptions
 		};
@@ -42,8 +42,9 @@ function WordCloud() {
 
 	function handleClick(chart, value, name = 'terms') {
 		chart.setOption({ animation: false });
-		let array = [...form[name]];
-		const newValue = value.trim().replace(/\s+/g, ' ADJ1 ');
+		// let array = [...form[name]];
+		let array = [...searchParams[name]];
+		const newValue = value.trim().replace(/\s+/g, ' adj1 ');
 		let existCheck = true;
 		array.map(arr => {
 			if (arr.includes(newValue)) {
@@ -74,7 +75,7 @@ function WordCloud() {
 	}
 
 	useUpdateEffect(() => {
-		const [_params] = parseSearchText(form, null);
+		const [_params] = parseSearchOptions(form);
 		dispatch(setSearchParams(_params));
 	}, [form]);
 

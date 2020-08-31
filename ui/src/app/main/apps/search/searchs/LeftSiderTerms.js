@@ -21,7 +21,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import _ from '@lodash';
 import LeftConfig from './setLeftConfig';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import {
 	getSearchs,
 	getWordCloud,
@@ -119,10 +119,11 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	});
 
 	const { form, handleChange, setForm } = useForm(searchParams || initialState.searchParams);
-
+	console.log(form);
 	useUpdateEffect(() => {
 		// Sync from leftSidebar to header
-		const [_params, params] = parseSearchText(form, null);
+		const [_params, params] = parseSearchOptions(form);
+
 		dispatch(setSearchParams(_params));
 
 		function checkValidate() {

@@ -4,7 +4,7 @@ import Chip from '@material-ui/core/Chip';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import { getSubjectRelationVec, setSubjectRelationOptions } from '../../store/searchsSlice';
 import SubjectContext from '../SubjectContext';
 
@@ -32,7 +32,7 @@ function SubjectChips(props) {
 	function handleClick(value) {
 		setShowLoading(true);
 		const subjectRelationOptions = { ...analysisOptions.subjectRelationOptions, keywordvec: value };
-		const [, params] = parseSearchText(searchParams, null);
+		const [, params] = parseSearchOptions(searchParams);
 		const subParams = {
 			analysisOptions: {
 				...analysisOptions,

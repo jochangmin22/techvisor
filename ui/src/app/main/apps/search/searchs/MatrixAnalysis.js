@@ -10,7 +10,7 @@ import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import MatrixDialog from './MatrixDialog';
 import MatrixAnalysisMenu from './components/MatrixAnalysisMenu';
 
@@ -24,7 +24,7 @@ function MatrixAnalysis(props) {
 
 	useEffect(() => {
 		setShowLoading(true);
-		const [, params] = parseSearchText(searchParams, null);
+		const [, params] = parseSearchOptions(searchParams);
 		const subParams = { analysisOptions: analysisOptions };
 		dispatch(getMatrix({ params, subParams })).then(() => {
 			setShowLoading(false);
@@ -47,7 +47,7 @@ function MatrixAnalysis(props) {
 		function onCellClick(ev, props) {
 			ev.preventDefault();
 
-			const [, params] = parseSearchText(searchParams, null);
+			const [, params] = parseSearchOptions(searchParams);
 			params.topic = props.column.id;
 			params.categoryValue = Object.values(props.row.values)[0];
 			const subParams = { analysisOptions: analysisOptions };

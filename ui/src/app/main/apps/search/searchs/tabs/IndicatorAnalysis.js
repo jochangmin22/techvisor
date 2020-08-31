@@ -9,7 +9,7 @@ import CrossAnalysisB from './components/CrossAnalysisB';
 import Button from '@material-ui/core/Button';
 import { getIndicator } from '../../store/searchsSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 
 function IndicatorAnalysis(props) {
 	const dispatch = useDispatch();
@@ -33,7 +33,7 @@ function IndicatorAnalysis(props) {
 
 	useEffect(() => {
 		// setShowLoading(true);
-		const [, params] = parseSearchText(searchParams, null);
+		const [, params] = parseSearchOptions(searchParams);
 		const subParams = { analysisOptions: analysisOptions };
 		dispatch(getIndicator({ params, subParams })).then(() => {
 			// setShowLoading(false);

@@ -7,7 +7,7 @@ import SubjectTable from './components/SubjectTable';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import { getSubjectRelation } from '../store/searchsSlice';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import SubjectRelatonMenu from './components/SubjectRelationMenu';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
@@ -23,7 +23,7 @@ function SubjectRelation() {
 	const showLoadingValue = useMemo(() => ({ showLoading, setShowLoading }), [showLoading, setShowLoading]);
 
 	useEffect(() => {
-		const [, params] = parseSearchText(searchParams, null);
+		const [, params] = parseSearchOptions(searchParams);
 		const subParams = {
 			analysisOptions: analysisOptions
 		};

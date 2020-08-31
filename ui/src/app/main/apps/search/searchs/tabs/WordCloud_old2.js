@@ -8,7 +8,7 @@ import Paper from '@material-ui/core/Paper';
 import { useSelector, useDispatch } from 'react-redux';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import parseSearchText from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import LeftConfig from '../setLeftConfig';
 import * as Actions from '../../store/actions';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -80,7 +80,7 @@ function WordCloud(props) {
 
 		dispatch(setSearchSubmit(true));
 
-		const [newParams] = parseSearchText(form, null);
+		const [newParams] = parseSearchOptions(form);
 		dispatch(setSearchParams(newParams));
 	}
 

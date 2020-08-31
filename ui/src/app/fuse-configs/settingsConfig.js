@@ -7,9 +7,9 @@ const settingsConfig = {
 	animations: false,
 	direction: 'ltr', // rtl, ltr
 	theme: {
-		main: 'light9',
-		navbar: 'light9',
-		toolbar: 'dark2',
+		main: 'light7',
+		navbar: 'legacy',
+		toolbar: 'mainThemeDark',
 		footer: 'mainThemeDark'
 	}
 };

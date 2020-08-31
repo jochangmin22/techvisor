@@ -61,7 +61,7 @@ function SubjectTable(props) {
 
 		dispatch(setSearchSubmit(true));
 
-		const [newParams] = parseSearchText(form, null);
+		const [newParams] = parseSearchOptions(form);
 		dispatch(setSearchParams(newParams));
 	}
 
