@@ -193,7 +193,7 @@ def parse_searchs(request, mode="begin"):
 
 def parse_nlp(request, analType):
     """ 쿼리 실행 및 결과 저장
-        analType : wordCloud, matrix, subjectRelation
+        analType : wordCloud, matrix, keywords
     """
 
     _, subKey, _, subParams = get_redis_key(request)

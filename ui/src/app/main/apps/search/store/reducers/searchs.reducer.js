@@ -47,7 +47,7 @@ const initialState = {
 		data: null
 	},
 	wordCloud: [],
-	subjectRelation: {
+	keywords: {
 		topic: [],
 		vec: [],
 		modelType: 'word2vec' // ['word2vec','fasttext']
@@ -69,7 +69,7 @@ const searchsReducer = function (state = initialState, action) {
 				searchParams: action.searchParams,
 				matrix: action.matrix,
 				wordCloud: action.wordCloud,
-				subjectRelation: action.subjectRelation
+				keywords: action.keywords
 			};
 		}
 		case Actions.CLEAR_SEARCHS: {
@@ -77,7 +77,7 @@ const searchsReducer = function (state = initialState, action) {
 				...state,
 				entities: [],
 				wordCloud: [],
-				subjectRelation: initialState.subjectRelation
+				keywords: initialState.keywords
 			};
 		}
 		case Actions.CLEAR_SEARCH_TEXT: {
@@ -225,14 +225,14 @@ const searchsReducer = function (state = initialState, action) {
 		case Actions.GET_SUBJECT_RELATION: {
 			return {
 				...state,
-				subjectRelation: action.payload
+				keywords: action.payload
 			};
 		}
 		case Actions.RESET_SUBJECT_RELATION_VEC: {
 			return {
 				...state,
-				subjectRelation: {
-					...state.subjectRelation,
+				keywords: {
+					...state.keywords,
 					vec: [],
 					topic: action.topic // only vec reset
 				}
@@ -241,8 +241,8 @@ const searchsReducer = function (state = initialState, action) {
 		case Actions.UPDATE_SUBJECT_RELATION: {
 			return {
 				...state,
-				subjectRelation: {
-					...state.subjectRelation,
+				keywords: {
+					...state.keywords,
 					vec: action.payload
 				}
 			};
@@ -250,8 +250,8 @@ const searchsReducer = function (state = initialState, action) {
 		case Actions.UPDATE_SUBJECT_RELATION_MODEL_TYPE: {
 			return {
 				...state,
-				subjectRelation: {
-					...state.subjectRelation,
+				keywords: {
+					...state.keywords,
 					modelType: action.payload
 				}
 			};

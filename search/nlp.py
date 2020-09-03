@@ -87,17 +87,17 @@ def parse_vec(request):
 
     #///////////////////////////////////
     try:
-        _modelType = subParams['analysisOptions']['subjectRelationOptions']['modelType']
+        _modelType = subParams['analysisOptions']['keywordsOptions']['modelType']
     except:
         _modelType = None
 
     try:
-        _keywordvec = subParams['analysisOptions']['subjectRelationOptions']['keywordvec']
+        _keywordvec = subParams['analysisOptions']['keywordsOptions']['keywordvec']
     except:
         _keywordvec = None
 
     try:
-        unitNumber = subParams['analysisOptions']['subjectRelationOptions']['output']
+        unitNumber = subParams['analysisOptions']['keywordsOptions']['output']
     except:
         unitNumber = 20            
 
@@ -114,7 +114,7 @@ def parse_vec(request):
 
     #///////////////////////////////////
     try:  # handle NoneType error
-        taged_docs = parse_nlp(request, analType="subjectRelation")
+        taged_docs = parse_nlp(request, analType="keywords")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         tuple_taged_docs = tuple(taged_docs)  # list to tuble
         if taged_docs == [] or taged_docs == [[]]:  # result is empty

@@ -7472,7 +7472,7 @@ const searchData = {
 			unit: '구문',
 			output: 50
 		},
-		subjectRelationOptions: {
+		keywordsOptions: {
 			keywordvec: '',
 			modelType: 'word2vec', // 'word2vec','fasttext','etc'
 			volume: '요약',
@@ -9035,7 +9035,7 @@ const searchData = {
 			value: 12
 		}
 	],
-	subjectRelation: {
+	keywords: {
 		topic: [
 			'텍스트 정보',
 			'이미지 데이터',

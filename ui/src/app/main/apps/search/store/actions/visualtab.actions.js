@@ -53,7 +53,7 @@ export function getWordCloud(params) {
 //         );
 // }
 
-export function getSubjectRelation(params) {
+export function getKeywords(params) {
 	const request = axios.get(
 		`${process.env.REACT_APP_API_URL}/api/search-app/searchs/vec`,
 		{
@@ -75,7 +75,7 @@ export function getSubjectRelation(params) {
 				console.log(err.message);
 			});
 }
-// export function getSubjectRelation(searchText) {
+// export function getKeywords(searchText) {
 //     // const request = axios.get('/api/academy-app/course', {params});
 
 //     const request = axios({
@@ -104,21 +104,21 @@ export function clearWidgetsData() {
 //     };
 // }
 
-// export function resetSubjectRelation() {
+// export function resetKeywords() {
 //     return {
 //         type: RESET_SUBJECT_RELATION
 //     };
 // }
 
-export function resetSubjectRelationVec(data) {
+export function resetKeywordsVec(data) {
 	return {
 		type: RESET_SUBJECT_RELATION_VEC,
 		topic: data
 	};
 }
 
-// TODO :: updateSubjectRelation API 최적화
-export function updateSubjectRelation(params) {
+// TODO :: updateKeywords API 최적화
+export function updateKeywords(params) {
 	const request = axios.get(
 		`${process.env.REACT_APP_API_URL}/api/search-app/searchs/vec`,
 		{
@@ -140,7 +140,7 @@ export function updateSubjectRelation(params) {
 				console.log(err.message);
 			});
 }
-// export function updateSubjectRelation(params, vec) {
+// export function updateKeywords(params, vec) {
 //     // const request = axios.get('/api/academy-app/course', {params});
 
 //     const request = axios({
@@ -158,7 +158,7 @@ export function updateSubjectRelation(params) {
 //         );
 // }
 
-// export function updateSubjectRelationVec(data) {
+// export function updateKeywordsVec(data) {
 //     return {
 //         type: UPDATE_SUBJECT_RELATION_VEC,
 //         selectedVec: data

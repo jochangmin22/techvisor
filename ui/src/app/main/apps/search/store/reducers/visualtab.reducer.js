@@ -2,12 +2,12 @@ import * as Actions from '../actions';
 
 const initialState = {
 	wordCloud: [],
-	subjectRelation: [],
+	keywords: [],
 	// selectedVec: null,
 	selectedIndex: null
 };
 
-const visualTabReducer = function(state = initialState, action) {
+const visualTabReducer = function (state = initialState, action) {
 	switch (action.type) {
 		case Actions.GET_WORDCLOUD: {
 			return {
@@ -18,14 +18,14 @@ const visualTabReducer = function(state = initialState, action) {
 		case Actions.GET_SUBJECT_RELATION: {
 			return {
 				...state,
-				subjectRelation: action.payload
+				keywords: action.payload
 			};
 		}
 		case Actions.CLEAR_WIDGETS_DATA: {
 			return {
 				...state,
 				wordCloud: [],
-				subjectRelation: []
+				keywords: []
 			};
 		}
 		// case Actions.RESET_WORDCLOUD: {
@@ -37,13 +37,13 @@ const visualTabReducer = function(state = initialState, action) {
 		// case Actions.RESET_SUBJECT_RELATION: {
 		//     return {
 		//         ...state,
-		//         subjectRelation: []
+		//         keywords: []
 		//     };
 		// }
 		case Actions.RESET_SUBJECT_RELATION_VEC: {
 			return {
 				...state,
-				subjectRelation: {
+				keywords: {
 					topic: action.topic // only vec reset
 				}
 			};
@@ -51,12 +51,12 @@ const visualTabReducer = function(state = initialState, action) {
 		case Actions.UPDATE_SUBJECT_RELATION: {
 			// return {
 			//     ...state,
-			//     subjectRelation: action.payload
+			//     keywords: action.payload
 			// };
 			return {
 				...state,
-				subjectRelation: {
-					...state.subjectRelation,
+				keywords: {
+					...state.keywords,
 					vec: action.payload
 				}
 			};

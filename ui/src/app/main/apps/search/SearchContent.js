@@ -5,13 +5,13 @@ import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { setMockData } from './store/searchsSlice';
 // import { authRoles } from "app/auth";
 // import ContentGrid from './searchs/ContentGrid';
-import ContentVisual from './searchs/ContentVisual';
-import SubjectRelation from './searchs/SubjectRelation';
-import MatrixAnalysis from './searchs/MatrixAnalysis';
-import NewsAnalysis from './searchs/NewsAnalysis';
+import VisualContainer from './searchs/Visual/VisualContainer';
+import KeywordsContainer from './searchs/Keywords/KeywordsContainer';
+import MatrixAnalysis from './searchs/Matrix/MatrixAnalysis';
+import NewsAnalysis from './searchs/News/NewsAnalysis';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 import searchData from 'app/main/apps/lib/searchDataNew';
-import ContentTable from './searchs/ContentTable';
+import MainTable from './searchs/SearchList/MainTable';
 
 function SearchContent(props) {
 	const dispatch = useDispatch();
@@ -49,10 +49,10 @@ function SearchContent(props) {
 				) : (
 					<div className="flex flex-wrap w-full h-460 items-start justify-center">
 						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pt-0">
-							<SubjectRelation />
+							<KeywordsContainer />
 						</div>
 						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pl-0 md:pt-0">
-							<ContentVisual searchText={searchText} inventor={inventor} assignee={assignee} />
+							<VisualContainer searchText={searchText} inventor={inventor} assignee={assignee} />
 						</div>
 						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pt-0">
 							<MatrixAnalysis searchText={searchText} searchNum={searchNum} />
@@ -62,7 +62,7 @@ function SearchContent(props) {
 						</div>
 						<div className="flex w-full h-full p-16 md:pt-0">
 							{/* <ContentGrid /> */}
-							<ContentTable />
+							<MainTable />
 						</div>
 					</div>
 				)}

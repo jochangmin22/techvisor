@@ -32,7 +32,7 @@ export function getWordCloud(params) {
 			});
 }
 
-export function getSubjectRelation(params) {
+export function getKeywords(params) {
 	const request = axios.get(
 		`${process.env.REACT_APP_API_URL}/api/company-app/companies/vec`,
 		{
@@ -61,14 +61,14 @@ export function clearWidgetsData() {
 	};
 }
 
-export function resetSubjectRelationVec(data) {
+export function resetKeywordsVec(data) {
 	return {
 		type: RESET_SUBJECT_RELATION_VEC,
 		topic: data
 	};
 }
 
-export function updateSubjectRelation(params) {
+export function updateKeywords(params) {
 	const request = axios.get(
 		`${process.env.REACT_APP_API_URL}/api/company-app/companies/vec`,
 		{

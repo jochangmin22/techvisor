@@ -57,7 +57,7 @@ export function setMockData(data) {
 		searchParams: data.searchParams,
 		matrix: data.matrix,
 		wordCloud: data.wordCloud,
-		subjectRelation: data.subjectRelation
+		keywords: data.keywords
 	};
 }
 
@@ -239,7 +239,7 @@ export function getWordCloud(params) {
 			});
 }
 
-export function getSubjectRelation(params) {
+export function getKeywords(params) {
 	const request = axios.get(
 		`${process.env.REACT_APP_API_URL}/api/company-app/searchs/vec`,
 		{
@@ -262,15 +262,15 @@ export function getSubjectRelation(params) {
 			});
 }
 
-export function resetSubjectRelationVec(data) {
+export function resetKeywordsVec(data) {
 	return {
 		type: RESET_SUBJECT_RELATION_VEC,
 		topic: data
 	};
 }
 
-// TODO :: updateSubjectRelation API 최적화
-export function updateSubjectRelation(params) {
+// TODO :: updateKeywords API 최적화
+export function updateKeywords(params) {
 	const request = axios.get(
 		`${process.env.REACT_APP_API_URL}/api/company-app/searchs/vec`,
 		{

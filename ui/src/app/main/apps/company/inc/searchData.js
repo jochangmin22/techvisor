@@ -990,7 +990,7 @@ const searchData = {
 			value: 128
 		}
 	],
-	subjectRelation: {
+	keywords: {
 		topic: [
 			'바이러스',
 			'단백질',

@@ -52,22 +52,19 @@ export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async (param
 	return data;
 });
 
-export const getSubjectRelation = createAsyncThunk(NAME + 'getSubjectRelation', async (params, subParams) => {
+export const getKeywords = createAsyncThunk(NAME + 'getKeywords', async (params, subParams) => {
 	const response = await axios.get(URL + 'vec', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getSubjectRelationVec = createAsyncThunk(
-	NAME + 'getSubjectRelationVec',
-	async (params, subParams, { dispatch }) => {
-		const response = dispatch(getSubjectRelation({ params, subParams }));
-		const data = response.data;
+export const getKeywordsVec = createAsyncThunk(NAME + 'getKeywordsVec', async (params, subParams, { dispatch }) => {
+	const response = dispatch(getKeywords({ params, subParams }));
+	const data = response.data;
 
-		return data;
-	}
-);
+	return data;
+});
 
 export const getIndicator = createAsyncThunk(NAME + 'getIndicator', async (params, subParams) => {
 	const response = await axios.get(URL + 'indicator', { params: params, subParams: subParams });
@@ -104,7 +101,7 @@ export const initialState = {
 			unit: '구문', // '구문', '워드',
 			output: 50
 		},
-		subjectRelationOptions: {
+		keywordsOptions: {
 			keywordvec: '',
 			modelType: 'word2vec', // 'word2vec','fasttext','etc'
 			volume: '요약',
@@ -140,7 +137,7 @@ export const initialState = {
 		data: null
 	},
 	wordCloud: [],
-	subjectRelation: {
+	keywords: {
 		topic: [],
 		vec: []
 	}
@@ -151,20 +148,20 @@ const searchsSlice = createSlice({
 	initialState: searchsAdapter.getInitialState(initialState),
 	reducers: {
 		setMockData: (state, action) => {
-			const { entities, searchParams, matrix, wordCloud, subjectRelation } = action.payload;
+			const { entities, searchParams, matrix, wordCloud, keywords } = action.payload;
 
 			state.entities = entities;
 			state.searchParams = searchParams;
 			state.matrix = matrix;
 			state.wordCloud = wordCloud;
-			state.subjectRelation = subjectRelation;
+			state.keywords = keywords;
 		},
 		clearSearchs: (state, action) => {
-			const { entities, wordCloud, subjectRelation, indicator } = initialState;
+			const { entities, wordCloud, keywords, indicator } = initialState;
 
 			state.entities = entities;
 			state.wordCloud = wordCloud;
-			state.subjectRelation = subjectRelation;
+			state.keywords = keywords;
 			state.indicator = indicator;
 		},
 		clearSearchText: (state, action) => initialState,
@@ -187,8 +184,8 @@ const searchsSlice = createSlice({
 		setWordCloudOptions: (state, action) => {
 			state.analysisOptions.wordCloudOptions = action.payload;
 		},
-		setSubjectRelationOptions: (state, action) => {
-			state.analysisOptions.subjectRelationOptions = action.payload;
+		setkeywordsOptions: (state, action) => {
+			state.analysisOptions.keywordsOptions = action.payload;
 		},
 		setMatrixOptions: (state, action) => {
 			state.analysisOptions.matrixOptions = action.payload;
@@ -208,8 +205,8 @@ const searchsSlice = createSlice({
 		updateCols: (state, action) => {
 			state.cols = action.payload;
 		},
-		resetSubjectRelationVec: (state, action) => {
-			state.subjectRelation = { ...initialState.subjectRelation, vec: initialState.subjectRelation.vec };
+		resetKeywordsVec: (state, action) => {
+			state.keywords = { ...initialState.keywords, vec: initialState.keywords.vec };
 		}
 	},
 	extraReducers: {
@@ -238,17 +235,17 @@ const searchsSlice = createSlice({
 		[getWordCloud.fulfilled]: (state, action) => {
 			state.wordCloud = action.payload;
 		},
-		[getSubjectRelation.pending]: (state, action) => {
-			state.subjectRelation = { ...state.subjectRelation, vec: initialState.subjectRelation.vec };
+		[getKeywords.pending]: (state, action) => {
+			state.keywords = { ...state.keywords, vec: initialState.keywords.vec };
 		},
-		[getSubjectRelation.fulfilled]: (state, action) => {
-			state.subjectRelation = action.payload;
+		[getKeywords.fulfilled]: (state, action) => {
+			state.keywords = action.payload;
 		},
-		[getSubjectRelationVec.pending]: (state, action) => {
-			state.subjectRelation = { ...state.subjectRelation, vec: initialState.subjectRelation.vec };
+		[getKeywordsVec.pending]: (state, action) => {
+			state.keywords = { ...state.keywords, vec: initialState.keywords.vec };
 		},
-		[getSubjectRelationVec.fulfilled]: (state, action) => {
-			state.subjectRelation = { ...state.subjectRelation, vec: action.payload.vec };
+		[getKeywordsVec.fulfilled]: (state, action) => {
+			state.keywords = { ...state.keywords, vec: action.payload.vec };
 		},
 		[getIndicator.fulfilled]: (state, action) => {
 			state.indicator = action.payload;
@@ -266,15 +263,15 @@ export const {
 	setSearchNum,
 	setSearchVolume,
 	setWordCloudOptions,
-	setSubjectRelationOptions,
+	setkeywordsOptions,
 	setMatrixOptions,
 	setSearchSubmit,
 	updateMatrixCategory,
 	openMatrixDialog,
 	closeMatrixDialog,
 	updateCols,
-	resetSubjectRelationVec,
-	updateSubjectRelationModelType
+	resetKeywordsVec,
+	updateKeywordsModelType
 } = searchsSlice.actions;
 
 export default searchsSlice.reducer;

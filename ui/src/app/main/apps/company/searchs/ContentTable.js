@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import DownloadFilterMenu from './components/DownloadFilterMenu';
-import SpinLoading from '../../lib/SpinLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
 import { updateCols } from '../store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
@@ -115,13 +115,13 @@ const colsList = [
 
 function ContentTable(props) {
 	const dispatch = useDispatch();
-	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
+	const searchs = useSelector(({ companyApp }) => companyApp.searchs);
+	const { entities, cols } = searchs;
 	const data = useMemo(() => (entities ? entities : []), [entities]);
 	useEffect(() => {
 		setRowsCount(data.length);
 	}, [data]);
 	const [rowsCount, setRowsCount] = useState(null);
-	const cols = useSelector(({ companyApp }) => companyApp.searchs.cols);
 
 	const handleOnChange = useDebounce(cols => {
 		dispatch(updateCols(cols));

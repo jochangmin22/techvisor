@@ -5,7 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Divider from '@material-ui/core/Divider';
 import { useTheme } from '@material-ui/core/styles';
-import LeftSiderTerms from './searchs/LeftSiderTerms';
+import LeftSiderTerms from './LeftSiderTerms';
 import PopoverContent from 'app/main/apps/lib/PopoverContent';
 
 const content = (

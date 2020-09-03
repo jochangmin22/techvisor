@@ -4,29 +4,18 @@ import Hidden from '@material-ui/core/Hidden';
 import Icon from '@material-ui/core/Icon';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
 import withReducer from 'app/store/withReducer';
 import reducer from './store';
 import { parseInputSearchText } from 'app/main/apps/lib/parseSearchText';
-import { clearSearchText, setSearchParams, setSearchNum, setSearchSubmit } from './store/searchsSlice';
-
-const useStyles = makeStyles(theme => ({
-	root: {},
-	input: {
-		transition: theme.transitions.create(['background-color'], {
-			easing: theme.transitions.easing.easeInOut,
-			duration: theme.transitions.duration.short
-		}),
-		'&:focus': {
-			backgroundColor: theme.palette.background.paper
-		}
-	}
-}));
+import {
+	clearSearchText,
+	setSearchParams,
+	setSearchNum,
+	setSearchSubmit
+} from 'app/main/apps/search/store/searchsSlice';
 
 function SearchContentToolbar(props) {
-	const classes = useStyles();
 	const dispatch = useDispatch();
 	const searchNum = useSelector(({ searchApp }) => searchApp.searchs.searchParams.searchNum);
 	const searchText = useSelector(({ searchApp }) => searchApp.searchs.searchParams.searchText);
@@ -74,13 +63,16 @@ function SearchContentToolbar(props) {
 	}
 
 	return (
-		<div className="flex items-center w-full h-48 sm:h-56">
+		<Paper
+			className="flex items-center w-full h-48 sm:h-56 p-16 ltr:pl-4 lg:ltr:pl-16 rtl:pr-4 lg:rtl:pr-16 rounded-8"
+			elevation={1}
+		>
 			<Hidden lgUp>
 				<IconButton onClick={ev => props.pageLayout.current.toggleLeftSidebar()} aria-label="open left sidebar">
 					<Icon>menu</Icon>
 				</IconButton>
 			</Hidden>
-
+			<Icon color="action">search</Icon>
 			<form className="flex items-center w-full h-full" onSubmit={onSearchSubmit}>
 				<TextField
 					name="searchText"
@@ -90,32 +82,19 @@ function SearchContentToolbar(props) {
 					value={inputSearchText}
 					onChange={handleChange}
 					InputProps={{
-						// disableUnderline: true,
-						startAdornment: (
-							<InputAdornment position="start">
-								<Icon color="action">search</Icon>
-							</InputAdornment>
-						),
-						endAdornment: (
-							<InputAdornment position="end">
-								<IconButton onClick={() => dispatch(clearSearchText())} className="h-36 w-36">
-									<Icon>close</Icon>
-								</IconButton>
-							</InputAdornment>
-						),
-						inputRef: node => {
-							// ref(node);
-							// inputRef(node);
-						},
+						disableUnderline: true,
+						inputRef: node => {},
 						classes: {
-							input: clsx(classes.input, 'py-0 px-16 h-48 ltr:pr-48 rtl:pl-48'),
-							notchedOutline: 'rounded-8'
+							input: 'py-0 px-16 h-48 ltr:pr-48 rtl:pl-48'
 						}
 					}}
-					variant="outlined"
+					className="border-none"
 				/>
 			</form>
-		</div>
+			<IconButton onClick={() => dispatch(clearSearchText())} className="h-36 w-36">
+				<Icon>close</Icon>
+			</IconButton>
+		</Paper>
 	);
 }
 

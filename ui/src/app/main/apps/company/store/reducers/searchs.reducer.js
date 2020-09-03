@@ -36,7 +36,7 @@ const initialState = {
 	news: [],
 	matrix: [],
 	wordCloud: [],
-	subjectRelation: [],
+	keywords: [],
 	selectedIndex: null
 };
 
@@ -55,7 +55,7 @@ const searchsReducer = function (state = initialState, action) {
 				searchParams: action.searchParams,
 				matrix: action.matrix,
 				wordCloud: action.wordCloud,
-				subjectRelation: action.subjectRelation
+				keywords: action.keywords
 			};
 		}
 		case Actions.CLEAR_SEARCHS: {
@@ -63,7 +63,7 @@ const searchsReducer = function (state = initialState, action) {
 				...state,
 				entities: [],
 				wordCloud: [],
-				subjectRelation: []
+				keywords: []
 			};
 		}
 		case Actions.CLEAR_SEARCH_TEXT: {
@@ -149,13 +149,13 @@ const searchsReducer = function (state = initialState, action) {
 		case Actions.GET_SUBJECT_RELATION: {
 			return {
 				...state,
-				subjectRelation: action.payload
+				keywords: action.payload
 			};
 		}
 		case Actions.RESET_SUBJECT_RELATION_VEC: {
 			return {
 				...state,
-				subjectRelation: {
+				keywords: {
 					topic: action.topic // only vec reset
 				}
 			};
@@ -163,8 +163,8 @@ const searchsReducer = function (state = initialState, action) {
 		case Actions.UPDATE_SUBJECT_RELATION: {
 			return {
 				...state,
-				subjectRelation: {
-					...state.subjectRelation,
+				keywords: {
+					...state.keywords,
 					vec: action.payload
 				}
 			};

@@ -235,7 +235,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		if (num === '') {
 			dispatch(getSearchs(newApiParams)).then(() => {
 				// dispatch(getWordCloud(newApiParams));
-				// dispatch(getSubjectRelation(newApiParams));
+				// dispatch(getKeywords(newApiParams));
 				// dispatch(getMatrix(newApiParams));
 				dispatch(setSearchLoading(false));
 				dispatch(setSearchSubmit(false));
@@ -243,7 +243,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		} else {
 			dispatch(getSearchsNum({ searchNum: num })).then(() => {
 				// dispatch(getWordCloud({ searchNum: num }));
-				// dispatch(getSubjectRelation({ searchNum: num }));
+				// dispatch(getKeywords({ searchNum: num }));
 				// dispatch(getMatrix(newApiParams));
 				dispatch(setSearchLoading(false));
 				dispatch(setSearchSubmit(false));
@@ -260,9 +260,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	return (
 		<FuseScrollbars className="flex flex-auto flex-col min-h-2xl">
 			<div className="px-24 py-8">
-				<Typography variant="subtitle1" className="mt-8">
-					기업 이름
-				</Typography>
+				<Typography variant="subtitle1">기업 이름</Typography>
 				<Autocomplete
 					freeSolo
 					id="companyName"

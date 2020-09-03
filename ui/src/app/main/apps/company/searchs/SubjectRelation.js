@@ -7,9 +7,9 @@ import SubjectTable from './components/SubjectTable';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 
-function SubjectRelation(props) {
+function Keywords(props) {
 	const { searchText, searchNum } = props;
-	const subjectRelation = useSelector(({ companyApp }) => companyApp.searchs.subjectRelation);
+	const keywords = useSelector(({ companyApp }) => companyApp.searchs.keywords);
 
 	const [vecData, setVecData] = useState(null);
 
@@ -20,16 +20,16 @@ function SubjectRelation(props) {
 	// https://stackoverflow.com/questions/28121272/whats-the-best-way-to-update-an-object-in-an-array-in-reactjs
 	// data: this.state.data.map(el => (el.id === id ? {...el, text} : el))
 	useEffect(() => {
-		if (subjectRelation === null) {
+		if (keywords === null) {
 			setVecData(null);
 		} else {
-			if (subjectRelation.vec !== undefined) {
-				setVecData(subjectRelation.vec);
+			if (keywords.vec !== undefined) {
+				setVecData(keywords.vec);
 			}
 		}
-	}, [subjectRelation]);
+	}, [keywords]);
 
-	if (!subjectRelation || subjectRelation.length === 0) {
+	if (!keywords || keywords.length === 0) {
 		return <SpinLoading />;
 	}
 
@@ -40,11 +40,11 @@ function SubjectRelation(props) {
 					title="핵심 주제어"
 					msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 핵심키워드와 비교하여 유사 관계를 표시합니다."
 				/>
-				<SubjectChips searchText={searchText} searchNum={searchNum} topic={subjectRelation.topic} />
+				<SubjectChips searchText={searchText} searchNum={searchNum} topic={keywords.topic} />
 				{vecData && vecData.length !== 0 && !showLoading ? <SubjectTable data={vecData} /> : <SpinLoading />}
 			</Paper>
 		</SubjectContext.Provider>
 	);
 }
 
-export default SubjectRelation;
+export default Keywords;

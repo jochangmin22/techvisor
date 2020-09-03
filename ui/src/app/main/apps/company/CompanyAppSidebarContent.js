@@ -47,7 +47,7 @@ function CompanyAppSidebarContent(props) {
 	return (
 		<div>
 			<div className="flex flex-auto justify-between items-center w-full p-16 pr-8">
-				<PopoverContent content={content} title="검색조건" variant="h6" />
+				<PopoverContent content={content} title="검색조건" variant="subtitle1" />
 				<div>
 					<Button
 						variant="contained"

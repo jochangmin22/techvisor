@@ -36,10 +36,10 @@ function SubjectChips(props) {
 		paramsCopy.keyword = searchText;
 		paramsCopy.inventor = searchParams.inventor.join(' and ');
 		paramsCopy.assignee = searchParams.assignee.join(' and ');
-		paramsCopy.keywordvec = value; // updateSubjectRelation 에서만 이 line 추가
+		paramsCopy.keywordvec = value; // updateKeywords 에서만 이 line 추가
 
-		dispatch(resetSubjectRelationVec());
-		dispatch(updateSubjectRelation(paramsCopy));
+		dispatch(resetKeywordsVec());
+		dispatch(updateKeywords(paramsCopy));
 	}
 
 	const [anchorEl, setAnchorEl] = React.useState(null);
