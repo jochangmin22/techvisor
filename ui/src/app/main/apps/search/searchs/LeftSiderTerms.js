@@ -119,7 +119,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	});
 
 	const { form, handleChange, setForm } = useForm(searchParams || initialState.searchParams);
-	console.log(form);
+	// console.log(form);
 	useUpdateEffect(() => {
 		// Sync from leftSidebar to header
 		const [_params, params] = parseSearchOptions(form);

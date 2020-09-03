@@ -179,8 +179,8 @@ export default function parseSearchOptions(params) {
 	 *  convert searchText to searchTextParenthesis with parenthesis
 	 */
 	let searchTextParenthesis = addParenthesis(searchText);
-	console.log(searchText);
-	console.log(searchTextParenthesis);
+	// console.log(searchText);
+	// console.log(searchTextParenthesis);
 	/**
 	 * update params value for UI
 	 */

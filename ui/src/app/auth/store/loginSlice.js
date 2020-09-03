@@ -17,6 +17,20 @@ export const submitLogin = ({ email, password }) => async dispatch => {
 		});
 };
 
+export const submitLoginEmail = ({ email }) => async dispatch => {
+	return jwtService
+		.signInWithEmail(email)
+		.then(user => {
+			return dispatch(setSignedIn(true));
+
+			// return dispatch(loginSuccess());
+		})
+		.catch(error => {
+			return dispatch(setSignedIn(false));
+			// return dispatch(loginError(error));
+		});
+};
+
 export const submitLoginWithFireBase = ({ username, password }) => async dispatch => {
 	if (!firebaseService.auth) {
 		console.warn("Firebase Service didn't initialize, check your configuration");
@@ -53,6 +67,7 @@ export const submitLoginWithFireBase = ({ username, password }) => async dispatc
 
 const initialState = {
 	success: false,
+	signedIn: null,
 	error: {
 		username: null,
 		password: null
@@ -69,11 +84,14 @@ const loginSlice = createSlice({
 		loginError: (state, action) => {
 			state.success = false;
 			state.error = action.payload;
+		},
+		setSignedIn: (state, action) => {
+			state.signedIn = action.payload;
 		}
 	},
 	extraReducers: {}
 });
 
-export const { loginSuccess, loginError } = loginSlice.actions;
+export const { loginSuccess, loginError, setSignedIn } = loginSlice.actions;
 
 export default loginSlice.reducer;

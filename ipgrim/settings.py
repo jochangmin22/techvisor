@@ -54,18 +54,19 @@ CORS_ORIGIN_WHITELIST = [
     "http://192.168.0.40",
     "http://192.168.0.40:1000",
     "http://192.168.0.40:3000",
-    "http://192.168.0.40:3001",
+    "http://192.168.0.40:4000",
     "http://192.168.0.50",
     "http://192.168.0.50:1000",
     "http://192.168.0.50:3000",
-    "http://192.168.0.50:3001",
+    "http://192.168.0.50:4000",
     "http://localhost:1000",
     "http://localhost:3000",
-    "http://localhost:3001",
+    "http://localhost:4000",
     "http://127.0.0.1:8000",
     "http://btowin.iptime.org:1000",
     "http://btowin.iptime.org:1111",
     "http://btowin.iptime.org:3000",
+    "http://btowin.iptime.org:4000",
     "http://btowin.iptime.org:8000",
     "http://btowin.synology.me:1000",
     "http://btowin.synology.me:1111",
@@ -125,7 +126,8 @@ ROOT_URLCONF = 'ipgrim.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # 'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'users/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
