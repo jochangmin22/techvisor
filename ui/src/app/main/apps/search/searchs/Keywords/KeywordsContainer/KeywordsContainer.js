@@ -48,7 +48,7 @@ function KeywordsContainer() {
 						title="핵심 주제어"
 						msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 핵심키워드와 비교하여 유사 관계를 표시합니다."
 					/>
-					{/* <KeywordsMenu /> */}
+					<KeywordsMenu />
 				</div>
 				{isEmpty ? (
 					<EmptyMsg

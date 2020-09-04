@@ -7,7 +7,7 @@ import echarts from 'echarts';
 import moment from 'moment';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useSelector, useDispatch } from 'react-redux';
-import { setChartType } from '../../store/searchSlice';
+import { setChartType } from 'app/main/apps/company/store/searchSlice';
 import debounce from 'lodash/debounce';
 import clsx from 'clsx';
 import { chartTypes } from 'app/main/apps/lib/variables';

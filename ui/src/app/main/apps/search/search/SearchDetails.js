@@ -29,15 +29,15 @@ import {
 	getApplicantTrend,
 	getSimilar,
 	resetSearch
-} from '../store/searchSlice';
+} from 'app/main/apps/search/store/searchSlice';
 
-import PatInfo from './tabs/PatInfo';
-import Specification from './tabs/Specification';
-import Keyword from './tabs/Keyword';
-import Applicant from './tabs/Applicant';
-import Similar from './tabs/Similar';
-import Grade from './tabs/Grade';
-import Associate from './tabs/Associate';
+import PatentInfoContainer from './PatentInfo/PatentInfoContainer';
+import SpecContainer from './Specification/SpecContainer';
+import KeywordContainer from './Keyword/KeywordContainer';
+import ApplicantContainer from './Applicant/ApplicantContainer';
+import SimilarContainer from './Similar/SimilarContainer';
+import GradeContainer from './Grade/GradeContainer';
+import AssociateCompany from './AssociateCompany';
 
 const useStyles = makeStyles(theme => ({
 	contentCard: {
@@ -81,7 +81,6 @@ function SearchDetails(props) {
 			dispatch(getRegisterFee(params));
 			dispatch(getRightHolder(params));
 		}
-		// dispatch(getRightfullOrder({appNo: appNo}));
 		// eslint-disable-next-line
 	}, [dispatch, props.match.params]);
 
@@ -93,10 +92,7 @@ function SearchDetails(props) {
 		setTimeout(() => {
 			const response = {
 				file:
-					'http://kpat.kipris.or.kr/kpat/biblio/biblioMain_pdfAcrobat.jsp?method=fullText&pub_reg=' +
-					(search && search.공고일자 ? 'R' : 'P') +
-					'&applno=' +
-					appNo
+					process.env.REACT_APP_KIPRIS_PDF_URL + (search && search.공고일자 ? 'R' : 'P') + '&applno=' + appNo
 			};
 			window.open(response.file);
 		}, 100);
@@ -143,8 +139,7 @@ function SearchDetails(props) {
 									className="w-32 h-32 sm:w-48 sm:h-48 mr-8 sm:mr-16 rounded"
 									src={
 										appNo
-											? 'http://kpat.kipris.or.kr/kpat/remoteFile.do?method=bigFrontDraw&applno=' +
-											  appNo
+											? process.env.REACT_APP_KIPRIS_DRAW_URL + appNo
 											: 'assets/images/ecommerce/product-image-placeholder.png'
 									}
 									alt={1}
@@ -192,12 +187,9 @@ function SearchDetails(props) {
 						textColor="inherit"
 						variant="scrollable"
 						scrollButtons="auto"
-						// className="w-full border-b-1 px-24"
 						classes={{ root: 'max-w-3xl h-48' }}
 					>
 						<Tab label="특허정보" className="h-48 min-w-160" />
-						{/* <Tab label="청구항" className="h-48 min-w-160" />
-						<Tab label="발명의 설명" className="h-48 min-w-160" /> */}
 						<Tab label="명세서" className="h-48 min-w-160" />
 						<Tab label="키워드" className="h-48 min-w-160" />
 						<Tab label="출원인" className="h-48 min-w-160" />
@@ -210,15 +202,15 @@ function SearchDetails(props) {
 			content={
 				search && (
 					<div className="p-12 max-w-5xl">
-						{tabValue === 0 && <PatInfo search={search} searchText={searchText} terms={terms} />}
-						{/* {tabValue === 1 && <Claims search={search} searchText={searchText} terms={terms} />} */}
-						{/* {tabValue === 2 && <Description search={search} searchText={searchText} terms={terms} />} */}
-						{tabValue === 1 && <Specification search={search} searchText={searchText} terms={terms} />}
-						{tabValue === 2 && <Keyword search={search} />}
-						{tabValue === 3 && <Applicant search={search} />}
-						{tabValue === 4 && <Similar appNo={appNo} />}
-						{tabValue === 5 && <Grade rgNo={rgNo} />}
-						{tabValue === 6 && <Associate search={search} />}
+						{tabValue === 0 && (
+							<PatentInfoContainer search={search} searchText={searchText} terms={terms} />
+						)}
+						{tabValue === 1 && <SpecContainer search={search} searchText={searchText} terms={terms} />}
+						{tabValue === 2 && <KeywordContainer search={search} />}
+						{tabValue === 3 && <ApplicantContainer search={search} />}
+						{tabValue === 4 && <SimilarContainer appNo={appNo} />}
+						{tabValue === 5 && <GradeContainer rgNo={rgNo} />}
+						{tabValue === 6 && <AssociateCompany search={search} />}
 					</div>
 				)
 			}
