@@ -62,14 +62,14 @@ export default function parseSearchText(params, inputSearchText) {
 				if (dNumber.length === 8) {
 					// >=A<=B, >=A, <=B, =A
 					if (dOperator === '>=' || dOperator === '>' || dOperator === '=') {
-						newParams.foundedStartDate = dNumber;
+						newParams.foundedStart = dNumber;
 					} else {
-						newParams.foundedEndDate = dNumber;
+						newParams.foundedEnd = dNumber;
 					}
 				}
 				if (dNumber.length === 16) {
-					newParams.foundedStartDate = dNumber.slice(0, 8);
-					newParams.foundedEndDate = dNumber.slice(8, 16);
+					newParams.foundedStart = dNumber.slice(0, 8);
+					newParams.foundedEnd = dNumber.slice(8, 16);
 				}
 			}
 		} else {
@@ -92,8 +92,8 @@ export default function parseSearchText(params, inputSearchText) {
 		// newApiParams.industry = newParams.industry.join('+') | '';
 		// newApiParams.marketCapStart = newParams.marketCapStart.join('+') | '';
 		// newApiParams.marketCapStartEnd = newParams.marketCapStartEnd.join('+') | '';
-		// newApiParams.foundedStartDate = newParams.foundedStartDate.join('+') | '';
-		// newApiParams.foundedEndDate = newParams.foundedEndDate.join('+') | '';
+		// newApiParams.foundedStart = newParams.foundedStart.join('+') | '';
+		// newApiParams.foundedEnd = newParams.foundedEnd.join('+') | '';
 		// newApiParams.employeeStart = newParams.employeeStart.join('+') | '';
 		// newApiParams.employeeEnd = newParams.employeeEnd.join('+') | '';
 		// newApiParams.repAgeStart = newParams.repAgeStart.join('+') | '';

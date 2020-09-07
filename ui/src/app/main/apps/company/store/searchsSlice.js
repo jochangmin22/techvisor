@@ -78,69 +78,73 @@ const searchsAdapter = createEntityAdapter({});
 export const { selectAll: selectSearchs, selectById: selectSearchById } = searchsAdapter.getSelectors(
 	state => state.searchApp.searchs.entities
 );
+
 export const initialState = {
 	entities: [],
 	searchParams: {
 		searchText: '',
 		searchNum: '',
-		terms: [],
-		searchVolume: 'SUM', // 'SUM','SUMA', 'ALL'
-		dateType: '',
-		startDate: '',
-		endDate: '',
-		inventor: [],
-		assignee: [],
-		patentOffice: [],
-		language: [],
-		status: [],
-		ipType: []
+		companyName: [],
+		companyAddress: [],
+		bizDomain: [],
+		relatedKeyword: [],
+		customCriteria: [],
+		industry: [],
+		marketCapStart: '',
+		marketCapEnd: '',
+		foundedStart: '',
+		foundedEnd: '',
+		employeeStart: '',
+		employeeEnd: '',
+		repAgeStart: '',
+		repAgeEnd: ''
 	},
-	analysisOptions: {
-		wordCloudOptions: {
-			volume: '요약',
-			unit: '구문', // '구문', '워드',
-			output: 50
-		},
-		keywordsOptions: {
-			keywordvec: '',
-			modelType: 'word2vec', // 'word2vec','fasttext','etc'
-			volume: '요약',
-			unit: '구문', // '구문', '워드',
-			output: 20
-		},
-		matrixOptions: {
-			category: '연도별', // '국가별', '연도별', '기술별', '기업별'
-			volume: '요약',
-			unit: '구문', // '구문', '워드',
-			output: 20
-		}
-	},
+	// analysisOptions: {
+	// 	wordCloudOptions: {
+	// 		volume: '요약',
+	// 		unit: '구문', // '구문', '워드',
+	// 		output: 50
+	// 	},
+	// 	keywordsOptions: {
+	// 		keywordvec: '',
+	// 		modelType: 'word2vec', // 'word2vec','fasttext','etc'
+	// 		volume: '요약',
+	// 		unit: '구문', // '구문', '워드',
+	// 		output: 20
+	// 	},
+	// 	matrixOptions: {
+	// 		category: '연도별', // '국가별', '연도별', '기술별', '기업별'
+	// 		volume: '요약',
+	// 		unit: '구문', // '구문', '워드',
+	// 		output: 20
+	// 	}
+	// },
 	searchLoading: null,
 	searchSubmit: null,
-	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
-	clickedSearchId: null,
-	selectedSearchIds: [],
-	topicChips: [],
-	news: [],
-	newsSA: null,
-	indicator: [],
-	relatedCompany: [],
-	matrix: {
-		entities: [],
-		// category: '연도별', // ['국가별', '연도별', '기술별', '기업별'],
-		max: 0
-	},
-	matrixDialog: {
-		props: {
-			open: false
-		},
-		data: null
-	},
-	wordCloud: [],
-	keywords: {
-		topic: [],
-		vec: []
-	}
+	cols: ['1', '2', '3', '4', '5', '6', '7', '8']
+	// clickedSearchId: null,
+	// selectedSearchIds: [],
+	// topicChips: [],
+	// news: [],
+	// newsSA: null,
+	// indicator: [],
+	// relatedCompany: [],
+	// matrix: {
+	// 	entities: [],
+	// 	// category: '연도별', // ['국가별', '연도별', '기술별', '기업별'],
+	// 	max: 0
+	// },
+	// matrixDialog: {
+	// 	props: {
+	// 		open: false
+	// 	},
+	// 	data: null
+	// },
+	// wordCloud: [],
+	// keywords: {
+	// 	topic: [],
+	// 	vec: []
+	// }
 };
 
 const searchsSlice = createSlice({

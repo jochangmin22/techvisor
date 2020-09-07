@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Hidden from '@material-ui/core/Hidden';
 import Icon from '@material-ui/core/Icon';
@@ -7,17 +7,33 @@ import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import withReducer from 'app/store/withReducer';
 import reducer from './store';
-import { parseInputSearchText } from 'app/main/apps/lib/parseSearchText';
+import { parseInputSearchText } from 'app/main/apps/lib/parseParamsCompanyApp';
 import { clearSearchText, setSearchParams, setSearchNum, setSearchSubmit } from './store/searchsSlice';
+import SearchPoper from './SearchPoper';
 
 function CompanyContentToolbar(props) {
 	const dispatch = useDispatch();
-	const searchNum = useSelector(({ searchApp }) => searchApp.searchs.searchParams.searchNum);
-	const searchText = useSelector(({ searchApp }) => searchApp.searchs.searchParams.searchText);
-
+	const anchorRef = useRef(null);
+	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
+	const searchNum = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchNum);
+	const searchText = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchText);
+	const searchSubmit = useSelector(({ companyApp }) => companyApp.searchs.searchSubmit);
 	const [inputSearchText, setInputSearchText] = useState(
 		searchNum && searchNum.match(/^[0-9.-]*$/) ? searchNum || '' : searchText || ''
 	);
+
+	const poperRef = useRef();
+
+	const poperOpen = open => {
+		if (open) {
+			poperRef.current.handleOpen(anchorRef.current);
+		} else {
+			// if (anchorRef.current) {
+			anchorRef.current.focus();
+			// }
+			poperRef.current.handleOpen(null);
+		}
+	};
 
 	useEffect(() => {
 		let value;
@@ -73,17 +89,22 @@ function CompanyContentToolbar(props) {
 					name="searchText"
 					placeholder="Search"
 					autoComplete="off"
+					ref={anchorRef}
 					fullWidth
 					value={inputSearchText}
 					onChange={handleChange}
+					onFocus={() => poperOpen(true)}
+					onBlur={() => poperOpen(false)}
 					InputProps={{
 						disableUnderline: true,
+						inputRef: node => {},
 						classes: {
 							input: 'py-0 px-16 h-48 ltr:pr-48 rtl:pl-48'
 						}
 					}}
 					className="border-none"
 				/>
+				<SearchPoper ref={poperRef} value={entities} open={searchSubmit} anchorEl={anchorRef.current} />
 			</form>
 			<IconButton onClick={() => dispatch(clearSearchText())} className="h-36 w-36">
 				<Icon>close</Icon>
@@ -92,4 +113,4 @@ function CompanyContentToolbar(props) {
 	);
 }
 
-export default withReducer('searchApp', reducer)(CompanyContentToolbar);
+export default withReducer('companyApp', reducer)(CompanyContentToolbar);

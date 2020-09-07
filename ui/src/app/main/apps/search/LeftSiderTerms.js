@@ -20,7 +20,7 @@ import ChipInput from 'material-ui-chip-input';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import _ from '@lodash';
-import { leftConfig } from 'app/main/apps/lib/variables';
+import { searchAppLeftConfig } from 'app/main/apps/lib/variables';
 import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import {
 	getSearchs,
@@ -40,6 +40,8 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 // TODO: DnD word chip
 const useStyles = makeStyles(theme => ({
 	root: {
+		marginBottom: theme.spacing(2),
+		backgroundColor: theme.palette.type === 'light' ? theme.palette.background.paper : theme.palette.primary.dark,
 		'& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
 			borderWidth: 0
 		},
@@ -55,10 +57,6 @@ const useStyles = makeStyles(theme => ({
 			borderWidth: 2,
 			borderColor: theme.palette.primary.main
 		}
-	},
-	customBg: {
-		marginBottom: theme.spacing(2),
-		backgroundColor: theme.palette.type === 'light' ? theme.palette.background.paper : theme.palette.primary.dark
 	},
 	chipInput: {
 		paddingRight: theme.spacing(1)
@@ -99,7 +97,7 @@ const insert = (arr, index, newItem) => [...arr.slice(0, index), newItem, ...arr
 const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	const dispatch = useDispatch();
 	const classes = useStyles();
-	const { options } = leftConfig;
+	const { options } = searchAppLeftConfig;
 	const [searchVolume, setSearchVolume] = useState('SUM');
 
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
@@ -307,6 +305,19 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		setForm(_.set({ ...form }, name, ''));
 	}
 
+	const defaultProps = {
+		className: clsx(classes.root, 'w-full'),
+		textFieldProps: {
+			variant: 'outlined'
+		},
+		styles: {
+			input: styles => ({
+				...styles,
+				minHeight: '34px'
+			})
+		}
+	};
+
 	return (
 		<FuseScrollbars className="flex flex-auto flex-col min-h-2xl">
 			<div className="px-24 py-8">
@@ -341,7 +352,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 							value={value} // JSON.stringify(nameList)
 							fullWidth
 							variant="outlined" // standard, outlined, filled
-							className={clsx(classes.root, classes.customBg, 'input:', classes.chipInput)}
+							className={clsx(classes.root, 'input:', classes.chipInput)}
 							placeholder=" or + Synonym"
 							// clearInputValueOnChange={true}
 							onAdd={chip => handleAddChip(chip, key, 'terms')}
@@ -352,7 +363,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 				<ChipInput
 					value={[]}
 					fullWidth
-					className={clsx(classes.root, classes.customBg, 'input:', classes.chipInput)}
+					className={clsx(classes.root, 'input:', classes.chipInput)}
 					placeholder=" or + Synonym"
 					onAdd={chip => handleAddChip(chip, termsRowCount, 'terms')}
 					onDelete={(chip, index) => handleDeleteChip(chip, index, termsRowCount, 'terms')}
@@ -393,7 +404,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 						value={dateState.startDate}
 						autoComplete="off"
 						variant="outlined"
-						className={clsx(classes.root, classes.customBg, 'flex w-full')}
+						className={clsx(classes.root, 'flex w-full')}
 						placeholder="YYYYMMDD"
 						error={!(form.startDate && form.startDate.length === 8 && /^\d+$/.test(form.startDate))}
 						InputProps={{
@@ -423,7 +434,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 						value={dateState.endDate}
 						autoComplete="off"
 						variant="outlined"
-						className={clsx(classes.root, classes.customBg, 'flex w-full')}
+						className={clsx(classes.root, 'flex w-full')}
 						placeholder="YYYYMMDD"
 						InputProps={{
 							classes: {
@@ -448,7 +459,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 					<ChipInput
 						value={form.inventor}
 						fullWidth
-						className={clsx(classes.root, classes.customBg)}
+						className={classes.root}
 						placeholder=" + 발명자"
 						clearInputValueOnChange
 						onAdd={chip => handleAddChip(chip, null, 'inventor')}
@@ -460,7 +471,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 					<ChipInput
 						value={form.assignee}
 						fullWidth
-						className={clsx(classes.root, classes.customBg)}
+						className={classes.root}
 						// label="용어 검색"
 						placeholder=" + 출원인"
 						onAdd={chip => handleAddChip(chip, null, 'assignee')}
@@ -470,22 +481,13 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 				</FormControl>
 				<div className="flex justify-center items-start">
 					<FuseChipSelect
-						className={clsx(classes.root, classes.customBg, 'w-full')}
+						{...defaultProps}
 						value={form.patentOffice.map(item => ({
 							value: item,
 							label: item
 						}))}
 						onChange={v => handleChipChange(v, 'patentOffice')}
 						placeholder="특허 기관"
-						textFieldProps={{
-							variant: 'outlined'
-						}}
-						styles={{
-							input: styles => ({
-								...styles,
-								minHeight: '34px'
-							})
-						}}
 						options={options.patentOffice.map(item => ({
 							value: item,
 							label: item
@@ -495,22 +497,13 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 				</div>
 				<div className="flex justify-center items-start">
 					<FuseChipSelect
-						className={clsx(classes.root, classes.customBg, 'w-full')}
+						{...defaultProps}
 						value={form.language.map(item => ({
 							value: item,
 							label: item
 						}))}
 						onChange={v => handleChipChange(v, 'language')}
 						placeholder="언어"
-						textFieldProps={{
-							variant: 'outlined'
-						}}
-						styles={{
-							input: styles => ({
-								...styles,
-								minHeight: '34px'
-							})
-						}}
 						options={options.language.map(item => ({
 							value: item,
 							label: item
@@ -520,22 +513,13 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 				</div>
 				<div className="w-full">
 					<FuseChipSelect
-						className={clsx(classes.root, classes.customBg, 'w-full')}
+						{...defaultProps}
 						value={form.status.map(item => ({
 							value: item,
 							label: item
 						}))}
 						onChange={v => handleChipChange(v, 'status')}
 						placeholder="상태"
-						textFieldProps={{
-							variant: 'outlined'
-						}}
-						styles={{
-							input: styles => ({
-								...styles,
-								minHeight: '34px'
-							})
-						}}
 						options={options.status.map(item => ({
 							value: item,
 							label: item
@@ -589,22 +573,13 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 				</div>
 				<div className="w-full">
 					<FuseChipSelect
-						className={clsx(classes.root, classes.customBg, 'w-full')}
+						{...defaultProps}
 						value={form.ipType.map(item => ({
 							value: item,
 							label: item
 						}))}
 						onChange={v => handleChipChange(v, 'ipType')}
 						placeholder="종류"
-						textFieldProps={{
-							variant: 'outlined'
-						}}
-						styles={{
-							input: styles => ({
-								...styles,
-								minHeight: '34px'
-							})
-						}}
 						options={options.ipType.map(item => ({
 							value: item,
 							label: item

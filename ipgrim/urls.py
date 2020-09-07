@@ -88,7 +88,7 @@ urlpatterns = [
     re_path(r"^api/search-app/search/applicanttrend$", csrf_exempt(get_search_applicant_trend)),
     re_path(r"^api/search-app/search/similar$", csrf_exempt(get_search_similar)),         
 
-    re_path(r"^api/company-app/query$", get_companies_query),
+    re_path(r"^api/company-app/query/$", get_companies_query),
     re_path(r"^api/company-app/searchs/$", get_companies),
     re_path(r"^api/company-app/searchs/searchsnum$", get_companies_num),
     re_path(r"^api/company-app/searchs/stock$", get_stock),

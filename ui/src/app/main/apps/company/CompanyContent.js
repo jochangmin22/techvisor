@@ -5,7 +5,7 @@ import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { setMockData } from './store/searchsSlice';
 // import { authRoles } from "app/auth";
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-import searchData from 'app/main/apps/lib/searchDataNew';
+import searchData from 'app/main/apps/lib/mockDataCompanyApp';
 import ContentTable from './searchs/ContentTable';
 
 function CompanyContent(props) {

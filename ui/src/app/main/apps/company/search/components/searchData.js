@@ -38,30 +38,34 @@ const searchData = {
 		engreprnm: 'Kim,Gi Nam/Kim,Hyeon Seok/Go,Dong Jin'
 	},
 	searchParams: {
-		searchText: '바이러스 and 치료 and 단백질 and 감염',
-		searchNum: '',
-		terms: [['바이러스'], ['치료'], ['단백질'], ['감염']],
-		dateType: '',
-		startDate: '',
-		endDate: '',
-		inventor: [],
-		assignee: [],
-		patentOffice: [],
-		language: [],
-		status: [],
-		ipType: []
+		searchText: '삼성전자',
+		searchNum: [],
+		companyName: [],
+		companyAddress: [],
+		bizDomain: [],
+		relatedKeyword: [],
+		customCriteria: [],
+		industry: [],
+		marketCapStart: '',
+		marketCapEnd: '',
+		foundedStart: '',
+		foundedEnd: '',
+		employeeStart: '',
+		employeeEnd: '',
+		repAgeStart: '',
+		repAgeEnd: ''
 	},
-	searchScope: {
-		volume: '',
-		limit: 100,
-		offset: 0
-	},
+	// searchScope: {
+	// 	volume: '',
+	// 	limit: 100,
+	// 	offset: 0
+	// },
 	searchLoading: false,
 	searchSubmit: true,
 	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
-	clickedSearchId: null,
-	selectedSearchIds: [],
-	topicChips: [],
+	// clickedSearchId: null,
+	// selectedSearchIds: [],
+	// topicChips: [],
 	news: [
 		{
 			title: '“‘나파모스타트’, 렘데시비르보다 코로나19 치료 효과 ‘600배’”',

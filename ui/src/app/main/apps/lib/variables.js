@@ -1256,7 +1256,7 @@ export const ipc = {
 		'인쇄회로; 전기장치의 상체 또는 구조적 세부, 전기부품의 조립체의 제조(달리 분류되지 않는 기계의 부품 또는 그 외의 장치의 유사한 세부 G21B; 박막 또는 후막회로 H01L 27/01, 27/13; 인쇄회로에의 또는 인쇄회로간의 전기접속을 위한 인쇄에 의하지 않는 수단 H01R; 특수형식의 장치의 상체 또는 구조적 세부는 관련하는 서브클라스 참조; 타에 규정이 있는 단일의 기술, 예. 가열, 스프레이 만을 포함하는 방법은 관련되는 클라스를 참조)'
 };
 
-export const leftConfig = {
+export const searchAppLeftConfig = {
 	options: {
 		dateType: { PRD: '우선일', AD: '출원일', PD: '공개일', FD: '등록일' },
 		patentOffice: ['KR', 'JR', 'US', 'EP', 'PCT', 'ETC'],
@@ -1264,19 +1264,16 @@ export const leftConfig = {
 		status: ['출원', '등록'],
 		ipType: ['특허', '실용신안']
 		// litigation: ["침해있음", "침해없음"]
-	},
-	defaultFormValue: {
-		searchText: '',
-		searchNum: '',
-		terms: [],
-		dateType: '',
-		startDate: '',
-		endDate: '',
-		inventor: [],
-		assignee: [],
-		patentOffice: [],
-		language: [],
-		status: [],
-		ipType: []
+	}
+};
+
+export const companyAppLeftConfig = {
+	options: {
+		dateType: { PRD: '우선일', AD: '출원일', PD: '공개일', FD: '등록일' },
+		patentOffice: ['KR', 'JR', 'US', 'EP', 'PCT', 'ETC'],
+		language: ['한글', '영어'],
+		status: ['출원', '등록'],
+		ipType: ['특허', '실용신안']
+		// litigation: ["침해있음", "침해없음"]
 	}
 };
