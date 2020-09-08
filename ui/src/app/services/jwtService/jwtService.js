@@ -164,14 +164,15 @@ class JwtService extends FuseUtils.EventEmitter {
 	// 403 : 코드사용 -> name
 	// 410 : 코드만료 -> error
 	// 200 : 사용자 없음 -> email, register_token
-	// 200 : 사용자 있음 인증메일 -> email_auth ㅣlogged 갱신 -> user, profile, token
+	// 201 : 사용자 (users, user_profiles) 에 있음 -> 인증메일 -> email_auth ㅣlogged 갱신 -> user, profile, token
 	getToken = code => {
 		return new Promise((resolve, reject) => {
 			axios
 				.get(URL + `verify/${code}`)
 				.then(response => {
 					console.log('response', response.data);
-					// 200 : {email, register_token} or 201: { user:,profile:,token }
+					// 200 : {email, register_token}
+					// 201 : users, user_profiles 에 있음 -> { user:,profile:,token }
 					// if (response.status === 200) {
 					// 	resolve(response.data);
 					// }

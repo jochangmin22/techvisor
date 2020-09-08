@@ -53,7 +53,7 @@ function KeywordsContainer() {
 				{isEmpty ? (
 					<EmptyMsg
 						icon="blur_linear"
-						msg="핵심 주제어"
+						msg="검색결과가 너무 적습니다"
 						text="검색결과가 적어서 분석할 데이터가 부족합니다."
 					/>
 				) : (
