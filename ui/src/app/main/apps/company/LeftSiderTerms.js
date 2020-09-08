@@ -15,7 +15,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { makeStyles } from '@material-ui/core/styles';
 import _ from '@lodash';
-import parseSearchOptions from 'app/main/apps/lib/parseParamsCompanyApp';
+import parseSearchOptions from 'app/main/apps/lib/parseParamsCompany';
 import {
 	getSearchs,
 	// getWordCloud,
@@ -113,7 +113,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		repAgeEnd: searchParams.repAgeEnd
 	});
 
-	const { form, handleChange, setForm } = useForm(searchParams || initialState.searchParams);
+	const { form, setForm } = useForm(searchParams || initialState.searchParams);
 
 	useUpdateEffect(() => {
 		// Sync from leftSidebar to header

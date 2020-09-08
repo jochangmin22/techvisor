@@ -17,39 +17,14 @@ from django.contrib import admin
 from django.urls import path, re_path, include
 from django.views.decorators.csrf import csrf_exempt  # post일 경우 필요
 
-from search.views import (
-    get_searchs,
-    get_query,
-    get_search,
-    get_search_quote,
-    get_search_family,
-    get_search_ipc_cpc,
-    get_search_rnd,
-    get_search_legal,
-    get_search_registerfee,
-    get_search_rightfullorder,
-    get_search_rightholder,
-    get_search_applicant,
-    get_search_applicant_trend,
-    get_search_similar,
-    get_wordcloud,
-    get_vec,
-    get_news,
-    get_news_sa,
-    get_news_nlp,
-    get_related_company,
-    get_matrix,
-    get_matrix_dialog,
-    get_indicator
-)
-from company.views import (
-    get_companies, get_companies_query, get_companies_num, get_company, get_stock, get_crawl, get_company_info)
 from users.views import (do_auth, do_auth_start, do_verify,
                          do_access_token, do_register, do_update)
 from callback.views import (redirect_google_login, google_callback)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('search.urls')),
+    path('', include('company.urls')),
     re_path(r"^api/auth/$", csrf_exempt(do_auth)),
     re_path(r"^api/auth/start$", csrf_exempt(do_auth_start)),
     re_path(r"^api/auth/verify$", csrf_exempt(do_auth_start)),
@@ -59,44 +34,12 @@ urlpatterns = [
     path("auth/verify/<str:code>/", do_verify),
     path("auth/google/login", redirect_google_login),
     path("auth/google", google_callback),
-    re_path(r"^api/search-app/query/$", get_query),
-    re_path(r"^api/search-app/searchs/$", csrf_exempt(get_searchs)),
-    re_path(r"^api/search-app/searchs/wordcloud$", csrf_exempt(get_wordcloud)),
-    re_path(r"^api/search-app/searchs/vec$", get_vec),
-    re_path(r"^api/search-app/searchs/news$", get_news),
-    re_path(r"^api/search-app/searchs/newssa$", csrf_exempt(get_news_sa)),
-    re_path(r"^api/search-app/searchs/newsnlp$", csrf_exempt(get_news_nlp)),
-    re_path(r"^api/search-app/searchs/relatedcompany$", csrf_exempt(get_related_company)),
-    re_path(r"^api/search-app/searchs/matrix$", get_matrix),
-    re_path(r"^api/search-app/searchs/matrixdialog$", get_matrix_dialog),
-    re_path(r"^api/search-app/searchs/indicator$", csrf_exempt(get_indicator)),
+
     # path("api/search-app/thsrs/<str:keyword>/", get_thsrs),
     # path("api/search-app/applicant", get_applicant),
     # path("api/search-app/applicant/<str:keyword>/", get_applicant),
     # path("api/search-app/test/<str:keyword>/", test),
 
-    re_path(r"^api/search-app/search/$", csrf_exempt(get_search)),
-    re_path(r"^api/search-app/search/quote$", csrf_exempt(get_search_quote)),
-    re_path(r"^api/search-app/search/family$", csrf_exempt(get_search_family)),
-    re_path(r"^api/search-app/search/ipccpc$", csrf_exempt(get_search_ipc_cpc)),
-    re_path(r"^api/search-app/search/rnd$", csrf_exempt(get_search_rnd)),
-    re_path(r"^api/search-app/search/legal$", csrf_exempt(get_search_legal)),
-    re_path(r"^api/search-app/search/registerfee$", csrf_exempt(get_search_registerfee)),
-    re_path(r"^api/search-app/search/rightfullorder$", csrf_exempt(get_search_rightfullorder)),
-    re_path(r"^api/search-app/search/rightholder$", csrf_exempt(get_search_rightholder)),
-    re_path(r"^api/search-app/search/applicant$", csrf_exempt(get_search_applicant)),
-    re_path(r"^api/search-app/search/applicanttrend$", csrf_exempt(get_search_applicant_trend)),
-    re_path(r"^api/search-app/search/similar$", csrf_exempt(get_search_similar)),         
-
-    re_path(r"^api/company-app/query/$", get_companies_query),
-    re_path(r"^api/company-app/searchs/$", get_companies),
-    re_path(r"^api/company-app/searchs/searchsnum$", get_companies_num),
-    re_path(r"^api/company-app/searchs/stock$", get_stock),
-    re_path(r"^api/company-app/searchs/vec$", get_vec),
-    
-    re_path(r"^api/company-app/search/stock$", csrf_exempt(get_stock)),
-    re_path(r"^api/company-app/search/companyinfo$", csrf_exempt(get_company_info)),
-    re_path(r"^api/company-app/search/crawlstock$", csrf_exempt(get_crawl)),
     # path("api/company-app/search", get_company),
     # path("api/company-app/search/<str:companyId>/", get_company),
     # path("api/extract-app/extract_topic/<str:keyword>/", get_extract_topic),

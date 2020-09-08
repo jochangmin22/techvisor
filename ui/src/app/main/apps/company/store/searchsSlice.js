@@ -2,11 +2,30 @@ import { createSlice, createAsyncThunk, createEntityAdapter } from '@reduxjs/too
 import axios from 'axios';
 
 const URL = `${process.env.REACT_APP_API_URL}/api/company-app/searchs/`;
-const NAME = 'companyApp/search/';
+const NAME = 'companyApp/searchs/';
 
 export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async (params, subParams) => {
 	const response = await axios.get(URL, { params: params, subParams: subParams });
 	const data = await response.data;
+
+	return data;
+});
+
+export const getStock = createAsyncThunk(NAME + 'getStock', async params => {
+	const response = await axios.post(URL + 'stock', params);
+	const data = await response.data;
+
+	return data;
+});
+
+export const getCompanyInfo = createAsyncThunk(NAME + 'getCompanyInfo', async (params, { dispatch }) => {
+	const response = await axios.post(URL + 'companyinfo', params);
+	const data = await response.data;
+
+	const { 종목코드 } = data;
+	if (종목코드) {
+		dispatch(getStock({ kiscode: 종목코드 }));
+	}
 
 	return data;
 });
@@ -121,8 +140,13 @@ export const initialState = {
 	// },
 	searchLoading: null,
 	searchSubmit: null,
-	cols: ['1', '2', '3', '4', '5', '6', '7', '8']
-	// clickedSearchId: null,
+	kiscode: null,
+	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
+	stock: {
+		entities: [],
+		chartType: 'year'
+	},
+	companyInfo: []
 	// selectedSearchIds: [],
 	// topicChips: [],
 	// news: [],
@@ -173,8 +197,8 @@ const searchsSlice = createSlice({
 		setSearchLoading: (state, action) => {
 			state.searchLoading = action.payload;
 		},
-		setClickedSearchId: (state, action) => {
-			state.clickedSearchId = action.payload;
+		setKiscode: (state, action) => {
+			state.kiscode = action.payload;
 		},
 		setSearchParams: (state, action) => {
 			state.searchParams = action.payload;
@@ -216,6 +240,12 @@ const searchsSlice = createSlice({
 	extraReducers: {
 		[getSearchs.fulfilled]: (state, action) => {
 			state.entities = action.payload;
+		},
+		[getStock.fulfilled]: (state, action) => {
+			state.stock.entities = action.payload;
+		},
+		[getCompanyInfo.fulfilled]: (state, action) => {
+			state.companyInfo = action.payload;
 		},
 		[getNews.fulfilled]: (state, action) => {
 			state.news = action.payload;
@@ -262,7 +292,7 @@ export const {
 	clearSearchs,
 	clearSearchText,
 	setSearchLoading,
-	setClickedSearchId,
+	setKiscode,
 	setSearchParams,
 	setSearchNum,
 	setSearchVolume,

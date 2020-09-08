@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import Popper from '@material-ui/core/Popper';
 import Table from '@material-ui/core/Table';
@@ -7,7 +7,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import { parseInputSearchText } from 'app/main/apps/lib/parseParamsCompany';
+import { setSearchParams, setSearchSubmit, setKiscode } from 'app/main/apps/company/store/searchsSlice';
+import { useDispatch } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -110,15 +112,23 @@ const columns = ['기업명', '종목코드', '업종', '주요제품', '지역'
 
 const SearchPoper = React.forwardRef(function (props, ref) {
 	const classes = useStyles();
+	const dispatch = useDispatch();
 	const [anchorEl, setAnchorEl] = useState(props.anchorEl || null);
-	const [pendingValue, setPendingValue] = useState(props.value || []);
+	// const [pendingValue, setPendingValue] = useState(props.value || []);
 
 	// useEffect(() => {
 	// 	setAnchorEl(props.open);
 	// }, [props.open]);
 
-	const handleClick = (event, value) => {
-		setPendingValue(value);
+	const handleClick = (name, code) => {
+		const inputSearchText = '(' + name + ').CN';
+		const [_params] = parseInputSearchText(inputSearchText);
+		_params['companyName'] = [name];
+		_params['searchNum'] = ''; // prevent uncontrolled error
+		dispatch(setKiscode(code));
+		dispatch(setSearchParams(_params));
+		dispatch(setSearchSubmit(true));
+
 		if (anchorEl) {
 			anchorEl.focus();
 		}
@@ -133,10 +143,6 @@ const SearchPoper = React.forwardRef(function (props, ref) {
 		};
 	});
 
-	const handleClickAway = () => {
-		// setAnchorEl(null);
-	};
-
 	// const handleClose = (event, reason) => {
 	// 	if (reason === 'toggleInput') {
 	// 		return;
@@ -149,12 +155,11 @@ const SearchPoper = React.forwardRef(function (props, ref) {
 	// };
 
 	const open = Boolean(anchorEl);
-	const id = open ? 'SearchPoper' : undefined;
+	// const id = open ? 'SearchPoper' : undefined;
 
 	return (
 		<React.Fragment>
-			{/* <ClickAwayListener onClickAway={handleClickAway}> */}
-			<Popper id={id} open={open} anchorEl={anchorEl} placement="bottom-start" className={classes.popper}>
+			<Popper anchorEl={anchorEl} open={open} placement="bottom-start" className={classes.popper}>
 				{props.value ? (
 					<Table size="small">
 						<TableHead>
@@ -172,7 +177,9 @@ const SearchPoper = React.forwardRef(function (props, ref) {
 									key={index}
 									hover
 									className="cursor-pointer"
-									onClick={event => handleClick(value)}
+									onClick={event => {
+										handleClick(value.회사명, value.종목코드);
+									}}
 								>
 									<TableCell width="15%">{value.회사명}</TableCell>
 									<TableCell width="10%">{value.종목코드}</TableCell>
@@ -193,7 +200,6 @@ const SearchPoper = React.forwardRef(function (props, ref) {
 					<div />
 				)}
 			</Popper>
-			{/* </ClickAwayListener> */}
 		</React.Fragment>
 	);
 });

@@ -1,0 +1,35 @@
+from django.urls import path, re_path
+from django.views.decorators.csrf import csrf_exempt  # post일 경우 필요
+
+from . import views
+
+urlpatterns = [
+    re_path(r"^api/search-app/query/$", views.get_query),
+    re_path(r"^api/search-app/searchs/$", csrf_exempt(views.get_searchs)),
+    re_path(r"^api/search-app/searchs/wordcloud$", csrf_exempt(views.get_wordcloud)),
+    re_path(r"^api/search-app/searchs/vec$", views.get_vec),
+    re_path(r"^api/search-app/searchs/news$", views.get_news),
+    re_path(r"^api/search-app/searchs/newssa$", csrf_exempt(views.get_news_sa)),
+    re_path(r"^api/search-app/searchs/newsnlp$", csrf_exempt(views.get_news_nlp)),
+    re_path(r"^api/search-app/searchs/relatedcompany$", csrf_exempt(views.get_related_company)),
+    re_path(r"^api/search-app/searchs/matrix$", views.get_matrix),
+    re_path(r"^api/search-app/searchs/matrixdialog$", views.get_matrix_dialog),
+    re_path(r"^api/search-app/searchs/indicator$", csrf_exempt(views.get_indicator)),
+    # path("api/search-app/thsrs/<str:keyword>/", get_thsrs),
+    # path("api/search-app/applicant", get_applicant),
+    # path("api/search-app/applicant/<str:keyword>/", get_applicant),
+    # path("api/search-app/test/<str:keyword>/", test),
+
+    re_path(r"^api/search-app/search/$", csrf_exempt(views.get_search)),
+    re_path(r"^api/search-app/search/quote$", csrf_exempt(views.get_search_quote)),
+    re_path(r"^api/search-app/search/family$", csrf_exempt(views.get_search_family)),
+    re_path(r"^api/search-app/search/ipccpc$", csrf_exempt(views.get_search_ipc_cpc)),
+    re_path(r"^api/search-app/search/rnd$", csrf_exempt(views.get_search_rnd)),
+    re_path(r"^api/search-app/search/legal$", csrf_exempt(views.get_search_legal)),
+    re_path(r"^api/search-app/search/registerfee$", csrf_exempt(views.get_search_registerfee)),
+    re_path(r"^api/search-app/search/rightfullorder$", csrf_exempt(views.get_search_rightfullorder)),
+    re_path(r"^api/search-app/search/rightholder$", csrf_exempt(views.get_search_rightholder)),
+    re_path(r"^api/search-app/search/applicant$", csrf_exempt(views.get_search_applicant)),
+    re_path(r"^api/search-app/search/applicanttrend$", csrf_exempt(views.get_search_applicant_trend)),
+    re_path(r"^api/search-app/search/similar$", csrf_exempt(views.get_search_similar)),         
+]

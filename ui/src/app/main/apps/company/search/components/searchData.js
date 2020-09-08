@@ -38,9 +38,9 @@ const searchData = {
 		engreprnm: 'Kim,Gi Nam/Kim,Hyeon Seok/Go,Dong Jin'
 	},
 	searchParams: {
-		searchText: '삼성전자',
+		searchText: '(삼성).CN',
 		searchNum: [],
-		companyName: [],
+		companyName: ['삼성'],
 		companyAddress: [],
 		bizDomain: [],
 		relatedKeyword: [],

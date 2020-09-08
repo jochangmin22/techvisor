@@ -14,7 +14,6 @@ import json
 
 from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
 
-
 # caching with redis
 from django.core.cache import cache
 from django.conf import settings
@@ -32,17 +31,6 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 # from collections import OrderedDict
 # from itertools import repeat
 ### for api }
-
-# 국민연금 가입 사업장 내역' 데이터셋의 '사업장 정보조회 서비스
-URL = "http://apis.data.go.kr/B552015/NpsBplcInfoInqireService/"
-SERVICE_KEY = "2vd6KuqxkMvAIit6jtPA4Mz%2BQOmviDM0BqwkTM32%2FWmXeMu94AgrHPsdHDKA3na%2Bm9tnnf%2FEwLOyGlWmD9d6nw%3D%3D"
-OPER_LIST = "getBassInfoSearch"
-OPER_DETAIL = "getDetailInfoSearch"
-OPER_PERIOD = "getPdAcctoSttusInfoSearch"
-
-# list params sample : ?ldong_addr_mgpl_dg_cd=41&ldong_addr_mgpl_sggu_cd=117&ldong_addr_mgpl_sggu_emd_cd=101&wkpl_nm=삼성전자&bzowr_rgst_no=124815&pageNo=10&startPage=10&numOfRows=1&pageSize=1&serviceKey=서비스인증키
-# detail params sample : ?seq=22216&serviceKey=서비스인증키
-# period params sample : ?seq=784911&data_crt_ym=201510&serviceKey=서비스인증키
 
 def parse_companies(request, mode="begin"): # mode : begin, nlp, query
     """ 쿼리 실행 및 결과 저장 """
@@ -134,7 +122,7 @@ def parse_companies(request, mode="begin"): # mode : begin, nlp, query
 
 
 
-def parse_companies_query(request):
+def parse_query(request):
     """ 쿼리 확인용 """
     return HttpResponse(parse_companies(request, mode="query"), content_type="text/plain; charset=utf-8")
 
@@ -333,95 +321,8 @@ def tsquery_keywords(keyword="", fieldName=""):
         res = None
     return res
 
-def parse_companies_num(request, mode="begin"): # mode : begin, nlp, query
-    """ 쿼리 실행 및 결과 저장 ; 번호검색 """
-    # api 저장용 params
-    params = {}
-    params["searchNum"] = request.GET.get("searchNum") if request.GET.get("searchNum") else ""
-    params["searchNumNotHyphens"] = params["searchNum"].replace("-","") if params["searchNum"] else ""
-    apiParams = params["searchNum"] # apiParams = "¶".join(params.values())
 
-    context = cache.get(apiParams)    
-    if context and context['raw'] and mode == "begin":
-        return JsonResponse(context['raw'], safe=False)
 
-    if context and context['nlp_raw'] and mode == 'nlp':
-        return context['nlp_raw']    
-
-    with connection.cursor() as cursor:
-        whereNum = ""
-        # fields without "-"
-        for value in ["종목코드"]:
-            whereNum += value + "::text like '%" + params["searchNumNotHyphens"] + "%' or "
-
-        # TODO : hyphen refine
-        # fields with "-"
-        # for value in ["우선권주장출원번호1", "우선권주장출원번호2", "우선권주장출원번호3", "우선권주장출원번호4", "우선권주장출원번호5", "우선권주장출원번호6", "우선권주장출원번호7", "우선권주장출원번호8", "우선권주장출원번호9", "우선권주장출원번호10"]:
-        #     whereNum += value + "::text like '%" + params["searchNum"] + "%' or "
-        if whereNum.endswith(" or "):
-            whereNum = whereNum[:-4]          
-
-        query = 'SELECT * FROM 상장법인목록 WHERE ' + whereNum
-
-        if mode == "query": # mode가 query면 여기서 분기
-           return query
-
-        cursor.execute(
-            "SET work_mem to '100MB';"
-            + query
-        )
-        row = dictfetchall(cursor)
-
-    # return HttpResponse(query, content_type="text/plain; charset=utf-8")
-
-    nlp_raw = ""
-    mtx_raw = []
-    # x = []
-    # if row:
-
-        # mtx_raw = deepcopy(row)
-        # # nlp, mtx parse
-        # for i in range(len(row)):
-        #     # x += row[i]["요약token"].split()
-        #     nlp_raw += row[i]["요약token"] + " "
-        #     del row[i]["요약token"]  # grid에는 초록 안쓰므로 nlp_raw에 저장하고 바로 제거 - row는 list of dictionaries 형태임
-
-        #     # matrix는 출원일자, 출원인1, ipc요약, 요약token만 사용
-        #     mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]
-        #     del mtx_raw[i]["등록사항"]
-        #     del mtx_raw[i]["발명의명칭(국문)"]
-        #     del mtx_raw[i]["발명의명칭(영문)"]
-        #     del mtx_raw[i]["출원인코드1"]
-        #     del mtx_raw[i]["출원인국가코드1"]
-        #     del mtx_raw[i]["발명자1"]
-        #     del mtx_raw[i]["발명자국가코드1"]
-        #     del mtx_raw[i]["등록일자"]
-        #     del mtx_raw[i]["공개일자"]        
-        #     # del mtx_raw[i][:4]
-        #     # del mtx_raw[i][6:12]            
-
-        # if nlp_raw.endswith(" "):
-        #     nlp_raw = nlp_raw[:-1]
-    # else:  # 결과값 없을 때 처리
-        # row = []
-
-    # Redis 저장 {
-    new_context = {}
-    new_context['nlp_raw'] = nlp_raw
-    new_context['mtx_raw'] = mtx_raw
-    new_context['raw'] = row
-    new_context['wordcloud'] = []
-    new_context['vec'] = []
-    new_context['matrix'] = []
-    cache.set(apiParams, new_context, CACHE_TTL)
-    # Redis 저장 }
-
-    if mode == "begin":
-        return JsonResponse(row, safe=False)
-    elif mode =="nlp":
-        return nlp_raw
-    elif mode =="matrix":
-        return mtx_raw
 
 def tokenizer( raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]): # NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
     mecab = Mecab()    

@@ -96,6 +96,10 @@ export const initialState = {
 		status: [],
 		ipType: []
 	},
+	searchLoading: null,
+	searchSubmit: null,
+	clickedSearchId: null,
+	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
 	analysisOptions: {
 		wordCloudOptions: {
 			volume: '요약',
@@ -116,10 +120,6 @@ export const initialState = {
 			output: 20
 		}
 	},
-	searchLoading: null,
-	searchSubmit: null,
-	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
-	clickedSearchId: null,
 	selectedSearchIds: [],
 	topicChips: [],
 	news: [],
