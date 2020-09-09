@@ -89,10 +89,10 @@ class JwtService extends FuseUtils.EventEmitter {
 					}
 				})
 				.then(response => {
-					if (response.data.signed) {
-						resolve(response.data.signed);
+					if (response.data.signedIn) {
+						resolve(response.data.signedIn);
 					} else {
-						reject(response.data.signed);
+						reject(response.data.signedIn);
 					}
 				});
 		});
@@ -168,9 +168,9 @@ class JwtService extends FuseUtils.EventEmitter {
 	getToken = code => {
 		return new Promise((resolve, reject) => {
 			axios
-				.get(URL + `verify/${code}`)
+				.get(URL + `verify/${code}`) // users.py > auth_verify
 				.then(response => {
-					console.log('response', response.data);
+					// console.log('response', response.data);
 					// 200 : {email, register_token}
 					// 201 : users, user_profiles 에 있음 -> { user:,profile:,token }
 					// if (response.status === 200) {
@@ -179,7 +179,7 @@ class JwtService extends FuseUtils.EventEmitter {
 					resolve(response.data);
 				})
 				.catch(error => {
-					console.log('error', error.response.code);
+					// console.log('error', error.response.code);
 					reject(error);
 					// Promise.reject(new Error('Not Found'));
 					// console.log('error', 'fdf');

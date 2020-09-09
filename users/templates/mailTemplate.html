@@ -24,7 +24,7 @@
 </div>
 
 <a
-    href="http://v.ipgrim.com:8001/api/auth/verify/{{ code }}"
+    href="{{ url }}/{{ keywords.type }}/{{ code }}"
     style="
         text-decoration: none;
         width: 400px;
@@ -55,8 +55,8 @@
         혹은, 다음 링크를 열어주세요:<br />
         <a
             style="color: #b197fc;"
-            href="http:/v.ipgrim.com:8001/api/auth/verify/{{ code }}"
-            >http://v.ipgrim.com:8001/api/auth/verify/{{ code }}</a
+            href="{{ url }}/{{ keywords.type }}/{{ code }}"
+            >{{ url }}/{{ keywords.type }}/{{ code }}</a
         >
     </div>
     <br />

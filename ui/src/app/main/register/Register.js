@@ -1,150 +1,215 @@
+import { TextFieldFormsy } from '@fuse/core/formsy';
 import FuseAnimate from '@fuse/core/FuseAnimate';
+import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import Icon from '@material-ui/core/Icon';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import { darken } from '@material-ui/core/styles/colorManipulator';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
-import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import Auth0RegisterTab from './tabs/Auth0RegisterTab';
-import FirebaseRegisterTab from './tabs/FirebaseRegisterTab';
-import JWTRegisterTab from './tabs/JWTRegisterTab';
+import { Link, useParams } from 'react-router-dom';
+import { submitRegister, getRegisterToken } from 'app/auth/store/registerSlice';
+import Formsy from 'formsy-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useDeepCompareEffect } from '@fuse/hooks';
 
 const useStyles = makeStyles(theme => ({
 	root: {
-		background: `linear-gradient(to left, ${theme.palette.primary.dark} 0%, ${darken(
-			theme.palette.primary.dark,
-			0.5
-		)} 100%)`,
-		color: theme.palette.primary.contrastText
-	},
-	leftSection: {},
-	rightSection: {
-		background: `linear-gradient(to left, ${theme.palette.primary.dark} 0%, ${darken(
-			theme.palette.primary.dark,
-			0.5
-		)} 100%)`,
+		background: `radial-gradient(${darken(theme.palette.primary.dark, 0.5)} 0%, ${theme.palette.primary.dark} 80%)`,
 		color: theme.palette.primary.contrastText
 	}
 }));
 
 function Register() {
 	const classes = useStyles();
-	const [selectedTab, setSelectedTab] = useState(0);
+	const dispatch = useDispatch();
+	const routeParams = useParams();
+	const register = useSelector(({ auth }) => auth.register);
 
-	function handleTabChange(event, value) {
-		setSelectedTab(value);
+	const [isFormValid, setIsFormValid] = useState(false);
+	// eslint-disable-next-line
+	const [fixedEmail, setFixedEmail] = useState(false);
+	const formRef = useRef(null);
+
+	useDeepCompareEffect(() => {
+		/**
+		 * Get refreshToken
+		 */
+		dispatch(getRegisterToken(routeParams.code));
+	}, [dispatch, routeParams.code]);
+
+	useEffect(() => {
+		if (register.error && (register.error.username || register.error.password || register.error.email)) {
+			formRef.current.updateInputsWithError({
+				...register.error
+			});
+			disableButton();
+		}
+	}, [register.error]);
+
+	function disableButton() {
+		setIsFormValid(false);
+	}
+
+	function enableButton() {
+		setIsFormValid(true);
+	}
+
+	function handleSubmit(model) {
+		dispatch(submitRegister(model));
 	}
 
 	return (
-		<div
-			className={clsx(
-				classes.root,
-				'flex flex-col flex-auto items-center justify-center flex-shrink-0 p-16 md:p-24'
-			)}
-		>
-			<FuseAnimate animation="transition.expandIn">
-				<div className="flex w-full max-w-400 md:max-w-3xl rounded-12 shadow-2xl overflow-hidden">
-					<Card
-						className={clsx(
-							classes.leftSection,
-							'flex flex-col w-full max-w-sm items-center justify-center'
-						)}
-						square
-						elevation={0}
-					>
-						<CardContent className="flex flex-col items-center justify-center w-full py-96 max-w-320">
-							<FuseAnimate delay={300}>
-								<div className="flex items-center justif-center mb-32">
-									<img className="logo-icon w-48" src="assets/images/logos/fuse.svg" alt="logo" />
-									<div className="border-l-1 mr-4 w-1 h-40" />
-									<div>
-										<Typography className="text-24 font-800 logo-text" color="inherit">
-											FUSE
-										</Typography>
-										<Typography
-											className="text-16 tracking-widest -mt-8 font-700"
-											color="textSecondary"
-										>
-											REACT
-										</Typography>
-									</div>
-								</div>
-							</FuseAnimate>
+		<div className={clsx(classes.root, 'flex flex-col flex-auto flex-shrink-0 items-center justify-center p-32')}>
+			<div className="flex flex-col items-center justify-center w-full">
+				<FuseAnimate animation="transition.expandIn">
+					<Card className="w-full max-w-384">
+						<CardContent className="flex flex-col items-center justify-center p-32">
+							{/* <img className="w-128 m-32" src="assets/images/logos/logo_line.svg" alt="logo" /> */}
 
-							<Tabs
-								value={selectedTab}
-								onChange={handleTabChange}
-								variant="fullWidth"
-								className="w-full mb-32"
+							<Typography variant="h6" className="mt-16 mb-32">
+								회원 가입
+							</Typography>
+							<Formsy
+								onValidSubmit={handleSubmit}
+								onValid={enableButton}
+								onInvalid={disableButton}
+								ref={formRef}
+								className="flex flex-col justify-center w-full"
 							>
-								<Tab
-									icon={
-										<img
-											className="h-40 p-4 bg-black rounded-12"
-											src="assets/images/logos/jwt.svg"
-											alt="firebase"
-										/>
-									}
-									className="min-w-0"
-									label="JWT"
+								<TextFieldFormsy
+									className="mb-16"
+									type="text"
+									name="displayName"
+									label="이름"
+									validations={{
+										minLength: 2
+									}}
+									validationErrors={{
+										minLength: '길이가 2글자 이상이여야 합니다'
+									}}
+									InputProps={{
+										endAdornment: (
+											<InputAdornment position="end">
+												<Icon className="text-20" color="action">
+													person
+												</Icon>
+											</InputAdornment>
+										)
+									}}
+									variant="outlined"
+									required
 								/>
-								<Tab
-									icon={
-										<img className="h-40" src="assets/images/logos/firebase.svg" alt="firebase" />
-									}
-									className="min-w-0"
-									label="Firebase"
-								/>
-								<Tab
-									icon={<img className="h-40" src="assets/images/logos/auth0.svg" alt="auth0" />}
-									className="min-w-0"
-									label="Auth0"
-								/>
-							</Tabs>
 
-							{selectedTab === 0 && <JWTRegisterTab />}
-							{selectedTab === 1 && <FirebaseRegisterTab />}
-							{selectedTab === 2 && <Auth0RegisterTab />}
-						</CardContent>
+								<TextFieldFormsy
+									className="mb-16"
+									type="text"
+									name="email"
+									label="이메일"
+									// value={fixedEmail ? false : true}
+									validations="isEmail"
+									validationErrors={{
+										isEmail: '이메일 형식이 맞지 않습니다'
+									}}
+									InputProps={{
+										endAdornment: (
+											<InputAdornment position="end">
+												<Icon className="text-20" color="action">
+													email
+												</Icon>
+											</InputAdornment>
+										)
+									}}
+									variant="outlined"
+									required={fixedEmail ? false : true}
+									disabled={fixedEmail ? true : false}
+								/>
 
-						<div className="flex flex-col items-center justify-center pb-32">
-							<div>
-								<span className="font-medium mr-8">Already have an account?</span>
-								<Link className="font-medium" to="/login">
-									Login
+								<TextFieldFormsy
+									className="mb-16"
+									type="password"
+									name="password"
+									label="비밀번호"
+									validations={{
+										minLength: 4
+									}}
+									validationErrors={{
+										minLength: '길이가 4글자 이상이여야 합니다'
+									}}
+									// validations="equalsField:password-confirm"
+									// validationErrors={{
+									// 	equalsField: '비밀번호가 일치하지 않습니다'
+									// }}
+									InputProps={{
+										endAdornment: (
+											<InputAdornment position="end">
+												<Icon className="text-20" color="action">
+													vpn_key
+												</Icon>
+											</InputAdornment>
+										)
+									}}
+									variant="outlined"
+									required
+								/>
+
+								<TextFieldFormsy
+									className="mb-16"
+									type="password"
+									name="password-confirm"
+									label="비밀번호 확인"
+									validations="equalsField:password"
+									validationErrors={{
+										equalsField: '비밀번호가 일치하지 않습니다'
+									}}
+									InputProps={{
+										endAdornment: (
+											<InputAdornment position="end">
+												<Icon className="text-20" color="action">
+													vpn_key
+												</Icon>
+											</InputAdornment>
+										)
+									}}
+									variant="outlined"
+									required
+								/>
+
+								<Button
+									type="submit"
+									variant="contained"
+									color="primary"
+									className="w-full mx-auto mb-32 normal-case"
+									aria-label="가입"
+									disabled={!isFormValid}
+									value="legacy"
+								>
+									다음
+								</Button>
+							</Formsy>
+
+							{/* <div className="flex flex-col items-center justify-center pt-32 pb-24">
+								<span className="font-medium text-12 pb-8">이미 계정이 있나요?</span>
+								<Link className="font-medium text-12 mb-8" to="/login">
+									로그인
 								</Link>
-							</div>
-							<Link className="font-medium mt-8" to="/">
-								Back to Dashboard
+							</div> */}
+							<Link className="font-medium mb-32" to="/">
+								취소
 							</Link>
-						</div>
+						</CardContent>
 					</Card>
-
-					<div
-						className={clsx(classes.rightSection, 'hidden md:flex flex-1 items-center justify-center p-64')}
-					>
-						<div className="max-w-320">
-							<FuseAnimate animation="transition.slideUpIn" delay={400}>
-								<Typography variant="h3" color="inherit" className="font-800 leading-tight">
-									Welcome <br />
-									to the <br /> FUSE React!
-								</Typography>
-							</FuseAnimate>
-
-							<FuseAnimate delay={500}>
-								<Typography variant="subtitle1" color="inherit" className="mt-32">
-									Powerful and professional admin template for Web Applications, CRM, CMS, Admin
-									Panels and more.
-								</Typography>
-							</FuseAnimate>
-						</div>
-					</div>
+				</FuseAnimate>
+				<div className="flex flex-row items-center justify-center pt-32 pb-24">
+					<span className="font-light text-12 pr-8">이미 계정이 있나요?</span>
+					<Link className="font-medium text-12" to="/login">
+						로그인
+					</Link>
 				</div>
-			</FuseAnimate>
+			</div>
 		</div>
 	);
 }

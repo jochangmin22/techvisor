@@ -101,7 +101,7 @@ def auth_start(request):
 def sendmail(shortid, received_email, keywords):
     # aws ses : ep026
     subject = 'ipgrim ' + keywords['text']
-    html_message = render_to_string('mailTemplate.html', {'code': shortid, 'keywords': keywords})
+    html_message = render_to_string('mailTemplate.html', {'code': shortid, 'keywords': keywords, 'url': 'http://btowin.synology.me:4000'})
     plain_message = strip_tags(html_message)
     from_email = settings.DEFAULT_FROM_EMAIL 
     to = received_email
@@ -114,6 +114,7 @@ def auth_verify(request, code):
     # 200 : 사용자 없음 -> send email, register_token
     # 201 : 사용자 있음 인증메일 -> email_auth ㅣlogged 갱신 -> user, profile, token
     try:
+        # code not exist?
         # 4XX : check code
         emailAuth = email_auth.objects.filter(code=code)
         if not emailAuth.exists():
@@ -121,18 +122,19 @@ def auth_verify(request, code):
 
         row = list(emailAuth.values())
         emailAuthData = row[0]
-
+        # used?
         if emailAuthData['logged']:
             # return JsonResponse({'name': 'TOKEN_ALREADY_USED'}, status=403, safe=False)
             return HttpResponse('TOKEN_ALREADY_USED', status=403)
 
-        # check date
+        # expried? 
         timestamp = emailAuthData['created_at'].timestamp()
         valid_period_secs = verifyExpiresIn.total_seconds()
         if time.time() - timestamp > valid_period_secs:
             # return HttpResponseGone('EXPIRED_CODE') # 410
             return HttpResponse('EXPIRED_CODE', status=410)
 
+        # new user?
         # 2XX : check user with code
         row = users.objects.filter(data__email=emailAuthData['email'])
         if not row.exists():
@@ -144,14 +146,16 @@ def auth_verify(request, code):
                 'exp': now + verifyExpiresIn
             }
             register_token = jwt.encode(payload, secret_key , algorithm=algorithm)
-            response = {'email': emailAuthData['email'], 'register_token' : register_token.decode('utf-8')}
-            # return HttpResponse(response)
+            register_token = register_token.decode('utf-8')
+            # https://stackoverflow.com/questions/40059654/python-convert-a-bytes-array-into-json-format
+            response = {'email': emailAuthData['email'], 'register_token' : register_token} # .decode('utf8').replace("'", '"')}
             return JsonResponse(response, status=200, safe=False)
 
         # user exists
         row = list(row.values())
         userData = row[0]
 
+        # no userProfiles
         userProfiles = user_profiles.objects.filter(fk_user_id=userData['id'])
         if not userProfiles.exists():
             return HttpResponse('no profile', content_type="text/plain; charset=utf-8")
@@ -214,10 +218,10 @@ def access_token(request):
             return JsonResponse({ "error" :"Token Expired"}, status=401, safe=False)
             # Signature has expired
        
-        received_uuid = payload.get("id")
+        received_id = payload.get("id")
         try:
             # Loading user data
-            row = users.objects.filter(uuid=received_uuid)
+            row = users.objects.filter(id=received_id)
             userData = row[0] if row else {}
 
             del userData['password'] # deleted for security
@@ -252,8 +256,8 @@ def register(request):
         if not error['displayName'] and not error['password'] and not error['email']:
             newUid = str(uuid.uuid4())
             newUser = {
-                'uuid': newUid,
-                'from': 'custom-db',
+                'id': newUid,
+                'my_from': 'custom-db',
                 'password': received_password,
                 'role': 'admin',
                 'data': {
@@ -281,7 +285,7 @@ def register(request):
 def update_user_data(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        received_id = data["user"].get('uuid')
+        received_id = data["user"].get('id')
 
         newData = {
             'data' : data["user"]["data"]

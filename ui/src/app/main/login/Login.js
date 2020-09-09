@@ -61,10 +61,11 @@ function Login() {
 	}, [login.error]);
 
 	useEffect(() => {
-		if (login.signedIn !== null) {
-			setStart(false);
-		}
+		// if (login.signedIn !== null) {
+		// 	setStart(false);
+		// }
 		if (login.signedIn === true || login.signedIn === false) {
+			setStart(false);
 			setSigned(login.signedIn);
 		}
 	}, [login.signedIn, setStart]);
@@ -141,9 +142,11 @@ function Login() {
 									// required={isEmailExists ? false : true}
 									required={start}
 								/>
-								{/* 시작 signedIn = null 없어서발송 signedIn= false 있어서 암호 signedIn= true */}
+								{/* 시작 signedIn = null, 없어서 발송 signedIn= false, 있어서 암호 signedIn= true */}
 								<Alert className={clsx(signedIn === false ? 'flex' : 'hidden')} severity="success">
-									회원가입 링크가 이메일로 전송되었습니다.
+									{signedIn ? '로그인' : '회원가입'} 링크가 이메일로 전송되었습니다.
+									<br />
+									이메일의 링크를 통하여 {signedIn ? '로그인' : '회원가입'}을 계속하세요.
 								</Alert>
 								<TextFieldFormsy
 									className={signedIn === true ? '' : 'hidden'}

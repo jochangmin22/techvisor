@@ -4,7 +4,7 @@ from .models import users, email_auth, auth_tokens, user_profiles
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = users
-        field = ['uuid', 'from','password', 'role', 'data']
+        field = ['id', 'from','password', 'role', 'data']
 
 class EmailAuthSerializer(serializers.ModelSerializer):
     class Meta:

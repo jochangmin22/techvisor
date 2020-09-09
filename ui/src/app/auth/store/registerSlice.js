@@ -62,12 +62,27 @@ export const registerWithFirebase = model => async dispatch => {
 		});
 };
 
+export const getRegisterToken = code => async dispatch => {
+	return jwtService
+		.getToken(code)
+		.then(response => {
+			// console.log('getRegisterToken -> response', response);
+			// 200 : no user in db {email, register_token} or user in db 201: { user:,profile:,token }
+			// dispatch(UserActions.setUserData(user));
+			return dispatch(setRegisterToken(response.register_token));
+		})
+		.catch(error => {
+			return dispatch(registerError(error));
+		});
+};
+
 const initialState = {
 	success: false,
 	error: {
 		username: null,
 		password: null
-	}
+	},
+	registerToken: ''
 };
 
 const registerSlice = createSlice({
@@ -80,11 +95,14 @@ const registerSlice = createSlice({
 		registerError: (state, action) => {
 			state.success = false;
 			state.error = action.payload;
+		},
+		setRegisterToken: (state, action) => {
+			state.registerToken = action.payload;
 		}
 	},
 	extraReducers: {}
 });
 
-export const { registerSuccess, registerError } = registerSlice.actions;
+export const { registerSuccess, registerError, setRegisterToken } = registerSlice.actions;
 
 export default registerSlice.reducer;
