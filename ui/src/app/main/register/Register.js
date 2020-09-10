@@ -6,15 +6,16 @@ import CardContent from '@material-ui/core/CardContent';
 import Icon from '@material-ui/core/Icon';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Typography from '@material-ui/core/Typography';
+import Alert from '@material-ui/lab/Alert';
 import { makeStyles } from '@material-ui/core/styles';
 import { darken } from '@material-ui/core/styles/colorManipulator';
 import clsx from 'clsx';
 import { Link, useParams } from 'react-router-dom';
-import { submitRegister, getRegisterToken } from 'app/auth/store/registerSlice';
+import { submitRegister } from 'app/auth/store/registerSlice';
 import Formsy from 'formsy-react';
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useDeepCompareEffect } from '@fuse/hooks';
+// import { useDeepCompareEffect } from '@fuse/hooks';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -34,18 +35,21 @@ function Register() {
 	const [fixedEmail, setFixedEmail] = useState(false);
 	const formRef = useRef(null);
 
-	useDeepCompareEffect(() => {
-		/**
-		 * Get refreshToken
-		 */
-		dispatch(getRegisterToken(routeParams.code));
-	}, [dispatch, routeParams.code]);
+	// useDeepCompareEffect(() => {
+	// 	/**
+	// 	 * Get refreshToken
+	// 	 */
+	// 	dispatch(getRegisterToken(routeParams.code));
+	// }, [dispatch, routeParams.code]);
 
 	useEffect(() => {
-		if (register.error && (register.error.username || register.error.password || register.error.email)) {
-			formRef.current.updateInputsWithError({
-				...register.error
-			});
+		if (
+			register.error &&
+			(register.error.username || register.error.password || register.error.email || register.error.code)
+		) {
+			// code is not a formsy element, so delete it
+			const { code: _, ..._error } = register.error;
+			formRef.current.updateInputsWithError({ ..._error });
 			disableButton();
 		}
 	}, [register.error]);
@@ -59,7 +63,7 @@ function Register() {
 	}
 
 	function handleSubmit(model) {
-		dispatch(submitRegister(model));
+		dispatch(submitRegister(model, routeParams.code));
 	}
 
 	return (
@@ -177,6 +181,12 @@ function Register() {
 									variant="outlined"
 									required
 								/>
+								<Alert
+									className={clsx(register.error && register.error.code ? 'flex' : 'hidden')}
+									severity="error"
+								>
+									잘못된 인증메일 입니다. 인증메일을 다시 받으십시오
+								</Alert>
 
 								<Button
 									type="submit"

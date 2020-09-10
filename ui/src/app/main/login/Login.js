@@ -14,7 +14,7 @@ import Formsy from 'formsy-react';
 import TextFieldFormsy from '@fuse/core/formsy/TextFieldFormsy';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
-import { submitLogin, submitLoginEmail } from 'app/auth/store/loginSlice';
+import { submitPassword, submitEmail } from 'app/auth/store/loginSlice';
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from '@material-ui/lab/Alert';
@@ -67,6 +67,7 @@ function Login() {
 		if (login.signedIn === true || login.signedIn === false) {
 			setStart(false);
 			setSigned(login.signedIn);
+			disableButton();
 		}
 	}, [login.signedIn, setStart]);
 
@@ -83,11 +84,13 @@ function Login() {
 	function handleSubmit(model) {
 		setShowLoading(true);
 		if (start) {
-			dispatch(submitLoginEmail(model)).then(() => {
+			dispatch(submitEmail(model)).then(() => {
 				setShowLoading(false);
 			});
+			disableButton();
 		} else {
-			dispatch(submitLogin(model));
+			disableButton();
+			dispatch(submitPassword(model));
 			setShowLoading(false);
 		}
 	}
@@ -142,12 +145,13 @@ function Login() {
 									// required={isEmailExists ? false : true}
 									required={start}
 								/>
-								{/* 시작 signedIn = null, 없어서 발송 signedIn= false, 있어서 암호 signedIn= true */}
+								{/* signedIn = null (시작), false (없어서 발송), true (있어서 암호) */}
 								<Alert className={clsx(signedIn === false ? 'flex' : 'hidden')} severity="success">
 									{signedIn ? '로그인' : '회원가입'} 링크가 이메일로 전송되었습니다.
 									<br />
 									이메일의 링크를 통하여 {signedIn ? '로그인' : '회원가입'}을 계속하세요.
 								</Alert>
+								{/* TODO : need to preventFirstValidation*/}
 								<TextFieldFormsy
 									className={signedIn === true ? '' : 'hidden'}
 									type="password"
@@ -172,6 +176,9 @@ function Login() {
 									// required={isEmailExists ? true : false}
 									required={signedIn === true}
 								/>
+								<Alert className={clsx(signedIn === true ? 'flex' : 'hidden')} severity="success">
+									비밀번호를 입력하세요.
+								</Alert>
 								<Button
 									type="submit"
 									variant="contained"

@@ -17,7 +17,6 @@ from django.contrib import admin
 from django.urls import path, re_path, include
 from django.views.decorators.csrf import csrf_exempt  # post일 경우 필요
 
-# from users.views import (do_auth, do_auth_start, do_verify, do_access_token, do_register, do_update)
 from callback.views import (redirect_google_login, google_callback)
 
 urlpatterns = [

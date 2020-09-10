@@ -29,35 +29,10 @@ from django.utils.html import strip_tags
 secret_key = settings.JWT_AUTH['JWT_SECRET_KEY']
 expiresIn = settings.JWT_AUTH['JWT_EXPIRATION_DELTA']
 algorithm = settings.JWT_AUTH['JWT_ALGORITHM']
+verifyExpiresIn = settings.JWT_AUTH['JWT_EMAIL_CODE_EXPIRATION_DELTA']
+
 now = datetime.datetime.utcnow()
 # now = timezone.now()
-verifyExpiresIn = settings.TOKEN_EXPIRATION_DELTA
-
-def auth(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        received_email = data["data"].get('email')
-        received_password = data["data"].get('password')
-
-        row = users.objects.filter(data__email=received_email).values()
-        row = list(row)
-
-        userData = row[0] if row else {}#dict
-        password = userData.get('password')
-
-        error = {}
-        error['password'] = None if userData and received_password == password else '암호가 잘못되었습니다'
-
-        if not error['password']:
-            del userData['password'] # deleted for security
-
-            access_token = jwt.encode({ "id": str(userData['uuid']), 'iat': now, "exp": expiresIn}, secret_key , algorithm=algorithm)
-            
-            response = { "user" : userData, "access_token" : access_token.decode('utf-8') }
-
-            return JsonResponse(response, status=200, safe=False)
-
-        return JsonResponse({"error": error}, status=200, safe=False)
 
 def auth_start(request):
     ''' 
@@ -107,84 +82,175 @@ def sendmail(shortid, received_email, keywords):
     to = received_email
     send_mail(subject, plain_message, from_email, [to], fail_silently=False, html_message=html_message)
 
-def auth_verify(request, code):
-    # 404 : 코드없음
-    # 403 : 코드사용
-    # 410 : 코드만료
-    # 200 : 사용자 없음 -> send email, register_token
-    # 201 : 사용자 있음 인증메일 -> email_auth ㅣlogged 갱신 -> user, profile, token
+def register(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        received_displayName = data.get('displayName')
+        received_password = data.get('password')
+        received_email = data.get('email')
+        received_code = data.get('code')
+
+        isEmailExists = users.objects.filter(data__email=received_email).count()
+
+        isCodeValidate = email_code_verify(received_code)
+
+        error = {}
+        error['email'] = '이 이메일은 이미 사용중입니다' if isEmailExists else None
+        error['displayName'] = '이름을 입력하세요' if not received_displayName else None
+        error['code'] = '잘못된 인증메일 입니다' if not isCodeValidate else None
+        error['password'] = None
+
+        if not error['displayName'] and not error['password'] and not error['email'] and not error['code']:
+            newUid = str(uuid.uuid4())
+            newUser = {
+                'id': newUid,
+                'my_from': 'custom-db',
+                'password': received_password,
+                'role': 'admin',
+                'data': {
+                    'displayName': received_displayName,
+                    'photoURL': 'assets/images/avatars/profile.jpg',
+                    'email': received_email,
+                    'settings': {},
+                    'shortcuts': []
+                }
+            }
+
+            users.objects.create(**newUser)
+            del newUser['password']
+
+            email_code_now_expired(received_code)
+
+            payload = {
+                'id': newUid,
+                'iat': now.timestamp(),
+                'exp': int(now.timestamp()) + expiresIn
+            }
+            access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
+        
+            return JsonResponse({ "user": newUser, "access_token" : access_token.decode('utf-8')}, status=200, safe=False)
+        return JsonResponse({'error': error}, status=200, safe=False)
+
+def email_code_verify(code):
+    '''email code validate check'''
     try:
         # code not exist?
-        # 4XX : check code
         emailAuth = email_auth.objects.filter(code=code)
         if not emailAuth.exists():
-            return HttpResponse('Not Found', status=404)
+            return False
 
         row = list(emailAuth.values())
         emailAuthData = row[0]
         # used?
         if emailAuthData['logged']:
-            # return JsonResponse({'name': 'TOKEN_ALREADY_USED'}, status=403, safe=False)
-            return HttpResponse('TOKEN_ALREADY_USED', status=403)
+            return False
 
         # expried? 
         timestamp = emailAuthData['created_at'].timestamp()
-        valid_period_secs = verifyExpiresIn.total_seconds()
-        if time.time() - timestamp > valid_period_secs:
-            # return HttpResponseGone('EXPIRED_CODE') # 410
-            return HttpResponse('EXPIRED_CODE', status=410)
+        # valid_period_secs = verifyExpiresIn.total_seconds()
+        # if time.time() - timestamp > valid_period_secs:
+        if time.time() - timestamp > verifyExpiresIn:
+            return False
+        # # new user?
+        # row = users.objects.filter(data__email=emailAuthData['email'])
+        # if row.exists():
+        #     return False
+        # else:
+        return True
+    except:
+        return False
 
-        # new user?
-        # 2XX : check user with code
-        row = users.objects.filter(data__email=emailAuthData['email'])
-        if not row.exists():
-            # generate register token
-            payload = {'id': str(emailAuthData['id']),
-                'email': emailAuthData['email'],
-                'sub': 'email-register',
-                'iat': now,
-                'exp': now + verifyExpiresIn
-            }
-            register_token = jwt.encode(payload, secret_key , algorithm=algorithm)
-            register_token = register_token.decode('utf-8')
-            # https://stackoverflow.com/questions/40059654/python-convert-a-bytes-array-into-json-format
-            response = {'email': emailAuthData['email'], 'register_token' : register_token} # .decode('utf8').replace("'", '"')}
-            return JsonResponse(response, status=200, safe=False)
-
-        # user exists
-        row = list(row.values())
-        userData = row[0]
-
-        # no userProfiles
-        userProfiles = user_profiles.objects.filter(fk_user_id=userData['id'])
-        if not userProfiles.exists():
-            return HttpResponse('no profile', content_type="text/plain; charset=utf-8")
-            
-        row = list(userProfiles.values())
-        profileData = row[0]
-
-        tokens  = generate_user_token(userData['id'])
+def email_code_now_expired(code):
+    ''' update that the email code was used once in the DB '''
+    try:
+        emailAuth = email_auth.objects.filter(code=code)
+        row = list(emailAuth.values())
+        emailAuthData = row[0]
         emailAuthData['logged'] = True
         emailAuthData['updated_at'] = now
         emailAuth.update(**emailAuthData)
-
-        response = { 'user': userData, 'profile': profileData, 'token': tokens}
-        return JsonResponse(response,status=201, safe=False)
-       
+        return True
     except:
-        return HttpResponse() # 500
-        # return JsonResponse({},status='500', safe=False)
+        return False      
 
+# def auth_verify(request, code):
+#     # 404 : 코드없음
+#     # 403 : 코드사용
+#     # 410 : 코드만료
+#     # 200 : 사용자 없음 -> send email, register_token
+#     # 201 : 사용자 있음 인증메일 -> email_auth ㅣlogged 갱신 -> user, profile, token
+#     try:
+#         # code not exist?
+#         # 4XX : check code
+#         emailAuth = email_auth.objects.filter(code=code)
+#         if not emailAuth.exists():
+#             return HttpResponse('Not Found', status=404)
 
-def auth_password(request):
+#         row = list(emailAuth.values())
+#         emailAuthData = row[0]
+#         # used?
+#         if emailAuthData['logged']:
+#             # return JsonResponse({'name': 'TOKEN_ALREADY_USED'}, status=403, safe=False)
+#             return HttpResponse('TOKEN_ALREADY_USED', status=403)
+
+#         # expried? 
+#         timestamp = emailAuthData['created_at'].timestamp()
+#         valid_period_secs = verifyExpiresIn.total_seconds()
+#         if time.time() - timestamp > valid_period_secs:
+#             # return HttpResponseGone('EXPIRED_CODE') # 410
+#             return HttpResponse('EXPIRED_CODE', status=410)
+
+#         # new user?
+#         # 2XX : check user with code
+#         row = users.objects.filter(data__email=emailAuthData['email'])
+#         if not row.exists():
+#             # generate register token
+#             payload = {'id': str(emailAuthData['id']),
+#                 'email': emailAuthData['email'],
+#                 'sub': 'email-register',
+#                 'iat': now.timestamp(),
+#                 'exp': now + verifyExpiresIn
+#             }
+#             register_token = jwt.encode(payload, secret_key , algorithm=algorithm)
+#             register_token = register_token.decode('utf-8')
+#             # https://stackoverflow.com/questions/40059654/python-convert-a-bytes-array-into-json-format
+#             response = {'email': emailAuthData['email'], 'register_token' : register_token} # .decode('utf8').replace("'", '"')}
+#             return JsonResponse(response, status=200, safe=False)
+
+#         # user exists
+#         row = list(row.values())
+#         userData = row[0]
+
+#         # no userProfiles
+#         userProfiles = user_profiles.objects.filter(fk_user_id=userData['id'])
+#         if not userProfiles.exists():
+#             return HttpResponse('no profile', content_type="text/plain; charset=utf-8")
+            
+#         row = list(userProfiles.values())
+#         profileData = row[0]
+
+#         tokens  = generate_user_token(userData['id'])
+#         emailAuthData['logged'] = True
+#         emailAuthData['updated_at'] = now
+#         emailAuth.update(**emailAuthData)
+
+#         response = { 'user': userData, 'profile': profileData, 'token': tokens}
+#         return JsonResponse(response,status=201, safe=False)
+       
+#     except:
+#         return HttpResponse() # 500
+#         # return JsonResponse({},status='500', safe=False)
+
+def auth(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_email = data["data"].get('email')
         received_password = data["data"].get('password')
 
-        row = users.objects.filter(data__email=received_email)
+        row = users.objects.filter(data__email=received_email).values()
+        row = list(row)
 
-        userData = row[0] if row else {}
+        userData = row[0] if row else {}#dict
         password = userData.get('password')
 
         error = {}
@@ -194,18 +260,18 @@ def auth_password(request):
             del userData['password'] # deleted for security
 
             payload = {
-                'id': str(userData['uuid']),
-                'iat': now,
-                'exp': now + expiresIn
+                'id': str(userData['id']),
+                'iat': now.timestamp(),
+                'exp': int(now.timestamp()) + expiresIn
             }
 
             access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
-
+            
             response = { "user" : userData, "access_token" : access_token.decode('utf-8') }
 
             return JsonResponse(response, status=200, safe=False)
 
-        return JsonResponse({"error": error}, status=400, safe=False)
+        return JsonResponse({"error": error}, status=200, safe=False)
 
 def access_token(request):
     if request.method == 'POST':
@@ -228,9 +294,9 @@ def access_token(request):
 
             # update user token
             payload = {
-                'id': str(userData['uuid']),
-                'iat': now,
-                'exp': now + expiresIn
+                'id': str(userData['id']),
+                'iat': now.timestamp(),
+                'exp': int(now.timestamp()) + expiresIn
             }
             updated_access_token = jwt.encode(payload, secret_key, algorithm=algorithm)
 
@@ -239,48 +305,38 @@ def access_token(request):
             # return JsonResponse({ "error" :"Not verified"}, status=401, safe=False)        
             return JsonResponse({ "error" :"Invalid access token detected"}, status=500, safe=False)        
 
-def register(request):
+      
+def auth_password(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        received_displayName = data.get('displayName')
-        received_password = data.get('password')
-        received_email = data.get('email')
+        received_email = data["data"].get('email')
+        received_password = data["data"].get('password')
 
-        isEmailExists = users.objects.filter(data__email=received_email).count()
+        row = users.objects.filter(data__email=received_email)
+
+        userData = row[0] if row else {}
+        password = userData.get('password')
 
         error = {}
-        error['email'] = '이 이메일은 이미 사용중입니다' if isEmailExists else None
-        error['displayName'] = '이름을 입력하세요' if not received_displayName else None
-        error['password'] = None
+        error['password'] = None if userData and received_password == password else '암호가 잘못되었습니다'
 
-        if not error['displayName'] and not error['password'] and not error['email']:
-            newUid = str(uuid.uuid4())
-            newUser = {
-                'id': newUid,
-                'my_from': 'custom-db',
-                'password': received_password,
-                'role': 'admin',
-                'data': {
-                    'displayName': received_displayName,
-                    'photoURL': 'assets/images/avatars/profile.jpg',
-                    'email': received_email,
-                    'settings': {},
-                    'shortcuts': []
-                }
-            }
-
-            users.objects.create(**newUser)
-            del newUser['password']
+        if not error['password']:
+            del userData['password'] # deleted for security
 
             payload = {
-                'id': newUid,
-                'iat': now,
-                'exp': now + expiresIn
+                'id': str(userData['id']),
+                'iat': now.timestamp(),
+                'exp': int(now.timestamp()) + expiresIn
             }
+
             access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
-        
-            return JsonResponse({ "user": newUser, "access_token" : access_token.decode('utf-8')}, status=200, safe=False)
-        return JsonResponse({'error': error}, status=200, safe=False)
+
+            response = { "user" : userData, "access_token" : access_token.decode('utf-8') }
+
+            return JsonResponse(response, status=200, safe=False)
+
+        return JsonResponse({"error": error}, status=400, safe=False)
+
 
 def update_user_data(request):
     if request.method == 'POST':
@@ -316,16 +372,16 @@ def generate_user_token(id):
         'user_id': str(id),
         'token_id': str(authTokens.id),
         'sub': 'refresh_token',
-        'iat': now,
-        'exp': now + expiresIn
+        'iat': now.timestamp(),
+        'exp': int(now.timestamp()) + expiresIn
     }
     refreshToken = jwt.encode(payload, secret_key , algorithm=algorithm)
 
     payload = {
         'user_id': str(id),
         'sub': 'access_token',
-        'iat': now,
-        'exp': now + verifyExpiresIn
+        'iat': now.timestamp(),
+        'exp': int(now.timestamp()) + verifyExpiresIn
     }    
     accessToken = jwt.encode(payload, secret_key , algorithm=algorithm)
     # return JsonResponse({ refreshToken, accessToken},safe=False)

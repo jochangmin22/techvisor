@@ -4,20 +4,7 @@ import firebaseService from 'app/services/firebaseService';
 import jwtService from 'app/services/jwtService';
 import { setUserData } from './userSlice';
 
-export const submitLogin = ({ email, password }) => async dispatch => {
-	return jwtService
-		.signInWithEmailAndPassword(email, password)
-		.then(user => {
-			dispatch(setUserData(user));
-
-			return dispatch(loginSuccess());
-		})
-		.catch(error => {
-			return dispatch(loginError(error));
-		});
-};
-
-export const submitLoginEmail = ({ email }) => async dispatch => {
+export const submitEmail = ({ email }) => async dispatch => {
 	return jwtService
 		.signInWithEmail(email)
 		.then(user => {
@@ -28,6 +15,19 @@ export const submitLoginEmail = ({ email }) => async dispatch => {
 		.catch(error => {
 			return dispatch(setSignedIn(false));
 			// return dispatch(loginError(error));
+		});
+};
+
+export const submitPassword = ({ email, password }) => async dispatch => {
+	return jwtService
+		.signInWithEmailAndPassword(email, password)
+		.then(user => {
+			dispatch(setUserData(user));
+
+			return dispatch(loginSuccess());
+		})
+		.catch(error => {
+			return dispatch(loginError(error));
 		});
 };
 

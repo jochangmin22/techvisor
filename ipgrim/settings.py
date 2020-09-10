@@ -230,8 +230,9 @@ JWT_AUTH = {
     'JWT_SECRET_KEY': SECRET_KEY,
     'JWT_ALGORITHM': 'HS256',
     'JWT_ALLOW_REFRESH': True,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=28),
+    'JWT_EXPIRATION_DELTA': 60 * 60 * 24 * 7,
+    'JWT_EMAIL_CODE_EXPIRATION_DELTA' : 60 * 60 * 24 * 1,
+    'JWT_REFRESH_EXPIRATION_DELTA': 60 * 60 * 24 * 28,
 }
 
 ANYMAIL = {

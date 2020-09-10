@@ -1,22 +1,22 @@
-from .users import auth, auth_start, auth_verify, auth_password, access_token, register, update_user_data
+from . import users
 
 def do_auth(request):
-    return auth(request)
+    return users.auth(request)
 
 def do_auth_start(request):
-    return auth_start(request)
+    return users.auth_start(request)
 
-def do_verify(request, code):
-    return auth_verify(request, code)
+# def do_verify(request, code):
+#     return users.auth_verify(request, code)
 
 def do_auth_password(request):
-    return auth_password(request)
+    return users.auth_password(request)
 
 def do_access_token(request):
-    return access_token(request)
+    return users.access_token(request)
 
 def do_register(request):
-    return register(request)
+    return users.register(request)
 
 def do_update(request):
-    return update_user_data(request)
+    return users.update_user_data(request)
