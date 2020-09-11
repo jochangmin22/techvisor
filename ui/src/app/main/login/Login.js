@@ -71,7 +71,7 @@ function Login() {
 		}
 	}, [login.signedIn, setStart]);
 
-	useEffect(() => {}, [setMode]);
+	useEffect(() => { }, [setMode]);
 
 	function disableButton() {
 		setIsFormValid(false);
@@ -290,13 +290,13 @@ function Login() {
 						</div>
 					</div>
 				) : (
-					<div className="flex flex-row items-center justify-center pt-32 pb-24">
-						<span className="font-light text-12 pr-8">이미 계정이 있나요?</span>
-						<div className="font-medium text-12 cursor-pointer" onClick={() => setMode('LOGIN')}>
-							로그인
+						<div className="flex flex-row items-center justify-center pt-32 pb-24">
+							<span className="font-light text-12 pr-8">이미 계정이 있나요?</span>
+							<div className="font-medium text-12 cursor-pointer" onClick={() => setMode('LOGIN')}>
+								로그인
 						</div>
-					</div>
-				)}
+						</div>
+					)}
 			</div>
 		</div>
 	);

@@ -75,7 +75,7 @@ function SubjectTable(props) {
 				<TableHead>
 					<TableRow>
 						<TableCell className="text-right">Surrounding word</TableCell>
-						<TableCell className="text-right" colSpan={2}>
+						<TableCell className="text-center" colSpan={2}>
 							Probability of occurrence
 						</TableCell>
 					</TableRow>

@@ -70,7 +70,7 @@ function KeywordsTable() {
 		dispatch(setSearchParams(_params));
 	}, [form]);
 
-	useEffect(() => {}, [entities]);
+	useEffect(() => { }, [entities]);
 
 	useEffect(() => {
 		const [, params] = parseSearchOptions(searchParams);
@@ -91,7 +91,7 @@ function KeywordsTable() {
 				<TableHead>
 					<TableRow>
 						<TableCell className="text-right">Surrounding word</TableCell>
-						<TableCell className="text-right" colSpan={2}>
+						<TableCell className="text-center" colSpan={2}>
 							Probability of occurrence
 						</TableCell>
 					</TableRow>

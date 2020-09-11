@@ -19,6 +19,12 @@ const themesConfig = {
 		},
 		status: {
 			danger: 'orange'
+		},
+		typography: {
+			fontFamily: [
+				'Apple SD Gothic Neo', 'AppleSDGothicNeo', 'Noto Sans KR', 'NanumGothic', 'Nalgun Gothic', '맑은 고딕',
+				'돋움', 'dotum', 'Arial', 'sans-serif'
+			].join(','),
 		}
 	},
 	defaultDark: {

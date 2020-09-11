@@ -7,7 +7,7 @@ const FuseLayoutConfigs = {
 	layout1,
 	layout2,
 	layout3,
-	layout4
+	layout4,
 };
 
 export default FuseLayoutConfigs;

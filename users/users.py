@@ -92,7 +92,7 @@ def register(request):
 
         isEmailExists = users.objects.filter(data__email=received_email).count()
 
-        isCodeValidate = email_code_verify(received_code)
+        isCodeValidate = email_code_verify(received_code, received_email)
 
         error = {}
         error['email'] = '이 이메일은 이미 사용중입니다' if isEmailExists else None
@@ -113,7 +113,8 @@ def register(request):
                     'email': received_email,
                     'settings': {},
                     'shortcuts': []
-                }
+                },
+                'is_certified': True
             }
 
             users.objects.create(**newUser)
@@ -131,7 +132,7 @@ def register(request):
             return JsonResponse({ "user": newUser, "access_token" : access_token.decode('utf-8')}, status=200, safe=False)
         return JsonResponse({'error': error}, status=200, safe=False)
 
-def email_code_verify(code):
+def email_code_verify(code, email):
     '''email code validate check'''
     try:
         # code not exist?
@@ -153,9 +154,11 @@ def email_code_verify(code):
             return False
         # # new user?
         # row = users.objects.filter(data__email=emailAuthData['email'])
-        # if row.exists():
-        #     return False
-        # else:
+        # if not row.exists():
+        #     newData = {
+        #         'is_certified' : True
+        #     }
+        #     row.update(**newData) 
         return True
     except:
         return False

@@ -27,30 +27,43 @@ function UserMenu(props) {
 
 	return (
 		<>
-			<Button className="min-h-32" onClick={userMenuClick}>
+			{/* <Button className="min-h-32" onClick={userMenuClick}>
 				{user.data.photoURL ? (
 					<Avatar className="" alt="user photo" src={user.data.photoURL} />
 				) : (
-					// <Avatar className="">{user.data.displayName[0]}</Avatar>
-					<Typography className="text-14 font-medium pl-16">로그인</Typography>
-				)}
+						<Typography className="text-14 font-medium pl-16">로그인</Typography>
+					)}
 				<div className="hidden md:flex flex-col mx-4 items-end">
 					<Typography component="span" className="normal-case font-bold flex">
 						{user.data.displayName}
 					</Typography>
 					<Typography className="text-11 capitalize" color="textSecondary">
 						{user.role.toString()}
-						{/* {(!user.role || (Array.isArray(user.role) && user.role.length === 0)) && 'Guest'} */}
 					</Typography>
 				</div>
 				<Icon className="text-16 hidden sm:flex" variant="action">
 					keyboard_arrow_down
 				</Icon>
-				{/* {user.data.photoURL ? (
-					<Avatar className="mx-4" alt="user photo" src={user.data.photoURL} />
+			</Button>		 */}
+			<Button className="min-h-40 min-w-40 px-0 md:px-16 py-0 md:py-6" onClick={userMenuClick}>
+				<div className="hidden md:flex flex-col mx-4 items-end">
+					<Typography component="span" className="normal-case font-bold flex">
+						{user.data.displayName}
+					</Typography>
+					<Typography className="text-11 capitalize" color="textSecondary">
+						{user.role.toString()}
+						{(!user.role || (Array.isArray(user.role) && user.role.length === 0)) && 'Guest'}
+					</Typography>
+				</div>
+
+				{user.data.photoURL ? (
+					<Avatar className="md:mx-4" alt="user photo" src={user.data.photoURL} />
 				) : (
-					<Avatar className="mx-4">{user.data.displayName[0]}</Avatar>
-				)} */}
+						<Avatar className="md:mx-4">{user.data.displayName[0]}</Avatar>
+					)}
+				<Icon className="text-16 hidden sm:flex" variant="action">
+					keyboard_arrow_down
+				</Icon>
 			</Button>
 
 			<Popover
@@ -85,32 +98,32 @@ function UserMenu(props) {
 						</MenuItem>
 					</>
 				) : (
-					<>
-						<MenuItem component={Link} to="/pages/profile" onClick={userMenuClose} role="button">
-							<ListItemIcon className="min-w-40">
-								<Icon>account_circle</Icon>
-							</ListItemIcon>
-							<ListItemText primary="내 정보" />
-						</MenuItem>
-						<MenuItem component={Link} to="/apps/mail" onClick={userMenuClose} role="button">
-							<ListItemIcon className="min-w-40">
-								<Icon>mail</Icon>
-							</ListItemIcon>
-							<ListItemText primary="편지함" />
-						</MenuItem>
-						<MenuItem
-							onClick={() => {
-								dispatch(logoutUser());
-								userMenuClose();
-							}}
-						>
-							<ListItemIcon className="min-w-40">
-								<Icon>exit_to_app</Icon>
-							</ListItemIcon>
-							<ListItemText primary="로그아웃" />
-						</MenuItem>
-					</>
-				)}
+						<>
+							<MenuItem component={Link} to="/pages/profile" onClick={userMenuClose} role="button">
+								<ListItemIcon className="min-w-40">
+									<Icon>account_circle</Icon>
+								</ListItemIcon>
+								<ListItemText primary="내 정보" />
+							</MenuItem>
+							<MenuItem component={Link} to="/apps/mail" onClick={userMenuClose} role="button">
+								<ListItemIcon className="min-w-40">
+									<Icon>mail</Icon>
+								</ListItemIcon>
+								<ListItemText primary="편지함" />
+							</MenuItem>
+							<MenuItem
+								onClick={() => {
+									dispatch(logoutUser());
+									userMenuClose();
+								}}
+							>
+								<ListItemIcon className="min-w-40">
+									<Icon>exit_to_app</Icon>
+								</ListItemIcon>
+								<ListItemText primary="로그아웃" />
+							</MenuItem>
+						</>
+					)}
 			</Popover>
 		</>
 	);

@@ -3,7 +3,6 @@ import ko from './navigation-i18n/ko';
 // import ar from './navigation-i18n/ar';
 import en from './navigation-i18n/en';
 // import tr from './navigation-i18n/tr';
-
 i18next.addResourceBundle('ko', 'navigation', ko);
 i18next.addResourceBundle('en', 'navigation', en);
 // i18next.addResourceBundle('tr', 'navigation', tr);
@@ -26,6 +25,24 @@ const navigationConfig = [
 		icon: 'domain',
 		url: '/apps/companies'
 	}
+	// {
+	// 	id: 'applications',
+	// 	title: 'Applications',
+	// 	translate: 'APPLICATIONS',
+	// 	type: 'group',
+	// 	icon: 'apps',
+	// 	children: [
+	// 		{
+	// 			id: 'example-component',
+	// 			title: 'Example',
+	// 			translate: 'EXAMPLE',
+	// 			type: 'item',
+	// 			icon: 'whatshot',
+	// 			url: '/example'
+	// 		}
+	// 	]
+	// }
+
 	// {
 	// 	id: 'pat_classify',
 	// 	title: '특허분류',
@@ -64,23 +81,6 @@ const navigationConfig = [
 	// 			type: 'item',
 	// 			icon: 'search',
 	// 			url: '/apps/trend'
-	// 		}
-	// 	]
-	// }
-	// {
-	// 	id: 'applications',
-	// 	title: 'Applications',
-	// 	translate: 'APPLICATIONS',
-	// 	type: 'group',
-	// 	icon: 'apps',
-	// 	children: [
-	// 		{
-	// 			id: 'example-component',
-	// 			title: 'Example',
-	// 			translate: 'EXAMPLE',
-	// 			type: 'item',
-	// 			icon: 'whatshot',
-	// 			url: '/example'
 	// 		}
 	// 	]
 	// }

@@ -10,6 +10,7 @@ import clsx from 'clsx';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectToolbarTheme } from 'app/store/fuse/settingsSlice';
+import FullScreenToggle from '../../shared-components/FullScreenToggle';
 import LanguageSwitcher from '../../shared-components/LanguageSwitcher';
 
 const useStyles = makeStyles(theme => ({
@@ -31,10 +32,10 @@ function ToolbarLayout2(props) {
 				style={{ backgroundColor: toolbarTheme.palette.background.paper }}
 				elevation={2}
 			>
-				<Toolbar className="container p-0 lg:px-24">
+				<Toolbar className="container p-0 lg:px-24 min-h-48 md:min-h-64">
 					{config.navbar.display && (
 						<Hidden lgUp>
-							<NavbarMobileToggleButton className="w-64 h-64 p-0" />
+							<NavbarMobileToggleButton className="w-40 h-40 p-0 mx-0 sm:mx-8" />
 						</Hidden>
 					)}
 
@@ -46,6 +47,8 @@ function ToolbarLayout2(props) {
 
 					<div className="flex items-center px-16">
 						<LanguageSwitcher />
+
+						<FullScreenToggle />
 
 						<FuseSearch />
 
