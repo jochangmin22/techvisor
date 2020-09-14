@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableCombine';
+import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -127,7 +128,7 @@ function MainTable(props) {
 		dispatch(updateCols(cols));
 	}, 300);
 
-	function onBtExport() {}
+	function onBtExport() { }
 
 	if (!data || data.length === 0) {
 		return <SpinLoading />;
@@ -137,7 +138,10 @@ function MainTable(props) {
 		<Paper className="rounded-8 shadow h-512 w-full mb-36">
 			<>
 				<div className="p-12 flex items-center justify-between">
-					<Typography variant="h6">검색 결과 ({Number(rowsCount).toLocaleString()})</Typography>
+					<div className="flex flex-row items-center">
+						<Typography variant="h6" className="pr-8">검색 결과 ({Number(rowsCount).toLocaleString()})</Typography>
+						<DraggableIcon />
+					</div>
 					<div className="flex items-center">
 						<Button
 							variant="outlined"

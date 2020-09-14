@@ -1,24 +1,50 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import Typography from '@material-ui/core/Typography';
-import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { setMockData } from './store/searchsSlice';
 // import { authRoles } from "app/auth";
 // import ContentGrid from './searchs/ContentGrid';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
+import NoResultMsg from 'app/main/apps/lib/NoResultMsg';
+import searchData from 'app/main/apps/lib/searchDataNew';
+import { useForm } from '@fuse/hooks';
+import { makeStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
+import MainTable from './searchs/SearchList/MainTable';
 import VisualContainer from './searchs/Visual/VisualContainer';
 import KeywordsContainer from './searchs/Keywords/KeywordsContainer';
 import MatrixAnalysis from './searchs/Matrix/MatrixAnalysis';
 import NewsAnalysis from './searchs/News/NewsAnalysis';
-import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-import searchData from 'app/main/apps/lib/searchDataNew';
-import MainTable from './searchs/SearchList/MainTable';
+import Draggable from 'react-draggable';
 
-function SearchContent(props) {
+const useStyles = makeStyles(theme => ({
+	paper: {
+		display: 'flex',
+		width: '100%',
+		height: '100%',
+		padding: theme.spacing(1)
+	}
+}));
+
+function SearchContent() {
+	const classes = useStyles();
 	const dispatch = useDispatch();
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	const { searchText, searchNum, inventor, assignee } = searchParams;
-	const searchs = useSelector(({ searchApp }) => searchApp.searchs.entities);
+	const { searchText, inventor, assignee } = searchParams;
+	const entities = useSelector(({ searchApp }) => searchApp.searchs.entities);
 	const searchLoading = useSelector(({ searchApp }) => searchApp.searchs.searchLoading);
+
+	const { form, setForm, resetForm } = useForm({
+		A: 100,
+		B: 100,
+		C: 100,
+		D: 100,
+		E: 100
+	});
+
+	function handleStart(name) {
+		resetForm();
+		setForm({ [name]: 101 });
+	}
 
 	// 개발용 mock data 넣기
 	useEffect(() => {
@@ -26,47 +52,71 @@ function SearchContent(props) {
 		// eslint-disable-next-line
 	}, []);
 
-	if (!searchLoading && searchs && searchs.length === 0) {
-		return (
-			<div className="flex flex-col flex-1 h-full items-center justify-center px-24">
-				<Typography variant="h6" className="my-12">
-					검색결과가 없습니다.
-				</Typography>
-			</div>
-		);
+	const noResult = !!(!searchLoading && entities && entities.length === 0);
+	const isEmpty = !!(!searchText && !inventor && !assignee);
+
+	if (noResult) {
+		return <NoResultMsg />;
+	}
+
+	if (isEmpty) {
+		return <EmptyMsg icon="chat" msg="검색결과" />;
 	}
 
 	return (
-		<div className="flex h-full items-center justify-center">
-			<FuseAnimateGroup
-				className="flex h-full w-full"
-				enter={{
-					animation: 'transition.slideUpBigIn'
-				}}
-			>
-				{!searchText && !inventor && !assignee ? (
-					<EmptyMsg icon="chat" msg="검색결과" />
-				) : (
-					<div className="flex flex-wrap w-full h-460 items-start justify-center mt-16">
-						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pt-0">
-							<KeywordsContainer />
-						</div>
-						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pl-0 md:pt-0">
-							<VisualContainer searchText={searchText} inventor={inventor} assignee={assignee} />
-						</div>
-						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pt-0">
-							<MatrixAnalysis searchText={searchText} searchNum={searchNum} />
-						</div>
-						<div className="flex w-full h-full md:w-1/2 p-16 pb-0 md:p-16 md:pt-0 md:pl-0">
-							<NewsAnalysis searchText={searchText} />
-						</div>
-						<div className="flex w-full h-full p-16 md:pt-0">
-							{/* <ContentGrid /> */}
-							<MainTable />
-						</div>
+		<div className="flex h-full w-full justify-center">
+			<div className="flex flex-wrap w-full h-460 items-start justify-center mt-8 px-8">
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('A')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.A }}>
+						<KeywordsContainer />
 					</div>
-				)}
-			</FuseAnimateGroup>
+				</Draggable>
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('B')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.B }}>
+						<VisualContainer />
+					</div>
+				</Draggable>
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('C')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.C }}>
+						<MatrixAnalysis />
+					</div>
+				</Draggable>
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('D')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.D }}>
+						<NewsAnalysis />
+					</div>
+				</Draggable>
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('E')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={classes.paper} style={{ zIndex: form.E }}>
+						<MainTable />
+					</div>
+				</Draggable>
+			</div>
 		</div>
 	);
 }

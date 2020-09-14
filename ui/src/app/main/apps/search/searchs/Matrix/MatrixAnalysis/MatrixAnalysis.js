@@ -6,6 +6,7 @@ import { getMatrix, getMatrixDialog, openMatrixDialog } from 'app/main/apps/sear
 // import { Draggable } from 'react-beautiful-dnd';
 // import Draggable from 'react-draggable';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
+import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
@@ -14,7 +15,7 @@ import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import MatrixDialog from '../MatrixDialog';
 import MatrixAnalysisMenu from '../MatrixAnalysisMenu';
 
-function MatrixAnalysis(props) {
+function MatrixAnalysis() {
 	const dispatch = useDispatch();
 	const matrix = useSelector(({ searchApp }) => searchApp.searchs.matrix);
 	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
@@ -58,43 +59,43 @@ function MatrixAnalysis(props) {
 
 		return matrix.entities
 			? [
-					{
-						Header: category,
-						accessor: category,
-						className: 'text-14 text-left max-w-96 overflow-hidden',
-						sortable: true,
-						Cell: props => (
-							<div onClick={ev => onCellClick(ev, props.cell)}>
+				{
+					Header: category,
+					accessor: category,
+					className: 'text-14 text-left max-w-96 overflow-hidden',
+					sortable: true,
+					Cell: props => (
+						<div onClick={ev => onCellClick(ev, props.cell)}>
+							<span title={props.cell.value}>{props.cell.value}</span>
+						</div>
+					)
+				}
+			].concat(
+				Object.keys(matrix.entities).map(item => ({
+					Header: item,
+					accessor: item,
+					className: 'text-11 text-center',
+					sortable: true,
+					// onClick: () => {
+					// 	alert('click!');
+					// },
+					Cell: props => {
+						return (
+							<div onClick={ev => onCellClick(ev, props.cell)} className={getColor(props.cell.value)}>
 								<span title={props.cell.value}>{props.cell.value}</span>
 							</div>
-						)
+						);
 					}
-			  ].concat(
-					Object.keys(matrix.entities).map(item => ({
-						Header: item,
-						accessor: item,
-						className: 'text-11 text-center',
-						sortable: true,
-						// onClick: () => {
-						// 	alert('click!');
-						// },
-						Cell: props => {
-							return (
-								<div onClick={ev => onCellClick(ev, props.cell)} className={getColor(props.cell.value)}>
-									<span title={props.cell.value}>{props.cell.value}</span>
-								</div>
-							);
-						}
-					}))
-			  )
+				}))
+			)
 			: [
-					{
-						Header: category,
-						accessor: category,
-						className: 'text-11 text-center',
-						sortable: true
-					}
-			  ];
+				{
+					Header: category,
+					accessor: category,
+					className: 'text-11 text-center',
+					sortable: true
+				}
+			];
 		// eslint-disable-next-line
 	}, [dispatch, searchParams, matrix, category]);
 
@@ -191,57 +192,62 @@ function MatrixAnalysis(props) {
 	return (
 		<Paper className="w-full h-full rounded-8 shadow py-8">
 			<div className="px-12 flex items-center justify-between">
-				<PopoverMsg
-					title="매트릭스 분석"
-					msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 연도별, 기술별, 기업별 분석을 매트릭스 형태로 표시합니다."
-				/>
+				<div className="flex flex-row items-center">
+					<PopoverMsg
+						title="매트릭스 분석"
+						msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 연도별, 기술별, 기업별 분석을 매트릭스 형태로 표시합니다."
+					/>
+					<DraggableIcon />
+				</div>
 				<MatrixAnalysisMenu />
 			</div>
-			{isEmpty ? (
-				<EmptyMsg icon="blur_linear" msg="매트릭스 분석" text="검색결과가 적어서 분석할 데이타가 부족합니다." />
-			) : (
-				<>
-					<FuseScrollbars className="h-40 px-12">
-						<div className="flex w-full ">
-							{/* {matrix.entities && (
+			{
+				isEmpty ? (
+					<EmptyMsg icon="blur_linear" msg="매트릭스 분석" text="검색결과가 적어서 분석할 데이타가 부족합니다." />
+				) : (
+						<>
+							<FuseScrollbars className="h-40 px-12">
+								<div className="flex w-full ">
+									{/* {matrix.entities && (
 						<Chip label={category} key={category} size="small" className="mx-4" />
 					)} */}
-							{matrix.entities &&
-								Object.entries(matrix.entities).map(([key]) => (
-									// <Chip label={value} key={value} size="small" onClick={() => handleClick(value)} />
-									// <Draggable>
-									<Chip label={key} key={key} size="small" className="mx-4" />
-									// </Draggable>
-								))}
-						</div>
-					</FuseScrollbars>
-					{showLoading ? (
-						<SpinLoading />
-					) : (
-						<>
-							<FuseScrollbars className="max-h-360 px-6">
-								<EnhancedTable
-									columns={columns}
-									// defaultColumn={defaultColumn}
-									data={data}
-									size="small"
-									pageSize={8}
-									pageOptions={[8, 16, 24]}
-									onRowClick={(ev, row) => {
-										if (row) {
-											// window.open(row.original.link, '_blank');
-											// props.history.push(row.original.link);
-											// dispatch(openEditContactDialog(row.original));
-										}
-									}}
-								/>
+									{matrix.entities &&
+										Object.entries(matrix.entities).map(([key]) => (
+											// <Chip label={value} key={value} size="small" onClick={() => handleClick(value)} />
+											// <Draggable>
+											<Chip label={key} key={key} size="small" className="mx-4" />
+											// </Draggable>
+										))}
+								</div>
 							</FuseScrollbars>
-							<MatrixDialog />
+							{showLoading ? (
+								<SpinLoading />
+							) : (
+									<>
+										<FuseScrollbars className="max-h-360 px-6">
+											<EnhancedTable
+												columns={columns}
+												// defaultColumn={defaultColumn}
+												data={data}
+												size="small"
+												pageSize={8}
+												pageOptions={[8, 16, 24]}
+												onRowClick={(ev, row) => {
+													if (row) {
+														// window.open(row.original.link, '_blank');
+														// props.history.push(row.original.link);
+														// dispatch(openEditContactDialog(row.original));
+													}
+												}}
+											/>
+										</FuseScrollbars>
+										<MatrixDialog />
+									</>
+								)}
 						</>
-					)}
-				</>
-			)}
-		</Paper>
+					)
+			}
+		</Paper >
 	);
 }
 

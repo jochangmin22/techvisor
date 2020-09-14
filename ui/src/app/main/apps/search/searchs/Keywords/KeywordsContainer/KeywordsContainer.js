@@ -7,6 +7,7 @@ import KeywordsMenu from '../KeywordsMenu';
 import KeywordsTable from '../KeywordsTable';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
+import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 import { getKeywords } from 'app/main/apps/search/store/searchsSlice';
@@ -32,7 +33,7 @@ function KeywordsContainer() {
 		// eslint-disable-next-line
 	}, [dispatch, searchParams, analysisOptions.keywordsOptions]);
 
-	useEffect(() => {}, [keywords]);
+	useEffect(() => { }, [keywords]);
 
 	const isEmpty = !!(!topic && !vec);
 
@@ -44,10 +45,13 @@ function KeywordsContainer() {
 		<KeywordsContext.Provider value={showLoadingValue}>
 			<Paper className="w-full h-full rounded-8 shadow py-8">
 				<div className="px-12 flex items-center justify-between">
-					<PopoverMsg
-						title="핵심 주제어"
-						msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 핵심키워드와 비교하여 유사 관계를 표시합니다."
-					/>
+					<div className="flex flex-row items-center">
+						<PopoverMsg
+							title="핵심 주제어"
+							msg="검색결과에서 의미 있는 핵심 주제어를 추출하고, 핵심키워드와 비교하여 유사 관계를 표시합니다."
+						/>
+						<DraggableIcon />
+					</div>
 					<KeywordsMenu />
 				</div>
 				{isEmpty ? (
@@ -57,11 +61,11 @@ function KeywordsContainer() {
 						text="검색결과가 적어서 분석할 데이터가 부족합니다."
 					/>
 				) : (
-					<>
-						<KeywordsChips topic={topic} />
-						{keywords && keywords.length !== 0 ? <KeywordsTable /> : <SpinLoading delay={20000} />}
-					</>
-				)}
+						<>
+							<KeywordsChips topic={topic} />
+							{keywords && keywords.length !== 0 ? <KeywordsTable /> : <SpinLoading delay={20000} />}
+						</>
+					)}
 			</Paper>
 		</KeywordsContext.Provider>
 	);

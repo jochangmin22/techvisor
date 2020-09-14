@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import Typography from '@material-ui/core/Typography';
 import { setMockData } from './store/searchsSlice';
 // import { authRoles } from "app/auth";
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
+import NoResultMsg from 'app/main/apps/lib/NoResultMsg';
 import searchData from 'app/main/apps/lib/mockDataCompanyApp';
 import MainTable from './searchs/SearchList/MainTable';
 import SearchsContainer from './searchs/SearchsContainer';
@@ -20,17 +20,11 @@ function CompanyContent(props) {
 		// eslint-disable-next-line
 	}, []);
 
-	const noResult = !searchLoading && entities && entities.length === 0 ? true : false;
-	const pleaseChooseOne = !searchLoading && entities && entities.length > 1 ? true : false;
+	const noResult = !!(!searchLoading && entities && entities.length === 0);
+	const pleaseChooseOne = !!(!searchLoading && entities && entities.length > 1);
 
 	if (noResult) {
-		return (
-			<div className="flex flex-col flex-1 h-full items-center justify-center px-24">
-				<Typography variant="h6" className="my-12">
-					검색결과가 없습니다.
-				</Typography>
-			</div>
-		);
+		return <NoResultMsg />;
 	}
 
 	if (!searchText) {

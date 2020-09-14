@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
+import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import PropTypes from 'prop-types';
 
 import WordCloudChart from '../WordCloud/WordCloudChart';
 import ApplicantClassify from '../ApplicantClassify';
-import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 import IndicatorAnalysis from '../IndicatorAnalysis/IndicatorAnalysisContainer';
 import ApplicationNumber from '../ApplicationNumber';
 import IpcChart from '../Ipc/IpcChart';
 import RelatedPerson from '../RelatedPerson';
+
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -49,7 +52,7 @@ function a11yProps(index) {
 const useStyles = makeStyles(theme => ({
 	root: {
 		display: 'flex',
-		flexGrow: 1,
+		// flexGrow: 1,
 		backgroundColor: theme.palette.background.paper
 		// minHeight: 360
 	},
@@ -70,9 +73,10 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function VisualContainer(props) {
+function VisualContainer() {
 	const classes = useStyles();
-	const { searchText, inventor, assignee } = props;
+	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
+	const { searchText, inventor, assignee } = searchParams;
 	const [tabValue, setTabValue] = useState(0);
 
 	function handleChangeTab(event, tabValue) {
@@ -81,11 +85,11 @@ function VisualContainer(props) {
 
 	const isEmpty = !!(!searchText && !inventor && !assignee);
 
-	useEffect(() => {}, [props]);
+	useEffect(() => { }, [searchParams]);
 
 	return (
 		<div className={clsx(classes.root, 'w-full h-full rounded-8 shadow')}>
-			<div className="flex flex-col">
+			<div className="flex flex-col h-full items-center content-between">
 				<Typography variant="h6" className="hidden sm:flex ml-8 mt-16 mb-4">
 					통계분석
 				</Typography>
@@ -111,30 +115,31 @@ function VisualContainer(props) {
                     <Tab icon={<AssessmentIcon />} {...a11yProps(6)} />
                 </Hidden> */}
 				</Tabs>
+				<DraggableIcon />
 			</div>
 			<TabPanel value={tabValue} index={0}>
 				{tabValue === 0 &&
 					(isEmpty ? (
 						<EmptyMsg icon="assessment" msg="특허 지표분석" />
 					) : (
-						<IndicatorAnalysis searchText={searchText} />
-					))}
+							<IndicatorAnalysis searchText={searchText} />
+						))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={1}>
 				{tabValue === 1 &&
 					(isEmpty ? (
 						<EmptyMsg icon="text_fields" msg="워드클라우드" />
 					) : (
-						<WordCloudChart searchText={searchText} />
-					))}
+							<WordCloudChart searchText={searchText} />
+						))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={2}>
 				{tabValue === 2 &&
 					(isEmpty ? (
 						<EmptyMsg icon="photo" msg="연도별 출원건수" />
 					) : (
-						<ApplicationNumber searchText={searchText} />
-					))}
+							<ApplicationNumber searchText={searchText} />
+						))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={3}>
 				{tabValue === 3 &&
@@ -145,16 +150,16 @@ function VisualContainer(props) {
 					(isEmpty ? (
 						<EmptyMsg icon="receipt" msg="출원주체별 건수" />
 					) : (
-						<ApplicantClassify searchText={searchText} />
-					))}
+							<ApplicantClassify searchText={searchText} />
+						))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={5}>
 				{tabValue === 5 &&
 					(isEmpty ? (
 						<EmptyMsg icon="assessment" msg="인명정보 동향" />
 					) : (
-						<RelatedPerson searchText={searchText} />
-					))}
+							<RelatedPerson searchText={searchText} />
+						))}
 			</TabPanel>
 		</div>
 	);

@@ -27,8 +27,8 @@ def get_stock(request):
     return finance.parse_stock(request)
 
 # company
-def get_company(request, companyId=""):
-    return company.parse_company(request, companyId)
+# def get_company(request, companyId=""):
+#     return company.parse_company(request, companyId)
 
 
 # def get_stock(request):
@@ -37,8 +37,8 @@ def get_company(request, companyId=""):
 def get_crawl(request):
     return finance.crawl_stock(request)
 
-# def get_company_info(request):
-#     return finance.crawl_dart(request)
+def get_company(request):
+    return finance.crawl_dart(request)
 
 # def get_topic(request):
 #     return kr_nlp(request, "topic")
