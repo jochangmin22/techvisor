@@ -13,8 +13,8 @@ import SimilarTable from '../SimilarTable';
 function SimilarContainer(props) {
 	const { appNo } = props;
 	const dispatch = useDispatch();
-	const similar = useSelector(({ searchApp }) => searchApp.search.similar);
-	const [simData, setSimData] = useState(null);
+	const entities = useSelector(({ searchApp }) => searchApp.search.similar.entities);
+	const [simData, setSimData] = useState(entities || null);
 	const [modelType, setModelType] = useState('');
 	const [showLoading, setShowLoading] = useState(false);
 
@@ -23,14 +23,8 @@ function SimilarContainer(props) {
 	}
 
 	useEffect(() => {
-		if (similar === null) {
-			setSimData(null);
-		} else {
-			if (similar.entities !== undefined) {
-				setSimData(similar.entities);
-			}
-		}
-	}, [similar]);
+		setSimData(entities || null);
+	}, [entities]);
 
 	useEffect(() => {
 		if (modelType) {
@@ -43,7 +37,7 @@ function SimilarContainer(props) {
 		}
 	}, [dispatch, appNo, modelType]);
 
-	if (!similar || similar.length === 0) {
+	if (!entities) {
 		return <SpinLoading />;
 	}
 
@@ -70,11 +64,7 @@ function SimilarContainer(props) {
 						</Select>
 					</FormControl>
 				</div>
-				{simData && simData.length !== 0 && !showLoading ? (
-					<SimilarTable data={simData} />
-				) : (
-					<SpinLoading delay={20000} className="h-full" />
-				)}
+				{simData && !showLoading && <SimilarTable data={simData} />}
 			</Paper>
 		</FuseAnimateGroup>
 	);

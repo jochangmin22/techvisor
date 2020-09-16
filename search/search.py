@@ -535,20 +535,26 @@ def parse_search_similar(request):
 
     with connection.cursor() as cursor:
         cursor.execute('select "요약token" a from 공개공보 where 출원번호 =' + appNo)
+        # cursor.execute('select concat("요약token", \' \',"명칭token", \' \',"대표항token") a from 공개공보 where 출원번호 =' + appNo)
         row = dictfetchall(cursor)
 
-    data = tokenizer(row[0]['a'])
+    # 1/3 토큰화 중복제거
+    # unique_list = list(dict.fromkeys(tokenizer(row[0]['a'])))
+    # data = ' '.join(unique_list if unique_list else [])
 
-    row = similarity(data, modelType) 
+    # 2/3 토큰화
+    # data = ' '.join(tokenizer(row[0]['a']) if row[0]['a'] else [])
+
+    # 3/3 그대로
+    data = row[0]['a']
+    dataList = tokenizer(row[0]['a']) if row[0]['a'] else []
+    res = similarity(data, modelType, dataList) 
 
     # Redis {
     # handleRedis(redisKey, 'similar', row, mode="w")
     # Redis }
 
-    # return JsonResponse(row, safe=False)    
-    return HttpResponse(row, content_type=u"application/json; charset=utf-8")
-
-
+    return HttpResponse(res, content_type="application/json")
 
 def handleRedis(redisKey, keys, data="", mode="r"):
     """ read or write to redis """

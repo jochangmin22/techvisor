@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField
 import uuid
 
 # Create your models here.
@@ -13,7 +12,7 @@ class users(models.Model):
     my_from = models.CharField(db_column='from', max_length=255)
     password = models.CharField(max_length=255)
     role = models.CharField(max_length=255)
-    data = JSONField()
+    data = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now_add=True)
     is_certified = models.BooleanField(default=False)
@@ -44,7 +43,7 @@ class user_profiles(models.Model):
         null=True
     )    
     fk_user_id = models.UUIDField()
-    profile_links =JSONField(default=dict, null=True)
+    profile_links =models.JSONField(default=dict, null=True)
     about = models.TextField(blank=True, null=True)
     
     class Meta:

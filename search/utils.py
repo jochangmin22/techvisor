@@ -29,9 +29,9 @@ def NestedDictValues(d):
         else:
             yield str(v)
 
-TAG_RE = re.compile(r'<[^>]+>')
 
 def remove_tags(text):
+    TAG_RE = re.compile(r'<[^>]+>')
     return TAG_RE.sub('', text)
 
 

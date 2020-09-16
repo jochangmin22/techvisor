@@ -8667,7 +8667,7 @@ fsevents@~2.1.2:
     redux-logger: 4.0.0
     source-map-explorer: 2.5.0
     styled-components: 5.2.0
-    tailwindcss: 1.8.9
+    tailwindcss: 1.8.10
     tailwindcss-dir: 4.0.0
     typeface-muli: 1.1.3
     velocity-animate: 1.5.2
@@ -17398,9 +17398,9 @@ resolve@1.15.0:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:1.8.9":
-  version: 1.8.9
-  resolution: "tailwindcss@npm:1.8.9"
+"tailwindcss@npm:1.8.10":
+  version: 1.8.10
+  resolution: "tailwindcss@npm:1.8.10"
   dependencies:
     "@fullhuman/postcss-purgecss": ^2.1.2
     autoprefixer: ^9.4.5
@@ -17427,7 +17427,7 @@ resolve@1.15.0:
   bin:
     tailwind: lib/cli.js
     tailwindcss: lib/cli.js
-  checksum: 72f40bb4f65c3062d492f2cb1ea20bf1d205fb42d45cbdd1c11f045a87590700e8a6f823bd57e8d05717c81992262ea020b33f36ee2d96d89280d7c60d99043a
+  checksum: 89c0c8a227b677b4bb150cd6b1c2f37c1a30a0285165ff5b315a1fa0046430ebdf54ccba26c291bfe86c96be0d25c83365608ac8f182799fcdf2e442860a229e
   languageName: node
   linkType: hard
 

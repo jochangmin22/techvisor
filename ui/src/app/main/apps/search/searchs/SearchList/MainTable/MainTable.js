@@ -119,6 +119,7 @@ function MainTable(props) {
 	const searchs = useSelector(({ searchApp }) => searchApp.searchs);
 	const { entities, cols } = searchs;
 	const data = useMemo(() => (entities ? entities : []), [entities]);
+
 	useEffect(() => {
 		setRowsCount(data.length);
 	}, [data]);
@@ -128,7 +129,7 @@ function MainTable(props) {
 		dispatch(updateCols(cols));
 	}, 300);
 
-	function onBtExport() { }
+	function onBtExport() {}
 
 	if (!data || data.length === 0) {
 		return <SpinLoading />;
@@ -139,7 +140,9 @@ function MainTable(props) {
 			<>
 				<div className="p-12 flex items-center justify-between">
 					<div className="flex flex-row items-center">
-						<Typography variant="h6" className="pr-8">검색 결과 ({Number(rowsCount).toLocaleString()})</Typography>
+						<Typography variant="h6" className="pr-8">
+							검색 결과 ({Number(rowsCount).toLocaleString()})
+						</Typography>
 						<DraggableIcon />
 					</div>
 					<div className="flex items-center">

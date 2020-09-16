@@ -12,6 +12,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import random
 
+from .utils import dictfetchall, remove_tags, remove_brackets, remove_punc
+
+
 # from .utils import get_redis_key, dictfetchall
 from django.conf import settings
 
@@ -24,19 +27,7 @@ lam = lambda x: ['/'.join(t) for t in mecab.pos(x)
                   or 'SL' in t
                  ]
 
-TAG_RE = re.compile(r'<[^>]+>')
 
-
-def remove_tags(text):
-    return TAG_RE.sub('', text)
-
-
-def remove_brackets(text):
-    return re.sub("[\(\[].*?[\)\]]", "", text)
-
-
-def remove_punc(text):
-    return re.sub("[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]", ' ', text)
 
 
 # def pos(text):
@@ -71,16 +62,58 @@ def pos(text):
    
 #     return row
 
-def similarity(abstract, modelType):
+# def similarity(abstract, modelType, absList = []):
+#     with connection.cursor() as cursor:
+#         query = 'SELECT similarity("요약token", $${}$$) similarity, "등록사항", "발명의명칭(국문)", "발명의명칭(영문)", "출원번호", "출원일자", "출원인1", "출원인코드1", "출원인국가코드1", "발명자1", "발명자국가코드1", "등록일자", "공개일자", "ipc요약", "요약token" FROM "공개공보" WHERE "요약token" % $${}$$ ORDER BY similarity DESC limit 100;'.format(abstract, abstract, abstract) 
+
+#         cursor.execute(
+#             "SET work_mem to '100MB';"
+#             + query
+#         )
+#         row = dictfetchall(cursor)
+
+#     if not row:
+#         return JsonResponse(row, safe=False)
+
+#     sents_sim = [remove_punc(remove_brackets(remove_tags(sent))) for sent in row['요약token'] if type(sent) == str] # 제거 수행        
+#     newSents_sim = [pos(s) for s in sents_sim]      # 문장에서 명사와 외국어만 추출하여 리스트로
+
+#     documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(newSents_sim)]
+
+#     topn = len(newSents_sim)
+
+#     if modelType == 'doc2vec':
+#         sims = w2b_value(documents, topn, absList)
+#         # return w2b_value(documents, newSents_sim, abstract, sents_sim)
+#     else:
+#         return cosine_value(documents, topn, sents_sim, absList)
+    
+#     row['유사도'] = sims    
+
+#     return JsonResponse(row, safe=False)
+
+def similarity(abstract, modelType, absList = []):
+    ''' Consists of df query based on the original Hanyang University '''
 
     # query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE ipc요약 = \'' + ipc + '\' limit 100'
 
     # psql pg_trgm similarity로 1차 유사도 측정 , 유사도 기본값 0.3
     # query = 'select set_limit(0.2);'
-    query = 'SELECT case when similarity("요약token", $${}$$) = 1 then 0.981 else round(similarity("요약token", $${}$$)::numeric, 3) end AS similarity, 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE 요약token % $${}$$ ORDER BY similarity DESC;'.format(abstract, abstract, abstract)  
+    # query = 'SELECT case when similarity("요약token", $${}$$) = 1 then 0.981 else round(similarity("요약token", $${}$$)::numeric, 3) end AS similarity, 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE 요약token % $${}$$ ORDER BY similarity DESC;'.format(abstract, abstract, abstract)  
+    # query = 'SELECT case when similarity(convert("요약token",\'UTF8\',\'EUC_KR\')::text, convert($${}$$,\'UTF8\',\'EUC_KR\')::text) = 1 then 0.981 else round(similarity(convert("요약token",\'UTF8\',\'EUC_KR\')::text, convert($${}$$,\'UTF8\',\'EUC_KR\')::text)::numeric, 3) end AS similarity, 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE 요약token % $${}$$ ORDER BY similarity DESC;'.format(abstract, abstract, abstract)  
 
+    # query = 'SELECT similarity(text(textsend("요약token")), text(textsend($${}$$))) similarity, "등록사항", "발명의명칭(국문)", "발명의명칭(영문)", "출원번호", "출원일자", "출원인1", "출원인코드1", "출원인국가코드1", "발명자1", "발명자국가코드1", "등록일자", "공개일자", "ipc요약", "요약token" FROM "공개공보" WHERE "요약token" is not null and text(textsend("요약token")) % text(textsend($${}$$)) ORDER BY similarity DESC limit 100;'.format(abstract, abstract, abstract)  
 
+    query = 'SELECT similarity("요약token", $${}$$) similarity, "등록사항", "발명의명칭(국문)", "발명의명칭(영문)", "출원번호", "출원일자", "출원인1", "출원인코드1", "출원인국가코드1", "발명자1", "발명자국가코드1", "등록일자", "공개일자", "ipc요약", "요약token" FROM "공개공보" WHERE "요약token" % $${}$$ ORDER BY similarity DESC limit 100;'.format(abstract, abstract, abstract)  
+
+    # query = 'SELECT case when similarity(convert(unaccent(regexp_replace(lower("요약token"), \'[.,\'\'׳`"-]\', \'\', \'g\'))::bytea,\'UTF8\',\'ISO_8859_8\')::text, convert(unaccent(regexp_replace(lower($${}$$), \'[.,\'\'׳`"-]\', \'\', \'g\'))::bytea,\'UTF8\',\'ISO_8859_8\')::text) = 1 then 0.981 else round(similarity(convert(unaccent(regexp_replace(lower("요약token"), \'[.,\'\'׳`"-]\', \'\', \'g\'))::bytea,\'UTF8\',\'ISO_8859_8\')::text, convert(unaccent(regexp_replace(lower($${}$$), \'[.,\'\'׳`"-]\', \'\', \'g\'))::bytea,\'UTF8\',\'ISO_8859_8\')::text))::numeric, 3) end AS similarity, 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE 요약token % $${}$$ ORDER BY similarity DESC;'.format(abstract, abstract, abstract)  
+
+    # return query
     df_sim = pd.read_sql_query(query, connection)
+
+    if df_sim.empty:
+        return json.dumps([], indent=4) 
+
     # sents_sim = [sent for sent in df_sim['요약token']]
     sents_sim = [remove_punc(remove_brackets(remove_tags(sent))) for sent in df_sim['요약token'] if type(sent) == str] # 제거 수행
     # sents_sim = [sent for sent in sents_sim if '내용 없음' not in sent and '내용없음' not in sent] # 내용 없는 초록 제거
@@ -94,19 +127,21 @@ def similarity(abstract, modelType):
     topn = len(newSents_sim)
 
     if modelType == 'doc2vec':
-        sims = w2b_value(documents, topn, abstract)
+        sims = w2b_value(documents, topn, absList)
         # return w2b_value(documents, newSents_sim, abstract, sents_sim)
     else:
-        return cosine_value(documents, topn, sents_sim, abstract)
+        return cosine_value(documents, topn, sents_sim, absList)
     
     df_sim['유사도'] = sims
 
     # new_df = df_sim.sort_values(by=['유사도'], axis=0, ascending=False)
     # df_row = new_df.to_json(orient="records")
 
-    
-    df_row = df_sim.to_json(orient="records")
-    return df_row
+
+    result = df_sim.to_json(orient="records")
+    parsed = json.loads(result)
+    res = json.dumps(parsed, indent=4) 
+    return res
 
     # old
     # with connection.cursor() as cursor:
@@ -120,8 +155,7 @@ def similarity(abstract, modelType):
     #     # sims = w2b_value(documents, newSents_sim)
     #     sims=0.838434 - (random.randint(1, 50) / 100)
     #     row[j]['유사도'] = round(sims,3)
-   
-    return row
+    #return row
 
 def w2b_value(documents, topn, abstract):
     '''단순 doc2vec'''

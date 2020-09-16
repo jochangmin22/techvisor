@@ -179,7 +179,10 @@ const searchSlice = createSlice({
 			state.applicantTrend = action.payload;
 		},
 		[getSimilar.fulfilled]: (state, action) => {
-			state.similar.entities = action.payload;
+			state.similar = {
+				...state.similar,
+				entities: action.payload
+			};
 		}
 	}
 });
