@@ -39,7 +39,7 @@ function IndicatorAnalysisContainer(props) {
 			// setShowLoading(false);
 		});
 		// eslint-disable-next-line
-	}, [dispatch, searchParams, analysisOptions.indicatorOptions]);
+	}, [analysisOptions.indicatorOptions]);
 
 	return (
 		<div className="flex flex-col w-full">

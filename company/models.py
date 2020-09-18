@@ -10,7 +10,7 @@ class stock_quotes(models.Model):
         default = uuid.uuid4,
         editable = False
     )
-    kiscode = models.CharField(max_length=10)
+    stock_code = models.CharField(max_length=10)
     price_date = models.DateField()
     stock = models.JSONField(default=list, null=True)
     # volume = models.DecimalField(max_digits=15, decimal_places=1)
@@ -55,4 +55,39 @@ class mdcin_clinc_test_info(models.Model):
     # created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
-        db_table = '"mdcin_clinc_test_info"'          
+        db_table = '"mdcin_clinc_test_info"'    
+
+
+class nice_corp(models.Model):
+    objects = models.Manager()
+    사업자등록번호 = models.CharField(max_length=12, primary_key = True)
+    업체명 = models.CharField(max_length=50)
+    대표자 = models.CharField(max_length=50)
+    개업일자 = models.IntegerField()
+    기업주체구분 = models.CharField(max_length=10)
+    기업규모 = models.CharField(max_length=10)
+    종업원수 = models.IntegerField()
+    종업원수기준일 = models.IntegerField()
+    본점사업자번호 = models.CharField(max_length=12)
+    주소 = models.CharField(max_length=255)
+    우편번호 = models.CharField(max_length=10)
+    전화번호 = models.CharField(max_length=20)
+    팩스번호 = models.CharField(max_length=20)
+    주요제품 = models.CharField(max_length=255)
+    홈페이지URL = models.CharField(max_length=100)
+    휴폐업여부 = models.CharField(max_length=10)
+    업종코드 = models.CharField(max_length=10)
+    업종명 = models.CharField(max_length=255)
+    상장일 = models.IntegerField()
+    상장구분 = models.CharField(max_length=20)
+    주식코드 = models.CharField(max_length=10)
+    최근결산년도 = models.IntegerField()
+    매출액 = models.CharField(max_length=15)
+    영업이익 = models.CharField(max_length=15)
+    당기순이익 = models.CharField(max_length=15)
+    자산총계 = models.CharField(max_length=15)
+    자본총계 = models.CharField(max_length=15)
+    부채총계 = models.CharField(max_length=15)
+
+    class Meta:
+        db_table = '"nice_corp"'

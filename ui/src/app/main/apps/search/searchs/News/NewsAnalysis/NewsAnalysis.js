@@ -26,7 +26,7 @@ function NewsAnalysis() {
 			});
 		}
 		// eslint-disable-next-line
-	}, [dispatch, searchParams, searchText]);
+	}, [searchText]);
 
 	return (
 		<Paper className="w-full h-full rounded-8 shadow">
@@ -42,11 +42,11 @@ function NewsAnalysis() {
 			{searchText.length === 0 ? (
 				<EmptyMsg icon="mic_none" msg="뉴스분석" text="키워드 검색에서만 관련 뉴스가 표시됩니다." />
 			) : (
-					<>
-						<NewsArticles />
-						<RelatedCompany searchText={searchText} />
-					</>
-				)}
+				<>
+					<NewsArticles />
+					<RelatedCompany searchText={searchText} />
+				</>
+			)}
 		</Paper>
 	);
 }

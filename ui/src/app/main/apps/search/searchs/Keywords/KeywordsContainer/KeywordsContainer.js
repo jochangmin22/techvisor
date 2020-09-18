@@ -31,9 +31,9 @@ function KeywordsContainer() {
 
 		dispatch(getKeywords({ params, subParams }));
 		// eslint-disable-next-line
-	}, [dispatch, searchParams, analysisOptions.keywordsOptions]);
+	}, [analysisOptions.keywordsOptions]);
 
-	useEffect(() => { }, [keywords]);
+	useEffect(() => {}, [keywords]);
 
 	const isEmpty = !!(!topic && !vec);
 
@@ -61,11 +61,11 @@ function KeywordsContainer() {
 						text="검색결과가 적어서 분석할 데이터가 부족합니다."
 					/>
 				) : (
-						<>
-							<KeywordsChips topic={topic} />
-							{keywords && keywords.length !== 0 ? <KeywordsTable /> : <SpinLoading delay={20000} />}
-						</>
-					)}
+					<>
+						<KeywordsChips topic={topic} />
+						{keywords && keywords.length !== 0 ? <KeywordsTable /> : <SpinLoading delay={20000} />}
+					</>
+				)}
 			</Paper>
 		</KeywordsContext.Provider>
 	);

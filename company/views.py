@@ -8,23 +8,23 @@
 from . import companies
 from . import company
 from . import finance
-from . import company_info
+# from . import company_info
 
 # companies 
 def get_companies(request):
     return companies.parse_companies(request)
 
-
 def get_query(request):
     return companies.parse_query(request)
 
-
 def get_company_info(request):
-    return company_info.parse_company_info(request)
-
+    return companies.parse_company_info(request)
 
 def get_stock(request):
-    return finance.parse_stock(request)
+    return companies.parse_stock(request)
+
+def get_crawl(request):
+    return companies.crawl_stock(request)    
 
 # company
 # def get_company(request, companyId=""):
@@ -34,8 +34,7 @@ def get_stock(request):
 # def get_stock(request):
 #     return company.parse_stock(request)
 
-def get_crawl(request):
-    return finance.crawl_stock(request)
+
 
 def get_company(request):
     return finance.crawl_dart(request)

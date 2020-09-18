@@ -220,6 +220,9 @@ def parse_indicator(request):
 
     d = parse_searchs(request, mode="indicator")
 
+    if not d:
+        return HttpResponse(json.dumps(d, ensure_ascii=False))
+
     # df = (pd.DataFrame(d)
     #     .loc[:,['출원인코드1']]
     #     .value_counts(['출원인코드1'])

@@ -29,19 +29,16 @@ function calculateMA(dayCount, data) {
 	return result;
 }
 
-// const defaultChipData = { stock_name: '삼성전자', corpCode: '126380', stock_code: '005930' };
-
-function StockChart(props) {
+function StockChart() {
 	const dispatch = useDispatch();
 	const chartRef = useRef(null);
-	const { stock_name, stock_code } = props;
-	// const { stock_name, corpCode, stock_code } = defaultChipData;
+	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode.stockCode);
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.stock.entities);
+	const corpName = useSelector(({ companyApp }) => companyApp.searchs.companyInfo.업체명);
 	const [today, setToday] = useState(null);
 	// const [series, setSeries] = useState(null);
 	// const [xAxis, setXAxis] = useState(null);
 	const [echart, setEchart] = useState(null);
-	// const digits = 2;
 
 	const [currentRange, setCurrentRange] = useState({
 		name: 'day',
@@ -55,13 +52,13 @@ function StockChart(props) {
 	}
 
 	useEffect(() => {
-		if (stock_code && entities) {
+		if (stockCode && entities) {
 			todayStock();
 			drawChart();
 			// updateChart();
 		}
 		// eslint-disable-next-line
-	}, [stock_code, entities]);
+	}, [stockCode, entities]);
 
 	const todayStock = () => {
 		if (entities && entities.data) {
@@ -143,7 +140,7 @@ function StockChart(props) {
 			animation: false,
 			title: {
 				left: 'left',
-				text: stock_name
+				text: corpName
 			},
 			legend: {
 				top: 30,
@@ -392,11 +389,11 @@ function StockChart(props) {
 		};
 	}, [handleResize]);
 
-	if (stock_name === undefined) {
+	if (corpName === undefined) {
 		return '';
 	}
 
-	if (!stock_code || stock_code.length === 0) {
+	if (!stockCode || stockCode.length === 0) {
 		return (
 			<div className="flex flex-col flex-1 items-center justify-center p-16">
 				<div className="max-w-512 text-center">
@@ -416,7 +413,7 @@ function StockChart(props) {
 		);
 	}
 
-	if (stock_code && (!entities || entities.length === 0)) {
+	if (stockCode && (!entities || entities.length === 0)) {
 		return <SpinLoading />;
 	}
 

@@ -1,4 +1,4 @@
-from .models import stock_quotes, financial_statements
+from .models import stock_quotes, financial_statements, nice_corp
 from search.models import listed_corp
 from django.http import HttpResponse, JsonResponse
 
@@ -13,13 +13,13 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 def parse_company_info(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        kiscode = data['kiscode']
+        corpNo = data['corpNo']
 
-        isExist = listed_corp.objects.filter(종목코드=kiscode).exists()
+        isExist = nice_corp.objects.filter(사업자등록번호=corpNo).exists()
         if not isExist:
             return HttpResponse('Not Found', status=404)
 
-        row = listed_corp.objects.filter(종목코드=kiscode).values()
+        row = nice_corp.objects.filter(사업자등록번호=corpNo).values()
         row = list(row)
         res = row[0] if row else {} #dict
 

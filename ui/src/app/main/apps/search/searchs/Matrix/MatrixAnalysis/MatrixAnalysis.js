@@ -31,7 +31,7 @@ function MatrixAnalysis() {
 			setShowLoading(false);
 		});
 		// eslint-disable-next-line
-	}, [dispatch, searchParams, analysisOptions.matrixOptions]);
+	}, [analysisOptions.matrixOptions]);
 
 	const columns = React.useMemo(() => {
 		function getColor(value) {
@@ -59,45 +59,46 @@ function MatrixAnalysis() {
 
 		return matrix.entities
 			? [
-				{
-					Header: category,
-					accessor: category,
-					className: 'text-14 text-left max-w-96 overflow-hidden',
-					sortable: true,
-					Cell: props => (
-						<div onClick={ev => onCellClick(ev, props.cell)}>
-							<span title={props.cell.value}>{props.cell.value}</span>
-						</div>
-					)
-				}
-			].concat(
-				Object.keys(matrix.entities).map(item => ({
-					Header: item,
-					accessor: item,
-					className: 'text-11 text-center',
-					sortable: true,
-					// onClick: () => {
-					// 	alert('click!');
-					// },
-					Cell: props => {
-						return (
-							<div onClick={ev => onCellClick(ev, props.cell)} className={getColor(props.cell.value)}>
+					{
+						Header: category,
+						accessor: category,
+						className: 'text-14 text-left max-w-96 overflow-hidden',
+						sortable: true,
+						Cell: props => (
+							<div onClick={ev => onCellClick(ev, props.cell)}>
 								<span title={props.cell.value}>{props.cell.value}</span>
 							</div>
-						);
+						)
 					}
-				}))
-			)
+			  ].concat(
+					Object.keys(matrix.entities).map(item => ({
+						Header: item,
+						accessor: item,
+						className: 'text-11 text-center',
+						sortable: true,
+						// onClick: () => {
+						// 	alert('click!');
+						// },
+						Cell: props => {
+							return (
+								<div onClick={ev => onCellClick(ev, props.cell)} className={getColor(props.cell.value)}>
+									<span title={props.cell.value}>{props.cell.value}</span>
+								</div>
+							);
+						}
+					}))
+			  )
 			: [
-				{
-					Header: category,
-					accessor: category,
-					className: 'text-11 text-center',
-					sortable: true
-				}
-			];
+					{
+						Header: category,
+						accessor: category,
+						className: 'text-11 text-center',
+						sortable: true
+					}
+			  ];
+		// }, [dispatch, searchParams, matrix, category]);
 		// eslint-disable-next-line
-	}, [dispatch, searchParams, matrix, category]);
+	}, [matrix, category]);
 
 	const groupBy = (obj, category) => {
 		const keys = Object.keys(obj);
@@ -201,53 +202,51 @@ function MatrixAnalysis() {
 				</div>
 				<MatrixAnalysisMenu />
 			</div>
-			{
-				isEmpty ? (
-					<EmptyMsg icon="blur_linear" msg="매트릭스 분석" text="검색결과가 적어서 분석할 데이타가 부족합니다." />
-				) : (
-						<>
-							<FuseScrollbars className="h-40 px-12">
-								<div className="flex w-full ">
-									{/* {matrix.entities && (
+			{isEmpty ? (
+				<EmptyMsg icon="blur_linear" msg="매트릭스 분석" text="검색결과가 적어서 분석할 데이타가 부족합니다." />
+			) : (
+				<>
+					<FuseScrollbars className="h-40 px-12">
+						<div className="flex w-full ">
+							{/* {matrix.entities && (
 						<Chip label={category} key={category} size="small" className="mx-4" />
 					)} */}
-									{matrix.entities &&
-										Object.entries(matrix.entities).map(([key]) => (
-											// <Chip label={value} key={value} size="small" onClick={() => handleClick(value)} />
-											// <Draggable>
-											<Chip label={key} key={key} size="small" className="mx-4" />
-											// </Draggable>
-										))}
-								</div>
+							{matrix.entities &&
+								Object.entries(matrix.entities).map(([key]) => (
+									// <Chip label={value} key={value} size="small" onClick={() => handleClick(value)} />
+									// <Draggable>
+									<Chip label={key} key={key} size="small" className="mx-4" />
+									// </Draggable>
+								))}
+						</div>
+					</FuseScrollbars>
+					{showLoading ? (
+						<SpinLoading />
+					) : (
+						<>
+							<FuseScrollbars className="max-h-360 px-6">
+								<EnhancedTable
+									columns={columns}
+									// defaultColumn={defaultColumn}
+									data={data}
+									size="small"
+									pageSize={8}
+									pageOptions={[8, 16, 24]}
+									onRowClick={(ev, row) => {
+										if (row) {
+											// window.open(row.original.link, '_blank');
+											// props.history.push(row.original.link);
+											// dispatch(openEditContactDialog(row.original));
+										}
+									}}
+								/>
 							</FuseScrollbars>
-							{showLoading ? (
-								<SpinLoading />
-							) : (
-									<>
-										<FuseScrollbars className="max-h-360 px-6">
-											<EnhancedTable
-												columns={columns}
-												// defaultColumn={defaultColumn}
-												data={data}
-												size="small"
-												pageSize={8}
-												pageOptions={[8, 16, 24]}
-												onRowClick={(ev, row) => {
-													if (row) {
-														// window.open(row.original.link, '_blank');
-														// props.history.push(row.original.link);
-														// dispatch(openEditContactDialog(row.original));
-													}
-												}}
-											/>
-										</FuseScrollbars>
-										<MatrixDialog />
-									</>
-								)}
+							<MatrixDialog />
 						</>
-					)
-			}
-		</Paper >
+					)}
+				</>
+			)}
+		</Paper>
 	);
 }
 

@@ -22,10 +22,17 @@ export const getCompanyInfo = createAsyncThunk(NAME + 'getCompanyInfo', async (p
 	const response = await axios.post(URL + 'companyinfo', params);
 	const data = await response.data;
 
-	const { 종목코드 } = data;
-	if (종목코드) {
-		dispatch(getStock({ kiscode: 종목코드 }));
+	const { 주식코드 } = data;
+	if (주식코드) {
+		dispatch(getStock({ stockCode: 주식코드 }));
 	}
+
+	return data;
+});
+
+export const getClinicTest = createAsyncThunk(NAME + 'getClinicTest', async (params, subParams) => {
+	const response = await axios.get(URL + 'clinic', { params: params, subParams: subParams });
+	const data = await response.data;
 
 	return data;
 });
@@ -118,57 +125,25 @@ export const initialState = {
 		repAgeStart: '',
 		repAgeEnd: ''
 	},
-	// analysisOptions: {
-	// 	wordCloudOptions: {
-	// 		volume: '요약',
-	// 		unit: '구문', // '구문', '워드',
-	// 		output: 50
-	// 	},
-	// 	keywordsOptions: {
-	// 		keywordvec: '',
-	// 		modelType: 'word2vec', // 'word2vec','fasttext','etc'
-	// 		volume: '요약',
-	// 		unit: '구문', // '구문', '워드',
-	// 		output: 20
-	// 	},
-	// 	matrixOptions: {
-	// 		category: '연도별', // '국가별', '연도별', '기술별', '기업별'
-	// 		volume: '요약',
-	// 		unit: '구문', // '구문', '워드',
-	// 		output: 20
-	// 	}
-	// },
+	clinicOptions: {
+		category: '연도별', // '국가별', '연도별', '기술별', '기업별'
+		volume: '요약',
+		unit: '구문', // '구문', '워드',
+		output: 50
+	},
 	searchLoading: null,
 	searchSubmit: null,
-	kiscode: null,
+	selectedCode: {
+		stockCode: '',
+		corpNo: ''
+	},
 	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
 	stock: {
 		entities: [],
 		chartType: 'year'
 	},
-	companyInfo: []
-	// selectedSearchIds: [],
-	// topicChips: [],
-	// news: [],
-	// newsSA: null,
-	// indicator: [],
-	// relatedCompany: [],
-	// matrix: {
-	// 	entities: [],
-	// 	// category: '연도별', // ['국가별', '연도별', '기술별', '기업별'],
-	// 	max: 0
-	// },
-	// matrixDialog: {
-	// 	props: {
-	// 		open: false
-	// 	},
-	// 	data: null
-	// },
-	// wordCloud: [],
-	// keywords: {
-	// 	topic: [],
-	// 	vec: []
-	// }
+	companyInfo: [],
+	clinicTest: []
 };
 
 const searchsSlice = createSlice({
@@ -197,8 +172,11 @@ const searchsSlice = createSlice({
 		setSearchLoading: (state, action) => {
 			state.searchLoading = action.payload;
 		},
-		setKiscode: (state, action) => {
-			state.kiscode = action.payload;
+		setSelectedCode: (state, action) => {
+			state.selectedCode = action.payload;
+		},
+		resetSelectedCode: (state, action) => {
+			state.selectedCode = initialState.selectedCode;
 		},
 		setSearchParams: (state, action) => {
 			state.searchParams = action.payload;
@@ -292,7 +270,7 @@ export const {
 	clearSearchs,
 	clearSearchText,
 	setSearchLoading,
-	setKiscode,
+	setSelectedCode,
 	setSearchParams,
 	setSearchNum,
 	setSearchVolume,

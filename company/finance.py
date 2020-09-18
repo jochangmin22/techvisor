@@ -56,7 +56,7 @@ def parse_stock(request):
     """ stock quote """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        kiscode = data["kiscode"]
+        stockCode = data["stockCode"]
         chartType = 'year'
 
         # update 
@@ -87,11 +87,11 @@ def parse_stock(request):
             range_from = temp.strftime('%Y-%m-%d')
 
     
-            isExist = stock_quotes.objects.filter(kiscode=kiscode, price_date__range=[range_from,today]).exists()
+            isExist = stock_quotes.objects.filter(kiscode=stockCode, price_date__range=[range_from,today]).exists()
             if not isExist:
                 return HttpResponse('Not Found', status=404)
 
-            stockQuotes = stock_quotes.objects.filter(kiscode=kiscode, price_date__range=[range_from,today])
+            stockQuotes = stock_quotes.objects.filter(kiscode=stockCode, price_date__range=[range_from,today])
 
             myDate = list(stockQuotes.values_list('price_date', flat=True).order_by('price_date'))
             myStock = list(stockQuotes.values_list('stock', flat=True).order_by('price_date'))

@@ -8,7 +8,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import { parseInputSearchText } from 'app/main/apps/lib/parseParamsCompany';
-import { setSearchParams, setSearchSubmit, setKiscode } from 'app/main/apps/company/store/searchsSlice';
+import { setSearchParams, setSearchSubmit, setSelectedCode } from 'app/main/apps/company/store/searchsSlice';
 import { useDispatch } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
@@ -120,13 +120,13 @@ const SearchPoper = React.forwardRef(function (props, ref) {
 	// 	setAnchorEl(props.open);
 	// }, [props.open]);
 
-	const handleClick = (name, code) => {
-		const inputSearchText = '(' + name + ').CN';
-		const [_params] = parseInputSearchText(inputSearchText);
-		_params['companyName'] = [name];
-		_params['searchNum'] = ''; // prevent uncontrolled error
-		dispatch(setKiscode(code));
-		dispatch(setSearchParams(_params));
+	const handleClick = (name, stockCode, corpNo) => {
+		// const inputSearchText = '(' + name + ').CN';
+		// const [_params] = parseInputSearchText(inputSearchText);
+		// _params['companyName'] = [name];
+		// _params['searchNum'] = ''; // prevent uncontrolled error
+		dispatch(setSelectedCode({ stockCode: stockCode, corpNo: corpNo }));
+		// dispatch(setSearchParams(_params));
 		dispatch(setSearchSubmit(true));
 
 		if (anchorEl) {
@@ -178,19 +178,20 @@ const SearchPoper = React.forwardRef(function (props, ref) {
 									hover
 									className="cursor-pointer"
 									onClick={event => {
-										handleClick(value.회사명, value.종목코드);
+										handleClick(value.업체명, value.주식코드, value.사업자등록번호);
 									}}
 								>
-									<TableCell width="15%">{value.회사명}</TableCell>
-									<TableCell width="10%">{value.종목코드}</TableCell>
+									<TableCell width="15%">{value.업체명}</TableCell>
+									<TableCell width="10%">{value.주식코드}</TableCell>
+									<TableCell width="10%">{value.사업자등록번호}</TableCell>
 									<TableCell width="25%" className="font-300 text-12" padding="none">
-										{value.업종}
+										{value.업종명}
 									</TableCell>
 									<TableCell width="40%" className="font-300 text-12" padding="none">
 										{value.주요제품}
 									</TableCell>
 									<TableCell width="10%" className="font-300 text-12 text-center" padding="none">
-										{value.지역}
+										{value.주소}
 									</TableCell>
 								</TableRow>
 							))}

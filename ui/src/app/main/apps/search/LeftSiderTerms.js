@@ -27,6 +27,7 @@ import {
 	getWordCloud,
 	getKeywords,
 	getMatrix,
+	getIndicator,
 	clearSearchs,
 	clearSearchText,
 	setSearchLoading,
@@ -293,6 +294,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 			dispatch(getWordCloud(params));
 			dispatch(getKeywords(params));
 			dispatch(getMatrix(params));
+			dispatch(getIndicator(params));
 			dispatch(setSearchLoading(false));
 			dispatch(setSearchSubmit(false));
 		});

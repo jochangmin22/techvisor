@@ -9,10 +9,19 @@ from bs4 import BeautifulSoup
 from lxml import etree as ET
 import os
 
+# stock
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from urllib.request import urlopen
+import uuid
+
 from copy import deepcopy
 import json
 
 from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
+
+from .models import nice_corp, stock_quotes
+
 
 # caching with redis
 from django.core.cache import cache
@@ -21,19 +30,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-# from urllib.parse import unquote
-# pynori python 3.6과 호환되는지 확인해야함
-# from pynori.korean_analyzer import KoreanAnalyzer
-
-### for api {
-# import requests
-# import urllib.parse
-# from collections import OrderedDict
-# from itertools import repeat
-### for api }
-
 def parse_companies(request, mode="begin"): # mode : begin, nlp, query
-    """ 쿼리 실행 및 결과 저장 """
 
     mainKey, _, params, _ = get_redis_key(request)
 
@@ -60,10 +57,11 @@ def parse_companies(request, mode="begin"): # mode : begin, nlp, query
                 whereAll = whereAll[:-4]            
         # 키워드 검색
         else:
-            whereAll = like_parse(
-                params["searchText"]) if params["searchText"] else ""
+            # whereAll = like_parse(params["searchText"]) if params["searchText"] else ""
+            whereAll = like_parse_nice(params["searchText"]) if params["searchText"] else ""
 
-        query = 'SELECT * FROM listed_corp WHERE (' + \
+        # query = 'SELECT * FROM listed_corp WHERE (' + \
+        query = 'SELECT * FROM nice_corp WHERE (' + \
             whereAll + ")"
 
         if mode == "query": # mode가 query면 여기서 분기
@@ -75,34 +73,6 @@ def parse_companies(request, mode="begin"): # mode : begin, nlp, query
         )
         row = dictfetchall(cursor)
 
-    # if row:
-
-        # # matrix list 생성
-        # mtx_raw = deepcopy(row)
-
-        # # npl and mtx parse
-        # for i in range(len(row)):
-        #     # x += row[i]["요약token"].split()
-        #     nlp_raw += row[i]["요약token"] + " "
-        #     del row[i]["요약token"]  # grid에는 초록 안쓰므로 nlp_raw에 저장하고 바로 제거 - row는 list of dictionaries 형태임
-
-        #     # matrix는 출원번호, 출원일자, 출원인1, ipc요약, 요약token만 사용
-        #     mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]            
-        #     del mtx_raw[i]["rows_count"]
-        #     del mtx_raw[i]["등록사항"]
-        #     del mtx_raw[i]["발명의명칭(국문)"]
-        #     del mtx_raw[i]["발명의명칭(영문)"]
-        #     del mtx_raw[i]["출원인코드1"]
-        #     del mtx_raw[i]["출원인국가코드1"]
-        #     del mtx_raw[i]["발명자1"]
-        #     del mtx_raw[i]["발명자국가코드1"]
-        #     del mtx_raw[i]["등록일자"]
-        #     del mtx_raw[i]["공개일자"]        
-
-        # # 요약token tokenizer
-        # nlp_raw = ' '.join(tokenizer(nlp_raw) if nlp_raw else '')
-    # else:  # 결과값 없을 때 처리
-        # row = []
 
     # redis 저장 {
     new_context = {}
@@ -183,154 +153,212 @@ def like_parse(keyword=""):
         res = None
     return res     
 
-def like_keywords(keyword="", fieldName=""):
-    """ 단순 like query 생성 """
-    # A and F LIKE "%A%"
-    # A or B_C ; F LIKE '%A%' or F LIKE '%B C%'
-    # A and B_C ; F LIKE '%A%' and F LIKE '%B C%'
-    # A or B and not C ; F LIKE '%A%' or F LIKE '%B%' and F !'C'
-
-    if not keyword:
-        return ""
-
-    # 전체 조합에서 + 기준으로 like query 만들기
-    items = []
-    notItems = []
-    mylength = 1
-    # for val in re.split("(\\W+)", keyword): #  not a word (\w)
-    for val in re.split(r' and | or ',keyword): # and | or
-        val = val.replace("_"," ")
-        if "not " in val or "-" in val: # collect negative word
-            val = val.replace("-","").replace("not ","")
-            notItems.append(val)
-        else:                
-            items.append(val)
-
-    temp = list(map("%".join, permutations(items, mylength)))        
-
-    res = ""
-    for k in temp:
-        res += '"' + fieldName + "\" like '%" + k + "%' or "
-
-    if res.endswith(" or "):
-        res = res[:-4]
-
-    # append collect negative word
-    res2 = ""
-    # if not notItems:
-    temp2 = list(map("%".join, permutations(notItems, mylength)))        
-
-    for k in temp2:
-        res2 += '"' + fieldName + "\" not like '%" + k + "%' and "
-
-    if res2.endswith(" and "):
-        res2 = res2[:-5]
-                
-    # merge result
-    if res:
-        return ("(" + res + ") and " + res2) if res2 else res
-    else:
-        return res2 if res2 else ""    
-
-def tsquery_keywords(keyword="", fieldName=""):
+def like_parse_nice(keyword=""):
+    """ like query 생성 """
     """ keyword 변환 => and, or, _, -, not, near, adj 를 tsquery 형식의 | & ! <1> 로 변경 """
-    # A+B;C_D => '("A" | "B") & "C D"'
-    # A or -B and C_D and not E => '(A !B) & "C D" & !E'
-    if keyword and keyword != "":
-        needPlainto = ""
-        strKeyword = ""  # unquote(keyword) # ; issue fix
 
+    # (기업이름).CN and (주소).CA and (사업영역).BD and (관련키워드).RK and (사용자).CC and (@MC>=1111<=2222) and (@FD>=33333333<=44444444) and (@EM>=55<=66) and (@RA>=77<=88)
+    if keyword and keyword != "":
+
+        res = ""  # unquote(keyword) # ; issue fix
         # for val in keyword.split(" AND "):
         for val in re.split(" and ", keyword, flags=re.IGNORECASE):  # case insentitive
-            # continue if not terms
-            if val.startswith("(@") or val.endswith(".CA") or val.endswith(".BD") or val.endswith(".RK") or val.endswith(").CC") or val.endswith(").IN"):
+            # continue they were not implemented
+            if val.startswith("(@") or val.endswith(").RK") or val.endswith(").CC"):
                 continue
-            strKeyword += "("  # not add paranthesis when above terms
-            # convert .CN to None
+            res += "("  # not add paranthesis when above terms
+            # select fieldName and remove initial symbol
             if val.endswith(".CN"):
                 val = val.replace(".CN", "")
-            # convert nagative - to !
+                res += '업체명'
+            if val.endswith(".CA"):
+                val = val.replace(".CA", "")
+                res += '주소'                
+            if val.endswith(".BD"):
+                val = val.replace(".BD", "")
+                res += '업종명'                
+            if val.endswith(".IN"):
+                val = val.replace(".IN", "")
+                res += '주요제품'                
+           
+            # convert nagative - to None
             if val.startswith("-") or ' or -' in val:
-                val = val.replace("-", "!")
-            # convert nagative not to !
+                val = val.replace("-", "")
+                res += " not"
+            # convert nagative not to None
             if val.startswith("not ") or ' or not ' in val:
-                val = val.replace("not ", "!")
-            # convert wildcard * to :*
-            if val.endswith("*") or '*' in val:
-                val = val.replace("*", ":*")
-            # handle Proximity Search
-            if ' adj' in val.lower():
-                s = val.lower()[val.lower().find("adj")+3:].split()[0]
-                if s.isnumeric():
-                    delimiter = "<" + s + ">"
-                    val = val.replace(s, "")
-                else:
-                    delimiter = "<1>"
-
-                val = re.sub(re.escape('adj'), delimiter, val, flags=re.IGNORECASE)                    
-                # val = val.replace("adj", delimiter)
-            # A or B near C
-            # A near B or C
-            # A or B near C or D near E or F
-            strNear = ""
-            if ' near' in val.lower():
-                for v in re.split(" or ", val, flags=re.IGNORECASE):
-                    # remove possible parenthesis
-                    v = re.sub('[()]', '', v)
-                    if ' near' in v.lower():
-                        s = v.lower()[v.lower().find("near")+4:].split()[0]
-                        if s.isnumeric():
-                            delimiter = "<" + s + ">"
-                            v = v.replace(s, "")
-                        else:
-                            delimiter = "<1>"
-
-                        v = re.sub(re.escape('near'), delimiter, v, flags=re.IGNORECASE) 
-                        temp = v.partition(" " + delimiter + " ")
-
-                        # switch position between words and add it
-                        strNear += "(" + v + " | " + \
-                            temp[2] + " " + delimiter + " " + temp[0] + ") | "
-                    else:
-                        strNear += "".join(str(v)) + " | "
-                if strNear.endswith(" | "):
-                    strNear = strNear[:-3]
-                strKeyword += strNear
-                val = ""  # val clear
-
+                val = val.replace("not ", "")
+                res += " not"
+            val = re.sub('[()]', '', val)
+            res += " like '%" + val + "%' and " 
             # if " OR " in val:
-            if " or ".upper() in map(str.upper, val):
-                needPlainto = "\""
+            # if " or ".upper() in map(str.upper, val):
+            #     needPlainto = "\""
 
-            # add paranthesis every terms block
+            # # add paranthesis every terms block
 
-            strKeyword += (
-                needPlainto + "".join(str(val)) + needPlainto + ") & "
-            )
-        strKeyword = strKeyword.replace(" AND ", needPlainto + " & ").replace(" OR ", needPlainto + " | ").replace(
-            " and ", needPlainto + " & ").replace(" or ", needPlainto + " | ")  # .replace("_", " ")
+            # res += (
+            #     needPlainto + "".join(str(val)) + needPlainto + ") & "
+            # )
+        # res = res.replace(" AND ", needPlainto + " & ").replace(" OR ", needPlainto + " | ").replace(
+        #     " and ", needPlainto + " & ").replace(" or ", needPlainto + " | ")  # .replace("_", " ")
 
-        if strKeyword.endswith(" & "):
-            strKeyword = strKeyword[:-3]
-
-        #  전문소 @@ plainto_tsquery('(A | B) & C')
-        tsqueryType = "plainto_tsquery" if needPlainto else "to_tsquery"
-        res = '"' + fieldName + "\" @@ " + \
-            tsqueryType + "('" + strKeyword + "')"
+        if res.endswith(" and "):
+            res = res[:-5]
+        res += ")"
     else:
         res = None
-    return res
+    return res       
 
+def parse_company_info(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        corpNo = data['corpNo']
 
+        isExist = nice_corp.objects.filter(사업자등록번호=corpNo).exists()
+        if not isExist:
+            return HttpResponse('Not Found', status=404)
 
+        row = nice_corp.objects.filter(사업자등록번호=corpNo).values()
+        row = list(row)
+        res = row[0] if row else {} #dict
 
-def tokenizer( raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]): # NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
-    mecab = Mecab()    
-    STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
-    return [
-        word
-        for word, tag in mecab.pos(raw) if len(word) > 1 and tag in pos and word not in STOPWORDS
-        # if len(word) > 1 and tag in pos and word not in stopword
-        # if tag in pos
-        # and not type(word) == float
-]             
+    return JsonResponse(res, safe=False)
+
+def parse_stock(request):
+    """ stock quote """
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        stockCode = data["stockCode"]
+        chartType = 'year'
+
+        # update 
+        try:
+            crawl_stock(request)
+        except:
+            return HttpResponse() # 500
+
+        try:
+            today = datetime.today().strftime('%Y-%m-%d')
+            
+            # 하루 일주일 한달 일년 전체
+            kwargs = {}
+            if chartType == 'day':
+                kwargs['days'] = -1
+            elif chartType == 'week':
+                kwargs['weeks'] = -1
+            elif chartType == 'month':
+                kwargs['months'] = -1
+            elif chartType == "year":
+                kwargs['years'] = -1
+            elif chartType == "all":
+                kwargs['years'] = -10
+
+            temp = datetime.now() + relativedelta(**kwargs)
+            range_from = temp.strftime('%Y-%m-%d')
+
+    
+            isExist = stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today]).exists()
+            if not isExist:
+                return HttpResponse('Not Found', status=404)
+
+            stockQuotes = stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today])
+
+            myDate = list(stockQuotes.values_list('price_date', flat=True).order_by('price_date'))
+            myStock = list(stockQuotes.values_list('stock', flat=True).order_by('price_date'))
+            myVolume = list(stockQuotes.values_list('volume', flat=True).order_by('price_date'))
+
+            response = { 'dates': myDate, 'data': myStock, 'volumes': myVolume}          
+            return JsonResponse(response,status=200, safe=False)
+        except:
+            return HttpResponse() # 500    
+
+def crawl_stock(request):
+    ''' 
+    page 1 부터 crawling -> if exist at db ? 
+              yes -> return
+              no -> stock_quotes.objects.create(**newStock)
+    '''
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        stockCode = data["stockCode"]
+
+        # exist ? {
+        try:
+            stockQuotes = stock_quotes.objects.filter(stock_code=stockCode).latest('price_date')
+            lastRecordDate = stockQuotes.price_date if stockQuotes else None
+        except:
+            lastRecordDate = None
+
+        # exist ? }
+
+        naver_url = 'http://finance.naver.com/item/sise_day.nhn?code='
+        url = naver_url + stockCode
+        html = urlopen(url) 
+        source = BeautifulSoup(html.read(), "html.parser")
+        
+        maxPage=source.find_all("table",align="center")
+        mp = maxPage[0].find_all("td",class_="pgRR")
+        if mp:
+            # mpNum = int(mp[0].a.get('href')[-3:])
+            mpNum = int(mp[0].a.get('href').split('page=')[1])
+        else:
+            mpNum = 1    
+        
+
+        isCrawlBreak = None                                                    
+        for page in range(1, mpNum+1):
+            if isCrawlBreak:
+                break
+            # print (str(page) )
+            url = naver_url + stockCode +'&page='+ str(page)
+            html = urlopen(url)
+            source = BeautifulSoup(html.read(), "html.parser")
+            srlists=source.find_all("tr")
+            isCheckNone = None
+
+            # if((page % 1) == 0):
+            #     time.sleep(1.50)
+
+            # data : open, close, lowest, highest, volume
+            # naver : 종가, 전일비, 시가, 고가, 저가, 거래량
+            # ResultSet order : 2,0,4,3,5 
+            for i in range(1,len(srlists)-1):
+                if(srlists[i].span != isCheckNone):
+
+                    newDate = srlists[i].find_all("td",align="center")[0].text
+                    newDate = newDate.replace('.','-')
+                    newDate_obj = datetime.strptime(newDate, '%Y-%m-%d')
+                    lastRecordDate_obj = datetime.combine(lastRecordDate, datetime.min.time()) if lastRecordDate else ''
+
+                    if not lastRecordDate or (lastRecordDate and lastRecordDate_obj.date() <= newDate_obj.date()):
+                        first = srlists[i].find_all("td",class_="num")[2].text
+                        second = srlists[i].find_all("td",class_="num")[0].text
+                        third = srlists[i].find_all("td",class_="num")[4].text
+                        fourth = srlists[i].find_all("td",class_="num")[3].text
+                        fifth = srlists[i].find_all("td",class_="num")[5].text
+
+                        first = int(first.replace(',',''))
+                        second = int(second.replace(',',''))
+                        third = int(third.replace(',',''))
+                        fourth = int(fourth.replace(',',''))
+                        fifth = int(fifth.replace(',',''))
+                        
+                        newUid = str(uuid.uuid4())
+                        newStock = {
+                            'id': newUid,
+                            'stock_code': stockCode,
+                            'price_date': newDate,
+                            'stock': [first, second, third, fourth, fifth],
+                            'volume' : fifth
+                        }
+                        isMatchToday = True if lastRecordDate and lastRecordDate_obj.date() == newDate_obj.date() else False
+
+                        if not isMatchToday:
+                            stock_quotes.objects.create(**newStock)
+                        else:                            
+                            stock_quotes.objects.filter(stock_code=stockCode, price_date=newDate).update(**newStock)
+                        # stock_quotes.objects.update_or_create(**newStock)
+                    else:
+                        isCrawlBreak = True    
+    return            

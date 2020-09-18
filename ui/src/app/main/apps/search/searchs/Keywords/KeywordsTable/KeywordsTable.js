@@ -70,7 +70,7 @@ function KeywordsTable() {
 		dispatch(setSearchParams(_params));
 	}, [form]);
 
-	useEffect(() => { }, [entities]);
+	useEffect(() => {}, [entities]);
 
 	useEffect(() => {
 		const [, params] = parseSearchOptions(searchParams);
@@ -79,7 +79,7 @@ function KeywordsTable() {
 		};
 		dispatch(getKeywordsVec({ params, subParams }));
 		// eslint-disable-next-line
-	}, [dispatch, searchParams, analysisOptions.keywordsOptions.keywordvec]);
+	}, [analysisOptions.keywordsOptions.keywordvec]);
 
 	if (entities && entities.length === 0) {
 		return <SpinLoading delay={20000} />;
