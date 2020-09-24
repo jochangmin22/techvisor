@@ -5970,12 +5970,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-fetch@npm:3.0.5":
-  version: 3.0.5
-  resolution: "cross-fetch@npm:3.0.5"
+"cross-fetch@npm:3.0.6":
+  version: 3.0.6
+  resolution: "cross-fetch@npm:3.0.6"
   dependencies:
-    node-fetch: 2.6.0
-  checksum: 99f0f4ae222c611bfd45c176e95335ffb4046c662e349afcdcfad8edf9a76cefb68e6dfb6707cddf0ad23d231290346a76d70ba1205f8af4cb335eb52321b4bc
+    node-fetch: 2.6.1
+  checksum: a491ad1b89988a351f8b8b252b68a5e653636d911042648c43a806cf7575ff043379a80d6269102ca60ec633af0b49ca4c83536007793bb0e65e491769f70d9d
   languageName: node
   linkType: hard
 
@@ -8586,7 +8586,7 @@ fsevents@~2.1.2:
     chart.js: 2.9.3
     clsx: 1.1.1
     cross-env: 7.0.2
-    cross-fetch: 3.0.5
+    cross-fetch: 3.0.6
     date-fns: 2.14.0
     echarts: ^4.9.0
     echarts-wordcloud: ^1.1.3
@@ -8644,7 +8644,7 @@ fsevents@~2.1.2:
     react-google-login: ^5.1.21
     react-highlight-selection: ^1.0.2
     react-highlight-words: ^0.16.0
-    react-i18next: 11.7.2
+    react-i18next: 11.7.3
     react-masonry-css: 1.0.14
     react-naver-login: ^0.1.4
     react-number-format: 4.4.1
@@ -8659,7 +8659,7 @@ fsevents@~2.1.2:
     react-spring: 8.0.27
     react-swipeable-views: 0.13.9
     react-swipeable-views-utils: 0.13.9
-    react-table: 7.5.0
+    react-table: 7.5.1
     react-text-mask: 5.4.3
     react-virtualized: 9.22.2
     react-window: 1.8.5
@@ -12409,6 +12409,13 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"node-fetch@npm:2.6.1":
+  version: 2.6.1
+  resolution: "node-fetch@npm:2.6.1"
+  checksum: cbb171635e538162b977eac5dfe7a1e07a9a02e991924377a6435502291e2f823d306b95aabc455caebf4a118ccf836868462bc70ccc3095af02bb9da61fda37
+  languageName: node
+  linkType: hard
+
 "node-fetch@npm:^1.0.1":
   version: 1.7.3
   resolution: "node-fetch@npm:1.7.3"
@@ -15083,16 +15090,16 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:11.7.2":
-  version: 11.7.2
-  resolution: "react-i18next@npm:11.7.2"
+"react-i18next@npm:11.7.3":
+  version: 11.7.3
+  resolution: "react-i18next@npm:11.7.3"
   dependencies:
     "@babel/runtime": ^7.3.1
     html-parse-stringify2: 2.0.1
   peerDependencies:
     i18next: ">= 19.0.0"
     react: ">= 16.8.0"
-  checksum: ea5c989d1b129d74b2d4b4d90cd33709f883cf89df90bcfbb78e3c97ac0c052cbf3369554e9e5beb405f1dbab5d7f7b77aa29fc0e13716d78d456f4f8408771c
+  checksum: 7f0b0535bf2577b534b3c163761f3151a204ae0cd2c2cf286385f6af4401cfc74500f3843328c70c46e5a115ffcfbc007bfee6bea0961b92f7103f26204e8c3a
   languageName: node
   linkType: hard
 
@@ -15439,12 +15446,12 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-table@npm:7.5.0":
-  version: 7.5.0
-  resolution: "react-table@npm:7.5.0"
+"react-table@npm:7.5.1":
+  version: 7.5.1
+  resolution: "react-table@npm:7.5.1"
   peerDependencies:
     react: ^16.8.3
-  checksum: be6f42ab1919333e8ac43249e386acfe8c8e975a7e952a2d4dac32707dd899a36b18650acd54b73fe98206ea056309cad25932cf8abe61a57839317187e365f6
+  checksum: 92b94706bed5f495ec30a2421294260d389755b8477793f25126a8ecdf68b90589260ebdfa9a1b82f937a06497da96474a2ea89d5c45b4eb83234784e110f9a8
   languageName: node
   linkType: hard
 

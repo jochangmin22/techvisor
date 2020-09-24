@@ -43,7 +43,7 @@ function SearchListContainer() {
 	const notSelectedYet = !!(!searchLoading && isEmpty);
 
 	return (
-		<div className="flex w-full h-auto md:pt-0">
+		<div className="flex flex-col w-full h-auto md:pt-0">
 			{open ? <ReturnListMsg /> : <MainTable onShrink={() => setOpen(true)} />}
 			{notSelectedYet && <WaitMsg />}
 		</div>

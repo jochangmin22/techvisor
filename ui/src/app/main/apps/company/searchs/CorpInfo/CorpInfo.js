@@ -1,24 +1,17 @@
 import React, { useEffect, useMemo } from 'react';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import CardHeader from '@material-ui/core/CardHeader';
+import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
 import { addSeparator, numberToKorean } from 'app/main/apps/lib/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCompanyInfo } from 'app/main/apps/company/store/searchsSlice';
-
-const useStyles = makeStyles(theme => ({
-	paper: {
-		padding: theme.spacing(1),
-		marginBottom: theme.spacing(1.5),
-		textAlign: 'center',
-		backgroundColor: theme.palette.secondary.light,
-		color: theme.palette.secondary.contrastText
-	}
-}));
+import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 
 function CorpInfo() {
-	const classes = useStyles();
 	const dispatch = useDispatch();
 	const arr = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
 	const selectedCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode);
@@ -28,6 +21,7 @@ function CorpInfo() {
 		if (!isEmpty) {
 			dispatch(getCompanyInfo(selectedCode));
 		}
+		// eslint-disable-next-line
 	}, [selectedCode]);
 
 	const corpInfo = useMemo(
@@ -41,28 +35,12 @@ function CorpInfo() {
 						기업규모: arr.기업규모,
 						// 산업분류: arr.sanupcode,
 						업종코드: arr.업종코드,
-						업종: arr.업종,
+						업종: arr.업종명,
 						주요제품: arr.주요제품,
 						홈페이지: arr.홈페이지URL,
 						전화번호: arr.전화번호,
 						'지번 주소': arr.주소
 						// 사업영역: arr.sanup
-				  }
-				: {},
-		[arr]
-	);
-	const stockInfo = useMemo(
-		() =>
-			arr
-				? {
-						시가총액: arr.시가총액,
-						'주가(월)': '', // arr.korreprnm,
-						'거래량(주)': arr.거래량,
-						'주가 수익률(일/월/년)': arr.수익률,
-						'PER(배)': arr['PER(배)'],
-						'PBR(배)': arr['PBR(배)'],
-						'ROE(%)': arr['ROE(%)'],
-						'EPS(원)': arr['EPS(원)'] ? arr['EPS(원)'] + '원' : ''
 				  }
 				: {},
 		[arr]
@@ -77,93 +55,121 @@ function CorpInfo() {
 						자산: numberToKorean(arr.자산총계),
 						부채: numberToKorean(arr.부채총계),
 						자본: numberToKorean(arr.자본총계),
-						'종업원수(월)': Number(arr.종업원수).toLocaleString(),
-						'': ''
+						'종업원수(월)': arr.종업원수 ? Number(arr.종업원수).toLocaleString() + '명' : ''
 				  }
 				: {},
 		[arr]
 	);
 
-	if (!arr || arr.length === 0) {
-		return '';
-	}
+	if (!arr || arr.length === 0) return '';
 
 	return (
-		<Paper className="w-full h-full rounded-8 p-8">
-			<div className="flex flex-row items-center mb-4">
-				<Typography variant="h6">{arr.corp_name}</Typography>
-				{arr.주식코드 ? (
-					<Typography className="text-14 font-bold ml-8">종목코드:{arr.주식코드}</Typography>
-				) : (
-					''
-				)}
-				{arr.사업자등록번호 ? (
-					<Typography className="text-14 font-bold ml-8">사업자등록번호:{arr.사업자등록번호}</Typography>
-				) : (
-					''
-				)}
-			</div>
-
-			<Grid container spacing={3}>
-				<Grid item xs={12} sm={4}>
-					<Typography gutterBottom variant="subtitle1">
-						<Paper className={classes.paper}>기업 개요</Paper>
-					</Typography>
-					{Object.entries(corpInfo).map(([key, value]) => (
-						<Grid container key={key} spacing={3}>
-							<Grid item xs={4}>
-								<Typography variant="body2" color="textSecondary" className="pl-16">
-									{key}
+		<div className="md:flex w-full">
+			<Card className="w-full rounded-8">
+				{/* <AppBar position="static" elevation={0}>
+					<Toolbar className="px-8">
+						<div className="flex flex-row justify-between">
+							<Typography variant="subtitle1" color="inherit" className="px-12" edge="start">
+								기업 개요
+							</Typography>
+							<div className="flex flex-row items-center">
+								<Typography className="font-medium text-gray-400" color="inherit">
+									{arr.업체명}
 								</Typography>
-							</Grid>
-							<Grid item xs={8}>
-								<Typography variant="body2" gutterBottom>
-									{value}
-								</Typography>
-							</Grid>
-						</Grid>
-					))}
-				</Grid>
-				<Grid item xs={12} sm={4}>
-					<Typography gutterBottom variant="subtitle1">
-						<Paper className={classes.paper}>시황 정보</Paper>
-					</Typography>
-					{Object.entries(stockInfo).map(([key, value]) => (
-						<Grid container key={key} spacing={3}>
-							<Grid item xs={6}>
-								<Typography variant="body2" color="textSecondary" className="pl-16">
-									{key}
-								</Typography>
-							</Grid>
-							<Grid item xs={6} className="text-right">
-								<Typography variant="body2" gutterBottom>
-									{value}
-								</Typography>
-							</Grid>
-						</Grid>
-					))}
-				</Grid>
-				<Grid item xs={12} sm={4}>
-					<Typography gutterBottom variant="subtitle1">
-						<Paper className={classes.paper}>재무 정보</Paper>
-					</Typography>
-					{Object.entries(financeInfo).map(([key, value]) => (
-						<Grid container key={key} spacing={3}>
-							<Grid item xs={4}>
-								<Typography variant="body2" color="textSecondary" className="pl-16">
-									{key}
-								</Typography>
-							</Grid>
-							<Grid item xs={8} className="text-right">
-								<Typography variant="body2" gutterBottom>
-									{value}
-								</Typography>
-							</Grid>
-						</Grid>
-					))}
-				</Grid>
-			</Grid>
-		</Paper>
+								<span className="flex flex-row items-center mx-8">
+									{arr.주식코드 && (
+										<Typography className="text-13 mr-8 text-gray-500" color="inherit">
+											종목코드 : {arr.주식코드}
+										</Typography>
+									)}
+									{arr.사업자등록번호 && (
+										<Typography className="text-13  text-gray-500" color="inherit">
+											사업자등록번호 : {arr.사업자등록번호}
+										</Typography>
+									)}
+								</span>
+							</div>
+						</div>
+						<div className="flex flex-1 px-16 justify-end items-center">
+							<DraggableIcon className="items-center" />
+							<IconButton aria-label="more" color="inherit" edge="end">
+								<Icon>more_vert</Icon>
+							</IconButton>
+						</div>
+					</Toolbar>
+				</AppBar> */}
+				<CardHeader
+					className="pr-24 pb-0"
+					action={
+							<IconButton aria-label="more" color="inherit" edge="end">
+								<Icon>more_vert</Icon>
+							</IconButton>
+					}
+					title={
+						<div className="flex flex-row pl-12 items-center">
+							<Typography variant="h6" color="inherit" className="min-w-96 pr-12" edge="start">
+								기업 개요
+							</Typography>
+							<DraggableIcon />
+							<Typography className="font-medium text-gray-600 ml-8" color="inherit">
+								{arr.업체명}
+							</Typography>
+							<span className="flex flex-row items-center mx-8">
+								{arr.주식코드 && (
+									<Typography className="text-13 mr-8 text-gray-500" color="inherit">
+										종목코드 : {arr.주식코드}
+									</Typography>
+								)}
+								{arr.사업자등록번호 && (
+									<Typography className="text-13  text-gray-500" color="inherit">
+										사업자등록번호 : {arr.사업자등록번호}
+									</Typography>
+								)}
+							</span>
+						</div>
+					}
+				/>
+				<CardContent>
+					<div className="flex flex-row justify-between items-start">
+						<div className="flex w-full items-start">
+							<div className="w-2/3 border-r-1 pr-8">
+								{Object.entries(corpInfo).map(([key, value]) => (
+									<Grid container key={key} spacing={2}>
+										<Grid item xs={3}>
+											<Typography variant="body1" color="textSecondary" className="pl-16">
+												{key}
+											</Typography>
+										</Grid>
+										<Grid item xs={9}>
+											<Typography variant="body1" gutterBottom>
+												{value}
+											</Typography>
+										</Grid>
+									</Grid>
+								))}
+							</div>
+							{/* <div className={clsx(classes.divider, 'mx-16 w-px h-320')} /> */}
+							<div className="w-1/3 pr-8">
+								{Object.entries(financeInfo).map(([key, value]) => (
+									<Grid container key={key} spacing={1}>
+										<Grid item xs={6}>
+											<Typography variant="body1" color="textSecondary" className="pl-16">
+												{key}
+											</Typography>
+										</Grid>
+										<Grid item xs={6} className="text-right">
+											<Typography variant="body1" gutterBottom>
+												{value}
+											</Typography>
+										</Grid>
+									</Grid>
+								))}
+							</div>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
+		</div>
 	);
 }
 

@@ -23,6 +23,9 @@ def get_company_info(request):
 def get_stock(request):
     return companies.parse_stock(request)
 
+def get_stock_info(request):
+    return companies.crawl_stock_info(request)
+
 def get_crawl(request):
     return companies.crawl_stock(request)    
 

@@ -1,8 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import CardHeader from '@material-ui/core/CardHeader';
 import echarts from 'echarts';
 import moment from 'moment';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
@@ -418,40 +420,53 @@ function StockChart() {
 	}
 
 	return (
-		<Paper className="rounded-8 shadow h-384 w-full p-16 items-center justify-center">
-			<div className="flex items-center justify-between pl-4">
-				{today && (
-					<div className="flex items-center">
-						<Typography className="font-500 text-24">{today.price}</Typography>
-						<div className="flex flex-row items-center">
-							<Icon className={today.color}>{today.icon}</Icon>
-							<div className={clsx(today.color, 'mx-8')}>
-								{today.increase} ({today.percent})
+		<div className="md:flex w-full">
+			<Card variant="outlined" className="w-full">
+				<CardHeader
+					className="px-8 pt-16 pb-0"
+					action={
+							<div className="items-end">
+								{chartTypes.map(({ name, text }) => {
+									return (
+										<Button
+											key={name}
+											className={clsx(
+												'shadow-none min-w-48 text-11',
+												currentRange === name ? 'font-bold' : 'font-normal'
+											)}
+											onClick={() => handleChangeRange(name)}
+											color="default"
+											variant={currentRange === name ? 'contained' : 'text'}
+										>
+											{text}
+										</Button>
+									);
+								})}
 							</div>
+					}
+					title={
+						<div className="flex items-center pl-4 -mt-8">
+							{today && (
+								<div className="flex items-center">
+									<Typography className="font-500 text-20">{today.price}</Typography>
+									<div className="flex flex-row items-center">
+										<Icon className={today.color}>{today.icon}</Icon>
+										<div className={clsx(today.color, 'ml-8 min-w-128')}>
+											<Typography variant="body1">
+												{today.increase} ({today.percent})
+											</Typography>
+										</div>
+									</div>
+								</div>
+							)}
 						</div>
-					</div>
-				)}
-				<div className="items-center">
-					{chartTypes.map(({ name, text }) => {
-						return (
-							<Button
-								key={name}
-								className={clsx(
-									'shadow-none px-16',
-									currentRange === name ? 'font-bold' : 'font-normal'
-								)}
-								onClick={() => handleChangeRange(name)}
-								color="default"
-								variant={currentRange === name ? 'contained' : 'text'}
-							>
-								{text}
-							</Button>
-						);
-					})}
-				</div>
-			</div>
-			<div id="main" className="w-full h-320" ref={chartRef}></div>
-		</Paper>
+					}
+				/>
+				<CardContent className="px-8 pt-16 pb-0">
+					<div id="main" className="w-full h-288" ref={chartRef}></div>
+				</CardContent>
+			</Card>
+		</div>
 	);
 }
 

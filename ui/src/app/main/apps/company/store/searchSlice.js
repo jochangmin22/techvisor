@@ -26,7 +26,7 @@ export const getCompanyInfo = createAsyncThunk(NAME + 'getCompanyInfo', async (p
 
 	const { stock_code } = data;
 	if (stock_code) {
-		dispatch(getStock({ kiscode: stock_code }));
+		dispatch(getStock({ stockCode: stock_code }));
 	}
 
 	return data;

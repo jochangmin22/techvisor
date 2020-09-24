@@ -10,7 +10,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import SearchListContainer from './searchs/SearchList/SearchListContainer';
 import CorpInfo from './searchs/CorpInfo';
-import StockChart from './searchs/StockChart';
+import StockInfoContainer from './searchs/StockInfo/StockInfoContainer';
 import Draggable from 'react-draggable';
 import ClinicTest from './searchs/ClinicTest';
 
@@ -27,8 +27,7 @@ function CompanyContent() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
-	const selectedCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode);
-	const { stockCode, corpNo } = selectedCode;
+	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode.stockCode);	
 	const searchText = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchText);
 	const searchLoading = useSelector(({ companyApp }) => companyApp.searchs.searchLoading);
 
@@ -69,17 +68,19 @@ function CompanyContent() {
 				</div>
 			</Draggable>
 			<Draggable handle=".draggable" onStart={() => handleStart('B')} onEnd={() => resetForm()} grid={[25, 25]}>
-				<div className={classes.paper} style={{ zIndex: form.B }}>
+				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.B }}>
 					<CorpInfo />
 				</div>
 			</Draggable>
+			{stockCode && stockCode.length !== 0 && (
 			<Draggable handle=".draggable" onStart={() => handleStart('C')} onEnd={() => resetForm()} grid={[25, 25]}>
 				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.C }}>
-					<StockChart />
+					<StockInfoContainer />
 				</div>
 			</Draggable>
-			<Draggable handle=".draggable" onStart={() => handleStart('C')} onEnd={() => resetForm()} grid={[25, 25]}>
-				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.C }}>
+			)}
+			<Draggable handle=".draggable" onStart={() => handleStart('D')} onEnd={() => resetForm()} grid={[25, 25]}>
+				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.D }}>
 					<ClinicTest />
 				</div>
 			</Draggable>

@@ -18,6 +18,13 @@ export const getStock = createAsyncThunk(NAME + 'getStock', async params => {
 	return data;
 });
 
+export const getStockInfo = createAsyncThunk(NAME + 'getStockInfo', async (params, { dispatch }) => {
+	const response = await axios.post(URL + 'stockinfo', params);
+	const data = await response.data;
+
+	return data;
+});
+
 export const getCompanyInfo = createAsyncThunk(NAME + 'getCompanyInfo', async (params, { dispatch }) => {
 	const response = await axios.post(URL + 'companyinfo', params);
 	const data = await response.data;
@@ -25,6 +32,7 @@ export const getCompanyInfo = createAsyncThunk(NAME + 'getCompanyInfo', async (p
 	const { 주식코드 } = data;
 	if (주식코드) {
 		dispatch(getStock({ stockCode: 주식코드 }));
+		dispatch(getStockInfo({ stockCode: 주식코드 }));
 	}
 
 	return data;
@@ -140,7 +148,8 @@ export const initialState = {
 	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
 	stock: {
 		entities: [],
-		chartType: 'year'
+		chartType: 'year',
+		stockInfo: [],
 	},
 	companyInfo: [],
 	clinicTest: []
@@ -177,6 +186,7 @@ const searchsSlice = createSlice({
 		},
 		resetSelectedCode: (state, action) => {
 			state.selectedCode = initialState.selectedCode;
+			state.stock = initialState.stock;
 		},
 		setSearchParams: (state, action) => {
 			state.searchParams = action.payload;
@@ -221,6 +231,9 @@ const searchsSlice = createSlice({
 		},
 		[getStock.fulfilled]: (state, action) => {
 			state.stock.entities = action.payload;
+		},
+		[getStockInfo.fulfilled]: (state, action) => {
+			state.stock.stockInfo = action.payload;
 		},
 		[getCompanyInfo.fulfilled]: (state, action) => {
 			state.companyInfo = action.payload;
@@ -271,6 +284,7 @@ export const {
 	clearSearchText,
 	setSearchLoading,
 	setSelectedCode,
+	resetSelectedCode,
 	setSearchParams,
 	setSearchNum,
 	setSearchVolume,

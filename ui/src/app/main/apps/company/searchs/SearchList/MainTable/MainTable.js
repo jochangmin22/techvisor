@@ -14,6 +14,7 @@ import { useDebounce } from '@fuse/hooks';
 // import { parseInputSearchText } from 'app/main/apps/lib/parseParamsCompany';
 import {
 	updateCols,
+	resetSelectedCode,
 	setSelectedCode,
 	// setSearchParams,
 	setSearchSubmit
@@ -59,6 +60,7 @@ function MainTable(props) {
 	const [rowsCount, setRowsCount] = useState(null);
 
 	const handleClick = (name, stockCode, corpNo) => {
+		dispatch(resetSelectedCode());
 		dispatch(setSelectedCode({ stockCode: stockCode, corpNo: corpNo }));
 		dispatch(setSearchSubmit(true));
 		props.onShrink(true);
@@ -75,7 +77,7 @@ function MainTable(props) {
 	}
 
 	return (
-		<Paper className="rounded-8 shadow h-512 w-full mb-36">
+		<Paper className="rounded-8 shadow h-512 w-full">
 			<>
 				<div className="p-12 flex items-center justify-between">
 					<div className="flex flex-row items-center">

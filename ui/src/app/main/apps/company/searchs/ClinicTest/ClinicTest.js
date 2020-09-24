@@ -3,8 +3,6 @@ import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import { useSelector, useDispatch } from 'react-redux';
 import { getClinicTest } from 'app/main/apps/company/store/searchsSlice';
-// import { Draggable } from 'react-beautiful-dnd';
-// import Draggable from 'react-draggable';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import Paper from '@material-ui/core/Paper';
@@ -17,7 +15,8 @@ function ClinicTest() {
 	const dispatch = useDispatch();
 	const clinicTest = useSelector(({ companyApp }) => companyApp.searchs.clinicTest);
 	const clinicOptions = useSelector(({ companyApp }) => companyApp.searchs.clinicOptions);
-	const corpName = useSelector(({ companyApp }) => companyApp.searchs.companyInfo.업체명);
+	const companyInfo = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
+	const { 업체명: corpName } = companyInfo;
 	const { category } = clinicOptions;
 	const [showLoading, setShowLoading] = useState(false);
 
@@ -30,16 +29,16 @@ function ClinicTest() {
 	}, [corpName]);
 
 	const columns = React.useMemo(() => {
-		function getColor(value) {
-			const hue = clinicTest.max && value ? (value / clinicTest.max).toFixed(1) * 10 : 0;
-			if (hue === 0) {
-				return 'font-normal text-blue-100';
-			} else if (hue > 0 && hue < 10) {
-				return 'font-normal text-blue-' + hue * 100;
-			} else if (hue === 10) {
-				return 'font-extrabold text-blue-900 text-12';
-			}
-		}
+		// function getColor(value) {
+		// 	const hue = clinicTest.max && value ? (value / clinicTest.max).toFixed(1) * 10 : 0;
+		// 	if (hue === 0) {
+		// 		return 'font-normal text-blue-100';
+		// 	} else if (hue > 0 && hue < 10) {
+		// 		return 'font-normal text-blue-' + hue * 100;
+		// 	} else if (hue === 10) {
+		// 		return 'font-extrabold text-blue-900 text-12';
+		// 	}
+		// }
 
 		// function onCellClick(ev, props) {
 		// 	ev.preventDefault();
@@ -123,6 +122,10 @@ function ClinicTest() {
 
 	const isEmpty = !!(data.length === 0);
 
+	if (!companyInfo || companyInfo.length === 0) {
+		return '';
+	}
+
 	if (!data) {
 		return <SpinLoading />;
 	}
@@ -131,13 +134,17 @@ function ClinicTest() {
 		<Paper className="w-full h-full rounded-8 shadow py-8">
 			<div className="px-12 flex items-center justify-between">
 				<div className="flex flex-row items-center">
-					<PopoverMsg title="임상실험" msg="선택한 업체의 임상실험 내역을 표시합니다." />
+					<PopoverMsg title="임상실험" msg="선택하신 기업명으로 검색된 임상실험 내역들을 표시합니다." />
 					<DraggableIcon />
 				</div>
 				{/* <MatrixAnalysisMenu /> */}
 			</div>
 			{isEmpty ? (
-				<EmptyMsg icon="local_pharmacy" msg="임상실험" text="임상실험 내역이 없습니다." />
+				<EmptyMsg
+					icon="local_pharmacy"
+					msg="임상실험"
+					text="선택하신 기업명으로 검색된 임상실험 내역이 없습니다."
+				/>
 			) : (
 				<>
 					{showLoading ? (

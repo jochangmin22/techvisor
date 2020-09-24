@@ -15,13 +15,19 @@ from dateutil.relativedelta import relativedelta
 from urllib.request import urlopen
 import uuid
 
+# naver crawl
+from selenium.webdriver import Chrome
+from selenium import webdriver
+import pandas as pd
+
+
 from copy import deepcopy
 import json
 
 from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
 
 from .models import nice_corp, stock_quotes
-
+from search.models import listed_corp
 
 # caching with redis
 from django.core.cache import cache
@@ -29,6 +35,29 @@ from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
+
+NAVER = settings.NAVER
+
+empty_info = {
+    '매출액': '',
+    '영업이익': '',
+    '당기순이익': '',
+    '자산총계': '',
+    '부채총계': '',
+    '자본총계': '',
+    'EPS(원)': '',
+    'PER(배)': '',
+    'ROE(%)': '',
+    'BPS(원)': '',
+    'PBR(배)': '',
+    '종업원수': '',
+    '상장일': '',
+    '업종': '',
+    '주요제품':'',
+    '거래량': '',
+    '시가총액':'',
+    '수익률':'',
+}
 
 def parse_companies(request, mode="begin"): # mode : begin, nlp, query
 
@@ -272,6 +301,174 @@ def parse_stock(request):
             return JsonResponse(response,status=200, safe=False)
         except:
             return HttpResponse() # 500    
+
+def crawl_stock_info(request):
+    ''' firstly, 거래량, 시가총액, 수익률 are taken from Naver, and if the rest is not in DB, crawling contiues'''
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        stockCode = data["stockCode"] 
+
+        options = webdriver.ChromeOptions()
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.headless = True
+        browser = webdriver.Chrome(executable_path="/usr/bin/chromedriver",options=options)
+
+        url = NAVER['finance_sum_url'] + stockCode
+        browser.get(url)
+
+        browser.switch_to_frame(browser.find_element_by_id('coinfo_cp'))
+
+        # page not found handle
+        # 상장된지 얼마안되서 자료없는 경우인듯
+        try:
+            browser.find_element_by_id('pageError') # <div id="pageError">
+            return JsonResponse(empty_info, safe=False)
+        except:
+            pass    
+        
+        #재무제표 "연간" 클릭하기
+        browser.find_elements_by_xpath('//*[@class="schtab"][1]/tbody/tr/td[3]')[0].click()
+
+        html0 = browser.page_source
+        html1 = BeautifulSoup(html0,'html.parser')
+        
+        # #기업명 뽑기
+        # title0 = html1.find('head').find('title').text
+        # print(title0.split('-')[-1])
+
+        #거래량, 시가총액, 수익률 구하기
+        html11 = html1.find('table',{'class':'gHead','summary':'기업의 기본적인 시세정보(주가/전일대비/수익률,52주최고/최저,액면가,거래량/거래대금,시가총액,유동주식비율,외국인지분율,52주베타,수익률(1M/3M/6M/1Y))를 제공합니다.'})
+    
+        tbody0 = html11.find('tbody')
+        tr0 = tbody0.find_all('tr')
+        
+        tr1 = tr0[3]
+        td1 = tr1.find('td').text
+
+        tr2 = tr0[4]
+        td2 = tr2.find('td').text
+
+        tr3 = tr0[0]
+        td3 = tr3.find('td')
+        l = td3.find_all('span')
+
+        stock_return = l[1].text if l else ''
+
+        tr4 = tr0[8]
+        td4 = tr4.find('td')
+        sp0 = td4.find_all('span')
+        stock_return += '/' + sp0[0].text
+        stock_return += '/' + sp0[3].text
+
+        stock_volume = td1.strip().split(' /',1)[0]
+        market_cap = td2.strip()
+        
+        # If there is data in db, fetch it or continue crawling
+        listedCorp = listed_corp.objects.get(종목코드=stockCode)
+        if listedCorp.정보['당기순이익'] != '':
+            res = listedCorp.정보
+            res.update({
+            '업종' : listedCorp.업종,
+            '주요제품' : listedCorp.주요제품,
+            '거래량' : stock_volume,
+            '시가총액' : market_cap,
+            '수익률' : stock_return,
+            })
+            return JsonResponse(res, safe=False)   
+
+        html22 = html1.find('table',{'class':'gHead01 all-width','summary':'주요재무정보를 제공합니다.'})
+        
+        #date scrapy
+        thead0 = html22.find('thead')
+        tr0 = thead0.find_all('tr')[1]
+        th0 = tr0.find_all('th')
+        
+        date = []
+        for i in range(len(th0)):
+            date.append(''.join(re.findall('[0-9/]',th0[i].text)))
+        
+        #columns scrapy
+        tbody0 = html22.find('tbody')
+        tr0 = tbody0.find_all('tr')
+        
+        col = []
+        for i in range(len(tr0)):
+
+            if '\xa0' in tr0[i].find('th').text:
+                tx = re.sub('\xa0','',tr0[i].find('th').text)
+            else:
+                tx = tr0[i].find('th').text
+
+            col.append(tx)
+        
+        #main text scrapy
+        td = []
+        for i in range(len(tr0)):
+            td0 = tr0[i].find_all('td')
+            td1 = []
+            for j in range(len(td0)):
+                if td0[j].text == '':
+                    td1.append('0')
+                else:
+                    td1.append(td0[j].text)
+
+            td.append(td1)
+
+        td2 = list(map(list,zip(*td)))
+
+        df = pd.DataFrame(td2,columns = col,index = date)     
+        try:
+            my_df = df.loc[['2019/12'],['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','EPS(원)','PER(배)','ROE(%)','BPS(원)','PBR(배)']]
+        except:
+            return empty_info
+                    
+        res = my_df.to_dict('records')
+
+        #종업원수·상장일 구하기
+        #"기업개요" 클릭하기
+        browser.find_elements_by_xpath('//*[@class="wrapper-menu"][1]/dl/dt[2]')[0].click()
+
+        html0 = browser.page_source
+        html1 = BeautifulSoup(html0,'html.parser')   
+        
+        html22 = html1.find('table',{'class':'gHead all-width','summary':'기업에 대한 기본적인 정보(본사주소,홈페이지,대표전화,설립일,대표이사,계열,종업원수,주식수(보통주/우선주),감사인,명의개서,주거래은행)을 제공합니다.'})
+    
+        tbody0 = html22.find('tbody')
+        tr0 = tbody0.find_all('tr')[3]
+        td0 = tr0.find_all('td')[1].text
+
+        employee = td0.strip().split(' (')[0]
+
+        # # 상장일 crawl
+        # tr0 = tbody0.find_all('tr')[2]
+        # td0 = tr0.find_all('td')[0].text
+        # text0 = td0.strip().rsplit('상장일: ',1)[-1]
+        # listing_date = text0.replace('/','.').replace(')','')
+
+        # 상장일 from model
+        listing_date = listedCorp.상장일.replace('-','.')
+
+        res[0].update({
+            '종업원수' : employee,
+            '상장일' : listing_date,
+            '거래량' : stock_volume,
+            '시가총액' : market_cap,
+            '수익률' : stock_return,
+        })
+
+        # save data in db if necessary
+        # listedCorp = listed_corp.objects.get(종목코드=stock_code)
+        listedCorp.정보 = res[0]
+        listedCorp.save(update_fields=['정보'])
+
+        # 2 elements need not be included in `정보` field 
+        res[0].update({
+            '업종' : listedCorp.업종,
+            '주요제품' : listedCorp.주요제품,
+        })  
+        return JsonResponse(res[0], safe=False)     
+
 
 def crawl_stock(request):
     ''' 
