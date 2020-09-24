@@ -29,6 +29,9 @@ def get_stock_info(request):
 def get_crawl(request):
     return companies.crawl_stock(request)    
 
+def get_clinic_test(request):
+    return companies.clinic_test(request)    
+
 # company
 # def get_company(request, companyId=""):
 #     return company.parse_company(request, companyId)

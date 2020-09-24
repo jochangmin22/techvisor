@@ -38,8 +38,8 @@ export const getCompanyInfo = createAsyncThunk(NAME + 'getCompanyInfo', async (p
 	return data;
 });
 
-export const getClinicTest = createAsyncThunk(NAME + 'getClinicTest', async (params, subParams) => {
-	const response = await axios.get(URL + 'clinic', { params: params, subParams: subParams });
+export const getClinicTest = createAsyncThunk(NAME + 'getClinicTest', async params => {
+	const response = await axios.post(URL + 'clinic', params);
 	const data = await response.data;
 
 	return data;
@@ -149,7 +149,7 @@ export const initialState = {
 	stock: {
 		entities: [],
 		chartType: 'year',
-		stockInfo: [],
+		stockInfo: []
 	},
 	companyInfo: [],
 	clinicTest: []
@@ -237,6 +237,9 @@ const searchsSlice = createSlice({
 		},
 		[getCompanyInfo.fulfilled]: (state, action) => {
 			state.companyInfo = action.payload;
+		},
+		[getClinicTest.fulfilled]: (state, action) => {
+			state.clinicTest = action.payload;
 		},
 		[getNews.fulfilled]: (state, action) => {
 			state.news = action.payload;

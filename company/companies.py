@@ -26,7 +26,7 @@ import json
 
 from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
 
-from .models import nice_corp, stock_quotes
+from .models import nice_corp, stock_quotes, mdcin_clinc_test_info
 from search.models import listed_corp
 
 # caching with redis
@@ -118,8 +118,6 @@ def parse_companies(request, mode="begin"): # mode : begin, nlp, query
     #     return nlp_raw
     # elif mode =="matrix":
     #     return mtx_raw        
-
-
 
 def parse_query(request):
     """ 쿼리 확인용 """
@@ -246,7 +244,8 @@ def parse_company_info(request):
 
         isExist = nice_corp.objects.filter(사업자등록번호=corpNo).exists()
         if not isExist:
-            return HttpResponse('Not Found', status=404)
+            return JsonResponse([], safe=False)
+            # return HttpResponse('Not Found', status=404)
 
         row = nice_corp.objects.filter(사업자등록번호=corpNo).values()
         row = list(row)
@@ -421,7 +420,7 @@ def crawl_stock_info(request):
         try:
             my_df = df.loc[['2019/12'],['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','EPS(원)','PER(배)','ROE(%)','BPS(원)','PBR(배)']]
         except:
-            return empty_info
+            return JsonResponse(empty_info, safe=False)
                     
         res = my_df.to_dict('records')
 
@@ -468,7 +467,6 @@ def crawl_stock_info(request):
             '주요제품' : listedCorp.주요제품,
         })  
         return JsonResponse(res[0], safe=False)     
-
 
 def crawl_stock(request):
     ''' 
@@ -558,4 +556,28 @@ def crawl_stock(request):
                         # stock_quotes.objects.update_or_create(**newStock)
                     else:
                         isCrawlBreak = True    
-    return            
+    return    
+    
+def clinic_test(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        corpName = data['corpName']
+
+        isExist = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()
+        if not isExist:
+            return JsonResponse([], safe=False)
+            # return HttpResponse('Not Found', status=404)
+
+        rows = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).values()
+        rows = list(rows)
+        res = [dict(row, **{
+                '신청자': row['신청자'],
+                '승인일': row['승인일'],
+                '제품명': row['제품명'],
+                '시험제목': row['정보']['시험제목'],
+                '연구실명': row['정보']['연구실명'],
+                '임상단계': row['정보']['임상단계'],
+            }) for row in rows]
+            
+        return JsonResponse(res, safe=False)            
+

@@ -8636,7 +8636,7 @@ fsevents@~2.1.2:
     react: 16.13.1
     react-autosuggest: 10.0.2
     react-beautiful-dnd: 13.0.0
-    react-big-calendar: 0.27.0
+    react-big-calendar: 0.28.0
     react-chartjs-2: 2.10.0
     react-dom: 16.13.1
     react-draggable: 4.4.3
@@ -8658,7 +8658,7 @@ fsevents@~2.1.2:
     react-sortable-hoc: ^1.11.0
     react-spring: 8.0.27
     react-swipeable-views: 0.13.9
-    react-swipeable-views-utils: 0.13.9
+    react-swipeable-views-utils: 0.14.0-alpha.0
     react-table: 7.5.1
     react-text-mask: 5.4.3
     react-virtualized: 9.22.2
@@ -14922,9 +14922,9 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-big-calendar@npm:0.27.0":
-  version: 0.27.0
-  resolution: "react-big-calendar@npm:0.27.0"
+"react-big-calendar@npm:0.28.0":
+  version: 0.28.0
+  resolution: "react-big-calendar@npm:0.28.0"
   dependencies:
     "@babel/runtime": ^7.1.5
     clsx: ^1.0.4
@@ -14940,7 +14940,7 @@ fsevents@~2.1.2:
   peerDependencies:
     react: ^16.6.1
     react-dom: ^16.6.1
-  checksum: 5d40e1bc1e028036d3d0727d4de623104d514f5f61883dce55fefb4daa1df4de3f642c9f5bb0fff860673ba3aa0404914047d0327f4e200026e118ab31d2e55e
+  checksum: 8989db86edb0487b8024c9ea708720cccd7df70f59d71c809f93af0afed40cb975b906cb790947817995eafe855244f3cbaaee5511ca3b9f71caba7ddd22cdf7
   languageName: node
   linkType: hard
 
@@ -15417,7 +15417,31 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-swipeable-views-utils@npm:0.13.9, react-swipeable-views-utils@npm:^0.13.9":
+"react-swipeable-views-core@npm:^0.14.0-alpha.0":
+  version: 0.14.0-alpha.0
+  resolution: "react-swipeable-views-core@npm:0.14.0-alpha.0"
+  dependencies:
+    "@babel/runtime": 7.0.0
+    warning: ^4.0.1
+  checksum: 8765c86342e26253bed7f13219b3894396fd351f8969d1dac6cc6df2571b87762b27dc7c527f40ff67cb5bb737073922aba5094d08a9396c8bb144aa30501816
+  languageName: node
+  linkType: hard
+
+"react-swipeable-views-utils@npm:0.14.0-alpha.0":
+  version: 0.14.0-alpha.0
+  resolution: "react-swipeable-views-utils@npm:0.14.0-alpha.0"
+  dependencies:
+    "@babel/runtime": 7.0.0
+    keycode: ^2.1.7
+    prop-types: ^15.6.0
+    react-event-listener: ^0.6.0
+    react-swipeable-views-core: ^0.14.0-alpha.0
+    shallow-equal: ^1.2.1
+  checksum: e7b64c73e157f62e7673c176ca0597f919fe7646498b6004ae54fa2d91c2cd2d943777dbe2898894127f4d717b60644e7afcf5bb70794b6859df6590a172317a
+  languageName: node
+  linkType: hard
+
+"react-swipeable-views-utils@npm:^0.13.9":
   version: 0.13.9
   resolution: "react-swipeable-views-utils@npm:0.13.9"
   dependencies:

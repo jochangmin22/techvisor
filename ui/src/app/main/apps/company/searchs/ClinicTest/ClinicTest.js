@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import Typography from '@material-ui/core/Typography';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import { useSelector, useDispatch } from 'react-redux';
+import clsx from 'clsx';
 import { getClinicTest } from 'app/main/apps/company/store/searchsSlice';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
@@ -11,123 +13,62 @@ import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 // import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
 // import MatrixAnalysisMenu from '../MatrixAnalysisMenu';
 
+const columnName = {
+	신청자: '180',
+	임상단계: '110',
+	승인일: '110',
+	제품명: '180',
+	시험제목: '100',
+	연구실명: '100'
+};
+
+const columns = Object.entries(columnName).map(([key, value]) => {
+	const bold = key === '신청자' || key === '임상단계' ? 'text-16 font-500' : 'text-13 font-400';
+	return {
+		Header: key,
+		accessor: key,
+		className: clsx(bold, 'text-left truncate'),
+		sortable: true,
+		width: value
+	};
+});
+
+// const colsList = Object.keys(columnName).map((key, index) => ({
+// 	id: key + 1,
+// 	name: key,
+// 	field: key
+// }));
+
 function ClinicTest() {
 	const dispatch = useDispatch();
 	const clinicTest = useSelector(({ companyApp }) => companyApp.searchs.clinicTest);
-	const clinicOptions = useSelector(({ companyApp }) => companyApp.searchs.clinicOptions);
+	// const clinicOptions = useSelector(({ companyApp }) => companyApp.searchs.clinicOptions);
 	const companyInfo = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
 	const { 업체명: corpName } = companyInfo;
-	const { category } = clinicOptions;
+
+	const data = useMemo(() => (clinicTest ? clinicTest : []), [clinicTest]);
+
+	useEffect(() => {
+		setRowsCount(data.length);
+	}, [data]);
+	const [rowsCount, setRowsCount] = useState(null);
+
 	const [showLoading, setShowLoading] = useState(false);
 
 	useEffect(() => {
 		setShowLoading(true);
-		dispatch(getClinicTest(corpName)).then(() => {
-			setShowLoading(false);
-		});
+		if (corpName) {
+			dispatch(getClinicTest({ corpName: corpName })).then(() => {
+				setShowLoading(false);
+			});
+		}
 		// eslint-disable-next-line
 	}, [corpName]);
 
-	const columns = React.useMemo(() => {
-		// function getColor(value) {
-		// 	const hue = clinicTest.max && value ? (value / clinicTest.max).toFixed(1) * 10 : 0;
-		// 	if (hue === 0) {
-		// 		return 'font-normal text-blue-100';
-		// 	} else if (hue > 0 && hue < 10) {
-		// 		return 'font-normal text-blue-' + hue * 100;
-		// 	} else if (hue === 10) {
-		// 		return 'font-extrabold text-blue-900 text-12';
-		// 	}
-		// }
-
-		// function onCellClick(ev, props) {
-		// 	ev.preventDefault();
-
-		// 	const [, params] = parseSearchOptions(searchParams);
-		// 	params.topic = props.column.id;
-		// 	params.categoryValue = Object.values(props.row.values)[0];
-		// 	const subParams = { clinicOptions: clinicOptions };
-		// 	dispatch(getMatrixDialog({ params, subParams })).then(() => {
-		// 		dispatch(openMatrixDialog());
-		// 	});
-		// }
-
-		return clinicTest.entities
-			? [
-					{
-						Header: category,
-						accessor: category,
-						className: 'text-14 text-left max-w-96 overflow-hidden',
-						sortable: true
-						// Cell: props => (
-						// 	<div onClick={ev => onCellClick(ev, props.cell)}>
-						// 		<span title={props.cell.value}>{props.cell.value}</span>
-						// 	</div>
-						// )
-					}
-			  ].concat(
-					Object.keys(clinicTest.entities).map(item => ({
-						Header: item,
-						accessor: item,
-						className: 'text-11 text-center',
-						sortable: true
-						// onClick: () => {
-						// 	alert('click!');
-						// },
-						// Cell: props => {
-						// 	return (
-						// 		<div onClick={ev => onCellClick(ev, props.cell)} className={getColor(props.cell.value)}>
-						// 			<span title={props.cell.value}>{props.cell.value}</span>
-						// 		</div>
-						// 	);
-						// }
-					}))
-			  )
-			: [
-					{
-						Header: category,
-						accessor: category,
-						className: 'text-11 text-center',
-						sortable: true
-					}
-			  ];
-		// }, [dispatch, searchParams, clinicTest, category]);
-		// eslint-disable-next-line
-	}, [clinicTest, category]);
-
-	const groupBy = (obj, category) => {
-		const keys = Object.keys(obj);
-		const mapping = keys.reduce((acc, k) => {
-			obj[k].forEach(item => {
-				Object.keys(item).forEach(yearKey => {
-					var tracked = acc[yearKey];
-					if (!tracked) {
-						acc[yearKey] = {
-							// year: yearKey
-							[category]: yearKey
-						};
-					}
-					acc[yearKey][k] = (acc[yearKey][k] | 0) + item[yearKey];
-				});
-			});
-			return acc;
-		}, {});
-		return Object.values(mapping);
-	};
-
-	const data = React.useMemo(() => (clinicTest.entities ? groupBy(clinicTest.entities, category) : []), [
-		clinicTest.entities,
-		category
-	]);
-
 	const isEmpty = !!(data.length === 0);
 
-	if (!companyInfo || companyInfo.length === 0) {
+	if (corpName === undefined) {
 		return '';
-	}
-
-	if (!data) {
-		return <SpinLoading />;
 	}
 
 	return (
@@ -136,6 +77,9 @@ function ClinicTest() {
 				<div className="flex flex-row items-center">
 					<PopoverMsg title="임상실험" msg="선택하신 기업명으로 검색된 임상실험 내역들을 표시합니다." />
 					<DraggableIcon />
+					<Typography variant="h6" className="pl-16">
+						검색 결과 ({Number(rowsCount).toLocaleString()})
+					</Typography>
 				</div>
 				{/* <MatrixAnalysisMenu /> */}
 			</div>
