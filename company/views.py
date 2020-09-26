@@ -6,7 +6,7 @@
 # from .finance import parse_stock, crawl_stock, crawl_dart
 
 from . import companies
-from . import company
+# from . import company
 from . import finance
 # from . import company_info
 

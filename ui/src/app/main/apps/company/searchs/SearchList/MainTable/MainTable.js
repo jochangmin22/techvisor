@@ -23,18 +23,27 @@ import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import clsx from 'clsx';
 
 const columnName = {
-	업체명: '180',
-	사업자등록번호: '110',
-	대표자: '150',
-	주소: '100',
-	상장일: '100',
-	주식코드: '110',
-	업종명: '200',
-	주요제품: '700'
+	회사명: '180',
+	종목코드: '110',
+	업종: '200',
+	주요제품: '700',
+	상장일: '120',
+	대표자명: '200',
+	지역: '100'
 };
+// const columnName = {
+// 	업체명: '180',
+// 	사업자등록번호: '110',
+// 	대표자: '150',
+// 	주소: '100',
+// 	상장일: '100',
+// 	주식코드: '110',
+// 	업종명: '200',
+// 	주요제품: '700'
+// };
 
 const columns = Object.entries(columnName).map(([key, value]) => {
-	const bold = key === '업체명' ? 'text-16 font-500' : 'text-13 font-400';
+	const bold = '회사명' || key === '종목코드' ? 'text-16 font-500' : 'text-13 font-400';
 	return {
 		Header: key,
 		accessor: key,
@@ -106,7 +115,7 @@ function MainTable(props) {
 						size="small"
 						onRowClick={(ev, row) => {
 							if (row) {
-								handleClick(row.original.업체명, row.original.주식코드, row.original.사업자등록번호);
+								handleClick(row.original.회사명, row.original.종목코드);
 							}
 						}}
 					/>

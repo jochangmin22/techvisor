@@ -87,11 +87,11 @@ def parse_stock(request):
             range_from = temp.strftime('%Y-%m-%d')
 
     
-            isExist = stock_quotes.objects.filter(kiscode=stockCode, price_date__range=[range_from,today]).exists()
+            isExist = stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today]).exists()
             if not isExist:
                 return HttpResponse('Not Found', status=404)
 
-            stockQuotes = stock_quotes.objects.filter(kiscode=stockCode, price_date__range=[range_from,today])
+            stockQuotes = stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today])
 
             myDate = list(stockQuotes.values_list('price_date', flat=True).order_by('price_date'))
             myStock = list(stockQuotes.values_list('stock', flat=True).order_by('price_date'))
@@ -216,7 +216,7 @@ def crawl_stock(request):
 
         # exist ? {
         try:
-            stockQuotes = stock_quotes.objects.filter(kiscode=kiscode).latest('price_date')
+            stockQuotes = stock_quotes.objects.filter(stock_code=kiscode).latest('price_date')
             lastRecordDate = stockQuotes.price_date if stockQuotes else None
         except:
             lastRecordDate = None
@@ -275,10 +275,10 @@ def crawl_stock(request):
                         fourth = int(fourth.replace(',',''))
                         fifth = int(fifth.replace(',',''))
                         
-                        newUid = str(uuid.uuid4())
+                        # newUid = str(uuid.uuid4())
                         newStock = {
-                            'id': newUid,
-                            'kiscode': kiscode,
+                            # 'id': newUid,
+                            'stock_code': kiscode,
                             'price_date': newDate,
                             'stock': [first, second, third, fourth, fifth],
                             'volume' : fifth
@@ -288,7 +288,7 @@ def crawl_stock(request):
                         if not isMatchToday:
                             stock_quotes.objects.create(**newStock)
                         else:                            
-                            stock_quotes.objects.filter(kiscode=kiscode, price_date=newDate).update(**newStock)
+                            stock_quotes.objects.filter(stock_code=kiscode, price_date=newDate).update(**newStock)
                         # stock_quotes.objects.update_or_create(**newStock)
                     else:
                         isCrawlBreak = True    
@@ -301,7 +301,7 @@ def crawl_dart(request):
         corp_code = data["corp_code"]
         # exist ? {
         try:
-            financial = financial_statements.objects.filter(kiscode=kiscode)
+            financial = financial_statements.objects.filter(stock_code=kiscode)
             lastRecordDate = None
             if financial.exists():
                 rows = list(financial.values())

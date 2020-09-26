@@ -36,7 +36,7 @@ function StockChart() {
 	const chartRef = useRef(null);
 	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode.stockCode);
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.stock.entities);
-	const corpName = useSelector(({ companyApp }) => companyApp.searchs.companyInfo.업체명);
+	const corpName = useSelector(({ companyApp }) => companyApp.searchs.companyInfo.회사명);
 	const [today, setToday] = useState(null);
 	// const [series, setSeries] = useState(null);
 	// const [xAxis, setXAxis] = useState(null);
@@ -425,24 +425,24 @@ function StockChart() {
 				<CardHeader
 					className="px-8 pt-16 pb-0"
 					action={
-							<div className="items-end">
-								{chartTypes.map(({ name, text }) => {
-									return (
-										<Button
-											key={name}
-											className={clsx(
-												'shadow-none min-w-48 text-11',
-												currentRange === name ? 'font-bold' : 'font-normal'
-											)}
-											onClick={() => handleChangeRange(name)}
-											color="default"
-											variant={currentRange === name ? 'contained' : 'text'}
-										>
-											{text}
-										</Button>
-									);
-								})}
-							</div>
+						<div className="items-end">
+							{chartTypes.map(({ name, text }) => {
+								return (
+									<Button
+										key={name}
+										className={clsx(
+											'shadow-none min-w-48 text-11',
+											currentRange === name ? 'font-bold' : 'font-normal'
+										)}
+										onClick={() => handleChangeRange(name)}
+										color="default"
+										variant={currentRange === name ? 'contained' : 'text'}
+									>
+										{text}
+									</Button>
+								);
+							})}
+						</div>
 					}
 					title={
 						<div className="flex items-center pl-4 -mt-8">

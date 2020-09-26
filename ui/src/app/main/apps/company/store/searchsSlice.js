@@ -29,10 +29,10 @@ export const getCompanyInfo = createAsyncThunk(NAME + 'getCompanyInfo', async (p
 	const response = await axios.post(URL + 'companyinfo', params);
 	const data = await response.data;
 
-	const { 주식코드 } = data;
-	if (주식코드) {
-		dispatch(getStock({ stockCode: 주식코드 }));
-		dispatch(getStockInfo({ stockCode: 주식코드 }));
+	const { 종목코드 } = data;
+	if (종목코드) {
+		dispatch(getStock({ stockCode: 종목코드 }));
+		dispatch(getStockInfo({ stockCode: 종목코드 }));
 	}
 
 	return data;

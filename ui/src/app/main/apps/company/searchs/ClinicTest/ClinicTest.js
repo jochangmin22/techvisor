@@ -44,7 +44,7 @@ function ClinicTest() {
 	const clinicTest = useSelector(({ companyApp }) => companyApp.searchs.clinicTest);
 	// const clinicOptions = useSelector(({ companyApp }) => companyApp.searchs.clinicOptions);
 	const companyInfo = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
-	const { 업체명: corpName } = companyInfo;
+	const { 회사명: corpName } = companyInfo;
 
 	const data = useMemo(() => (clinicTest ? clinicTest : []), [clinicTest]);
 

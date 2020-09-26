@@ -6,7 +6,6 @@ import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
-import { addSeparator, numberToKorean } from 'app/main/apps/lib/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCompanyInfo } from 'app/main/apps/company/store/searchsSlice';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
@@ -28,18 +27,18 @@ function CorpInfo() {
 		() =>
 			arr
 				? {
-						대표자: arr.대표자,
-						개업일자: arr.개업일자 ? addSeparator(arr.개업일자, '.', 4, 6) : '',
+						대표자명: arr.대표자명,
+						// 개업일자: addSeparator(arr.개업일자, '.', 4, 6),
 						상장일: arr.상장일 ? arr.상장일 : '',
-						// 법인등록번호: arr.jurir_no,
-						기업규모: arr.기업규모,
+						법인등록번호: arr.법인등록번호,
+						// 기업규모: arr.기업규모,
 						// 산업분류: arr.sanupcode,
-						업종코드: arr.업종코드,
-						업종: arr.업종명,
+						// 업종코드: arr.업종코드,
+						업종: arr.업종,
 						주요제품: arr.주요제품,
-						홈페이지: arr.홈페이지URL,
+						홈페이지: arr.홈페이지,
 						전화번호: arr.전화번호,
-						'지번 주소': arr.주소
+						주소: arr.주소
 						// 사업영역: arr.sanup
 				  }
 				: {},
@@ -49,12 +48,12 @@ function CorpInfo() {
 		() =>
 			arr
 				? {
-						매출액: numberToKorean(arr.매출액),
-						영업이익: numberToKorean(arr.영업이익),
-						당기순이익: numberToKorean(arr.당기순이익),
-						자산: numberToKorean(arr.자산총계),
-						부채: numberToKorean(arr.부채총계),
-						자본: numberToKorean(arr.자본총계),
+						매출액: arr.매출액,
+						영업이익: arr.영업이익,
+						당기순이익: arr.당기순이익,
+						자산: arr.자산총계,
+						부채: arr.부채총계,
+						자본: arr.자본총계,
 						'종업원수(월)': arr.종업원수 ? Number(arr.종업원수).toLocaleString() + '명' : ''
 				  }
 				: {},
@@ -74,7 +73,7 @@ function CorpInfo() {
 							</Typography>
 							<div className="flex flex-row items-center">
 								<Typography className="font-medium text-gray-400" color="inherit">
-									{arr.업체명}
+									{arr.회사명}
 								</Typography>
 								<span className="flex flex-row items-center mx-8">
 									{arr.주식코드 && (
@@ -101,9 +100,9 @@ function CorpInfo() {
 				<CardHeader
 					className="pr-24 pb-0"
 					action={
-							<IconButton aria-label="more" color="inherit" edge="end">
-								<Icon>more_vert</Icon>
-							</IconButton>
+						<IconButton aria-label="more" color="inherit" edge="end">
+							<Icon>more_vert</Icon>
+						</IconButton>
 					}
 					title={
 						<div className="flex flex-row pl-12 items-center">
@@ -112,19 +111,19 @@ function CorpInfo() {
 							</Typography>
 							<DraggableIcon />
 							<Typography className="font-medium text-gray-600 ml-8" color="inherit">
-								{arr.업체명}
+								{arr.회사명}
 							</Typography>
 							<span className="flex flex-row items-center mx-8">
-								{arr.주식코드 && (
+								{arr.종목코드 && (
 									<Typography className="text-13 mr-8 text-gray-500" color="inherit">
-										종목코드 : {arr.주식코드}
+										종목코드 : {arr.종목코드}
 									</Typography>
 								)}
-								{arr.사업자등록번호 && (
+								{/* {arr.사업자등록번호 && (
 									<Typography className="text-13  text-gray-500" color="inherit">
 										사업자등록번호 : {arr.사업자등록번호}
 									</Typography>
-								)}
+								)} */}
 							</span>
 						</div>
 					}
