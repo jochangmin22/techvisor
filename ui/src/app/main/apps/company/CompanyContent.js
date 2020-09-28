@@ -13,6 +13,7 @@ import CorpInfo from './searchs/CorpInfo';
 import StockInfoContainer from './searchs/StockInfo/StockInfoContainer';
 import Draggable from 'react-draggable';
 import ClinicTest from './searchs/ClinicTest';
+import StockFairValue from './searchs/StockFairValue';
 
 const useStyles = makeStyles(theme => ({
 	paper: {
@@ -27,7 +28,7 @@ function CompanyContent() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
-	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode.stockCode);	
+	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode.stockCode);
 	const searchText = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchText);
 	const searchLoading = useSelector(({ companyApp }) => companyApp.searchs.searchLoading);
 
@@ -73,15 +74,25 @@ function CompanyContent() {
 				</div>
 			</Draggable>
 			{stockCode && stockCode.length !== 0 && (
-			<Draggable handle=".draggable" onStart={() => handleStart('C')} onEnd={() => resetForm()} grid={[25, 25]}>
-				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.C }}>
-					<StockInfoContainer />
-				</div>
-			</Draggable>
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('C')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.C }}>
+						<StockInfoContainer />
+					</div>
+				</Draggable>
 			)}
 			<Draggable handle=".draggable" onStart={() => handleStart('D')} onEnd={() => resetForm()} grid={[25, 25]}>
 				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.D }}>
 					<ClinicTest />
+				</div>
+			</Draggable>
+			<Draggable handle=".draggable" onStart={() => handleStart('E')} onEnd={() => resetForm()} grid={[25, 25]}>
+				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.E }}>
+					<StockFairValue />
 				</div>
 			</Draggable>
 		</div>

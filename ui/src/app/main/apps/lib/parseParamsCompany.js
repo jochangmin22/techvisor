@@ -18,7 +18,7 @@
  */
 
 export function parseInputSearchText(inputSearchText = null) {
-	// parse InputSearchText from SearchContentToolbar
+	// parse InputSearchText from CompanyContentToolbar
 	/**
 	 * mistype handle,  ;+ convert
 	 */
@@ -33,17 +33,17 @@ export function parseInputSearchText(inputSearchText = null) {
 	 */
 
 	// a and b and c and @ad>=d<=e and (f OR g).ap and (h).inv -> newTerms = [a,b,c]
-	// const newTerms = searchText
-	// 	.split(' and ')
-	// 	.filter(function (item) {
-	// 		if (/\(@(.*?)|(.*?)\.AP|(.*?)\.INV|(.*?)\.CTRY|(.*?)\.LANG|(.*?)\.STAT|(.*?)\.TYPE/gi.test(item)) {
-	// 			return false; // skip if not terms
-	// 		}
-	// 		return true;
-	// 	})
-	// 	.map(function (item) {
-	// 		return item.split(' or ');
-	// 	});
+	const newTerms = searchText
+		.split(' and ')
+		.filter(function (item) {
+			if (/\(@(.*?)|(.*?)\.CN|(.*?)\.CA|(.*?)\.BD|(.*?)\.RK|(.*?)\.CC|(.*?)\.IN/gi.test(item)) {
+				return false; // skip if not terms
+			}
+			return true;
+		})
+		.map(function (item) {
+			return item.split(' or ');
+		});
 
 	// item => (/_/.test(item) ? `${item.replace(/_/gi, ' ')}`.split(' or ') : item.split(' or ')) // convert _ to whitespace
 
@@ -59,11 +59,12 @@ export function parseInputSearchText(inputSearchText = null) {
 		CA: 'companyAddress',
 		BD: 'bizDomain',
 		RK: 'relatedKeyword',
-		CC: 'customCriteria',
+		// CC: 'customCriteria',
 		IN: 'industry'
 	};
 
-	const arrayA = ['companyName', 'companyAddress', 'bizDomain', 'relatedKeyword', 'customCriteria', 'industry'];
+	// const arrayA = ['companyName', 'companyAddress', 'bizDomain', 'relatedKeyword', 'customCriteria', 'industry'];
+	const arrayA = ['companyName', 'companyAddress', 'bizDomain', 'relatedKeyword', 'industry'];
 	const arrayB = [
 		'marketCapStart',
 		'marketCapEnd',
@@ -78,6 +79,7 @@ export function parseInputSearchText(inputSearchText = null) {
 	let { ...newParams } = {};
 	newParams.searchText = searchTextParenthesis;
 	// newParams.terms = newTerms;
+	newParams.companyName = newTerms;
 	Object.entries(tempObj).map(([key, value]) => {
 		const testRE = new RegExp('/(.*?).' + key + '/', 'gi');
 		const replaceRE = new RegExp('/((.*?)).' + key + '/', 'gi');
@@ -176,7 +178,7 @@ export default function parseSearchOptions(params) {
 	 */
 
 	// a and b and c and @ad>=d<=e and (f OR g).ap and (h).inv -> newTerms = [a,b,c]
-	// const newTerms = params.terms;
+	const newTerms = params.companyName;
 
 	/**
 	 *  convert searchText to searchTextParenthesis with parenthesis
@@ -189,13 +191,15 @@ export default function parseSearchOptions(params) {
 	 */
 	let { ...newParams } = params;
 	newParams.searchText = searchTextParenthesis;
+	newParams.companyName = newTerms;
 	/**
 	 * create api parameters
 	 */
 	let { ...newApiParams } = params;
 
 	newApiParams.searchText = searchTextParenthesis;
-	['companyName', 'companyAddress', 'bizDomain', 'relatedKeyword', 'customCriteria', 'industry'].map(key => {
+	// ['companyName', 'companyAddress', 'bizDomain', 'relatedKeyword', 'customCriteria', 'industry'].map(key => {
+	['companyName', 'companyAddress', 'bizDomain', 'relatedKeyword', 'industry'].map(key => {
 		newApiParams[key] = params[key].join(' or ');
 		return undefined;
 	});
@@ -284,7 +288,7 @@ function mergeArgs(params) {
 		companyAddress: 'CA',
 		bizDomain: 'BD',
 		relatedKeyword: 'RK',
-		customCriteria: 'CC',
+		// customCriteria: 'CC',
 		industry: 'IN'
 	};
 	const tempObj2 = {

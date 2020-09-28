@@ -108,7 +108,7 @@ def parse_companies(request, mode="begin"): # mode : begin, nlp, query
 
         # query = 'SELECT * FROM nice_corp WHERE (' + \
         query = 'SELECT * FROM listed_corp WHERE (' + \
-            whereAll + ")"
+            whereAll # + ")"
 
         if mode == "query": # mode가 query면 여기서 분기
             return query
@@ -143,6 +143,13 @@ def parse_query(request):
 def like_parse(keyword=""):
     """ like query 생성 """
     """ keyword 변환 => and, or, _, -, not, near, adj 를 tsquery 형식의 | & ! <1> 로 변경 """
+    """ 
+    산업 : financialStatement - 산업코드 induty_code
+    시가총액 - listedCorp
+    설립일 - 공시 : 기업개황 - 설립일 (est_dt)
+    종업원수 - listedCorp
+    대표이사 나이 - 공시 : 사업보고서 주요정보 - 임원현황 - 임원 출생년월
+    """
 
     # (기업이름).CN and (주소).CA and (사업영역).BD and (관련키워드).RK and (사용자).CC and (@MC>=1111<=2222) and (@FD>=33333333<=44444444) and (@EM>=55<=66) and (@RA>=77<=88)
     if keyword and keyword != "":
@@ -151,7 +158,8 @@ def like_parse(keyword=""):
         # for val in keyword.split(" AND "):
         for val in re.split(" and ", keyword, flags=re.IGNORECASE):  # case insentitive
             # continue they were not implemented
-            if val.startswith("(@") or val.endswith(").RK") or val.endswith(").CC"):
+            # if val.startswith("(@") or val.endswith(").RK") or val.endswith(").CC"):
+            if val.startswith("(@") or val.endswith(").CC"):
                 continue
             res += "("  # not add paranthesis when above terms
             # select fieldName and remove initial symbol
@@ -164,9 +172,12 @@ def like_parse(keyword=""):
             if val.endswith(".BD"):
                 val = val.replace(".BD", "")
                 res += '업종'                
-            if val.endswith(".IN"):
-                val = val.replace(".IN", "")
+            if val.endswith(".RK"):
+                val = val.replace(".RK", "")
                 res += '주요제품'                
+            # if val.endswith(".IN"):
+            #     val = val.replace(".IN", "")
+            #     res += '산업'                
            
             # convert nagative - to None
             if val.startswith("-") or ' or -' in val:
@@ -177,7 +188,7 @@ def like_parse(keyword=""):
                 val = val.replace("not ", "")
                 res += " not"
             val = re.sub('[()]', '', val)
-            res += " like '%" + val + "%' and " 
+            res += " like '%" + val + "%') and " 
             # if " OR " in val:
             # if " or ".upper() in map(str.upper, val):
             #     needPlainto = "\""
