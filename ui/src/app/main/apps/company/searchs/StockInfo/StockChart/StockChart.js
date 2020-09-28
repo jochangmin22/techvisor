@@ -292,10 +292,10 @@ function StockChart() {
 					itemStyle: {
 						normal: {
 							opacity: 1.0,
-							color: '#3E67F1',
-							color0: '#D01454',
-							borderColor: '#3E67F1',
-							borderColor0: '#D01454'
+							color: '#D01454',
+							color0: '#3E67F1',
+							borderColor: '#D01454',
+							borderColor0: '#3E67F1'
 						}
 					}
 				},
