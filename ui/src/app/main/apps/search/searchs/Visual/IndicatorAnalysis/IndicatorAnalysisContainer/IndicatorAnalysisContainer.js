@@ -9,7 +9,7 @@ import IndicatorTable from '../IndicatorTable';
 import Button from '@material-ui/core/Button';
 import { getIndicator } from 'app/main/apps/search/store/searchsSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseParamsSearch';
 
 function IndicatorAnalysisContainer(props) {
 	const dispatch = useDispatch();

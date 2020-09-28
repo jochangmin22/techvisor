@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import _ from '@lodash';
 import { Line } from 'rc-progress';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseParamsSearch';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import {
 	getKeywordsVec,

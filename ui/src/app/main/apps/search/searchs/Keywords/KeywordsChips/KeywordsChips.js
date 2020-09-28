@@ -4,7 +4,7 @@ import Chip from '@material-ui/core/Chip';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseParamsSearch';
 import { getKeywordsVec, setKeywordsOptions } from 'app/main/apps/search/store/searchsSlice';
 import KeywordsContext from '../KeywordsContext';
 

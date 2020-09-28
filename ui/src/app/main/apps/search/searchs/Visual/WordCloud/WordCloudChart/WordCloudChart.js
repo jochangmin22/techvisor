@@ -3,7 +3,7 @@ import Paper from '@material-ui/core/Paper';
 import 'echarts-wordcloud';
 import echarts from 'echarts';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseParamsSearch';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSearchSubmit, setSearchParams, getWordCloud, initialState } from 'app/main/apps/search/store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';

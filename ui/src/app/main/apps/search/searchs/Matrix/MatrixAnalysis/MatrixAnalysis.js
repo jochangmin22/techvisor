@@ -11,7 +11,7 @@ import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseParamsSearch';
 import MatrixDialog from '../MatrixDialog';
 import MatrixAnalysisMenu from '../MatrixAnalysisMenu';
 

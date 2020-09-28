@@ -7,7 +7,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import withReducer from 'app/store/withReducer';
 import reducer from './store';
-import { parseInputSearchText } from 'app/main/apps/lib/parseSearchText';
+import { parseInputSearchText } from 'app/main/apps/lib/parseParamsSearch';
 import {
 	clearSearchText,
 	setSearchParams,

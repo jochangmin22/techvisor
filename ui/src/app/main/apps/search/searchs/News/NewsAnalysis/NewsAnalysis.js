@@ -7,7 +7,7 @@ import { getNews, getNewsSA, getRelatedCompany } from 'app/main/apps/search/stor
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
-import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseParamsSearch';
 import { useSelector } from 'react-redux';
 
 function NewsAnalysis() {

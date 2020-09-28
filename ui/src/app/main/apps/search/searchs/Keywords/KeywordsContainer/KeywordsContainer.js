@@ -8,7 +8,7 @@ import KeywordsTable from '../KeywordsTable';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
-import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseParamsSearch';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 import { getKeywords } from 'app/main/apps/search/store/searchsSlice';
 
