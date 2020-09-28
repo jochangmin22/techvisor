@@ -44,18 +44,18 @@ export function parseInputSearchText(inputSearchText = null) {
 		.map(function (item) {
 			return item.split(' or ');
 		});
-
 	// item => (/_/.test(item) ? `${item.replace(/_/gi, ' ')}`.split(' or ') : item.split(' or ')) // convert _ to whitespace
 
 	/**
 	 *  convert searchText to searchTextParenthesis with parenthesis
 	 */
 	let searchTextParenthesis = addParenthesis(searchText);
+
 	/**
 	 * update params value for UI
 	 */
 	const tempObj = {
-		CN: 'companyName',
+		// CN: 'companyName', // newTerms에서 처리
 		CA: 'companyAddress',
 		BD: 'bizDomain',
 		RK: 'relatedKeyword',
@@ -80,6 +80,7 @@ export function parseInputSearchText(inputSearchText = null) {
 	newParams.searchText = searchTextParenthesis;
 	// newParams.terms = newTerms;
 	newParams.companyName = newTerms;
+
 	Object.entries(tempObj).map(([key, value]) => {
 		const testRE = new RegExp('/(.*?).' + key + '/', 'gi');
 		const replaceRE = new RegExp('/((.*?)).' + key + '/', 'gi');
@@ -155,7 +156,6 @@ export function parseInputSearchText(inputSearchText = null) {
 	 * create api parameters
 	 */
 	const { ...newApiParams } = newParams;
-	console.log(newApiParams);
 
 	newApiParams.searchText = searchTextParenthesis;
 	arrayA.map(key => {
@@ -178,20 +178,19 @@ export default function parseSearchOptions(params) {
 	 */
 
 	// a and b and c and @ad>=d<=e and (f OR g).ap and (h).inv -> newTerms = [a,b,c]
-	const newTerms = params.companyName;
+	// const newTerms = params.companyName;
 
 	/**
 	 *  convert searchText to searchTextParenthesis with parenthesis
 	 */
 	let searchTextParenthesis = addParenthesis(searchText);
-	// console.log(searchText);
-	// console.log(searchTextParenthesis);
+
 	/**
 	 * update params value for UI
 	 */
 	let { ...newParams } = params;
 	newParams.searchText = searchTextParenthesis;
-	newParams.companyName = newTerms;
+	// newParams.companyName = newTerms;
 	/**
 	 * create api parameters
 	 */
@@ -221,12 +220,14 @@ function splitArgs(myString) {
 	// CN, CA, BD, RK, CC, IN, MC, FD, EM, RA
 	myString = myString
 		.split(' and ')
-		.map(item =>
-			/@(.*?)|(.*?)\.CN|(.*?)\.CA|(.*?)\.BD|(.*?)\.RK|(.*?)\.CC|(.*?)\.IN|(.*?)\.MC|(.*?)\.FD|(.*?)\.EM|(.*?)\.RA/gi.test(
-				item
-			)
-				? `"${item.replace(/\(/gi, '⁋').replace(/\)/gi, '¶').replace(/ /gi, '_').replace(/"/gi, '~')}"`
-				: '⁋' + item + '¶.CN'
+		.map(
+			item =>
+				/@(.*?)|(.*?)\.CN|(.*?)\.CA|(.*?)\.BD|(.*?)\.RK|(.*?)\.CC|(.*?)\.IN|(.*?)\.MC|(.*?)\.FD|(.*?)\.EM|(.*?)\.RA/gi.test(
+					item
+				)
+					? `"${item.replace(/\(/gi, '⁋').replace(/\)/gi, '¶').replace(/ /gi, '_').replace(/"/gi, '~')}"`
+					: item
+			// : '⁋' + item + '¶.CN'
 		)
 		.join(' and ');
 	// console.log('TCL: splitArgs -> myString', myString);
@@ -302,13 +303,21 @@ function mergeArgs(params) {
 	// my['result'] = params.searchText && params.searchText.length > 0 ? params.searchText + ' and ' : '';
 	my['result'] = '';
 
-	// Handle tempObj
+	// tempObj
 	Object.entries(tempObj).map(([key, value]) => {
-		my[key] = params[key] && params[key].length > 0 ? '(' + params[key] + ').' + value + ' and ' : '';
+		// my[key] = params[key] && params[key].length > 0 ? '(' + params[key] + ').' + value + ' and ' : '';
+		my[key] =
+			params[key] && params[key].length > 0
+				? '(' +
+				  params[key].map(item => (/\s/.test(item) ? '"' + item + '"' : item)).join(' or ') +
+				  ').' +
+				  value +
+				  ' and '
+				: '';
 		my['result'] += my[key];
 		return undefined;
 	});
-	// Handle tempObj2
+	// tempObj2
 	Object.entries(tempObj2).map(([key, value]) => {
 		my[key] = '(@' + value;
 		my[key] += params[key + 'Start'] && params[key + 'Start'].length > 0 ? '>=' + params[key + 'Start'] : '';

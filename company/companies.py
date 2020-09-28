@@ -26,7 +26,7 @@ import requests
 from copy import deepcopy
 import json
 
-from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
+from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc, like_parse
 
 from .models import nice_corp, stock_quotes, mdcin_clinc_test_info, financial_statements
 from search.models import listed_corp, disclosure
@@ -140,73 +140,75 @@ def parse_query(request):
     """ 쿼리 확인용 """
     return HttpResponse(parse_companies(request, mode="query"), content_type="text/plain; charset=utf-8")
 
-def like_parse(keyword=""):
-    """ like query 생성 """
-    """ keyword 변환 => and, or, _, -, not, near, adj 를 tsquery 형식의 | & ! <1> 로 변경 """
-    """ 
-    산업 : financialStatement - 산업코드 induty_code
-    시가총액 - listedCorp
-    설립일 - 공시 : 기업개황 - 설립일 (est_dt)
-    종업원수 - listedCorp
-    대표이사 나이 - 공시 : 사업보고서 주요정보 - 임원현황 - 임원 출생년월
-    """
+# def like_parse(keyword=""):
+#     """ 사용 안함 """
+#     """ like query 생성 """
+#     """ keyword 변환 => and, or, _, -, not, near, adj 를 tsquery 형식의 | & ! <1> 로 변경 """
+#     """ 
+#     산업 : financialStatement - 산업코드 induty_code
+#     시가총액 - listedCorp
+#     설립일 - 공시 : 기업개황 - 설립일 (est_dt)
+#     종업원수 - listedCorp
+#     대표이사 나이 - 공시 : 사업보고서 주요정보 - 임원현황 - 임원 출생년월
+#     """
 
-    # (기업이름).CN and (주소).CA and (사업영역).BD and (관련키워드).RK and (사용자).CC and (@MC>=1111<=2222) and (@FD>=33333333<=44444444) and (@EM>=55<=66) and (@RA>=77<=88)
-    if keyword and keyword != "":
+#     # (기업이름).CN and (주소).CA and (사업영역).BD and (관련키워드).RK and (사용자).CC and (@MC>=1111<=2222) and (@FD>=33333333<=44444444) and (@EM>=55<=66) and (@RA>=77<=88)
+#     if keyword and keyword != "":
 
-        res = ""  # unquote(keyword) # ; issue fix
-        # for val in keyword.split(" AND "):
-        for val in re.split(" and ", keyword, flags=re.IGNORECASE):  # case insentitive
-            # continue they were not implemented
-            # if val.startswith("(@") or val.endswith(").RK") or val.endswith(").CC"):
-            if val.startswith("(@") or val.endswith(").CC"):
-                continue
-            res += "("  # not add paranthesis when above terms
-            # select fieldName and remove initial symbol
-            if val.endswith(".CN"):
-                val = val.replace(".CN", "")
-                res += '회사명'
-            if val.endswith(".CA"):
-                val = val.replace(".CA", "")
-                res += '지역'                
-            if val.endswith(".BD"):
-                val = val.replace(".BD", "")
-                res += '업종'                
-            if val.endswith(".RK"):
-                val = val.replace(".RK", "")
-                res += '주요제품'                
-            # if val.endswith(".IN"):
-            #     val = val.replace(".IN", "")
-            #     res += '산업'                
+#         res = ""  # unquote(keyword) # ; issue fix
+#         # for val in keyword.split(" AND "):
+#         for val in re.split(" and ", keyword, flags=re.IGNORECASE):  # case insentitive
+#             # continue they were not implemented
+#             # if val.startswith("(@") or val.endswith(").RK") or val.endswith(").CC"):
+#             if val.startswith("(@") or val.endswith(").CC"):
+#                 continue
+#             res += "("  # not add paranthesis when above terms
+#             # select fieldName and remove initial symbol
+#             if val.endswith(".CN"):
+#                 val = val.replace(".CN", "")
+#                 res += '회사명'
+#             if val.endswith(".CA"):
+#                 val = val.replace(".CA", "")
+#                 res += '지역'                
+#             if val.endswith(".BD"):
+#                 val = val.replace(".BD", "")
+#                 res += '업종'                
+#             if val.endswith(".RK"):
+#                 val = val.replace(".RK", "")
+#                 res += '주요제품'                
+#             # if val.endswith(".IN"):
+#             #     val = val.replace(".IN", "")
+#             #     res += '산업'                
            
-            # convert nagative - to None
-            if val.startswith("-") or ' or -' in val:
-                val = val.replace("-", "")
-                res += " not"
-            # convert nagative not to None
-            if val.startswith("not ") or ' or not ' in val:
-                val = val.replace("not ", "")
-                res += " not"
-            val = re.sub('[()]', '', val)
-            res += " like '%" + val + "%') and " 
-            # if " OR " in val:
-            # if " or ".upper() in map(str.upper, val):
-            #     needPlainto = "\""
+#             # convert nagative - to None
+#             if val.startswith("-") or ' or -' in val:
+#                 val = val.replace("-", "")
+#                 res += " not"
+#             # convert nagative not to None
+#             if val.startswith("not ") or ' or not ' in val:
+#                 val = val.replace("not ", "")
+#                 res += " not"
+#             val = re.sub('[()]', '', val)
+#             res += " like '%" + val + "%') and " 
+#             # if " OR " in val:
+#             # if " or ".upper() in map(str.upper, val):
+#             #     needPlainto = "\""
 
-            # # add paranthesis every terms block
+#             # # add paranthesis every terms block
 
-            # res += (
-            #     needPlainto + "".join(str(val)) + needPlainto + ") & "
-            # )
-        # res = res.replace(" AND ", needPlainto + " & ").replace(" OR ", needPlainto + " | ").replace(
-        #     " and ", needPlainto + " & ").replace(" or ", needPlainto + " | ")  # .replace("_", " ")
+#             # res += (
+#             #     needPlainto + "".join(str(val)) + needPlainto + ") & "
+#             # )
+#         # res = res.replace(" AND ", needPlainto + " & ").replace(" OR ", needPlainto + " | ").replace(
+#         #     " and ", needPlainto + " & ").replace(" or ", needPlainto + " | ")  # .replace("_", " ")
 
-        if res.endswith(" and "):
-            res = res[:-5]
-        res += ")"
-    else:
-        res = None
-    return res     
+#         if res.endswith(" and "):
+#             res = res[:-5]
+#         res += ")"
+#     else:
+#         res = None
+#     return res     
+
 
 def like_parse_nice(keyword=""):
     """ like query 생성 """

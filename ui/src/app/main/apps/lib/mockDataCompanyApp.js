@@ -949,7 +949,7 @@ const searchData = {
 		// customCriteria: [],
 		industry: [],
 		marketCapStart: '',
-		marketCapStartEnd: '',
+		marketCapEnd: '',
 		foundedStart: '',
 		foundedEnd: '',
 		employeeStart: '',
