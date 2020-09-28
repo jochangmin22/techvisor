@@ -33,8 +33,6 @@ import {
 // TODO: DnD word chip
 const useStyles = makeStyles(theme => ({
 	root: {
-		// display: 'flex',
-		// width: 'full',
 		marginBottom: theme.spacing(2),
 		backgroundColor: theme.palette.type === 'light' ? theme.palette.background.paper : theme.palette.primary.dark,
 		'& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
@@ -63,9 +61,9 @@ const insert = (arr, index, newItem) => [...arr.slice(0, index), newItem, ...arr
 const tempObj = {
 	'기업 이름': 'companyName',
 	주소: 'companyAddress',
-	'사업 영역': 'bizDomain',
-	'관련 키워드': 'relatedKeyword',
-	'사용자정의 검색 조건': 'customCriteria'
+	업종: 'bizDomain',
+	주요제품: 'relatedKeyword'
+	// '사용자정의 검색 조건': 'customCriteria'
 };
 
 const LeftSiderTerms = React.forwardRef(function (props, ref) {
@@ -84,13 +82,13 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		companyAddressReset: 0,
 		bizDomainReset: 0,
 		relatedKeywordReset: 0,
-		customCriteriaReset: 0,
+		// customCriteriaReset: 0,
 		industryReset: 0,
 		companyName: searchParams.companyName,
 		companyAddress: searchParams.companyAddress,
 		bizDomain: searchParams.bizDomain,
 		relatedKeyword: searchParams.relatedKeyword,
-		customCriteria: searchParams.customCriteria,
+		// customCriteria: searchParams.customCriteria,
 		industry: searchParams.industry
 	});
 
@@ -139,7 +137,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 			companyAddress: searchParams.companyAddress,
 			bizDomain: searchParams.bizDomain,
 			relatedKeyword: searchParams.relatedKeyword,
-			customCriteria: searchParams.customCriteria,
+			// customCriteria: searchParams.customCriteria,
 			industry: searchParams.industry
 		});
 		setDoubleState({

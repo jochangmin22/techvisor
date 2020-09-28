@@ -57,7 +57,7 @@ function ClinicTest() {
 
 	useEffect(() => {
 		setShowLoading(true);
-		if (corpName) {
+		if (corpName !== undefined && corpName) {
 			dispatch(getClinicTest({ corpName: corpName })).then(() => {
 				setShowLoading(false);
 			});

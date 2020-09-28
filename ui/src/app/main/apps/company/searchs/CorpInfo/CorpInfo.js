@@ -54,7 +54,7 @@ function CorpInfo() {
 						자산: arr.자산총계,
 						부채: arr.부채총계,
 						자본: arr.자본총계,
-						'종업원수(월)': arr.종업원수 ? Number(arr.종업원수).toLocaleString() + '명' : ''
+						'종업원수(월)': arr.종업원수 ? arr.종업원수 + '명' : ''
 				  }
 				: {},
 		[arr]

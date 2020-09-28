@@ -21,7 +21,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import _ from '@lodash';
 import { searchAppLeftConfig } from 'app/main/apps/lib/variables';
-import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
+import parseSearchOptions from 'app/main/apps/lib/parseParamsSearch';
 import {
 	getSearchs,
 	getWordCloud,
@@ -104,6 +104,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const searchSubmit = useSelector(({ searchApp }) => searchApp.searchs.searchSubmit);
 	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
+	const tableOptions = useSelector(({ searchApp }) => searchApp.searchs.tableOptions);
 
 	const [submitted, setSubmitted] = useState(searchSubmit);
 
@@ -284,6 +285,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		const params = {
 			params: mainParams,
 			subParams: {
+				tableOptions: tableOptions,
 				analysisOptions: analysisOptions
 			}
 		};

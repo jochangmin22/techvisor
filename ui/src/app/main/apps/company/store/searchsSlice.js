@@ -122,7 +122,7 @@ export const initialState = {
 		companyAddress: [],
 		bizDomain: [],
 		relatedKeyword: [],
-		customCriteria: [],
+		// customCriteria: [],
 		industry: [],
 		marketCapStart: '',
 		marketCapEnd: '',

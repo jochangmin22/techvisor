@@ -946,7 +946,7 @@ const searchData = {
 		companyAddress: [],
 		bizDomain: [],
 		relatedKeyword: [],
-		customCriteria: [],
+		// customCriteria: [],
 		industry: [],
 		marketCapStart: '',
 		marketCapStartEnd: '',
