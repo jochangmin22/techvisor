@@ -1,5 +1,6 @@
 import json
 import re
+from itertools import islice
 
 def get_redis_key(request):
     "Return mainKey, subKey, params, subParams"
@@ -41,4 +42,6 @@ def remove_brackets(text):
 
 def remove_punc(text):
     return re.sub("[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]", ' ', text)            
-  
+
+def sampling(selection, offset=0, limit=None):
+    return list(islice(islice(selection, offset, None), limit))  

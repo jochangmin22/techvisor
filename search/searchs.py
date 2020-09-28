@@ -8,7 +8,7 @@ from konlpy.tag import Mecab
 from copy import deepcopy
 import json
 
-from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
+from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc, sampling
 # from .similarity import similarity
 
 # caching with redis
@@ -38,14 +38,14 @@ def parse_searchs(request, mode="begin"):
         mode : begin, nlp, query, matrix, indicator
     """
 
-    mainKey, _, params, _ = get_redis_key(request)
+    mainKey, _, params, subParams = get_redis_key(request)
 
     context = cache.get(mainKey)
 
     if mode == "begin":
         try:
-            if context['raw']:
-                return JsonResponse(context['raw'], safe=False)
+            if context['raw_fetch']:
+                return JsonResponse(context['raw_fetch'], safe=False)
         except:
             pass
 
@@ -168,21 +168,26 @@ def parse_searchs(request, mode="begin"):
     else:  # 결과값 없을 때 처리
         row = []
 
+    sampling_row =sampling(row, subParams['analysisOptions']['tableOptions']['pageIndex'], subParams['analysisOptions']['tableOptions']['pageSize'])
+    res = { 'entities' : sampling_row, 'dataCount' : len(row)}
+
     # ''' 유사도 처리 '''
     # result=similarity(row)
     # return JsonResponse(result, safe=False)
+
 
     # redis 저장 {
     new_context = {}
     new_context['mtx_raw'] = mtx_raw
     new_context['raw'] = row
+    new_context['raw_fetch'] = res
     new_context['raw_abstract'] = raw_abstract
     new_context['raw_claims'] = raw_claims
     cache.set(mainKey, new_context, CACHE_TTL)
     # redis 저장 }
 
     if mode == "begin":
-        return JsonResponse(row, safe=False)
+        return JsonResponse(res, safe=False)
     elif mode == "nlp":
         return raw_abstract, raw_claims
     elif mode == "matrix":

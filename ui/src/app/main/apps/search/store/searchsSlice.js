@@ -81,6 +81,7 @@ export const { selectAll: selectSearchs, selectById: selectSearchById } = search
 
 export const initialState = {
 	entities: [],
+
 	searchParams: {
 		searchText: '',
 		searchNum: '',
@@ -101,6 +102,11 @@ export const initialState = {
 	clickedSearchId: null,
 	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
 	analysisOptions: {
+		tableOptions: {
+			dataCount: 0,
+			pageIndex: 0,
+			pageSize: 10
+		},
 		wordCloudOptions: {
 			volume: '요약',
 			unit: '구문', // '구문', '워드',
@@ -149,10 +155,11 @@ const searchsSlice = createSlice({
 	initialState: searchsAdapter.getInitialState(initialState),
 	reducers: {
 		setMockData: (state, action) => {
-			const { entities, searchParams, matrix, wordCloud, keywords } = action.payload;
+			const { entities, searchParams, matrix, wordCloud, keywords, analysisOptions } = action.payload;
 
 			state.entities = entities;
 			state.searchParams = searchParams;
+			state.analysisOptions = analysisOptions;
 			state.matrix = matrix;
 			state.wordCloud = wordCloud;
 			state.keywords = keywords;
@@ -212,7 +219,8 @@ const searchsSlice = createSlice({
 	},
 	extraReducers: {
 		[getSearchs.fulfilled]: (state, action) => {
-			state.entities = action.payload;
+			state.entities = action.payload.entities;
+			state.analysisOptions.tableOptions.dataCount = action.payload.dataCount;
 		},
 		[getNews.fulfilled]: (state, action) => {
 			state.news = action.payload;

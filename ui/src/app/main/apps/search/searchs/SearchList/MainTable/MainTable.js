@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import EnhancedTable from 'app/main/apps/lib/EnhancedTableCombine';
+import EnhancedTable from 'app/main/apps/lib/EnhancedTableServerSide';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
@@ -116,14 +116,26 @@ const colsList = [
 
 function MainTable(props) {
 	const dispatch = useDispatch();
-	const searchs = useSelector(({ searchApp }) => searchApp.searchs);
-	const { entities, cols } = searchs;
+	const entities = useSelector(({ searchApp }) => searchApp.searchs.entities);
+	const dataCount = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions.tableOptions.dataCount);
+	const pageSize = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions.tableOptions.pageSize);
+
+	const [rowsCount, setRowsCount] = useState(0);
+	const [pageCount, setPageCount] = useState(0);
+
+	const cols = useSelector(({ searchApp }) => searchApp.searchs.cols);
 	const data = useMemo(() => (entities ? entities : []), [entities]);
 
 	useEffect(() => {
-		setRowsCount(data.length);
-	}, [data]);
-	const [rowsCount, setRowsCount] = useState(null);
+		// setRowsCount(data.length);
+		setRowsCount(dataCount);
+		setPageCount(Math.ceil(dataCount / pageSize));
+	}, [dataCount, pageSize]);
+
+	const handleSort = useCallback(sortBy => {
+		//remote sort
+		//... fetch("your-api", sortBy) ...
+	}, []);
 
 	const handleOnChange = useDebounce(cols => {
 		dispatch(updateCols(cols));
@@ -162,6 +174,8 @@ function MainTable(props) {
 					<EnhancedTable
 						columns={columns}
 						data={data}
+						pageCount={pageCount}
+						onSort={handleSort}
 						size="small"
 						onRowClick={(ev, row) => {
 							if (row) {

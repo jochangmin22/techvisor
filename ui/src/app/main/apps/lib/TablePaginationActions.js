@@ -1,5 +1,4 @@
 import React from 'react';
-
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import IconButton from '@material-ui/core/IconButton';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -19,7 +18,7 @@ const useStyles = makeStyles(theme => ({
 const TablePaginationActions = props => {
 	const classes = useStyles();
 	const theme = useTheme();
-	const { count, page, rowsPerPage, onChangePage } = props;
+	const { count, page, rowsPerPage, onChangePage, canPreviousPage, canNextPage } = props;
 
 	const handleFirstPageButtonClick = event => {
 		onChangePage(event, 0);
@@ -47,14 +46,16 @@ const TablePaginationActions = props => {
 			</IconButton>
 			<IconButton
 				onClick={handleNextButtonClick}
-				disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+				// disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+				disabled={canNextPage}
 				aria-label="next page"
 			>
 				{theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
 			</IconButton>
 			<IconButton
 				onClick={handleLastPageButtonClick}
-				disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+				// disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+				disabled={canNextPage}
 				aria-label="last page"
 			>
 				{theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
