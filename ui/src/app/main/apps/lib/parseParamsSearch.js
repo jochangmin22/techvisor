@@ -22,6 +22,17 @@ export function parseInputSearchText(inputSearchText = null) {
 	/**
 	 * mistype handle,  ;+ convert
 	 */
+
+	// predefined object
+	const tempObj = {
+		AP: 'assignee',
+		INV: 'inventor',
+		CTRY: 'patentOffice',
+		LANG: 'language',
+		STAT: 'status',
+		TYPE: 'ipType'
+	};
+
 	const searchText = splitArgs(
 		inputSearchText
 			.toString()
@@ -44,7 +55,6 @@ export function parseInputSearchText(inputSearchText = null) {
 		.map(function (item) {
 			return item.split(' or ');
 		});
-
 	// item => (/_/.test(item) ? `${item.replace(/_/gi, ' ')}`.split(' or ') : item.split(' or ')) // convert _ to whitespace
 
 	/**
@@ -57,36 +67,23 @@ export function parseInputSearchText(inputSearchText = null) {
 	let { ...newParams } = {};
 	newParams.searchText = searchTextParenthesis;
 	newParams.terms = newTerms;
-	newParams.assignee = searchText
-		.split(' and ')
-		.filter(function (item) {
-			if (/(.*?)\.AP/gi.test(item)) {
-				return true;
-			}
-			return false;
-		})
-		.map(function (item) {
-			return item
-				.replace(/\((.*?)\)\.AP/gi, '$1')
-				.replace(/"/g, '')
-				.toLowerCase()
-				.split(' or ');
-		})[0];
-	newParams.inventor = searchText
-		.split(' and ')
-		.filter(function (item) {
-			if (/(.*?)\.INV/gi.test(item)) {
-				return true;
-			}
-			return false;
-		})
-		.map(function (item) {
-			return item
-				.replace(/\((.*?)\)\.INV/gi, '$1')
-				.replace(/"/g, '')
-				.toLowerCase()
-				.split(' or ');
-		})[0];
+
+	Object.entries(tempObj).map(([key, value]) => {
+		const testRE = new RegExp('/(.*?).' + key + '/', 'gi');
+		const replaceRE = new RegExp('/((.*?)).' + key + '/', 'gi');
+		newParams[value] = searchText
+			.split(' and ')
+			.filter(function (item) {
+				if (testRE.test(item)) {
+					return true;
+				}
+				return false;
+			})
+			.map(function (item) {
+				return item.replace(replaceRE, '$1').replace(/"/g, '').toLowerCase().split(' or ');
+			})[0];
+		return undefined;
+	});
 
 	let paramDate = searchText.split(' and ').filter(function (item) {
 		if (/(?<=\(@)/gi.test(item)) {
@@ -139,12 +136,8 @@ export function parseInputSearchText(inputSearchText = null) {
 		newParams.startDate = '';
 		newParams.endDate = '';
 	}
-	newParams.inventor = newParams.inventor !== undefined ? newParams.inventor : [];
-	newParams.assignee = newParams.assignee !== undefined ? newParams.assignee : [];
-	newParams.patentOffice = newParams.patentOffice !== undefined ? newParams.patentOffice : [];
-	newParams.language = newParams.language !== undefined ? newParams.language : [];
-	newParams.status = newParams.status !== undefined ? newParams.status : [];
-	newParams.ipType = newParams.ipType !== undefined ? newParams.ipType : [];
+
+	Object.values(tempObj).map(key => (newParams[key] = newParams[key] || []));
 	newParams.searchVolume = newParams.searchVolume !== undefined ? newParams.searchVolume : 'SUM';
 	/**
 	 * create api parameters
@@ -152,12 +145,10 @@ export function parseInputSearchText(inputSearchText = null) {
 	const { terms: _, ...newApiParams } = newParams; // terms are not required in api params
 
 	newApiParams.searchText = searchTextParenthesis;
-	newApiParams.inventor = newParams.inventor.join(' or ');
-	newApiParams.assignee = newParams.assignee.join(' or ');
-	newApiParams.patentOffice = newParams.patentOffice.join(' or ');
-	newApiParams.language = newParams.language.join(' or ');
-	newApiParams.status = newParams.status.join(' or ');
-	newApiParams.ipType = newParams.ipType.join(' or ');
+	Object.values(tempObj).map(key => {
+		newApiParams[key] = newParams[key].join(' or ');
+		return undefined;
+	});
 
 	return [newParams, newApiParams];
 }

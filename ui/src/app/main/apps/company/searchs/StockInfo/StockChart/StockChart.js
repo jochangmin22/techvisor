@@ -308,20 +308,6 @@ function StockChart() {
 						normal: {
 							width: 2
 						}
-					},
-					areaStyle: {
-						normal: {
-							color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-								{
-									offset: 0,
-									color: 'rgba(133, 245, 245, 0.25)'
-								},
-								{
-									offset: 1,
-									color: 'rgba(71, 176, 252, 0.25)'
-								}
-							])
-						}
 					}
 				},
 				{

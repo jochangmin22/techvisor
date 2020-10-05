@@ -9,6 +9,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCompanyInfo } from 'app/main/apps/company/store/searchsSlice';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
+import { numberToWon } from 'app/main/apps/lib/utils';
 
 function CorpInfo() {
 	const dispatch = useDispatch();
@@ -48,12 +49,12 @@ function CorpInfo() {
 		() =>
 			arr
 				? {
-						매출액: arr.매출액,
-						영업이익: arr.영업이익,
-						당기순이익: arr.당기순이익,
-						자산: arr.자산총계,
-						부채: arr.부채총계,
-						자본: arr.자본총계,
+						매출액: numberToWon(arr.매출액),
+						영업이익: numberToWon(arr.영업이익),
+						당기순이익: numberToWon(arr.당기순이익),
+						자산: numberToWon(arr.자산총계),
+						부채: numberToWon(arr.부채총계),
+						자본: numberToWon(arr.자본총계),
 						'종업원수(월)': arr.종업원수 ? arr.종업원수 + '명' : ''
 				  }
 				: {},

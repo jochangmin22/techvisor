@@ -252,13 +252,17 @@ def parse_indicator(request):
     df = df[df.등록일자.notnull()].loc[:,['출원번호']].출원번호.astype(str).tolist()      
     total_granted = len(df) # get total_granted
     appNoList = ', '.join(df)
-       
+
+
     # 전체 등록특허의 피인용수
-    with connection.cursor() as cursor: 
-        query= 'SELECT count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (' + appNoList + ')'
-        cursor.execute(query)
-        row = dictfetchall(cursor)
+    try:
+        with connection.cursor() as cursor: 
+            query= 'SELECT count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (' + appNoList + ')'
+            cursor.execute(query)
+            row = dictfetchall(cursor)
         total_citing = row[0]['cnt']
+    except:
+        total_citing = 0        
 
     # 출원인 groupby 출원번호 concat
     df = pd.DataFrame(d).loc[:,['출원인1','출원인코드1','출원번호']]
@@ -286,11 +290,14 @@ def parse_indicator(request):
             #////// CPP = 특정 주체의 등록특허의 피인용 횟수 / 해당 주체의 등록특허 수
 
             # citing count (using appNo)
-            query= 'SELECT count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (' + appNos + ')'
-            # query = 'SELECT Count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (SELECT 출원번호 from 공개공보 where 등록일자 is not null and 출원인코드1 = $$' + code + '$$)'
-            cursor.execute(query)
-            row = dictfetchall(cursor)
-            citing = row[0]['cnt']
+            try:
+                query= 'SELECT count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (' + appNos + ')'
+                # query = 'SELECT Count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (SELECT 출원번호 from 공개공보 where 등록일자 is not null and 출원인코드1 = $$' + code + '$$)'
+                cursor.execute(query)
+                row = dictfetchall(cursor)
+                citing = row[0]['cnt']
+            except:
+                citing = 0                
 
             # granted count (using grantedList, code)            
             try:
@@ -319,17 +326,22 @@ def parse_indicator(request):
             #////// PFS = 특정 주체의 평균 패밀리 국가 수 / 전체 평균 패밀리 국가 수            
 
             # family count (using appNo)
-            query= 'SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호 IN (' + appNos + ')'
-            cursor.execute(query)
-            row = dictfetchall(cursor)
-            family = row[0]['cnt']
-
+            try:
+                query= 'SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호 IN (' + appNos + ')'
+                cursor.execute(query)
+                row = dictfetchall(cursor)
+                family = row[0]['cnt']
+            except:
+                family = 0
 
             # family count total (using appNoList)
-            query= 'SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호 IN (' + appNoList + ')'
-            cursor.execute(query)
-            row = dictfetchall(cursor)
-            total_family = row[0]['cnt']
+            try:
+                query= 'SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호 IN (' + appNoList + ')'
+                cursor.execute(query)
+                row = dictfetchall(cursor)
+                total_family = row[0]['cnt']
+            except:
+                total_family = 0                
 
             # family / total_family
             try:
