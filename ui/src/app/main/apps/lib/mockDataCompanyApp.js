@@ -940,9 +940,9 @@ const searchData = {
 		}
 	],
 	searchParams: {
-		searchText: '(바이오).CN',
+		searchText: '바이오',
 		searchNum: '',
-		companyName: ['바이오'],
+		companyName: [['바이오']],
 		companyAddress: [],
 		bizDomain: [],
 		relatedKeyword: [],

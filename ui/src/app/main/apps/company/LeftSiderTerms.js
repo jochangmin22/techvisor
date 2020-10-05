@@ -15,6 +15,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { makeStyles } from '@material-ui/core/styles';
 import _ from '@lodash';
+import clsx from 'clsx';
 import parseSearchOptions from 'app/main/apps/lib/parseParamsCompany';
 import {
 	getSearchs,
@@ -50,6 +51,9 @@ const useStyles = makeStyles(theme => ({
 			borderWidth: 2,
 			borderColor: theme.palette.primary.main
 		}
+	},
+	chipInput: {
+		paddingRight: theme.spacing(1)
 	}
 }));
 
@@ -59,7 +63,7 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const insert = (arr, index, newItem) => [...arr.slice(0, index), newItem, ...arr.slice(index + 1)];
 
 const tempObj = {
-	'기업 이름': 'companyName',
+	// '기업 이름': 'companyName',
 	주소: 'companyAddress',
 	업종: 'bizDomain',
 	주요제품: 'relatedKeyword'
@@ -76,9 +80,11 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 
 	const [submitted, setSubmitted] = useState(searchSubmit);
 
+	const [companyNameRowCount, setCompanyNameRowCount] = useState(0);
+
 	// they were uncontrolled components so manually controlled
 	const [singleState, setSingleState] = useState({
-		companyNameReset: 0,
+		// companyNameReset: 0,
 		companyAddressReset: 0,
 		bizDomainReset: 0,
 		relatedKeywordReset: 0,
@@ -133,7 +139,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		// Sync uncontrolled components
 		setSingleState({
 			...singleState,
-			companyName: searchParams.companyName,
+			// companyName: searchParams.companyName,
 			companyAddress: searchParams.companyAddress,
 			bizDomain: searchParams.bizDomain,
 			relatedKeyword: searchParams.relatedKeyword,
@@ -155,6 +161,10 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	}, [searchParams.searchText, searchParams.searchNum]);
 
 	useEffect(() => {}, [dispatch]);
+
+	useEffect(() => {
+		setCompanyNameRowCount(form.companyName && form.companyName.length > 0 ? form.companyName.length : 0);
+	}, [form]);
 
 	React.useImperativeHandle(ref, () => {
 		return {
@@ -214,11 +224,30 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		setSubmitted(true);
 	}
 
-	function handleDeleteChip(index, name) {
+	// function handleDeleteChip(index, name) {
+	// 	let array = [...form[name]];
+
+	// 	array.splice(index, 1);
+
+	// 	setForm(_.set({ ...form }, name, array));
+	// 	setSubmitted(true);
+	// }
+
+	function handleDeleteChip(index, key, name) {
 		let array = [...form[name]];
 
-		array.splice(index, 1);
-
+		if (key !== null) {
+			// companyName
+			let newArrVal = [...array[key]];
+			newArrVal.splice(index, 1);
+			if (newArrVal.length === 0) {
+				array.splice(key, 1);
+			} else {
+				array = insert(array, key, newArrVal);
+			}
+		} else {
+			array.splice(index, 1); // not companyName
+		}
 		setForm(_.set({ ...form }, name, array));
 		setSubmitted(true);
 	}
@@ -274,6 +303,35 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	return (
 		<FuseScrollbars className="flex flex-auto flex-col min-h-2xl">
 			<div className="px-24 py-8">
+				<div>
+					<Typography variant="subtitle1" className="mb-8">
+						회사 이름
+					</Typography>
+					{form.companyName &&
+						form.companyName.length > 0 &&
+						form.companyName.map((value, key) => (
+							<ChipInput
+								value={value}
+								fullWidth
+								variant="outlined"
+								className={clsx(classes.root, 'input:', classes.chipInput)}
+								placeholder=" or 회사 이름"
+								onAdd={chip => handleAddChip(chip, key, 'companyName')}
+								onDelete={(chip, index) => handleDeleteChip(index, key, 'companyName')}
+								key={key}
+							/>
+						))}
+					<ChipInput
+						value={[]}
+						fullWidth
+						variant="outlined"
+						className={clsx(classes.root, 'input:', classes.chipInput)}
+						placeholder=" or 회사 이름"
+						onAdd={chip => handleAddChip(chip, companyNameRowCount, 'companyName')}
+						onDelete={(chip, index) => handleDeleteChip(index, companyNameRowCount, 'companyName')}
+						key={companyNameRowCount}
+					/>
+				</div>
 				{Object.entries(tempObj).map(([key, value]) => (
 					<div key={value}>
 						<Typography variant="subtitle1">{key}</Typography>
@@ -285,7 +343,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 								placeholder={` ${key}`}
 								clearInputValueOnChange
 								onAdd={chip => handleAddChip(chip, null, value)}
-								onDelete={(chip, index) => handleDeleteChip(index, value)}
+								onDelete={(chip, index) => handleDeleteChip(index, null, value)}
 								variant="outlined"
 							/>
 						</FormControl>
