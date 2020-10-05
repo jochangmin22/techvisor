@@ -7467,11 +7467,11 @@ const searchData = {
 		ipType: []
 	},
 	analysisOptions: {
-		tableOptions: {
-			dataCount: 456,
-			pageIndex: 0,
-			pageSize: 10
-		},
+		// tableOptions: {
+		// 	dataCount: 456,
+		// 	pageIndex: 0,
+		// 	pageSize: 10
+		// },
 		wordCloudOptions: {
 			volume: '요약',
 			unit: '구문',

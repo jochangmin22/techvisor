@@ -104,7 +104,6 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const searchSubmit = useSelector(({ searchApp }) => searchApp.searchs.searchSubmit);
 	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
-	const tableOptions = useSelector(({ searchApp }) => searchApp.searchs.tableOptions);
 
 	const [submitted, setSubmitted] = useState(searchSubmit);
 
@@ -271,7 +270,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 				array = insert(array, key, newArrVal);
 			}
 		} else {
-			array.splice(index, 1); // inventor, assignee
+			array.splice(index, 1); // not terms
 		}
 		setForm(_.set({ ...form }, name, array));
 		setSubmitted(true);
@@ -285,7 +284,6 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		const params = {
 			params: mainParams,
 			subParams: {
-				tableOptions: tableOptions,
 				analysisOptions: analysisOptions
 			}
 		};
@@ -483,7 +481,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 						variant="outlined"
 					/>
 				</FormControl>
-				<div className="flex justify-center items-start">
+				{/* <div className="flex justify-center items-start">
 					<FuseChipSelect
 						{...defaultProps}
 						value={form.patentOffice.map(item => ({
@@ -514,7 +512,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 						}))}
 						isMulti
 					/>
-				</div>
+				</div> */}
 				<div className="w-full">
 					<FuseChipSelect
 						{...defaultProps}

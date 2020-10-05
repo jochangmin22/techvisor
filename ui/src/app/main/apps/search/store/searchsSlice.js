@@ -102,11 +102,11 @@ export const initialState = {
 	clickedSearchId: null,
 	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
 	analysisOptions: {
-		tableOptions: {
-			dataCount: 0,
-			pageIndex: 0,
-			pageSize: 10
-		},
+		// tableOptions: {
+		// 	dataCount: 0,
+		// 	pageIndex: 0,
+		// 	pageSize: 10
+		// },
 		wordCloudOptions: {
 			volume: '요약',
 			unit: '구문', // '구문', '워드',
@@ -219,8 +219,9 @@ const searchsSlice = createSlice({
 	},
 	extraReducers: {
 		[getSearchs.fulfilled]: (state, action) => {
-			state.entities = action.payload.entities;
-			state.analysisOptions.tableOptions.dataCount = action.payload.dataCount;
+			state.entities = action.payload;
+			// state.entities = action.payload.entities;
+			// state.analysisOptions.tableOptions.dataCount = action.payload.dataCount;
 		},
 		[getNews.fulfilled]: (state, action) => {
 			state.news = action.payload;

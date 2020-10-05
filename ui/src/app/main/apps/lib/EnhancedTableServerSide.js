@@ -10,7 +10,15 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TablePaginationActions from './TablePaginationActions';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import { useGlobalFilter, usePagination, useRowSelect, useSortBy, useResizeColumns, useTable } from 'react-table';
+import {
+	useBlockLayout,
+	useGlobalFilter,
+	usePagination,
+	useRowSelect,
+	useSortBy,
+	useResizeColumns,
+	useTable
+} from 'react-table';
 import clsx from 'clsx';
 
 const IndeterminateCheckbox = React.forwardRef(({ indeterminate, ...rest }, ref) => {
@@ -31,25 +39,22 @@ const IndeterminateCheckbox = React.forwardRef(({ indeterminate, ...rest }, ref)
 const EnhancedTable = ({
 	columns,
 	data,
+	fetchData,
 	pageSize: controlledPageSize,
 	pageOptions: controlledPageOptions,
 	pageCount: controlledPageCount,
 	showHeader = true,
 	showFooter = true,
 	rowClick = true,
-	onRowClick,
-	onSort
+	onRowClick
 }) => {
 	const {
 		getTableProps,
 		headerGroups,
 		prepareRow,
 		page,
-		canPreviousPage,
-		canNextPage,
+		pageCount,
 		gotoPage,
-		// nextPage,
-		// previousPage,
 		setPageSize,
 		state: { pageIndex, pageSize, pageOptions, sortBy }
 	} = useTable(
@@ -63,6 +68,7 @@ const EnhancedTable = ({
 			autoResetSortBy: false,
 			pageCount: controlledPageCount
 		},
+		useBlockLayout,
 		useGlobalFilter,
 		useSortBy,
 		usePagination,
@@ -74,6 +80,7 @@ const EnhancedTable = ({
 				{
 					id: 'selection',
 					sortable: false,
+					width: 50,
 					// The header can use the table's getToggleAllRowsSelectedProps method
 					// to render a checkbox.  Pagination is a problem since this will select all
 					// rows even though not all rows are on the current page.  The solution should
@@ -102,8 +109,8 @@ const EnhancedTable = ({
 	);
 
 	useEffect(() => {
-		onSort(sortBy);
-	}, [onSort, sortBy]);
+		fetchData({ pageIndex, pageSize, sortBy });
+	}, [sortBy, fetchData, pageIndex, pageSize]);
 
 	const handleChangePage = (event, newPage) => {
 		gotoPage(newPage);
@@ -174,13 +181,13 @@ const EnhancedTable = ({
 							root: 'overflow-hidden',
 							spacer: 'w-0 max-w-0'
 						}}
-						rowsPerPageOptions={pageOptions.concat({ label: 'All', value: data.length })}
+						// rowsPerPageOptions={pageOptions.concat({ label: 'All', value: data.length })}
+						rowsPerPageOptions={pageOptions}
 						colSpan={9}
-						count={data.length}
+						// count={data.length}
+						count={pageCount}
 						rowsPerPage={pageSize}
 						page={pageIndex}
-						canPreviousPage={canPreviousPage}
-						canNextPage={canNextPage}
 						SelectProps={{
 							inputProps: { 'aria-label': 'rows per page' },
 							native: false
