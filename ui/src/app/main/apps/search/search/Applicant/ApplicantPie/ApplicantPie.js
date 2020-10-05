@@ -3,23 +3,27 @@ import Paper from '@material-ui/core/Paper';
 import debounce from 'lodash/debounce';
 import echarts from 'echarts';
 import 'echarts/theme/blue';
-import _ from '@lodash';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useTheme } from '@material-ui/core';
 
-function calculateCnt(arr) {
-	const filterA = 'ipc요약';
-
-	const result = _.chain(arr)
-		.filter(item => !!item[filterA])
-		.groupBy(filterA)
-		.map((value, key) => ({ name: key, value: value.length }))
-		.orderBy(['value'], ['desc'])
-		.splice(0, 15)
-		.defaultsDeep({ name: [], value: [] })
-		.value();
-	return result;
-}
+// function calculateCnt(arr) {
+// 	let result = { name: [], value: [] };
+// 	arr.forEach(item => {
+// 		result['name'].push(item['name']);
+// 		result['value'].push(Number(item['value']).toLocaleString());
+// 	});
+// 	// console.log('calculateCnt -> result', result);
+// 	// const filterA = 'ipc요약';
+// 	// const result = _.chain(arr)
+// 	// 	.filter(item => !!item[filterA])
+// 	// 	.groupBy(filterA)
+// 	// 	.map((value, key) => ({ name: key, value: value.length }))
+// 	// 	.orderBy(['value'], ['desc'])
+// 	// 	.splice(0, 15)
+// 	// 	.defaultsDeep({ name: [], value: [] })
+// 	// 	.value();
+// 	return result;
+// }
 
 function ApplicantPie(props) {
 	const { entities } = props;
@@ -31,7 +35,8 @@ function ApplicantPie(props) {
 
 	useEffect(() => {
 		if (entities && entities.length > 0) {
-			setData(calculateCnt(entities));
+			// setData(calculateCnt(entities));
+			setData(entities);
 		}
 		// eslint-disable-next-line
 	}, [entities]);
@@ -69,7 +74,8 @@ function ApplicantPie(props) {
 				orient: 'vertical',
 				left: 'right',
 				top: 50,
-				data: data.map(a => a.name)
+				// data: data.map(a => a.name)
+				data: data.name
 			},
 			series: [
 				{

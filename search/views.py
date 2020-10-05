@@ -14,6 +14,7 @@ from .search import (
     parse_search_rightholder,
     parse_search_applicant,
     parse_search_applicant_trend,
+    parse_search_applicant_ipc,
     parse_search_similar
 )
 
@@ -69,6 +70,9 @@ def get_search_applicant(request):
 
 def get_search_applicant_trend(request):
     return parse_search_applicant_trend(request)
+
+def get_search_applicant_ipc(request):
+    return parse_search_applicant_ipc(request)
 
 def get_search_similar(request):
     return parse_search_similar(request)

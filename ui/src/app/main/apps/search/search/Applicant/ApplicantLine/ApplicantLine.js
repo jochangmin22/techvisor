@@ -2,15 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Paper from '@material-ui/core/Paper';
 import debounce from 'lodash/debounce';
 import echarts from 'echarts';
-import _ from '@lodash';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useTheme } from '@material-ui/core';
 
 const initialState = {
 	PU: {
 		count: 54,
-		data: [822],
-		labels: ['2012']
+		data: [822, 112],
+		labels: ['2012', '2013']
 	},
 	PP: {
 		count: 54,
@@ -35,33 +34,43 @@ const initialState = {
 };
 
 function calculateCnt(val, arr) {
-	let p = { A: '출원일자', B: null };
-	if (val === 'PP') {
-		p = { A: '공개일자', B: '1' };
-	} else if (val === 'UP') {
-		p = { A: '공개일자', B: '2' };
-	} else if (val === 'PR') {
-		p = { A: '등록일자', B: '1' };
-	} else if (val === 'UR') {
-		p = { A: '등록일자', B: '2' };
+	let p = { A: 'pyr', B: 'pp' };
+	if (val === 'pp' || val === 'up') {
+		p = { A: 'pyr', B: val };
+	} else if (val === 'pr' || val === 'ur') {
+		p = { A: 'ryr', B: val };
 	}
 
-	const result = _.chain(arr)
-		.filter(item => !!item[p.A])
-		.filter(item => (p.B ? String(item.출원번호).startsWith(p.B) : item))
-		.groupBy(o => o[p.A].slice(0, 4))
-		.map((value, key) => ({ labels: key, data: value.length }))
-		.reduce((re, { labels, data }) => {
-			if (!re['labels']) re['labels'] = [];
-			if (!re['data']) re['data'] = [];
-			if (!re['count']) re['count'] = 0;
-			re['labels'].push(labels);
-			re['data'].push(data);
-			re['count'] += data;
-			return re;
-		}, {})
-		.defaultsDeep({ count: 0, labels: [], data: [] })
-		.value();
+	let result = { count: 0, labels: [], data: [] };
+	arr.filter(item => !!item[p.A])
+		.filter(item => !!item[p.B])
+		.forEach(item => {
+			result['labels'].push(item[p.A]);
+			result['data'].push(item[p.B]);
+			result['count'] += item[p.B];
+		});
+	//{pyr: null, ryr: "1995", pp: null, up: null, pr: 1167, ur: null}
+
+	// const result = _.chain(arr)
+	// 	.filter(item => !!item[p.A])
+	// 	.filter(item => !!item[p.B])
+	// 	// .filter(item => (p.B ? String(item.출원번호).startsWith(p.B) : item))
+	// 	// .filter(item => (p.B ? item.구분 === p.B : item))
+	// 	// .groupBy(o => o[p.A].slice(0, 4))
+	// 	.groupBy(o => o[p.A])
+	// 	.map((value, key) => ({ labels: key, data: value.length }))
+	// 	.reduce((re, { labels, data }) => {
+	// 		if (!re['labels']) re['labels'] = [];
+	// 		if (!re['data']) re['data'] = [];
+	// 		if (!re['count']) re['count'] = 0;
+	// 		re['labels'].push(labels);
+	// 		re['data'].push(data);
+	// 		re['count'] += data;
+	// 		return re;
+	// 	}, {})
+	// 	.defaultsDeep({ count: 0, labels: [], data: [] })
+	// 	.value();
+	// console.log('calculateCnt -> result', result);
 	return result;
 }
 
@@ -74,7 +83,7 @@ function ApplicantLine(props) {
 
 	useEffect(() => {
 		function updateState(arr) {
-			['PU', 'PP', 'PR', 'UP', 'UR'].map(key => {
+			['pu', 'pp', 'pr', 'up', 'ur'].map(key => {
 				data[key] = calculateCnt(key, arr);
 				return setData(data);
 			});
@@ -148,7 +157,7 @@ function ApplicantLine(props) {
 			xAxis: [
 				{
 					type: 'category',
-					data: data.PU.labels,
+					data: data.pu.labels,
 					axisPointer: {
 						type: 'shadow'
 					}
@@ -211,35 +220,35 @@ function ApplicantLine(props) {
 					name: '출원건수',
 					type: 'line',
 					xAxisIndex: 0,
-					data: data.PU.data
+					data: data.pu.data
 				},
 				{
 					name: '특허출원',
 					type: 'bar',
 					xAxisIndex: 0,
 					yAxisIndex: 1,
-					data: data.PP.data
+					data: data.pp.data
 				},
 				{
 					name: '실용출원',
 					type: 'bar',
 					xAxisIndex: 0,
 					yAxisIndex: 1,
-					data: data.UP.data
+					data: data.up.data
 				},
 				{
 					name: '특허등록',
 					type: 'bar',
 					xAxisIndex: 0,
 					yAxisIndex: 1,
-					data: data.PR.data
+					data: data.pr.data
 				},
 				{
 					name: '실용등록',
 					type: 'bar',
 					xAxisIndex: 0,
 					yAxisIndex: 1,
-					data: data.UR.data
+					data: data.ur.data
 				}
 			]
 		};

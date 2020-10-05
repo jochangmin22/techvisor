@@ -31,5 +31,6 @@ urlpatterns = [
     re_path(r"^api/search-app/search/rightholder$", csrf_exempt(views.get_search_rightholder), name='get_search_rightholder'),
     re_path(r"^api/search-app/search/applicant$", csrf_exempt(views.get_search_applicant), name='get_search_applicant'),
     re_path(r"^api/search-app/search/applicanttrend$", csrf_exempt(views.get_search_applicant_trend), name='get_search_applicant_trend'),
+    re_path(r"^api/search-app/search/applicantipc$", csrf_exempt(views.get_search_applicant_ipc), name='get_search_applicant_ipc'),
     re_path(r"^api/search-app/search/similar$", csrf_exempt(views.get_search_similar), name='get_search_similar'),         
 ]

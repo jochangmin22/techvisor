@@ -103,6 +103,15 @@ export const getApplicantTrend = createAsyncThunk(NAME + 'getApplicantTrend', as
 	return data;
 });
 
+export const getApplicantIpc = createAsyncThunk(NAME + 'getApplicantIpc', async params => {
+	const response = await axios.get(URL + 'applicantipc', {
+		params: params
+	});
+	const data = await response.data;
+
+	return data;
+});
+
 export const getSimilar = createAsyncThunk(NAME + 'getSimilar', async params => {
 	const response = await axios.get(URL + 'similar', {
 		params: params
@@ -126,6 +135,7 @@ const initialState = {
 	rightHolder: null,
 	applicant: null,
 	applicantTrend: null,
+	applicantIpc: null,
 	similar: {
 		entities: [],
 		modelType: 'doc2vec' // ['doc2vec', 'cosine similarity'],
@@ -177,6 +187,9 @@ const searchSlice = createSlice({
 		},
 		[getApplicantTrend.fulfilled]: (state, action) => {
 			state.applicantTrend = action.payload;
+		},
+		[getApplicantIpc.fulfilled]: (state, action) => {
+			state.applicantIpc = action.payload;
 		},
 		[getSimilar.fulfilled]: (state, action) => {
 			state.similar = {

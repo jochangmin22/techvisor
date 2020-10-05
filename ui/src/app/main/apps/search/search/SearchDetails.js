@@ -23,10 +23,10 @@ import {
 	getIpcCpc,
 	getRnd,
 	getLegal,
-	getRegisterFee,
-	getRightHolder,
-	getApplicant,
-	getApplicantTrend,
+	// getRegisterFee,
+	// getRightHolder,
+	// getApplicant,
+	// getApplicantTrend,
 	getSimilar,
 	resetSearch
 } from 'app/main/apps/search/store/searchSlice';
@@ -57,7 +57,7 @@ function SearchDetails(props) {
 	const terms = [].concat(...searchParams.terms.flatMap(x => x.toString().split(' ').join(',').split(',')));
 	const appNo = String(props.match.params.appNo).replace(/-/gi, '');
 	const rgNo = search && search.등록번호 !== null && search.등록번호 !== undefined ? search.등록번호 : null;
-	const cusNo = search && search.출원인코드1 !== null && search.출원인코드1 !== undefined ? search.출원인코드1 : null;
+	// const cusNo = search && search.출원인코드1 !== null && search.출원인코드1 !== undefined ? search.출원인코드1 : null;
 	const pageLayout = useRef(null);
 	const [tabValue, setTabValue] = useState(0);
 
@@ -71,16 +71,16 @@ function SearchDetails(props) {
 		dispatch(getSimilar(params));
 		dispatch(getIpcCpc(params));
 		dispatch(getRnd(params));
-		if (cusNo) {
-			const params = { cusNo: cusNo };
-			dispatch(getApplicant(params));
-			dispatch(getApplicantTrend(params));
-		}
-		if (rgNo) {
-			const params = { rgNo: rgNo };
-			dispatch(getRegisterFee(params));
-			dispatch(getRightHolder(params));
-		}
+		// if (cusNo) {
+		// 	const params = { cusNo: cusNo };
+		// 	dispatch(getApplicant(params));
+		// 	dispatch(getApplicantTrend(params));
+		// }
+		// if (rgNo) {
+		// 	const params = { rgNo: rgNo };
+		// 	dispatch(getRegisterFee(params));
+		// 	dispatch(getRightHolder(params));
+		// }
 		// eslint-disable-next-line
 	}, [dispatch, props.match.params]);
 

@@ -481,6 +481,7 @@ def parse_search_applicant(request):
 
 def parse_search_applicant_trend(request):
     """ searchDetails용 출원인 출원동향, 보유기술 검색 """
+    """ 출원건수, 특허출원, 실용출원, 특허등록, 실용등록 """
     cusNo = request.GET.get('cusNo') if request.GET.get('cusNo') else ''
     cusNo = cusNo.replace("-", "")
     redisKey = cusNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
@@ -489,16 +490,45 @@ def parse_search_applicant_trend(request):
     # Redis }
     with connection.cursor() as cursor:
         whereCusNo = "" if cusNo == "" else 'WHERE "출원인코드1" = $$' + cusNo + "$$"
-        # cursor.execute("SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereCusNo)
-        # cursor.execute("SELECT left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereCusNo)
-        # query = "SELECT left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereCusNo
-        # query = "SELECT left(출원일자::text,4) 출원년, ipc요약 FROM 공개공보 " + whereCusNo
-        query = "SELECT 출원일자, 공개일자, 등록일자, 출원번호, ipc요약 FROM 공개공보 " + whereCusNo
+        # query = "SELECT 출원일자, 공개일자, 등록일자, 출원번호, ipc요약 FROM 공개공보 " + whereCusNo
+        # query = "SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereCusNo
+
+        subQuery = "SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) pyr, left(등록일자::text,4) ryr FROM 공개공보 " + whereCusNo
+        # subQueryR = "SELECT left(출원번호::text,1) 구분, left(등록일자::text,4) ryr FROM 공개공보 " + whereCusNo + " and 등록일자 is not null"
+        query = "select pyr, null ryr, count(*) pp, null::int4 up, null::int4 pr, null::int4 ur from (" + subQuery + ") A WHERE 구분 = '1' GROUP BY pyr"
+        query +=" union all "
+        query += "select pyr, null, null::int4, count(*), null::int4, null::int4 from (" + subQuery + ") A WHERE 구분 = '2' GROUP BY pyr"
+        query +=" union all "
+        query += "select null, ryr, null::int4, null::int4, count(*), null::int4 from (" + subQuery + ") A WHERE 구분 = '1' GROUP BY ryr"
+        query +=" union all "
+        query += "select null, ryr, null::int4, null::int4,  null::int4, count(*) from (" + subQuery + ") A  WHERE 구분 = '2' GROUP BY ryr"
+
         cursor.execute(query)
         row = dictfetchall(cursor)
 
     # Redis {
     handleRedis(redisKey, 'applicant_trend', row, mode="w")
+    # Redis }
+    #
+    return JsonResponse(row, safe=False)
+
+def parse_search_applicant_ipc(request):
+    """ searchDetails용 출원인 보유기술 검색 """
+    cusNo = request.GET.get('cusNo') if request.GET.get('cusNo') else ''
+    cusNo = cusNo.replace("-", "")
+    redisKey = cusNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    # Redis {
+    handleRedis(redisKey, 'applicant_ipc')
+    # Redis }
+    with connection.cursor() as cursor:
+        whereCusNo = "" if cusNo == "" else 'WHERE "출원인코드1" = $$' + cusNo + "$$"
+        query = 'SELECT ipc요약 "name", count(*) "value" FROM 공개공보 ' + whereCusNo + ' GROUP BY ipc요약 order by "value" desc limit 15 offset 0'
+
+        cursor.execute(query)
+        row = dictfetchall(cursor)
+
+    # Redis {
+    handleRedis(redisKey, 'applicant_ipc', row, mode="w")
     # Redis }
     #
     return JsonResponse(row, safe=False)

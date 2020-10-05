@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { useSelector, useDispatch } from 'react-redux';
-import { getApplicant, getApplicantTrend } from 'app/main/apps/search/store/searchSlice';
+import { getApplicant, getApplicantTrend, getApplicantIpc } from 'app/main/apps/search/store/searchSlice';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import ApplicantPie from '../ApplicantPie';
 import ApplicantLine from '../ApplicantLine';
@@ -24,12 +24,14 @@ function ApplicantContainer(props) {
 
 	const applicant = useSelector(({ searchApp }) => searchApp.search.applicant);
 	const entities = useSelector(({ searchApp }) => searchApp.search.applicantTrend);
+	const ipc = useSelector(({ searchApp }) => searchApp.search.applicantIpc);
 	const [showLoading, setShowLoading] = useState(false);
 
 	useEffect(() => {
 		setShowLoading(true);
 		const params = { cusNo: 출원인코드1 };
 		dispatch(getApplicantTrend(params));
+		dispatch(getApplicantIpc(params));
 		dispatch(getApplicant(params)).then(() => {
 			setShowLoading(false);
 		});
@@ -75,7 +77,7 @@ function ApplicantContainer(props) {
 					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantLine entities={entities} />}
 				</div>
 				<div className="w-full md:w-1/3 md:pl-8 items-center justify-center">
-					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantPie entities={entities} />}
+					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantPie entities={ipc} />}
 				</div>
 			</>
 		</FuseAnimateGroup>
