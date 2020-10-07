@@ -67,9 +67,9 @@ function ClinicTest() {
 
 	const isEmpty = !!(data.length === 0);
 
-	if (corpName === undefined) {
-		return '';
-	}
+	// if (corpName === undefined) {
+	// 	return '';
+	// }
 
 	return (
 		<Paper className="w-full h-full rounded-8 shadow py-8">

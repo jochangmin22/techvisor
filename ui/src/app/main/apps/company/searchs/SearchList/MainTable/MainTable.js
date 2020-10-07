@@ -1,15 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { CSVLink } from 'react-csv';
 import { withRouter } from 'react-router-dom';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import DownloadFilterMenu from '../DownloadFilterMenu';
-import SpinLoading from 'app/main/apps/lib/SpinLoading';
+// import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
 // import { parseInputSearchText } from 'app/main/apps/lib/parseParamsCompany';
 import {
@@ -79,49 +79,49 @@ function MainTable(props) {
 		dispatch(updateCols(cols));
 	}, 300);
 
-	function onBtExport() {}
+	// function onBtExport() {}
 
-	if (!data || data.length === 0) {
-		return <SpinLoading />;
-	}
+	// if (!data || data.length === 0) {
+	// 	return <SpinLoading />;
+	// }
 
 	return (
-		<Paper className="rounded-8 shadow h-512 w-full">
-			<>
-				<div className="p-12 flex items-center justify-between">
-					<div className="flex flex-row items-center">
-						<Typography variant="h6" className="pr-8">
-							검색 결과 ({Number(rowsCount).toLocaleString()})
-						</Typography>
-						<DraggableIcon />
-					</div>
-					<div className="flex items-center">
-						<Button
-							variant="outlined"
-							color="default"
-							onClick={onBtExport}
-							className="shadow-none px-16"
-							startIcon={<SaveAltIcon />}
-						>
-							다운로드
-						</Button>
-						<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
-					</div>
+		<>
+			<div className="p-12 flex items-center justify-between">
+				<div className="flex flex-row items-center">
+					<Typography variant="h6" className="pr-8">
+						검색 결과 ({Number(rowsCount).toLocaleString()})
+					</Typography>
+					<DraggableIcon />
 				</div>
-				<FuseScrollbars className="max-h-512 px-6">
-					<EnhancedTable
-						columns={columns}
-						data={data}
-						size="small"
-						onRowClick={(ev, row) => {
-							if (row) {
-								handleClick(row.original.회사명, row.original.종목코드);
-							}
-						}}
-					/>
-				</FuseScrollbars>
-			</>
-		</Paper>
+				<div className="flex items-center">
+					<Button
+						variant="outlined"
+						color="default"
+						// onClick={onBtExport}
+						className="shadow-none px-16"
+						startIcon={<SaveAltIcon />}
+					>
+						<CSVLink data={data} filename={'company-list.csv'}>
+							Export to CSV
+						</CSVLink>
+					</Button>
+					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
+				</div>
+			</div>
+			<FuseScrollbars className="max-h-512 px-6">
+				<EnhancedTable
+					columns={columns}
+					data={data}
+					size="small"
+					onRowClick={(ev, row) => {
+						if (row) {
+							handleClick(row.original.회사명, row.original.종목코드);
+						}
+					}}
+				/>
+			</FuseScrollbars>
+		</>
 	);
 }
 

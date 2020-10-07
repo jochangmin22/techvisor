@@ -1,9 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setMockData } from './store/searchsSlice';
 // import { authRoles } from "app/auth";
-import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-import NoResultMsg from 'app/main/apps/lib/NoResultMsg';
 import searchData from 'app/main/apps/lib/mockDataCompanyApp';
 import { useForm } from '@fuse/hooks';
 import { makeStyles } from '@material-ui/core/styles';
@@ -32,6 +30,8 @@ function CompanyContent() {
 	const searchText = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchText);
 	const searchLoading = useSelector(({ companyApp }) => companyApp.searchs.searchLoading);
 
+	const [searchStatus, setSearchStatus] = useState(null);
+
 	const { form, setForm, resetForm } = useForm({
 		A: 100,
 		B: 100,
@@ -51,28 +51,37 @@ function CompanyContent() {
 		// eslint-disable-next-line
 	}, []);
 
-	const noResult = !!(!searchLoading && entities && entities.length === 0);
-
-	if (noResult) {
-		return <NoResultMsg />;
-	}
-
-	if (!searchText) {
-		return <EmptyMsg icon="chat" msg="검색결과" />;
-	}
+	useEffect(() => {
+		if (!!(searchText && !searchLoading && entities && entities.length === 0)) {
+			setSearchStatus('noResults');
+		}
+		if (!searchText) {
+			setSearchStatus('notStarted');
+		}
+		if (entities && entities.length > 0) {
+			setSearchStatus(null);
+		}
+	}, [searchText, searchLoading, entities]);
 
 	return (
 		<div className="flex flex-wrap w-full h-auto items-start justify-start mt-8 px-8">
 			<Draggable handle=".draggable" onStart={() => handleStart('A')} onEnd={() => resetForm()} grid={[25, 25]}>
 				<div className={classes.paper} style={{ zIndex: form.A }}>
-					<SearchListContainer />
+					<SearchListContainer status={searchStatus} />
 				</div>
 			</Draggable>
-			<Draggable handle=".draggable" onStart={() => handleStart('B')} onEnd={() => resetForm()} grid={[25, 25]}>
-				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.B }}>
-					<CorpInfo />
-				</div>
-			</Draggable>
+			{stockCode && stockCode.length !== 0 && (
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('B')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.B }}>
+						<CorpInfo />
+					</div>
+				</Draggable>
+			)}
 			{stockCode && stockCode.length !== 0 && (
 				<Draggable
 					handle=".draggable"

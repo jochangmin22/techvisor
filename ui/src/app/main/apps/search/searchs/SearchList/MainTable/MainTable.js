@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { CSVLink } from 'react-csv';
 import { withRouter } from 'react-router-dom';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableServerSide';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
@@ -118,6 +119,7 @@ function MainTable(props) {
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.entities);
 
 	const [data, setData] = useState(entities);
+	const [csvData, setCsvData] = useState(entities);
 	const [loading, setLoading] = useState(false);
 	const [pageCount, setPageCount] = useState(0);
 
@@ -154,6 +156,14 @@ function MainTable(props) {
 					// setPageCount(Math.ceil(entities.length / pageSize));
 					setPageCount(entities.length);
 					setLoading(false);
+					// '=""' + customer.manufacturer_no + '""';
+					setCsvData(
+						entities.map(row => ({
+							...row,
+							출원번호: '=""' + row.출원번호 + '""',
+							출원인코드1: '=""' + row.출원인코드1 + '""'
+						}))
+					);
 				}
 			}
 			// eslint-disable-next-line
@@ -165,7 +175,7 @@ function MainTable(props) {
 		dispatch(updateCols(cols));
 	}, 300);
 
-	function onBtExport() {}
+	// function onBtExport() {}
 
 	if (!entities || entities.length === 0) {
 		return <SpinLoading />;
@@ -185,11 +195,13 @@ function MainTable(props) {
 						<Button
 							variant="outlined"
 							color="default"
-							onClick={onBtExport}
+							// onClick={onBtExport}
 							className="shadow-none px-16"
 							startIcon={<SaveAltIcon />}
 						>
-							다운로드
+							<CSVLink data={csvData} filename={'patent-list.csv'}>
+								Export to CSV
+							</CSVLink>
 						</Button>
 						<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
 					</div>
