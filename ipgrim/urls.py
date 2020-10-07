@@ -22,6 +22,7 @@ from callback.views import (redirect_google_login, google_callback)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('search.urls')),
+    path('', include('abroad.urls')),
     path('', include('company.urls')),
     path('', include('users.urls')),
 

@@ -27,8 +27,7 @@ const useStyles = makeStyles(theme => ({
 function SearchContent() {
 	const classes = useStyles();
 	const dispatch = useDispatch();
-	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	const { searchText, inventor, assignee } = searchParams;
+	const searchText = useSelector(({ searchApp }) => searchApp.searchs.searchParams.searchText);
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.entities);
 	const searchLoading = useSelector(({ searchApp }) => searchApp.searchs.searchLoading);
 
@@ -51,8 +50,8 @@ function SearchContent() {
 		// eslint-disable-next-line
 	}, []);
 
-	const noResult = !!(!searchLoading && entities && entities.length === 0);
-	const isEmpty = !!(!searchText && !inventor && !assignee);
+	const noResult = !!(searchText && searchLoading === false && entities && entities.length === 0);
+	const isEmpty = !!(!searchText && searchLoading === null && entities && entities.length === 0);
 
 	if (noResult) {
 		return <NoResultMsg />;

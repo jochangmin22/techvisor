@@ -8640,9 +8640,9 @@ fsevents@~2.1.2:
     marked: 0.8.2
     material-table: 1.69.1
     material-ui-chip-input: ^2.0.0-beta.2
-    material-ui-popup-state: 1.6.1
+    material-ui-popup-state: 1.7.0
     mobile-detect: 1.4.4
-    moment: 2.29.0
+    moment: 2.29.1
     notistack: 0.9.17
     path-to-regexp: 3.2.0
     perfect-scrollbar: 1.5.0
@@ -8682,7 +8682,7 @@ fsevents@~2.1.2:
     react-spring: 8.0.27
     react-swipeable-views: 0.13.9
     react-swipeable-views-utils: 0.14.0-alpha.0
-    react-table: 7.5.1
+    react-table: 7.5.2
     react-text-mask: 5.4.3
     react-virtualized: 9.22.2
     react-window: 1.8.5
@@ -8690,9 +8690,9 @@ fsevents@~2.1.2:
     redux-logger: 4.0.0
     source-map-explorer: 2.5.0
     styled-components: 5.2.0
-    tailwindcss: 1.8.10
+    tailwindcss: 1.8.11
     tailwindcss-dir: 4.0.0
-    typeface-muli: 1.1.3
+    typeface-muli: 1.1.13
     velocity-animate: 1.5.2
     velocity-react: 1.4.3
   languageName: unknown
@@ -11866,9 +11866,9 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"material-ui-popup-state@npm:1.6.1":
-  version: 1.6.1
-  resolution: "material-ui-popup-state@npm:1.6.1"
+"material-ui-popup-state@npm:1.7.0":
+  version: 1.7.0
+  resolution: "material-ui-popup-state@npm:1.7.0"
   dependencies:
     "@babel/runtime": ^7.1.5
     "@material-ui/types": ^4.1.1
@@ -11876,7 +11876,7 @@ fsevents@~2.1.2:
     prop-types: ^15.0.0
   peerDependencies:
     react: ^15.0.0 || ^16.0.0
-  checksum: 2dd9ceea5e52534bc976021c1a16ae64fbc2d46279bfb5cea54f9275023092c1543ef5103571ab6dac8ebcf2e6eebe5f11197e9a33175ae30147c767152cd0b2
+  checksum: 49b89dc3221ecc7dd01d1997ee7adc43adce079c140d1f9f2eab0ae577580cc1121e45040b2810d3d58801aa716874ff2f633fd63534cf5caf1ff9175cbe570d
   languageName: node
   linkType: hard
 
@@ -12265,10 +12265,10 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"moment@npm:2.29.0":
-  version: 2.29.0
-  resolution: "moment@npm:2.29.0"
-  checksum: ad4850191348e75447d4d0b1362c78825b3d966f5abc42b3ed0ae0a6fcda5eb4504789c361d18c762f7467b3a7923b59f8bf1d52769568585516035b6c848a55
+"moment@npm:2.29.1":
+  version: 2.29.1
+  resolution: "moment@npm:2.29.1"
+  checksum: 86729013febf7160de5b93da69273dd304d674b0224f9544b3abd09a87671ddd2cdd57598261ce57588910d63747ffd5590965e83c790d8bf327083c0e0a06e0
   languageName: node
   linkType: hard
 
@@ -15500,12 +15500,12 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-table@npm:7.5.1":
-  version: 7.5.1
-  resolution: "react-table@npm:7.5.1"
+"react-table@npm:7.5.2":
+  version: 7.5.2
+  resolution: "react-table@npm:7.5.2"
   peerDependencies:
     react: ^16.8.3
-  checksum: 92b94706bed5f495ec30a2421294260d389755b8477793f25126a8ecdf68b90589260ebdfa9a1b82f937a06497da96474a2ea89d5c45b4eb83234784e110f9a8
+  checksum: 051dde13f86ff1bf713444e2b89a1e58e1640370391a04cf19f01f192a55a70b99272d6775f63db7a3785c27f985b571e1e844820ed2d83dc4df0d9d589ea11d
   languageName: node
   linkType: hard
 
@@ -17459,9 +17459,9 @@ resolve@1.15.0:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:1.8.10":
-  version: 1.8.10
-  resolution: "tailwindcss@npm:1.8.10"
+"tailwindcss@npm:1.8.11":
+  version: 1.8.11
+  resolution: "tailwindcss@npm:1.8.11"
   dependencies:
     "@fullhuman/postcss-purgecss": ^2.1.2
     autoprefixer: ^9.4.5
@@ -17488,7 +17488,7 @@ resolve@1.15.0:
   bin:
     tailwind: lib/cli.js
     tailwindcss: lib/cli.js
-  checksum: 89c0c8a227b677b4bb150cd6b1c2f37c1a30a0285165ff5b315a1fa0046430ebdf54ccba26c291bfe86c96be0d25c83365608ac8f182799fcdf2e442860a229e
+  checksum: 0bf5c83161ddab9213e2eef41e9a2c86d9fa69192519967aee30e8f5c5e6531c70a1b5a0364234c6fd5e45f00cb3dd4ac6b8ac75dbb2be19f149c584cc1193a2
   languageName: node
   linkType: hard
 
@@ -17946,10 +17946,10 @@ resolve@1.15.0:
   languageName: node
   linkType: hard
 
-"typeface-muli@npm:1.1.3":
-  version: 1.1.3
-  resolution: "typeface-muli@npm:1.1.3"
-  checksum: 19b7d635cb3d990822500dd077336119c25f306ca0437e16b5201d5df9ca1ec54429060cc4adef3b21e5dd3cd0870b611bf4998ffd62c4d63132137cc7e1f8ff
+"typeface-muli@npm:1.1.13":
+  version: 1.1.13
+  resolution: "typeface-muli@npm:1.1.13"
+  checksum: 470a24d59a3e93d9b67df5faef9ab4470edadbe3c296b4800bf78827f7188f1187344fd03408687e84195465f38ec52cdfb52e9f8d005d6f3e88cd67e3582a9a
   languageName: node
   linkType: hard
 

@@ -1,5 +1,7 @@
 const locale = {
 	SEARCH: 'Patent Search',
+	DOMESTIC_SEARCH: 'Korean Patent',
+	ABROAD_SEARCH: 'Abroad Patent',
 	COMPANY: 'Company Search',
 	PAT_CLASSIFY: 'Patent Classify',
 	AUTO_REPORT: 'Auto Report',

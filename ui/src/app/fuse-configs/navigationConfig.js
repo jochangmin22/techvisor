@@ -11,11 +11,28 @@ i18next.addResourceBundle('en', 'navigation', en);
 const navigationConfig = [
 	{
 		id: 'search',
-		title: '기본검색',
+		title: '기술검색',
 		translate: 'SEARCH',
-		type: 'item',
+		type: 'group',
 		icon: 'search',
-		url: '/apps/searchs'
+		children: [
+			{
+				id: 'domestic-search',
+				title: '국내특허',
+				translate: 'DOMESTIC_SEARCH',
+				type: 'item',
+				icon: 'search',
+				url: '/apps/searchs'
+			},
+			{
+				id: 'abroad-search',
+				title: '해외특허',
+				translate: 'ABROAD_SEARCH',
+				type: 'item',
+				icon: 'public',
+				url: '/apps/abroads'
+			}
+		]
 	},
 	{
 		id: 'company',

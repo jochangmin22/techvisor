@@ -36,13 +36,13 @@ export const nationality = {
 	'07': '전북',
 	'08': '전남',
 	'09': '경북',
-	'10': '경남',
-	'11': '제주',
-	'14': '대구',
-	'15': '인천',
-	'16': '광주',
-	'17': '대전',
-	'18': '한국',
+	10: '경남',
+	11: '제주',
+	14: '대구',
+	15: '인천',
+	16: '광주',
+	17: '대전',
+	18: '한국',
 	AD: '안도라',
 	AE: '아랍에미레이트연합국',
 	AF: '아프가니스탄',
@@ -1257,6 +1257,17 @@ export const ipc = {
 };
 
 export const searchAppLeftConfig = {
+	options: {
+		dateType: { PRD: '우선일', AD: '출원일', PD: '공개일', FD: '등록일' },
+		patentOffice: ['KR', 'JR', 'US', 'EP', 'PCT', 'ETC'],
+		language: ['한글', '영어'],
+		status: ['출원', '등록'],
+		ipType: ['특허', '실용신안']
+		// litigation: ["침해있음", "침해없음"]
+	}
+};
+
+export const abroadAppLeftConfig = {
 	options: {
 		dateType: { PRD: '우선일', AD: '출원일', PD: '공개일', FD: '등록일' },
 		patentOffice: ['KR', 'JR', 'US', 'EP', 'PCT', 'ETC'],

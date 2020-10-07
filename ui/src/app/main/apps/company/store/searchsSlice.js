@@ -110,7 +110,7 @@ export const getIndicator = createAsyncThunk(NAME + 'getIndicator', async (param
 const searchsAdapter = createEntityAdapter({});
 
 export const { selectAll: selectSearchs, selectById: selectSearchById } = searchsAdapter.getSelectors(
-	state => state.searchApp.searchs.entities
+	state => state.companyApp.searchs.entities
 );
 
 export const initialState = {

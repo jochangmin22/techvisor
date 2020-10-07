@@ -5,7 +5,7 @@ import Typography from '@material-ui/core/Typography';
 
 function EmptyMsg(props) {
 	return (
-		<div className="flex flex-col flex-1 items-center justify-center p-24">
+		<div className="flex flex-col flex-1 h-full items-center justify-center p-24">
 			<Paper className="rounded-full p-48">
 				<Icon className="block text-64" color="secondary">
 					{props.icon}
