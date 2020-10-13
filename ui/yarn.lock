@@ -2933,6 +2933,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/json-schema@npm:^7.0.6":
+  version: 7.0.6
+  resolution: "@types/json-schema@npm:7.0.6"
+  checksum: 820cabe35ac915b93e38b0c01957e5c49d7d9f69251dddfbf39af0ff4fe24f6e08b39e55603e0d212dea7bcaa383b1218b58a738d1c02013dc22df06547ff238
+  languageName: node
+  linkType: hard
+
 "@types/json5@npm:^0.0.29":
   version: 0.0.29
   resolution: "@types/json5@npm:0.0.29"
@@ -3834,6 +3841,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ajv-keywords@npm:^3.5.2":
+  version: 3.5.2
+  resolution: "ajv-keywords@npm:3.5.2"
+  peerDependencies:
+    ajv: ^6.9.1
+  checksum: 01f26c292304870c03a1cd14fc1ddcf7c713a05611a122c5193694d4050063d5fba46cbf8b5b2ebde364166fddd3c2e0abdcd97df655b7a7fbb3e6634eeb056a
+  languageName: node
+  linkType: hard
+
 "ajv@npm:^6.1.0, ajv@npm:^6.10.0, ajv@npm:^6.10.2, ajv@npm:^6.12.2, ajv@npm:^6.5.5":
   version: 6.12.3
   resolution: "ajv@npm:6.12.3"
@@ -3843,6 +3859,18 @@ __metadata:
     json-schema-traverse: ^0.4.1
     uri-js: ^4.2.2
   checksum: b20a171bf30ede1635c6b1955bcc1db5a6b3e7dfa77f75aace9fb0db87375430c46d5cdd84158a0bf0a8da91e4da97bdb1afe5604a0969d8468b7c11143fdbba
+  languageName: node
+  linkType: hard
+
+"ajv@npm:^6.12.5":
+  version: 6.12.6
+  resolution: "ajv@npm:6.12.6"
+  dependencies:
+    fast-deep-equal: ^3.1.1
+    fast-json-stable-stringify: ^2.0.0
+    json-schema-traverse: ^0.4.1
+    uri-js: ^4.2.2
+  checksum: 19a8f3b0a06001eb68e6268f4f9f04424b32baadd5df6ba8292cd473e22e5f4019ed9ab17c3e3510394178ed8bef9b42ad0bdb5c675d65f042421a774780ce1a
   languageName: node
   linkType: hard
 
@@ -8647,19 +8675,19 @@ fsevents@~2.1.2:
     path-to-regexp: 3.2.0
     perfect-scrollbar: 1.5.0
     prettier: ^2.1.2
-    prismjs: 1.21.0
+    prismjs: 1.22.0
     promise: 8.1.0
     prop-types: 15.7.2
     purgecss: 1.4.2
     qs: 6.9.4
     randomcolor: ^0.6.2
-    raw-loader: 4.0.1
+    raw-loader: 4.0.2
     rc-easyui: ^1.1.29
     rc-progress: ^3.1.0
     react: 16.13.1
     react-autosuggest: 10.0.2
     react-beautiful-dnd: 13.0.0
-    react-big-calendar: 0.28.0
+    react-big-calendar: 0.28.1
     react-chartjs-2: 2.10.0
     react-csv: ^2.0.3
     react-dom: 16.13.1
@@ -8683,7 +8711,7 @@ fsevents@~2.1.2:
     react-spring: 8.0.27
     react-swipeable-views: 0.13.9
     react-swipeable-views-utils: 0.14.0-alpha.0
-    react-table: 7.5.2
+    react-table: 7.6.0
     react-text-mask: 5.4.3
     react-virtualized: 9.22.2
     react-window: 1.8.5
@@ -8691,7 +8719,7 @@ fsevents@~2.1.2:
     redux-logger: 4.0.0
     source-map-explorer: 2.5.0
     styled-components: 5.2.0
-    tailwindcss: 1.8.11
+    tailwindcss: 1.9.0
     tailwindcss-dir: 4.0.0
     typeface-muli: 1.1.13
     velocity-animate: 1.5.2
@@ -14472,15 +14500,15 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"prismjs@npm:1.21.0":
-  version: 1.21.0
-  resolution: "prismjs@npm:1.21.0"
+"prismjs@npm:1.22.0":
+  version: 1.22.0
+  resolution: "prismjs@npm:1.22.0"
   dependencies:
     clipboard: ^2.0.0
   dependenciesMeta:
     clipboard:
       optional: true
-  checksum: 27f763abe2b8e93ad18b64b0d08ce990cbe5c80244c80d121d9010b0a890f2ae12286d59155b9669a89007a1868e861a0ad62051a8f602a6da79b9cebe68b65a
+  checksum: c9370f1f6a8c419cf7d712527dede91de33080ecdd9265cf6a7f0938cfe75e954dae4a02915ac8b9df4485f0c9fbab94a7babfedb7076a83ed57b9b132255e34
   languageName: node
   linkType: hard
 
@@ -14860,7 +14888,7 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"raw-loader@npm:*, raw-loader@npm:4.0.1":
+"raw-loader@npm:*":
   version: 4.0.1
   resolution: "raw-loader@npm:4.0.1"
   dependencies:
@@ -14869,6 +14897,18 @@ fsevents@~2.1.2:
   peerDependencies:
     webpack: ^4.0.0 || ^5.0.0
   checksum: f9e01e19a137603b36bc44f7e0b35d360e21175541490547eee04a864aa504f3e78e91f4e068a60bc66f34b6f1996f381f676302129bbf65f9e02a8ed532b925
+  languageName: node
+  linkType: hard
+
+"raw-loader@npm:4.0.2":
+  version: 4.0.2
+  resolution: "raw-loader@npm:4.0.2"
+  dependencies:
+    loader-utils: ^2.0.0
+    schema-utils: ^3.0.0
+  peerDependencies:
+    webpack: ^4.0.0 || ^5.0.0
+  checksum: 1a08968df5bf185923102de589dc28da6c9953f87059c80de3cbfdfb47bc15907f23f5e21048f03af2842df01d0dde2630826697c783c4c9683ea71f04f4538d
   languageName: node
   linkType: hard
 
@@ -14953,9 +14993,9 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-big-calendar@npm:0.28.0":
-  version: 0.28.0
-  resolution: "react-big-calendar@npm:0.28.0"
+"react-big-calendar@npm:0.28.1":
+  version: 0.28.1
+  resolution: "react-big-calendar@npm:0.28.1"
   dependencies:
     "@babel/runtime": ^7.1.5
     clsx: ^1.0.4
@@ -14971,7 +15011,7 @@ fsevents@~2.1.2:
   peerDependencies:
     react: ^16.6.1
     react-dom: ^16.6.1
-  checksum: 8989db86edb0487b8024c9ea708720cccd7df70f59d71c809f93af0afed40cb975b906cb790947817995eafe855244f3cbaaee5511ca3b9f71caba7ddd22cdf7
+  checksum: b09df4bbb9175a193ae2d1e2f146f31c0b4a3941fb637514096e484591b7bc9267ac7b4c81842681ba4ec08b3d55510c532cfca7cd28b9548df713912a05854e
   languageName: node
   linkType: hard
 
@@ -15508,12 +15548,12 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-table@npm:7.5.2":
-  version: 7.5.2
-  resolution: "react-table@npm:7.5.2"
+"react-table@npm:7.6.0":
+  version: 7.6.0
+  resolution: "react-table@npm:7.6.0"
   peerDependencies:
     react: ^16.8.3
-  checksum: 051dde13f86ff1bf713444e2b89a1e58e1640370391a04cf19f01f192a55a70b99272d6775f63db7a3785c27f985b571e1e844820ed2d83dc4df0d9d589ea11d
+  checksum: fbcc4294784350703c92a23d945f62a0e719295e64164df28d53696ea7bbddfe180acabcf92d84a29443380e5c1d84922756e9d44dbd55085e0b97995d6cefba
   languageName: node
   linkType: hard
 
@@ -16397,6 +16437,17 @@ resolve@1.15.0:
     ajv: ^6.12.2
     ajv-keywords: ^3.4.1
   checksum: 5d3e7c9e532712bbe0b7ba2f0bdbebc88ca3066c00ceb89877667c3c7b7ea5ee65e0ff7ffbf5164ebda43b0726166d4d39b382e91e9554b7ad2f6b06e77f947d
+  languageName: node
+  linkType: hard
+
+"schema-utils@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "schema-utils@npm:3.0.0"
+  dependencies:
+    "@types/json-schema": ^7.0.6
+    ajv: ^6.12.5
+    ajv-keywords: ^3.5.2
+  checksum: a084f593f222560c412a4d8f40c92386c01c1c709f27c0672c2f02927a4d4d475f57f8b8e91198d0defb452add160476a03f07a05b26200a64b5124fa874e158
   languageName: node
   linkType: hard
 
@@ -17467,9 +17518,9 @@ resolve@1.15.0:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:1.8.11":
-  version: 1.8.11
-  resolution: "tailwindcss@npm:1.8.11"
+"tailwindcss@npm:1.9.0":
+  version: 1.9.0
+  resolution: "tailwindcss@npm:1.9.0"
   dependencies:
     "@fullhuman/postcss-purgecss": ^2.1.2
     autoprefixer: ^9.4.5
@@ -17496,7 +17547,7 @@ resolve@1.15.0:
   bin:
     tailwind: lib/cli.js
     tailwindcss: lib/cli.js
-  checksum: 0bf5c83161ddab9213e2eef41e9a2c86d9fa69192519967aee30e8f5c5e6531c70a1b5a0364234c6fd5e45f00cb3dd4ac6b8ac75dbb2be19f149c584cc1193a2
+  checksum: 2c538232af7bc58d9fb05f054f3e027aa15eceff06d739d8a1ca3e574b99a2161be7d470c67d7aa69637b06b1dd10ce2ad9f936de3646d28f08547845d17a26f
   languageName: node
   linkType: hard
 

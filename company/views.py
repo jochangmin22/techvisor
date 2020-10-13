@@ -32,6 +32,9 @@ def get_crawl(request):
 def get_clinic_test(request):
     return companies.clinic_test(request)    
 
+def get_stock_fair(request):
+    return companies.stock_fair(request)    
+
 # company
 # def get_company(request, companyId=""):
 #     return company.parse_company(request, companyId)

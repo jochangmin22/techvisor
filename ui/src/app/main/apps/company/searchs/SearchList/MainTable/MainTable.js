@@ -23,14 +23,57 @@ import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import clsx from 'clsx';
 
 const columnName = {
-	회사명: '180',
 	종목코드: '110',
+	회사명: '180',
 	업종: '200',
-	주요제품: '700',
-	상장일: '120',
-	대표자명: '200',
-	지역: '100'
+	주요제품: '400',
+	대표자명: '150',
+	// 지역: '100',
+	시가총액: '100',
+	'업종PER(%)': '100',
+	'PER(배)': '100',
+	'PER갭(%)': '100',
+	'PBR(배)': '100',
+	'EPS(원)': '100',
+	'ROE(%)': '100',
+	'ROA(%)': '100',
+	// 부채비율: '100',
+	현재가: '100',
+	적정가: '100',
+	'영업이익증감(전전)': 130,
+	'순이익증감(전전)': 130,
+	'영업이익증감(직전)': 130,
+	'순이익증감(직전)': 130,
+	현금배당수익률: 100
 };
+
+const csvHeaders = [
+	{ key: '종목코드', label: '종목코드' },
+	{ key: '회사명', label: '회사명' },
+	{ key: '업종', label: '업종' },
+	{ key: '주요제품', label: '주요제품' },
+	{ key: '대표자명', label: '대표자명' },
+	{ key: '시가총액', label: '시가총액' },
+	{ key: '업종PER(%)', label: '업종PER(%)' },
+	{ key: 'PER(배)', label: 'PER(배)' },
+	{ key: 'PER갭(%)', label: 'PER갭(%)' },
+	{ key: 'PBR(배)', label: 'PBR(배)' },
+	{ key: 'EPS(원)', label: 'EPS(원)' },
+	{ key: 'ROE(%)', label: 'ROE(%)' },
+	{ key: 'ROA(%)', label: 'ROA(%)' },
+	{ key: '현재가', label: '현재가' },
+	{ key: '적정가', label: '적정가' },
+	{ key: '영업이익증감(전전)', label: '영업이익증감(전전)' },
+	{ key: '순이익증감(전전)', label: '순이익증감(전전)' },
+	{ key: '영업이익증감(직전)', label: '영업이익증감(직전)' },
+	{ key: '순이익증감(직전)', label: '순이익증감(직전)' },
+	{ key: '부채비율', label: '부채비율' },
+	{ key: '적(1)PER*EPS', label: '적정가(1)' },
+	{ key: '적(2)ROE*EPS', label: '적정가(2)' },
+	{ key: '적(3)EPS*10', label: '적정가(3)' },
+	{ key: '적(4)s-lim', label: '적정가(4)' },
+	{ key: '적(5)당기순이익*PER', label: '적정가(5)' }
+];
 // const columnName = {
 // 	업체명: '180',
 // 	사업자등록번호: '110',
@@ -43,7 +86,7 @@ const columnName = {
 // };
 
 const columns = Object.entries(columnName).map(([key, value]) => {
-	const bold = '회사명' || key === '종목코드' ? 'text-16 font-500' : 'text-13 font-400';
+	const bold = key === '회사명' || key === '종목코드' ? 'text-16 font-500' : 'text-14 font-400';
 	return {
 		Header: key,
 		accessor: key,
@@ -60,12 +103,19 @@ const colsList = Object.keys(columnName).map((key, index) => ({
 
 function MainTable(props) {
 	const dispatch = useDispatch();
-	const searchs = useSelector(({ companyApp }) => companyApp.searchs);
-	const { entities, cols } = searchs;
+	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
+	const cols = useSelector(({ companyApp }) => companyApp.searchs.cols);
+	const [csvData, setCsvData] = useState(entities);
 	const data = useMemo(() => (entities ? entities : []), [entities]);
 	useEffect(() => {
-		setRowsCount(data.length);
-	}, [data]);
+		setRowsCount(entities.length);
+		setCsvData(
+			entities.map(row => ({
+				...row,
+				종목코드: '=""' + row.종목코드 + '""'
+			}))
+		);
+	}, [entities]);
 	const [rowsCount, setRowsCount] = useState(null);
 
 	const handleClick = (name, stockCode, corpNo) => {
@@ -102,7 +152,7 @@ function MainTable(props) {
 						className="shadow-none px-16"
 						startIcon={<SaveAltIcon />}
 					>
-						<CSVLink data={data} filename={'company-list.csv'}>
+						<CSVLink data={csvData} headers={csvHeaders} filename={'company-list.csv'}>
 							Export to CSV
 						</CSVLink>
 					</Button>

@@ -43,6 +43,32 @@ def remove_brackets(text):
 def remove_punc(text):
     return re.sub("[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]", ' ', text)            
 
+def str2round(value, num=1):
+    try:
+        value = float(value)
+        return round(value, num)
+    except ValueError:
+        pass
+    
+    try:
+        res = round(float(str.replace(",","")),num)
+    except:
+        res = 0
+    return res
+
+def str2int(value):
+    try:
+        value = int(value)
+        return value
+    except ValueError:
+        pass
+    
+    try:
+        res = int(value.replace(",",""))
+    except:
+        res = 0
+    return res     
+
 # def tsquery_parse(keyword=""):
 #     """ like 검색안되서 일단 보류 200928 """
 #     """ tsquery 생성 """

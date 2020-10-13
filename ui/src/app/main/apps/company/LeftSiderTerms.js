@@ -9,10 +9,6 @@ import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import ChipInput from 'material-ui-chip-input';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import Checkbox from '@material-ui/core/Checkbox';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { makeStyles } from '@material-ui/core/styles';
 import _ from '@lodash';
 import clsx from 'clsx';
@@ -57,17 +53,24 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
-
 const insert = (arr, index, newItem) => [...arr.slice(0, index), newItem, ...arr.slice(index + 1)];
 
 const tempObj = {
-	// '기업 이름': 'companyName',
-	주소: 'companyAddress',
 	업종: 'bizDomain',
 	주요제품: 'relatedKeyword'
-	// '사용자정의 검색 조건': 'customCriteria'
+};
+const tempDoubleObj = {
+	시가총액: 'marketCap',
+	'PER(%)': 'per',
+	'PBR(배)': 'pbr',
+	'EPS(원)': 'eps',
+	'ROE(%)': 'roe',
+	'ROA(%)': 'roa',
+	'현재가(원)': 'nowPrice',
+	'영업이익(전전분기)': 'operatingProfitDPQ',
+	'당기순이익증감(전전분기)': 'netIncomeDPQ',
+	'영업이익(전분기)': 'operatingProfitPQ',
+	'당기순이익증감(전분기)': 'netIncomePQ'
 };
 
 const LeftSiderTerms = React.forwardRef(function (props, ref) {
@@ -84,37 +87,58 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 
 	// they were uncontrolled components so manually controlled
 	const [singleState, setSingleState] = useState({
-		// companyNameReset: 0,
-		companyAddressReset: 0,
 		bizDomainReset: 0,
 		relatedKeywordReset: 0,
-		// customCriteriaReset: 0,
-		industryReset: 0,
 		companyName: searchParams.companyName,
-		companyAddress: searchParams.companyAddress,
 		bizDomain: searchParams.bizDomain,
-		relatedKeyword: searchParams.relatedKeyword,
-		// customCriteria: searchParams.customCriteria,
-		industry: searchParams.industry
+		relatedKeyword: searchParams.relatedKeyword
 	});
 
 	const [doubleState, setDoubleState] = useState({
 		marketCapStartReset: 0,
 		marketCapEndReset: 0,
-		foundedStartReset: 0,
-		foundedEndReset: 0,
-		employeeStartReset: 0,
-		employeeEndReset: 0,
-		repAgeStartReset: 0,
-		repAgeEndReset: 0,
+		perStartReset: 0,
+		perEndReset: 0,
+		pbrStartReset: 0,
+		pbrEndReset: 0,
+		epsStartReset: 0,
+		epsEndReset: 0,
+		roeStartReset: 0,
+		roeEndReset: 0,
+		roaStartReset: 0,
+		roaEndReset: 0,
+		nowPriceStartReset: 0,
+		nowPriceEndReset: 0,
+		operatingProfitDPQStartReset: 0,
+		operatingProfitDPQEndReset: 0,
+		netIncomeDPQStartReset: 0,
+		netIncomeDPQEndReset: 0,
+		operatingProfitPQStartReset: 0,
+		operatingProfitPQEndReset: 0,
+		netIncomePQStartReset: 0,
+		netIncomePQEndReset: 0,
 		marketCapStart: searchParams.marketCapStart,
 		marketCapEnd: searchParams.marketCapEnd,
-		foundedStart: searchParams.foundedStart,
-		foundedEnd: searchParams.foundedEnd,
-		employeeStart: searchParams.employeeStart,
-		employeeEnd: searchParams.employeeEnd,
-		repAgeStart: searchParams.repAgeStart,
-		repAgeEnd: searchParams.repAgeEnd
+		perStart: searchParams.perStart,
+		perEnd: searchParams.perEnd,
+		pbrStart: searchParams.pbrStart,
+		pbrEnd: searchParams.pbrEnd,
+		epsStart: searchParams.epsStart,
+		epsEnd: searchParams.epsEnd,
+		roeStart: searchParams.roeStart,
+		roeEnd: searchParams.roeEnd,
+		roaStart: searchParams.roaStart,
+		roaEnd: searchParams.roaEnd,
+		nowPriceStart: searchParams.nowPriceStart,
+		nowPriceEnd: searchParams.nowPriceEnd,
+		operatingProfitDPQStart: searchParams.operatingProfitDPQStart,
+		operatingProfitDPQEnd: searchParams.operatingProfitDPQEnd,
+		netIncomeDPQStart: searchParams.netIncomeDPQStart,
+		netIncomeDPQEnd: searchParams.netIncomeDPQEnd,
+		operatingProfitPQStart: searchParams.operatingProfitPQStart,
+		operatingProfitPQEnd: searchParams.operatingProfitPQEnd,
+		netIncomePQStart: searchParams.netIncomePQStart,
+		netIncomePQEnd: searchParams.netIncomePQEnd
 	});
 
 	const { form, setForm } = useForm(searchParams || initialState.searchParams);
@@ -139,23 +163,34 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		// Sync uncontrolled components
 		setSingleState({
 			...singleState,
-			// companyName: searchParams.companyName,
-			companyAddress: searchParams.companyAddress,
 			bizDomain: searchParams.bizDomain,
-			relatedKeyword: searchParams.relatedKeyword,
-			// customCriteria: searchParams.customCriteria,
-			industry: searchParams.industry
+			relatedKeyword: searchParams.relatedKeyword
 		});
+
 		setDoubleState({
 			...doubleState,
 			marketCapStart: searchParams.marketCapStart,
 			marketCapEnd: searchParams.marketCapEnd,
-			foundedStart: searchParams.foundedStart,
-			foundedEnd: searchParams.foundedEnd,
-			employeeStart: searchParams.employeeStart,
-			employeeEnd: searchParams.employeeEnd,
-			repAgeStart: searchParams.repAgeStart,
-			repAgeEnd: searchParams.repAgeEnd
+			perStart: searchParams.perStart,
+			perEnd: searchParams.perEnd,
+			pbrStart: searchParams.pbrStart,
+			pbrEnd: searchParams.pbrEnd,
+			epsStart: searchParams.epsStart,
+			epsEnd: searchParams.epsEnd,
+			roeStart: searchParams.roeStart,
+			roeEnd: searchParams.roeEnd,
+			roaStart: searchParams.roaStart,
+			roaEnd: searchParams.roaEnd,
+			nowPriceStart: searchParams.nowPriceStart,
+			nowPriceEnd: searchParams.nowPriceEnd,
+			operatingProfitDPQStart: searchParams.operatingProfitDPQStart,
+			operatingProfitDPQEnd: searchParams.operatingProfitDPQEnd,
+			netIncomeDPQStart: searchParams.netIncomeDPQStart,
+			netIncomeDPQEnd: searchParams.netIncomeDPQEnd,
+			operatingProfitPQStart: searchParams.operatingProfitPQStart,
+			operatingProfitPQEnd: searchParams.operatingProfitPQEnd,
+			netIncomePQStart: searchParams.netIncomePQStart,
+			netIncomePQEnd: searchParams.netIncomePQEnd
 		});
 		setSubmitted(searchSubmit);
 	}, [searchParams.searchText, searchParams.searchNum]);
@@ -174,27 +209,6 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		};
 	});
 
-	// function handleSingleChange(ev) {
-	// 	const { value, name } = ev.target;
-	// 	setSingleState({ ...singleState, [name]: value });
-	// 	if ((value.length >= 2 && /^\D*$/.test(value)) || value.length === 0) {
-	// 		if (form[name] !== value) {
-	// 			setForm(_.set({ ...form }, name, value));
-	// 		}
-	// 	}
-	// 	setSubmitted(true);
-	// }
-
-	function handleDateChange(ev) {
-		const { value, name } = ev.target;
-		setDoubleState({ ...doubleState, [name]: value });
-		if ((value.length === 8 && /^\d+$/.test(value)) || value.length === 0) {
-			if (form[name] !== value) {
-				setForm(_.set({ ...form }, name, value));
-			}
-		}
-		setSubmitted(true);
-	}
 	function handleDoubleChange(ev) {
 		const { value, name } = ev.target;
 		setDoubleState({ ...doubleState, [name]: value });
@@ -223,15 +237,6 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		setForm(_.set({ ...form }, name, array));
 		setSubmitted(true);
 	}
-
-	// function handleDeleteChip(index, name) {
-	// 	let array = [...form[name]];
-
-	// 	array.splice(index, 1);
-
-	// 	setForm(_.set({ ...form }, name, array));
-	// 	setSubmitted(true);
-	// }
 
 	function handleDeleteChip(index, key, name) {
 		let array = [...form[name]];
@@ -265,9 +270,6 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		dispatch(setSearchLoading(true));
 		dispatch(clearSearchs());
 		dispatch(getSearchs(params)).then(() => {
-			// dispatch(getWordCloud(newApiParams));
-			// dispatch(getKeywords(newApiParams));
-			// dispatch(getMatrix(newApiParams));
 			dispatch(setSearchLoading(false));
 			dispatch(setSearchSubmit(false));
 		});
@@ -305,7 +307,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 			<div className="px-24 py-8">
 				<div>
 					<Typography variant="subtitle1" className="mb-8">
-						회사 이름
+						회사명
 					</Typography>
 					{form.companyName &&
 						form.companyName.length > 0 &&
@@ -315,7 +317,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 								fullWidth
 								variant="outlined"
 								className={clsx(classes.root, 'input:', classes.chipInput)}
-								placeholder=" or 회사 이름"
+								placeholder=" or 회사명"
 								onAdd={chip => handleAddChip(chip, key, 'companyName')}
 								onDelete={(chip, index) => handleDeleteChip(index, key, 'companyName')}
 								key={key}
@@ -326,7 +328,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 						fullWidth
 						variant="outlined"
 						className={clsx(classes.root, 'input:', classes.chipInput)}
-						placeholder=" or 회사 이름"
+						placeholder=" or 회사명"
 						onAdd={chip => handleAddChip(chip, companyNameRowCount, 'companyName')}
 						onDelete={(chip, index) => handleDeleteChip(index, companyNameRowCount, 'companyName')}
 						key={companyNameRowCount}
@@ -349,164 +351,45 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 						</FormControl>
 					</div>
 				))}
-				<Typography variant="subtitle1" className="mt-8">
-					산업
-				</Typography>
-				<Autocomplete
-					multiple
-					// id="industry"
-					options={[]}
-					disableCloseOnSelect
-					getOptionLabel={option => option.title}
-					renderOption={(option, { selected }) => (
-						<React.Fragment>
-							<Checkbox
-								icon={icon}
-								checkedIcon={checkedIcon}
-								style={{ marginRight: 8 }}
-								checked={selected}
+				{Object.entries(tempDoubleObj).map(([key, value]) => (
+					<div key={value}>
+						<Typography variant="subtitle1" className="mt-8">
+							{key}
+						</Typography>
+						<FormControl className="flex flex-col sm:flex-row flex-grow-0 flex-shrink-0 items-between justify-center">
+							<TextField
+								key={doubleState[value + 'StartReset'] + value + 'Start'}
+								name={value + 'Start'}
+								onChange={handleDoubleChange}
+								value={doubleState[value + 'Start']}
+								autoComplete="off"
+								variant="outlined"
+								className={classes.root}
+								placeholder="From"
+								error={
+									!(
+										form[value + 'Start'] &&
+										form[value + 'Start'].length === 8 &&
+										/^\d+$/.test(form[value + 'Start'])
+									)
+								}
+								InputProps={clearIconAdornment(value + 'Start')}
 							/>
-							{option.title}
-						</React.Fragment>
-					)}
-					// style={{ width: 500 }}
-					renderInput={params => (
-						<TextField
-							{...params}
-							name="industry"
-							variant="outlined"
-							fullWidth
-							className={classes.root}
-							placeholder="산업"
-						/>
-					)}
-				/>
-				<Typography variant="subtitle1" className="mt-8">
-					시가총액
-				</Typography>
-				<FormControl className="flex flex-col sm:flex-row flex-grow-0 flex-shrink-0 items-between justify-center">
-					<TextField
-						key={doubleState.marketCapStartReset + 'marketCapStart'}
-						name="marketCapStart"
-						onChange={handleDoubleChange}
-						value={doubleState.marketCapStart}
-						autoComplete="off"
-						variant="outlined"
-						className={classes.root}
-						placeholder="From"
-						error={
-							!(
-								form.marketCapStart &&
-								form.marketCapStart.length === 8 &&
-								/^\d+$/.test(form.marketCapStart)
-							)
-						}
-						InputProps={clearIconAdornment('marketCapStart')}
-					/>
-					<div className="flex w-full sm:w-8 py-20">-</div>
-					<TextField
-						key={doubleState.marketCapEndReset + 'marketCapEnd'}
-						name="marketCapEnd"
-						onChange={handleDoubleChange}
-						value={doubleState.marketCapEnd}
-						autoComplete="off"
-						variant="outlined"
-						className={classes.root}
-						placeholder="To"
-						InputProps={clearIconAdornment('marketCapEnd')}
-					/>
-				</FormControl>
-				<Typography variant="subtitle1" className="mt-8">
-					설립일
-				</Typography>
-				<FormControl className="flex flex-col sm:flex-row flex-grow-0 flex-shrink-0 items-between justify-center">
-					<TextField
-						key={doubleState.foundedStartReset + 'foundedStart'}
-						name="foundedStart"
-						onChange={handleDateChange}
-						value={doubleState.foundedStart}
-						autoComplete="off"
-						variant="outlined"
-						className={classes.root}
-						placeholder="YYYYMMDD"
-						error={
-							!(form.foundedStart && form.foundedStart.length === 8 && /^\d+$/.test(form.foundedStart))
-						}
-						InputProps={clearIconAdornment('foundedStart')}
-					/>
-					<div className="flex w-full sm:w-8 py-20">-</div>
-					<TextField
-						key={doubleState.foundedEndReset + 'foundedEnd'}
-						name="foundedEnd"
-						onChange={handleDateChange}
-						value={doubleState.foundedEnd}
-						autoComplete="off"
-						variant="outlined"
-						className={classes.root}
-						placeholder="YYYYMMDD"
-						InputProps={clearIconAdornment('foundedEnd')}
-					/>
-				</FormControl>
-				<Typography variant="subtitle1" className="mt-8">
-					종업원 수
-				</Typography>
-				<FormControl className="flex flex-col sm:flex-row flex-grow-0 flex-shrink-0 items-between justify-center">
-					<TextField
-						key={doubleState.employeeStartReset + 'employeeStart'}
-						name="employeeStart"
-						onChange={handleDoubleChange}
-						value={doubleState.employeeStart}
-						autoComplete="off"
-						variant="outlined"
-						className={classes.root}
-						placeholder="From"
-						error={
-							!(form.employeeStart && form.employeeStart.length === 8 && /^\d+$/.test(form.employeeStart))
-						}
-						InputProps={clearIconAdornment('employeeStart')}
-					/>
-					<div className="flex w-full sm:w-8 py-20">-</div>
-					<TextField
-						key={doubleState.employeeEndReset + 'employeeEnd'}
-						name="employeeEnd"
-						onChange={handleDoubleChange}
-						value={doubleState.employeeEnd}
-						autoComplete="off"
-						variant="outlined"
-						className={classes.root}
-						placeholder="To"
-						InputProps={clearIconAdornment('employeeEnd')}
-					/>
-				</FormControl>
-				<Typography variant="subtitle1" className="mt-8">
-					대표이사 나이
-				</Typography>
-				<FormControl className="flex flex-col sm:flex-row flex-grow-0 flex-shrink-0 items-between justify-center">
-					<TextField
-						key={doubleState.repAgeStartReset + 'repAgeStart'}
-						name="repAgeStart"
-						onChange={handleDoubleChange}
-						value={doubleState.repAgeStart}
-						autoComplete="off"
-						variant="outlined"
-						className={classes.root}
-						placeholder="From"
-						error={!(form.repAgeStart && form.repAgeStart.length === 2 && /^\d+$/.test(form.repAgeStart))}
-						InputProps={clearIconAdornment('repAgeStart')}
-					/>
-					<div className="flex w-full sm:w-8 py-20">-</div>
-					<TextField
-						key={doubleState.repAgeEndReset + 'repAgeEnd'}
-						name="repAgeEnd"
-						onChange={handleDoubleChange}
-						value={doubleState.repAgeEnd}
-						autoComplete="off"
-						variant="outlined"
-						className={classes.root}
-						placeholder="To"
-						InputProps={clearIconAdornment('repAgeEnd')}
-					/>
-				</FormControl>
+							<div className="flex w-full sm:w-8 py-20">-</div>
+							<TextField
+								key={doubleState[value + 'EndReset'] + value + 'End'}
+								name={value + 'End'}
+								onChange={handleDoubleChange}
+								value={doubleState[value + 'End']}
+								autoComplete="off"
+								variant="outlined"
+								className={classes.root}
+								placeholder="To"
+								InputProps={clearIconAdornment(value + 'End')}
+							/>
+						</FormControl>
+					</div>
+				))}
 			</div>
 		</FuseScrollbars>
 	);

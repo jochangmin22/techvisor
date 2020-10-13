@@ -24,8 +24,7 @@ class listed_corp(models.Model):
     홈페이지 = models.CharField(max_length=100)
     지역 = models.CharField(max_length=50)
     정보 = models.JSONField(default=dict, null=True)
-    적정 = models.JSONField(default=dict, null=True)
-
+    
     class Meta:
         db_table = '"listed_corp"'
 
