@@ -43,7 +43,7 @@ const searchData = {
 		companyName: ['삼성'],
 		companyAddress: [],
 		bizDomain: [],
-		relatedKeyword: [],
+		mainProduct: [],
 		// customCriteria: [],
 		industry: [],
 		marketCapStart: '',

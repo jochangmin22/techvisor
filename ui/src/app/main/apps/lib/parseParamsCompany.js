@@ -25,21 +25,35 @@ export function parseInputSearchText(inputSearchText = null) {
 
 	// predefined objects and arrays
 	const tempObj = {
-		CA: 'companyAddress',
+		// CA: 'companyAddress',
 		BD: 'bizDomain',
-		RK: 'relatedKeyword',
-		IN: 'industry'
+		MP: 'mainProduct'
+		// IN: 'industry'
 	};
 
 	const tempArr = [
 		'marketCapStart',
 		'marketCapEnd',
-		'foundedStart',
-		'foundedEnd',
-		'employeeStart',
-		'employeeEnd',
-		'repAgeStart',
-		'repAgeEnd'
+		'perStart',
+		'perEnd',
+		'pbrStart',
+		'pbrEnd',
+		'epsStart',
+		'epsEnd',
+		'roeStart',
+		'roeEnd',
+		'roaStart',
+		'roaEnd',
+		'nowPriceStart',
+		'nowPriceEnd',
+		'operatingProfitTBQStart',
+		'operatingProfitTBQEnd',
+		'netIncomeTBQStart',
+		'netIncomeTBQEnd',
+		'operatingProfitBQStart',
+		'operatingProfitBQEnd',
+		'netIncomeBQStart',
+		'netIncomeBQEnd'
 	];
 
 	const searchText = splitArgs(
@@ -56,7 +70,8 @@ export function parseInputSearchText(inputSearchText = null) {
 	const newCompanyName = searchText
 		.split(' and ')
 		.filter(function (item) {
-			if (/\(@(.*?)|(.*?)\.CA|(.*?)\.BD|(.*?)\.RK|(.*?)\.CC|(.*?)\.IN/gi.test(item)) {
+			// if (/\(@(.*?)|(.*?)\.CA|(.*?)\.BD|(.*?)\.RK|(.*?)\.CC|(.*?)\.IN/gi.test(item)) {
+			if (/\(@(.*?)|(.*?)\.BD|(.*?)\.MP/gi.test(item)) {
 				return false; // skip if not companyName (.CN)
 			}
 			return true;
@@ -195,7 +210,7 @@ export default function parseSearchOptions(params) {
 	const { companyName: _, ...newApiParams } = params;
 
 	newApiParams.searchText = searchTextParenthesis;
-	['companyAddress', 'bizDomain', 'relatedKeyword', 'industry'].map(key => {
+	['bizDomain', 'mainProduct'].map(key => {
 		newApiParams[key] = params[key].join(' or ');
 		return undefined;
 	});
@@ -214,12 +229,12 @@ function splitArgs(myString) {
 	// change Parenthesis of .AP.INV to ⁋ ¶, double quotes to ~ ; (F OR "G H").AP world -> "⁋F_OR_~G_H~¶.AP"
 	// and change Parenthesis to quotes
 
-	// CN, CA, BD, RK, CC, IN, MC, FD, EM, RA
+	// CN, BD, MP, MC, PER, PBR, EPS, ROE, ROA, NP, PTQ, ITQ, PQ, IQ
 	myString = myString
 		.split(' and ')
 		.map(
 			item =>
-				/@(.*?)|(.*?)\.CA|(.*?)\.BD|(.*?)\.RK|(.*?)\.CC|(.*?)\.IN|(.*?)\.MC|(.*?)\.FD|(.*?)\.EM|(.*?)\.RA/gi.test(
+				/@(.*?)|(.*?)\.BD|(.*?)\.MP|(.*?)\.MC|(.*?)\.PER|(.*?)\.PBR|(.*?)\.EPS|(.*?)\.ROE|(.*?)\.ROA|(.*?)\.NP|(.*?)\.PTQ|(.*?)\.ITQ|(.*?)\.PQ|(.*?)\.IQ/gi.test(
 					item
 				)
 					? `"${item.replace(/\(/gi, '⁋').replace(/\)/gi, '¶').replace(/ /gi, '_').replace(/"/gi, '~')}"`
@@ -280,19 +295,30 @@ function splitArgs(myString) {
 
 function mergeArgs(params) {
 	// addParenthesis 는 여기서 안함
-	// CN, CA, BD, RK, CC, IN, MC, FD, EM, RA
+
+	// CN, BD, MP, MC, PER, PBR, EPS, ROE, ROA, NP, PTQ, ITQ, PQ, IQ
 	const tempObj = {
 		// companyName: 'CN',
-		companyAddress: 'CA',
+		// companyAddress: 'CA',
 		bizDomain: 'BD',
-		relatedKeyword: 'RK',
-		industry: 'IN'
+		mainProduct: 'MP'
+		// industry: 'IN'
 	};
 	const tempObj2 = {
 		marketCap: 'MC',
-		founded: 'FD',
-		employee: 'EM',
-		repAge: 'RA'
+		// founded: 'FD',
+		// employee: 'EM',
+		// repAge: 'RA',
+		per: 'PER',
+		pbr: 'PBR',
+		eps: 'EPS',
+		roe: 'ROE',
+		roa: 'ROA',
+		nowPrice: 'NP',
+		operatingProfitTBQ: 'PTQ',
+		netIncomeTBQ: 'ITQ',
+		operatingProfitBQ: 'PQ',
+		netIncomeBQ: 'IQ'
 	};
 
 	let my = {};

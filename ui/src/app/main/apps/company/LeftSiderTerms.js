@@ -57,7 +57,7 @@ const insert = (arr, index, newItem) => [...arr.slice(0, index), newItem, ...arr
 
 const tempObj = {
 	업종: 'bizDomain',
-	주요제품: 'relatedKeyword'
+	주요제품: 'mainProduct'
 };
 const tempDoubleObj = {
 	시가총액: 'marketCap',
@@ -67,10 +67,10 @@ const tempDoubleObj = {
 	'ROE(%)': 'roe',
 	'ROA(%)': 'roa',
 	'현재가(원)': 'nowPrice',
-	'영업이익(전전분기)': 'operatingProfitDPQ',
-	'당기순이익증감(전전분기)': 'netIncomeDPQ',
-	'영업이익(전분기)': 'operatingProfitPQ',
-	'당기순이익증감(전분기)': 'netIncomePQ'
+	'영업이익(전전분기)': 'operatingProfitTBQ',
+	'당기순이익증감(전전분기)': 'netIncomeTBQ',
+	'영업이익(전분기)': 'operatingProfitBQ',
+	'당기순이익증감(전분기)': 'netIncomeBQ'
 };
 
 const LeftSiderTerms = React.forwardRef(function (props, ref) {
@@ -88,10 +88,10 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	// they were uncontrolled components so manually controlled
 	const [singleState, setSingleState] = useState({
 		bizDomainReset: 0,
-		relatedKeywordReset: 0,
+		mainProductReset: 0,
 		companyName: searchParams.companyName,
 		bizDomain: searchParams.bizDomain,
-		relatedKeyword: searchParams.relatedKeyword
+		mainProduct: searchParams.mainProduct
 	});
 
 	const [doubleState, setDoubleState] = useState({
@@ -109,14 +109,14 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		roaEndReset: 0,
 		nowPriceStartReset: 0,
 		nowPriceEndReset: 0,
-		operatingProfitDPQStartReset: 0,
-		operatingProfitDPQEndReset: 0,
-		netIncomeDPQStartReset: 0,
-		netIncomeDPQEndReset: 0,
-		operatingProfitPQStartReset: 0,
-		operatingProfitPQEndReset: 0,
-		netIncomePQStartReset: 0,
-		netIncomePQEndReset: 0,
+		operatingProfitTBQStartReset: 0,
+		operatingProfitTBQEndReset: 0,
+		netIncomeTBQStartReset: 0,
+		netIncomeTBQEndReset: 0,
+		operatingProfitBQStartReset: 0,
+		operatingProfitBQEndReset: 0,
+		netIncomeBQStartReset: 0,
+		netIncomeBQEndReset: 0,
 		marketCapStart: searchParams.marketCapStart,
 		marketCapEnd: searchParams.marketCapEnd,
 		perStart: searchParams.perStart,
@@ -131,14 +131,14 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		roaEnd: searchParams.roaEnd,
 		nowPriceStart: searchParams.nowPriceStart,
 		nowPriceEnd: searchParams.nowPriceEnd,
-		operatingProfitDPQStart: searchParams.operatingProfitDPQStart,
-		operatingProfitDPQEnd: searchParams.operatingProfitDPQEnd,
-		netIncomeDPQStart: searchParams.netIncomeDPQStart,
-		netIncomeDPQEnd: searchParams.netIncomeDPQEnd,
-		operatingProfitPQStart: searchParams.operatingProfitPQStart,
-		operatingProfitPQEnd: searchParams.operatingProfitPQEnd,
-		netIncomePQStart: searchParams.netIncomePQStart,
-		netIncomePQEnd: searchParams.netIncomePQEnd
+		operatingProfitTBQStart: searchParams.operatingProfitTBQStart,
+		operatingProfitTBQEnd: searchParams.operatingProfitTBQEnd,
+		netIncomeTBQStart: searchParams.netIncomeTBQStart,
+		netIncomeTBQEnd: searchParams.netIncomeTBQEnd,
+		operatingProfitBQStart: searchParams.operatingProfitBQStart,
+		operatingProfitBQEnd: searchParams.operatingProfitBQEnd,
+		netIncomeBQStart: searchParams.netIncomeBQStart,
+		netIncomeBQEnd: searchParams.netIncomeBQEnd
 	});
 
 	const { form, setForm } = useForm(searchParams || initialState.searchParams);
@@ -164,7 +164,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		setSingleState({
 			...singleState,
 			bizDomain: searchParams.bizDomain,
-			relatedKeyword: searchParams.relatedKeyword
+			mainProduct: searchParams.mainProduct
 		});
 
 		setDoubleState({
@@ -183,14 +183,14 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 			roaEnd: searchParams.roaEnd,
 			nowPriceStart: searchParams.nowPriceStart,
 			nowPriceEnd: searchParams.nowPriceEnd,
-			operatingProfitDPQStart: searchParams.operatingProfitDPQStart,
-			operatingProfitDPQEnd: searchParams.operatingProfitDPQEnd,
-			netIncomeDPQStart: searchParams.netIncomeDPQStart,
-			netIncomeDPQEnd: searchParams.netIncomeDPQEnd,
-			operatingProfitPQStart: searchParams.operatingProfitPQStart,
-			operatingProfitPQEnd: searchParams.operatingProfitPQEnd,
-			netIncomePQStart: searchParams.netIncomePQStart,
-			netIncomePQEnd: searchParams.netIncomePQEnd
+			operatingProfitTBQStart: searchParams.operatingProfitTBQStart,
+			operatingProfitTBQEnd: searchParams.operatingProfitTBQEnd,
+			netIncomeTBQStart: searchParams.netIncomeTBQStart,
+			netIncomeTBQEnd: searchParams.netIncomeTBQEnd,
+			operatingProfitBQStart: searchParams.operatingProfitBQStart,
+			operatingProfitBQEnd: searchParams.operatingProfitBQEnd,
+			netIncomeBQStart: searchParams.netIncomeBQStart,
+			netIncomeBQEnd: searchParams.netIncomeBQEnd
 		});
 		setSubmitted(searchSubmit);
 	}, [searchParams.searchText, searchParams.searchNum]);
