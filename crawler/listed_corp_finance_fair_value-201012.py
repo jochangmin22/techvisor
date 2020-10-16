@@ -81,8 +81,23 @@ def get_kind_stock_code():
     # 종목코드 6자리로 
     stock_code.종목코드 = stock_code.종목코드.map('{:06d}'.format) 
     
-    return stock_code        
-       
+    return stock_code   
+
+def backupAndEmptyTable():
+    try:
+        with connect() as connection:
+            with connection.cursor() as cursor:      
+                query =" DROP TABLE IF EXISTS listed_corp_back; create table listed_corp_back as (select * from listed_corp); TRUNCATE listed_corp;"  
+                cursor.execute(query)
+                connection.commit()
+    except (Exception, psycopg2.Error) as error :
+        if(connection):
+            print("Failed to backup and empty listed_corp table", error)
+
+    finally:
+        if(connection):
+            cursor.close()
+            connection.close()
 
 def insertTable(no, kiscode, info, name, upjong, product, listed_date, settlemonth, representive, homepage, area):
     # table = 'listed_corp'    
@@ -153,13 +168,17 @@ def existCheck(kiscode):
         if (connection):
             cursor.close()
             connection.close()
-
+#wrapper > div.fund.fl_le > table > tbody > tr:nth-child(5) > td.num.noline-right
+#wrapper > div.fund.fl_le > table > tbody > tr:nth-child(1) > td.num.noline-right
 def _etc_info_sub(html1, value):
-    ''' etc_info의 sub def '''    
+    ''' etc_info의 sub def '''
+    ''' [{'PER': 1}, {'PBR': 2}, {'EPS': 5}, {'BPS': 6}, {'현금배당수익률': 9}] '''    
     # 2020/12(E)
     try:
         res = html1.select('#wrapper > div.fund.fl_le > table > tbody > tr:nth-of-type(' + str(value) + ') > td.num.noline-right')[0].get_text().strip()
         res = res.replace("N/A","0").replace(",","").replace("원","").replace("%","")
+        if not res:
+            res = 0
     except:
         res = 0
 
@@ -168,8 +187,11 @@ def _etc_info_sub(html1, value):
         try:
             res = html1.select('#wrapper > div.fund.fl_le > table > tbody > tr:nth-of-type(' + str(value) + ') > td:nth-of-type(1)')[0].get_text().strip()
             res = res.replace("N/A","0").replace(",","").replace("원","").replace("%","")
+            if not res:
+                res = 0            
         except:
             res = 0
+         
         return res
     else:
         return res
@@ -195,6 +217,8 @@ def etc_info(html1):
     
     ### 'PER(배)','PBR','EPS','BPS','현금배당수익률' 구하기
     ### 위치 : 펀더멘털 > 주요지표 > 2020/12(E) or 2019/12(A)
+    ### 'ROE(%)','ROA(%)','PER(배)','PBR(배)'는 최근분기에서 사용 ; 최근 분기없으면 'PER(배)','PBR(배)'는 여기 것으로 대체 
+
     # 5가지가 나열이 길어져서 _etc_info_sub def 로 만듬
     r = {}
     dataList = [{'PER': 1}, {'PBR': 2}, {'EPS': 5}, {'BPS': 6}, {'현금배당수익률': 9}] # 뒤의 숫자는 tr:nth-of-type(n) 위치
@@ -318,33 +342,49 @@ def stock_fair_value(main, etc, employee, listing_date):
     r['기업가치(백만)'] = int(r['기업가치(백만)'])
     
     sumCnt = 5
-    r['적(1)PER*EPS'] = r['PER(배)'] * r['EPS(원)']   #적정주가(1)PER*EPS
-    r['적(1)PER*EPS'] =  int(r['적(1)PER*EPS'])     
-    if r['적(1)PER*EPS'] == 0:
+    if r['PER(배)'] > 0 and r['EPS(원)'] > 0:
+        r['적(1)PER*EPS'] = r['PER(배)'] * r['EPS(원)']   #적정주가(1)PER*EPS
+        r['적(1)PER*EPS'] =  int(r['적(1)PER*EPS'])     
+    else:        
+        r['적(1)PER*EPS'] = 0
         sumCnt -= 1
-    
-    r['적(2)ROE*EPS'] = r['ROE(%)'] * r['EPS(원)']    #적정주가(2)ROE*EPS
-    r['적(2)ROE*EPS'] = int(r['적(2)ROE*EPS'])
-    if r['적(2)ROE*EPS'] == 0:
+
+    if r['ROE(%)'] > 0 and r['EPS(원)'] > 0:
+        r['적(2)ROE*EPS'] = r['ROE(%)'] * r['EPS(원)']    #적정주가(2)ROE*EPS
+        r['적(2)ROE*EPS'] = int(r['적(2)ROE*EPS'])
+    else:
+        r['적(2)ROE*EPS'] = 0         
         sumCnt -= 1    
 
-    r['적(3)EPS*10'] =  r['EPS(원)']*10    #적정주가(3)EPS*10
-    r['적(3)EPS*10'] = int(r['적(3)EPS*10'])
-    if r['적(3)EPS*10'] == 0:
-        sumCnt -= 1       
+    if r['EPS(원)'] > 0:
+        r['적(3)EPS*10'] =  r['EPS(원)']*10    #적정주가(3)EPS*10
+        r['적(3)EPS*10'] = int(r['적(3)EPS*10'])
+    else:        
+        r['적(3)EPS*10'] = 0
+        sumCnt -= 1  
 
     try:
         r['적(4)s-lim'] = r['기업가치(백만)']/ r['발행주식수(보통주)']*100000000 #100000000     #적정주가(4)s-lim
         r['적(4)s-lim'] = int(r['적(4)s-lim'])
+        if r['적(4)s-lim'] < 0:
+            r['적(4)s-lim'] = 0
     except:
          r['적(4)s-lim'] = 0
-         sumCnt -= 1
+    finally:         
+        if r['적(4)s-lim'] == 0:
+            sumCnt -= 1         
+
     try:
         r['적(5)당기순이익*PER'] = r['당기순이익'] * r['PER(배)'] * 100000000 / r['발행주식수(보통주)'] #100000000    #적정주가(5)당기순이익*PER
         r['적(5)당기순이익*PER'] = int(r['적(5)당기순이익*PER'])
+        if r['적(5)당기순이익*PER'] < 0:
+            r['적(5)당기순이익*PER'] = 0        
     except:
-         r['적(5)당기순이익*PER'] = 0
-         sumCnt -= 1
+        r['적(5)당기순이익*PER'] = 0
+    finally:         
+        if  r['적(5)당기순이익*PER'] == 0:
+            sumCnt -= 1         
+
     
     try:
         r['추천매수가'] = (r['자본총계(지배)']+r['자본총계(지배)']*(r['ROE(%)']-7.9)/7.9*(0.8/(1+7.9-0.8)))/r['발행주식수(보통주)']*100000000 #100000000    #적정매수가
@@ -355,6 +395,8 @@ def stock_fair_value(main, etc, employee, listing_date):
     try:
         r['적정가'] = sum([r['적(1)PER*EPS'],r['적(2)ROE*EPS'],r['적(3)EPS*10'],r['적(4)s-lim'],r['적(5)당기순이익*PER']]) / sumCnt
         r['적정가'] = int(r['적정가'])
+        if r['적정가'] < 0:
+            r['적정가'] = 0
     except:
         r['적정가'] = 0
 
@@ -660,7 +702,10 @@ def stock_crawler(code):
     
     
     #frame구조에 들어가기
-    browser.switch_to.frame(browser.find_element_by_id('coinfo_cp'))
+    try:
+        browser.switch_to.frame(browser.find_element_by_id('coinfo_cp'))
+    except:
+        return empty_dict        
     
     # page not found handle
     # 상장된지 얼마안되서 자료없는 경우인듯
@@ -762,7 +807,6 @@ def stock_crawler(code):
     
         html0 = browser.page_source
         html1 = BeautifulSoup(html0,'lxml')
-        # html1 = BeautifulSoup(html0,'html.parser')   
     
         employee = html1.select('#cTB201 > tbody > tr:nth-of-type(4) > td.c4.txt')[0].get_text().strip().split(' (')[0]
         employee = employee.replace(',','')  
@@ -793,13 +837,13 @@ def stock_crawler(code):
     # 적정주가분석 산출 · merge two json 
     result_merge = stock_fair_value(res[0], etc, employee, listing_date)    
     return result_merge
-
+# print(stock_crawler('155660'))
 # print(stock_crawler('005930'))
 # stock_crawler('226330')
 # stock_crawler('002170')
 # stock_crawler('357120')
 
-def main_def(start = 0, end = 0):
+def main_def(start = 0, end = 0, tableclearnow = False):
     """ 메인 def """
 
     # start_time = time.time()
@@ -817,8 +861,10 @@ def main_def(start = 0, end = 0):
 
     print('총 상장법인수 :', len(kindInfo))
     print('실행건       :', len(rangeValue))        
-    print('실행소요예상 :', int(int(len(rangeValue)) * 2 / 60), '분')        
+    print('실행소요예상 :', int(int(len(rangeValue)) * 1 / 60), '분')        
 
+    if tableclearnow:
+        backupAndEmptyTable()
     # for i in range(len(kindInfo)):
     # for i in range(0,50):
     for i in rangeValue:
@@ -849,8 +895,11 @@ def main_def(start = 0, end = 0):
     print('done')       
 
 if __name__ == "__main__":
+    ''' 실행하려면 argv 3개가 필요합니다. : startno, endno, tableclearatfirst? (True or False) '''
     # request = int(sys.argv[1])
+    # argv ex) 0 2380 True
     start = int(sys.argv[1])
     end = int(sys.argv[2])
+    tableclearnow = sys.argv[3]
     sys.setrecursionlimit(5000)
-    main_def(start, end)    
+    main_def(start, end, tableclearnow)    
