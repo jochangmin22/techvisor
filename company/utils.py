@@ -51,7 +51,7 @@ def str2round(value, num=1):
         pass
     
     try:
-        res = round(float(str.replace(",","")),num)
+        res = round(float(value.replace(",","")),num)
     except:
         res = 0
     return res
@@ -182,6 +182,20 @@ def str2int(value):
 #         res = None
 #     return res     
 
+doubleKeyword = {
+    '시가총액': 'MC',
+    'PER(%)': 'PER',
+    'PBR(배)': 'PBR',
+    'EPS(원)': 'EPS',
+    'ROE(%)': 'ROE',
+    'ROA(%)': 'ROA',
+    '현재가(원)': 'NP',
+    '영업이익(전전분기)': 'PTQ',
+    '당기순이익증감(전전분기)': 'ITQ',
+    '영업이익(전분기)': 'PQ',
+    '당기순이익증감(전분기)': 'IQ'
+}
+
 def like_parse(keyword=""):
     """ like query 생성 """
 
@@ -196,19 +210,23 @@ def like_parse(keyword=""):
         # if val.startswith("(@") or val.endswith(").RK") or val.endswith(").CC"):
         if val.startswith("(@") or val.endswith(").CC"):
             continue
-
+        # CN, BD, MP, MC, PER, PBR, EPS, ROE, ROA, NP, PTQ, ITQ, PQ, IQ
         fieldName = '회사명' # default    
         # res += "("  # not add paranthesis when above terms
         # select fieldName and remove initial symbol
-        if val.endswith(".CA"):
-            val = val.replace(".CA", "")
-            fieldName =  '지역'                
         if val.endswith(".BD"):
             val = val.replace(".BD", "")
             fieldName ='업종'                
-        if val.endswith(".RK"):
-            val = val.replace(".RK", "")
-            fieldName = '주요제품'               
+        if val.endswith(".MP"):
+            val = val.replace(".MP", "")
+            fieldName = '주요제품'
+        
+
+        for key, value in doubleKeyword.items():
+        # for key in [MC, PER, PBR, EPS, ROE, ROA, NP, PTQ, ITQ, PQ, IQ]:
+            if val.endswith("."+value):
+                val = val.replace("."+value, "")                           
+                fieldName = "정보 ->> '" + key + "'"
         # if val.endswith(".IN"):
         #     val = val.replace(".IN", "")
         #     res += '산업'    

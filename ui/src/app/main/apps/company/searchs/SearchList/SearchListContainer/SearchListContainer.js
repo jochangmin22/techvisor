@@ -21,7 +21,7 @@ function SearchListContainer(props) {
 		setOpen(false);
 	}, [searchLoading]);
 
-	const ReturnListMsg = () => {
+	const HideTableShowMsg = () => {
 		return (
 			<div className="flex justify-start items-center">
 				<Typography
@@ -49,7 +49,7 @@ function SearchListContainer(props) {
 
 	const WhatMsgToShow = useCallback(() => {
 		if (open) {
-			return <ReturnListMsg />;
+			return <HideTableShowMsg />;
 		} else if (status === 'noResults') {
 			return (
 				<Paper className="rounded-8 shadow h-224 w-full">

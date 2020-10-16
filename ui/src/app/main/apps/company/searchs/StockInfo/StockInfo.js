@@ -23,17 +23,17 @@ function StockInfo() {
 
 	const stockInfo = useMemo(
 		() =>
-			arr && arr.length !==0
+			arr && arr.length !== 0
 				? {
 						시가총액: arr.시가총액,
 						'주가(월)': '', // arr.korreprnm,
 						'거래량(주)': arr.거래량,
-						'수익률(일)': arr.수익률.split('/')[0],
-						'수익률(월)': arr.수익률.split('/')[1],
-						'수익률(년)': arr.수익률.split('/')[2],
+						'수익률(일)': arr.수익률1d ? arr.수익률1d + '%' : '',
+						'수익률(월)': arr.수익률1m ? arr.수익률1m + '%' : '',
+						'수익률(년)': arr.수익률1y ? arr.수익률1y + '%' : '',
 						'PER(배)': arr['PER(배)'],
 						'PBR(배)': arr['PBR(배)'],
-						'ROE(%)': arr['ROE(%)'],
+						'ROE(%)': arr['ROE(%)'] ? arr['ROE(%)'] + '%' : '',
 						'EPS(원)': arr['EPS(원)'] ? arr['EPS(원)'] + '원' : ''
 				  }
 				: {},
@@ -44,7 +44,7 @@ function StockInfo() {
 
 	return (
 		<div className="md:flex w-full pr-8">
-			<Card className='border-0 w-full' variant="outlined">
+			<Card className="border-0 w-full" variant="outlined">
 				<CardHeader
 					className="px-8 pt-4 pb-0"
 					title={

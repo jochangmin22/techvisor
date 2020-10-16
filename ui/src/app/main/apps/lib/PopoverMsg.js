@@ -29,7 +29,7 @@ function PopoverMsg(props) {
 	const open = Boolean(anchorEl);
 
 	return (
-		<div className="p-12 pb-4 flex items-center">
+		<div className="flex items-center">
 			<Typography variant={variant || 'h6'}>{title}</Typography>
 			<Icon
 				className="ml-8"

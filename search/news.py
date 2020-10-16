@@ -107,6 +107,7 @@ def parse_news_nlp(request, mode="needJson"):
     """ 
     news title description tokenization 
     returns a list of NNP nouns
+    ※ According to the NNP nouns of mecab, the company name may not be recognized.
     """
 
     # redis key

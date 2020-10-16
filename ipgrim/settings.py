@@ -46,8 +46,7 @@ NAVER = get_secret("NAVER")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.0.50", "192.168.0.40", "localhost", "btowin.iptime.org",
-                 "btowin.synology.me", "14.63.15.149", "ipgrim.com", "v.ipgrim.com", "52.79.161.225"]
+ALLOWED_HOSTS = ["192.168.0.50", "192.168.0.40", "localhost", "btowin.synology.me", "14.32.114.185", "ipgrim.com", "v.ipgrim.com", "52.79.161.225"]
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = [
@@ -63,11 +62,7 @@ CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
     "http://localhost:4000",
     "http://127.0.0.1:8000",
-    "http://btowin.iptime.org:1000",
-    "http://btowin.iptime.org:1111",
-    "http://btowin.iptime.org:3000",
-    "http://btowin.iptime.org:4000",
-    "http://btowin.iptime.org:8000",
+
     "http://btowin.synology.me:1000",
     "http://btowin.synology.me:1111",
     "http://btowin.synology.me:3000",
@@ -76,8 +71,9 @@ CORS_ORIGIN_WHITELIST = [
     "http://v.ipgrim.com:8000",
     "http://v.ipgrim.com:8001",
     "https://v.ipgrim.com",
-    "http://14.63.15.149",  # company
-    "https://14.63.15.149",
+    
+    "http://14.32.114.185",  # company
+    "https://14.32.114.185",
     "http://ipgrim.com",
     "https://ipgrim.com",
     "http://52.79.161.225",  # aws
