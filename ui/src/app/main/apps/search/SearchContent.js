@@ -12,7 +12,7 @@ import MainTable from './searchs/SearchList/MainTable';
 import VisualContainer from './searchs/Visual/VisualContainer';
 import KeywordsContainer from './searchs/Keywords/KeywordsContainer';
 import MatrixAnalysis from './searchs/Matrix/MatrixAnalysis';
-import NewsAnalysis from './searchs/News/NewsAnalysis';
+import NewsContainer from './searchs/News/NewsContainer';
 import Draggable from 'react-draggable';
 
 const useStyles = makeStyles(theme => ({
@@ -101,7 +101,7 @@ function SearchContent() {
 					grid={[25, 25]}
 				>
 					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.D }}>
-						<NewsAnalysis />
+						<NewsContainer />
 					</div>
 				</Draggable>
 				<Draggable

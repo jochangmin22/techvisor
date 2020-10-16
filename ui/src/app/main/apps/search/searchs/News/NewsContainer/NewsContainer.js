@@ -10,7 +10,7 @@ import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import parseSearchOptions from 'app/main/apps/lib/parseParamsSearch';
 import { useSelector } from 'react-redux';
 
-function NewsAnalysis() {
+function NewsContainer() {
 	const dispatch = useDispatch();
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const { searchText } = searchParams;
@@ -29,7 +29,7 @@ function NewsAnalysis() {
 	}, [searchText]);
 
 	return (
-		<Paper className="w-full h-full rounded-8 shadow">
+		<Paper className="w-full h-full rounded-8 shadow py-8">
 			<div className="px-12 flex items-center">
 				<div className="flex flex-row items-center">
 					<PopoverMsg
@@ -51,4 +51,4 @@ function NewsAnalysis() {
 	);
 }
 
-export default NewsAnalysis;
+export default NewsContainer;
