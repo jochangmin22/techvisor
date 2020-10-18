@@ -1,10 +1,8 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CSVLink } from 'react-csv';
 import { withRouter } from 'react-router-dom';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableServerSide';
-import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
@@ -13,8 +11,9 @@ import clsx from 'clsx';
 import DownloadFilterMenu from '../DownloadFilterMenu';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
-import { updateCols } from 'app/main/apps/search/store/searchsSlice';
+import { getOwnedPatent, updateCols } from 'app/main/apps/company/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
 const columns = [
 	{
@@ -120,18 +119,34 @@ const useStyles = makeStyles(theme => ({
 	root: { backgroundColor: theme.palette.primary.dark }
 }));
 
-function MainTable(props) {
+function OwnedPatent(props) {
 	const dispatch = useDispatch();
 	const classes = useStyles();
-	const entities = useSelector(({ searchApp }) => searchApp.searchs.entities);
+	const entities = useSelector(({ companyApp }) => companyApp.searchs.ownedPatent);
+	const companyInfo = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
+	const { 회사명: corpName } = companyInfo;
 
 	const [data, setData] = useState(entities);
 	const [csvData, setCsvData] = useState(entities);
 	const [loading, setLoading] = useState(false);
 	const [pageCount, setPageCount] = useState(0);
 
-	const cols = useSelector(({ searchApp }) => searchApp.searchs.cols);
+	const cols = useSelector(({ companyApp }) => companyApp.searchs.cols);
+
+	const [showLoading, setShowLoading] = useState(false);
 	// const data = useMemo(() => (entities ? entities : []), [entities]);
+
+	useEffect(() => {
+		setShowLoading(true);
+		let params = { corpName: '' };
+		if (corpName !== undefined && corpName) {
+			params = { corpName: corpName };
+		}
+		dispatch(getOwnedPatent(params)).then(() => {
+			setShowLoading(false);
+		});
+		// eslint-disable-next-line
+	}, [corpName]);
 
 	const fetchIdRef = useRef(0);
 
@@ -182,23 +197,16 @@ function MainTable(props) {
 		dispatch(updateCols(cols));
 	}, 300);
 
-	// function onBtExport() {}
-
-	if (!entities || entities.length === 0) {
-		return <SpinLoading />;
-	}
+	const isEmpty = !!(entities.length === 0);
 
 	return (
-		<Paper className="rounded-8 shadow h-512 w-full mb-36">
+		<div className="w-full h-full pb-8">
 			<>
 				<div className="p-12 flex items-center justify-between">
-					<div className="px-12 flex flex-row items-center justify-end mb-8">
-						<Typography
-							className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4 mr-8')}
-						>
+					<div className="px-12 flex items-center justify-end mb-8">
+						<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4')}>
 							검색 결과 {Number(entities.length).toLocaleString()} 건
 						</Typography>
-						<DraggableIcon />
 					</div>
 					<div className="flex items-center">
 						<Button
@@ -215,24 +223,44 @@ function MainTable(props) {
 						<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
 					</div>
 				</div>
-				<FuseScrollbars className="max-h-460 px-6">
-					<EnhancedTable
-						columns={columns}
-						data={data}
-						fetchData={fetchData}
-						loading={loading}
-						pageCount={pageCount}
-						size="small"
-						onRowClick={(ev, row) => {
-							if (row) {
-								props.history.push(`/apps/search/${row.original.출원번호}`);
-							}
-						}}
-					/>
-				</FuseScrollbars>
+				{isEmpty ? (
+					<div className="max-h-320">
+						<EmptyMsg
+							icon="wb_incandescent"
+							msg="특허"
+							text="선택하신 기업명으로 검색된 보유특허 내역이 없습니다."
+						/>
+					</div>
+				) : (
+					<>
+						{showLoading ? (
+							<SpinLoading />
+						) : (
+							<>
+								<FuseScrollbars className="max-h-360 px-6">
+									<EnhancedTable
+										columns={columns}
+										data={data}
+										fetchData={fetchData}
+										loading={loading}
+										pageCount={pageCount}
+										pageSize={6}
+										pageOptions={[6, 12, 18]}
+										size="small"
+										onRowClick={(ev, row) => {
+											if (row) {
+												props.history.push(`/apps/search/${row.original.출원번호}`);
+											}
+										}}
+									/>
+								</FuseScrollbars>
+							</>
+						)}
+					</>
+				)}
 			</>
-		</Paper>
+		</div>
 	);
 }
 
-export default withRouter(MainTable);
+export default withRouter(OwnedPatent);

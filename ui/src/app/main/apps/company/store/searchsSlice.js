@@ -74,6 +74,13 @@ export const getDisclosureReport = createAsyncThunk(NAME + 'getDisclosureReport'
 	return data;
 });
 
+export const getOwnedPatent = createAsyncThunk(NAME + 'getOwnedPatent', async params => {
+	const response = await axios.post(URL + 'ownedpatent', params);
+	const data = await response.data;
+
+	return data;
+});
+
 export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async (params, subParams) => {
 	const response = await axios.get(URL + 'matrix', { params: params, subParams: subParams });
 	const data = await response.data;
@@ -174,6 +181,7 @@ export const initialState = {
 	companyInfo: [],
 	clinicTest: [],
 	disclosureReport: [],
+	ownedPatent: [],
 	news: [],
 	newsSA: null,
 	relatedCompany: []
@@ -276,6 +284,9 @@ const searchsSlice = createSlice({
 		},
 		[getDisclosureReport.fulfilled]: (state, action) => {
 			state.disclosureReport = action.payload;
+		},
+		[getOwnedPatent.fulfilled]: (state, action) => {
+			state.ownedPatent = action.payload;
 		},
 		[getMatrix.fulfilled]: (state, action) => {
 			const { entities, max } = action.payload;

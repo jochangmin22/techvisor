@@ -78,16 +78,18 @@ function CorpReport() {
 	return (
 		<div className="w-full h-full py-8">
 			<div className="px-12 flex items-center justify-end mb-8">
-				<Typography className={clsx(classes.root, 'text-11 font-500 rounded-4 text-white px-8 py-4')}>
+				<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4')}>
 					검색 결과 {Number(rowsCount).toLocaleString()} 건
 				</Typography>
 			</div>
 			{isEmpty ? (
-				<EmptyMsg
-					icon="local_pharmacy"
-					msg="전자공시"
-					text="선택하신 기업명으로 검색된 전자공시 내역이 없습니다."
-				/>
+				<div className="max-h-320">
+					<EmptyMsg
+						icon="camera"
+						msg="전자공시"
+						text="선택하신 기업명으로 검색된 전자공시 내역이 없습니다."
+					/>
+				</div>
 			) : (
 				<>
 					{showLoading ? (

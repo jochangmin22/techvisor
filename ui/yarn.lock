@@ -5297,13 +5297,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:2.9.3":
-  version: 2.9.3
-  resolution: "chart.js@npm:2.9.3"
+"chart.js@npm:2.9.4":
+  version: 2.9.4
+  resolution: "chart.js@npm:2.9.4"
   dependencies:
     chartjs-color: ^2.1.0
     moment: ^2.10.2
-  checksum: 8e3f10e003941c1c77a5209cd08ed342a41c7c6a2ed93722b7ea1366c804bb2349d957e066f2abb7a3399d6ebebe83a298a15cbc960bc64846bc127e94f77f27
+  checksum: 4551932943bc5e42d25ae5632d91878fb89e22937095a2742e23c4d0d0bde405bed6be2cb8480694ba599d6dbb9882c8bce6bac1e4667c820eb24c38416380aa
   languageName: node
   linkType: hard
 
@@ -8634,7 +8634,7 @@ fsevents@~2.1.2:
     axios: 0.20.0
     axios-mock-adapter: 1.18.2
     babel-eslint: 10.1.0
-    chart.js: 2.9.3
+    chart.js: 2.9.4
     clsx: 1.1.1
     cross-env: 7.0.2
     cross-fetch: 3.0.6

@@ -88,8 +88,8 @@ function NewsArticles(props) {
 					columns={columns}
 					data={data}
 					size="small"
-					pageSize={7}
-					pageOptions={[7, 14, 21]}
+					pageSize={8}
+					pageOptions={[8, 16, 24]}
 					showHeader={false}
 					onRowClick={(ev, row) => {
 						if (row) {
