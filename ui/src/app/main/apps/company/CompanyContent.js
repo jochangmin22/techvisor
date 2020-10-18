@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import SearchListContainer from './searchs/SearchList/SearchListContainer';
 import CorpInfo from './searchs/CorpInfo';
 import StockInfoContainer from './searchs/StockInfo/StockInfoContainer';
-import NewsContainer from './searchs/News/NewsContainer';
+import RelatedInfoContainer from './searchs/RelatedInfo/RelatedInfoContainer';
 import Draggable from 'react-draggable';
 import StockFairValue from './searchs/StockFairValue';
 
@@ -102,7 +102,7 @@ function CompanyContent() {
 			)}
 			<Draggable handle=".draggable" onStart={() => handleStart('D')} onEnd={() => resetForm()} grid={[25, 25]}>
 				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.D }}>
-					<NewsContainer selectCode={selectCode} />
+					<RelatedInfoContainer selectCode={selectCode} />
 				</div>
 			</Draggable>
 			<Draggable handle=".draggable" onStart={() => handleStart('E')} onEnd={() => resetForm()} grid={[25, 25]}>

@@ -8,6 +8,8 @@ import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
+import { makeStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
 import DownloadFilterMenu from '../DownloadFilterMenu';
 // import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
@@ -20,7 +22,6 @@ import {
 	setSearchSubmit
 } from 'app/main/apps/company/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import clsx from 'clsx';
 
 const columnName = {
 	종목코드: '110',
@@ -101,8 +102,13 @@ const colsList = Object.keys(columnName).map((key, index) => ({
 	field: key
 }));
 
+const useStyles = makeStyles(theme => ({
+	root: { backgroundColor: theme.palette.primary.dark }
+}));
+
 function MainTable(props) {
 	const dispatch = useDispatch();
+	const classes = useStyles();
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
 	const cols = useSelector(({ companyApp }) => companyApp.searchs.cols);
 	const [csvData, setCsvData] = useState(entities);
@@ -136,11 +142,11 @@ function MainTable(props) {
 	// }
 
 	return (
-		<>
+		<div className="w-full h-full">
 			<div className="p-12 flex items-center justify-between">
-				<div className="flex flex-row items-center">
-					<Typography variant="h6" className="pr-8">
-						검색 결과 ({Number(rowsCount).toLocaleString()})
+				<div className="px-12 flex flex-row items-center justify-end mb-8">
+					<Typography className={clsx(classes.root, 'text-11 font-500 rounded-4 text-white px-8 py-4 mr-8')}>
+						검색 결과 {Number(rowsCount).toLocaleString()} 건
 					</Typography>
 					<DraggableIcon />
 				</div>
@@ -159,7 +165,7 @@ function MainTable(props) {
 					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-512 px-6">
+			<FuseScrollbars className="max-h-460 px-6">
 				<EnhancedTable
 					columns={columns}
 					data={data}
@@ -171,7 +177,7 @@ function MainTable(props) {
 					}}
 				/>
 			</FuseScrollbars>
-		</>
+		</div>
 	);
 }
 

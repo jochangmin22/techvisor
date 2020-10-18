@@ -83,11 +83,13 @@ function CorpReport() {
 				</Typography>
 			</div>
 			{isEmpty ? (
-				<EmptyMsg
-					icon="local_pharmacy"
-					msg="전자공시"
-					text="선택하신 기업명으로 검색된 전자공시 내역이 없습니다."
-				/>
+				<div className="max-h-320">
+					<EmptyMsg
+						icon="camera"
+						msg="전자공시"
+						text="선택하신 기업명으로 검색된 전자공시 내역이 없습니다."
+					/>
+				</div>
 			) : (
 				<>
 					{showLoading ? (
