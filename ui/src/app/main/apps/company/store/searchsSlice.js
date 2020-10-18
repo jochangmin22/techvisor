@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, createEntityAdapter } from '@reduxjs/too
 import axios from 'axios';
 
 const URL = `${process.env.REACT_APP_API_URL}/api/company-app/searchs/`;
+const URL_OTHER = `${process.env.REACT_APP_API_URL}/api/search-app/searchs/`;
 const NAME = 'companyApp/searchs/';
 
 export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async (params, subParams) => {
@@ -46,25 +47,33 @@ export const getClinicTest = createAsyncThunk(NAME + 'getClinicTest', async para
 });
 
 export const getNews = createAsyncThunk(NAME + 'getNews', async (params, subParams) => {
-	const response = await axios.get(URL + 'news', { params: params, subParams: subParams });
+	const response = await axios.get(URL_OTHER + 'news', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
 export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async (params, subParams) => {
-	const response = await axios.get(URL + 'newssa', { params: params, subParams: subParams });
+	const response = await axios.get(URL_OTHER + 'newssa', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
 export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async (params, subParams) => {
-	const response = await axios.get(URL + 'relatedcompany', { params: params, subParams: subParams });
+	const response = await axios.get(URL_OTHER + 'relatedcompany', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
+
+export const getDisclosureReport = createAsyncThunk(NAME + 'getDisclosureReport', async params => {
+	const response = await axios.post(URL + 'disclosurereport', params);
+	const data = await response.data;
+
+	return data;
+});
+
 export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async (params, subParams) => {
 	const response = await axios.get(URL + 'matrix', { params: params, subParams: subParams });
 	const data = await response.data;
@@ -119,19 +128,30 @@ export const initialState = {
 		searchText: '',
 		searchNum: '',
 		companyName: [],
-		companyAddress: [],
 		bizDomain: [],
-		relatedKeyword: [],
-		// customCriteria: [],
-		industry: [],
+		mainProduct: [],
 		marketCapStart: '',
 		marketCapEnd: '',
-		foundedStart: '',
-		foundedEnd: '',
-		employeeStart: '',
-		employeeEnd: '',
-		repAgeStart: '',
-		repAgeEnd: ''
+		perStart: '',
+		perEnd: '',
+		pbrStart: '',
+		pbrEnd: '',
+		epsStart: '',
+		epsEnd: '',
+		roeStart: '',
+		roeEnd: '',
+		roaStart: '',
+		roaEnd: '',
+		nowPriceStart: '',
+		nowPriceEnd: '',
+		operatingProfitTBQStart: '',
+		operatingProfitTBQEnd: '',
+		netIncomeTBQStart: '',
+		netIncomeTBQEnd: '',
+		operatingProfitBQStart: '',
+		operatingProfitBQEnd: '',
+		netIncomeBQStart: '',
+		netIncomeBQEnd: ''
 	},
 	clinicOptions: {
 		category: '연도별', // '국가별', '연도별', '기술별', '기업별'
@@ -152,7 +172,11 @@ export const initialState = {
 		stockInfo: []
 	},
 	companyInfo: [],
-	clinicTest: []
+	clinicTest: [],
+	disclosureReport: [],
+	news: [],
+	newsSA: null,
+	relatedCompany: []
 };
 
 const searchsSlice = createSlice({
@@ -249,6 +273,9 @@ const searchsSlice = createSlice({
 		},
 		[getRelatedCompany.fulfilled]: (state, action) => {
 			state.relatedCompany = action.payload;
+		},
+		[getDisclosureReport.fulfilled]: (state, action) => {
+			state.disclosureReport = action.payload;
 		},
 		[getMatrix.fulfilled]: (state, action) => {
 			const { entities, max } = action.payload;

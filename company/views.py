@@ -6,6 +6,7 @@
 # from .finance import parse_stock, crawl_stock, crawl_dart
 
 from . import companies
+from . import disclosure_clinic
 # from . import company
 from . import finance
 # from . import company_info
@@ -30,7 +31,10 @@ def get_crawl(request):
     return companies.crawl_stock(request)    
 
 def get_clinic_test(request):
-    return companies.clinic_test(request)    
+    return disclosure_clinic.clinic_test(request)    
+
+def get_disclosure_report(request):
+    return disclosure_clinic.get_disclosure_report(request)    
 
 def get_stock_fair(request):
     return companies.stock_fair(request)    

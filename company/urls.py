@@ -10,6 +10,7 @@ urlpatterns = [
     re_path(r"^api/company-app/searchs/companyinfo$", csrf_exempt(views.get_company_info), name='get_company_info'),    
     re_path(r"^api/company-app/searchs/stockinfo$", csrf_exempt(views.get_stock_info), name='get_stock_info'),
     re_path(r"^api/company-app/searchs/clinic$", csrf_exempt(views.get_clinic_test), name='get_clinic_test'),
+    re_path(r"^api/company-app/searchs/disclosurereport$", csrf_exempt(views.get_disclosure_report), name='get_disclosure_report'),
     re_path(r"^api/company-app/searchs/stockfair$", csrf_exempt(views.get_stock_fair), name='get_stock_fair'),
     # re_path(r"^api/company-app/searchs/searchsnum$", get_companies_num, name='get_companies_num'),
     # re_path(r"^api/company-app/searchs/stock$", get_stock, name='get_stock'),

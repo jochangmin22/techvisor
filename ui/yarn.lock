@@ -8682,10 +8682,10 @@ fsevents@~2.1.2:
     qs: 6.9.4
     randomcolor: ^0.6.2
     raw-loader: 4.0.2
-    rc-easyui: ^1.1.29
+    rc-easyui: ^1.1.30
     rc-progress: ^3.1.0
     react: 16.14.0
-    react-autosuggest: 10.0.2
+    react-autosuggest: 10.0.3
     react-beautiful-dnd: 13.0.0
     react-big-calendar: 0.28.1
     react-chartjs-2: 2.10.0
@@ -8719,7 +8719,7 @@ fsevents@~2.1.2:
     redux-logger: 4.0.0
     source-map-explorer: 2.5.0
     styled-components: 5.2.0
-    tailwindcss: 1.9.2
+    tailwindcss: 1.9.4
     tailwindcss-dir: 4.0.0
     typeface-muli: 1.1.13
     velocity-animate: 1.5.2
@@ -14912,10 +14912,10 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"rc-easyui@npm:^1.1.29":
-  version: 1.1.29
-  resolution: "rc-easyui@npm:1.1.29"
-  checksum: 48d97e1eac202045ca2223bf059aa94c87847540ccc2522d8e335459594461ede94ad2748d0f3564dddcc5bc4488fad0724f00c17a3a81c80c2fb68e66f36409
+"rc-easyui@npm:^1.1.30":
+  version: 1.1.30
+  resolution: "rc-easyui@npm:1.1.30"
+  checksum: 1ba9ac16424a78c9bc0d5ce8c325ecddd5554a64807a55d6aed3d6c82a25311b54a64cb7a78ee751ba5ef11d13739cf1e84e3707cf04ada7978aeba5df57adad
   languageName: node
   linkType: hard
 
@@ -14946,32 +14946,18 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-autosuggest@npm:10.0.2":
-  version: 10.0.2
-  resolution: "react-autosuggest@npm:10.0.2"
+"react-autosuggest@npm:10.0.3":
+  version: 10.0.3
+  resolution: "react-autosuggest@npm:10.0.3"
   dependencies:
     es6-promise: ^4.2.8
     prop-types: ^15.7.2
-    react-autowhatever: ^10.2.1
     react-themeable: ^1.1.0
     section-iterator: ^2.0.0
     shallow-equal: ^1.2.1
   peerDependencies:
     react: ">=16.3.0"
-  checksum: 9c31237d77dd9621e90844f1356863c151ac7f4367b02d5d0301a7a6b0b2cea13c42fc5c8f6f7a8b7c1b373ba2080f45ff30e598b4d0d71f5e0285ac8a313a31
-  languageName: node
-  linkType: hard
-
-"react-autowhatever@npm:^10.2.1":
-  version: 10.2.1
-  resolution: "react-autowhatever@npm:10.2.1"
-  dependencies:
-    prop-types: ^15.5.8
-    react-themeable: ^1.1.0
-    section-iterator: ^2.0.0
-  peerDependencies:
-    react: ">=0.14.7"
-  checksum: d060a144ebbad9c9bfcdc18da8c22b46e3bf05839723d68da59bf9551f26c5139fbe66608bd6be135a1500720ee25dc9346042a6e346d38e97c488e9633fe46d
+  checksum: c5d8d7f30dae31c0eb329498808bcfa3aea076bb91fa2fa3a055b56f45d2c8fb36a0890df9c68d44684351dd28d7ef1ba8942af069ce42024d8b73e3bcf4ca1c
   languageName: node
   linkType: hard
 
@@ -17518,9 +17504,9 @@ resolve@1.15.0:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:1.9.2":
-  version: 1.9.2
-  resolution: "tailwindcss@npm:1.9.2"
+"tailwindcss@npm:1.9.4":
+  version: 1.9.4
+  resolution: "tailwindcss@npm:1.9.4"
   dependencies:
     "@fullhuman/postcss-purgecss": ^2.1.2
     autoprefixer: ^9.4.5
@@ -17547,7 +17533,7 @@ resolve@1.15.0:
   bin:
     tailwind: lib/cli.js
     tailwindcss: lib/cli.js
-  checksum: 359250a49e922b2b610ca835ab61b3584fb016e99346f7b8dd0fa35c6e22abc10e0b69ac90a448582c349039073935cb2cd9f32087e4a1f267680490d022744e
+  checksum: 360b2a287ea3f0c05cb106eb09a0e11d001ac48f1d1796b9d367971347834d0c698db9a93a1345bbc3a8adb3a27e7aad87462e98cb04d9a159c9783336db8b01
   languageName: node
   linkType: hard
 

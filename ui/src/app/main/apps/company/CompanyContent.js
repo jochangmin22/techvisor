@@ -3,14 +3,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setMockData } from './store/searchsSlice';
 // import { authRoles } from "app/auth";
 import searchData from 'app/main/apps/lib/mockDataCompanyApp';
-import { useForm } from '@fuse/hooks';
+import { useForm, useUpdateEffect } from '@fuse/hooks';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import SearchListContainer from './searchs/SearchList/SearchListContainer';
 import CorpInfo from './searchs/CorpInfo';
 import StockInfoContainer from './searchs/StockInfo/StockInfoContainer';
+import NewsContainer from './searchs/News/NewsContainer';
 import Draggable from 'react-draggable';
-import ClinicTest from './searchs/ClinicTest';
 import StockFairValue from './searchs/StockFairValue';
 
 const useStyles = makeStyles(theme => ({
@@ -31,6 +31,8 @@ function CompanyContent() {
 	const searchLoading = useSelector(({ companyApp }) => companyApp.searchs.searchLoading);
 
 	const [searchStatus, setSearchStatus] = useState(null);
+
+	const [selectCode, setSelectCode] = useState(stockCode || '주식');
 
 	const { form, setForm, resetForm } = useForm({
 		A: 100,
@@ -62,6 +64,10 @@ function CompanyContent() {
 			setSearchStatus(null);
 		}
 	}, [searchText, searchLoading, entities]);
+
+	useUpdateEffect(() => {
+		setSelectCode(stockCode || '주식');
+	}, [stockCode]);
 
 	return (
 		<div className="flex flex-wrap w-full h-auto items-start justify-start mt-8 px-8">
@@ -96,7 +102,7 @@ function CompanyContent() {
 			)}
 			<Draggable handle=".draggable" onStart={() => handleStart('D')} onEnd={() => resetForm()} grid={[25, 25]}>
 				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.D }}>
-					<ClinicTest />
+					<NewsContainer selectCode={selectCode} />
 				</div>
 			</Draggable>
 			<Draggable handle=".draggable" onStart={() => handleStart('E')} onEnd={() => resetForm()} grid={[25, 25]}>

@@ -50,10 +50,10 @@
         "qs": "6.9.4",
         "randomcolor": "^0.6.2",
         "raw-loader": "4.0.2",
-        "rc-easyui": "^1.1.29",
+        "rc-easyui": "^1.1.30",
         "rc-progress": "^3.1.0",
         "react": "16.14.0",
-        "react-autosuggest": "10.0.2",
+        "react-autosuggest": "10.0.3",
         "react-beautiful-dnd": "13.0.0",
         "react-big-calendar": "0.28.1",
         "react-chartjs-2": "2.10.0",
@@ -117,7 +117,7 @@
         "promise": "8.1.0",
         "purgecss": "1.4.2",
         "source-map-explorer": "2.5.0",
-        "tailwindcss": "1.9.2",
+        "tailwindcss": "1.9.4",
         "tailwindcss-dir": "4.0.0"
     },
     "scripts": {

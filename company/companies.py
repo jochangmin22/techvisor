@@ -95,48 +95,48 @@ empty_fair = {
 }
 
 empty_dict = {
-'갭1': 0,
-'갭2': 0,
-'갭3': 0,
-'갭4': 0,
-'갭5': 0,
-'거래량': 0,
-'기대수익률': 0,
-'기업가치(백만)': 0,
-'당기순이익': 0,
-'매출액': 0,
-'발행주식수(보통주)': 0,
-'부채비율': 0,
-'부채총계': 0,
-'상장일': '',    
-'수익률':0,
-'순이익증감(전전)': 0,
-'순이익증감(직전)': 0,
-'시가총액':0,
-'업종PER(%)': 0,
-'영업이익': 0,
-'영업이익증감(전전)': 0,
-'영업이익증감(직전)': 0,
-'자본총계': 0,
-'자본총계(지배)': 0,
-'자산총계': 0,
-'적(1)PER*EPS': 0,
-'적(2)ROE*EPS': 0,
-'적(3)EPS*10': 0,
-'적(4)s-lim': 0,
-'적(5)당기순이익*PER': 0,
-'적정가': 0,
-'종업원수': 0,
-'추천매수가': 0,
-'현금배당수익률': 0,
-'현재가': 0,    
-'BPS(원)': 0,    
-'EPS(원)': 0,
-'PBR(배)': 0,
-'PER(배)': 0,
-'PER갭(%)': 0,
-'ROA(%)': 0,
-'ROE(%)': 0,
+    '갭1': 0,
+    '갭2': 0,
+    '갭3': 0,
+    '갭4': 0,
+    '갭5': 0,
+    '거래량': 0,
+    '기대수익률': 0,
+    '기업가치(백만)': 0,
+    '당기순이익': 0,
+    '매출액': 0,
+    '발행주식수(보통주)': 0,
+    '부채비율': 0,
+    '부채총계': 0,
+    '상장일': '',    
+    '수익률':0,
+    '순이익증감(전전)': 0,
+    '순이익증감(직전)': 0,
+    '시가총액':0,
+    '업종PER(%)': 0,
+    '영업이익': 0,
+    '영업이익증감(전전)': 0,
+    '영업이익증감(직전)': 0,
+    '자본총계': 0,
+    '자본총계(지배)': 0,
+    '자산총계': 0,
+    '적(1)PER*EPS': 0,
+    '적(2)ROE*EPS': 0,
+    '적(3)EPS*10': 0,
+    '적(4)s-lim': 0,
+    '적(5)당기순이익*PER': 0,
+    '적정가': 0,
+    '종업원수': 0,
+    '추천매수가': 0,
+    '현금배당수익률': 0,
+    '현재가': 0,    
+    'BPS(원)': 0,    
+    'EPS(원)': 0,
+    'PBR(배)': 0,
+    'PER(배)': 0,
+    'PER갭(%)': 0,
+    'ROA(%)': 0,
+    'ROE(%)': 0,
 }
 
 empty_info_dart = {
@@ -524,27 +524,20 @@ def crawl_stock_info(request):
             pass                
 
 
-        #재무제표 "연간" 클릭하기
+        #재무제표 "전체" 클릭하기
         try:
-            browser.find_elements_by_xpath('//*[@class="schtab"][1]/tbody/tr/td[3]')[0].click()
+            browser.find_elements_by_xpath('//*[@id="cns_Tab20"]')[0].click()
         except:
             return JsonResponse(empty_dict, safe=False)  
 
          
 
         html0 = browser.page_source
-        # html1 = BeautifulSoup(html0,'html.parser')
         html1 = BeautifulSoup(html0,'lxml')
 
-        ### 기타정보 -- 길어서 따로 def로 나눔 ; etc는 아래 [적정주가분석 산출] 부분에서 사용됨
+        ### 기타정보 -- 길어서 따로 def로 나눔
         etc = crawl_info_etc(html1)
 
-        # #기업명 뽑기
-        # title0 = html1.find('head').find('title').text
-        # print(title0.split('-')[-1])
-
-
-        
         # # If there is data in db, fetch it or continue crawling
         # listedCorp = listed_corp.objects.get(종목코드=stockCode)
         # if listedCorp.정보['당기순이익'] != '':
@@ -626,14 +619,14 @@ def crawl_stock_info(request):
             pass # or etc 자료 그대로 씀        
 
         #종업원수·상장일 구하기
+
         #### "기업개요" 클릭하기
         try:
             browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[2]')[0].click()
         
             html0 = browser.page_source
             html1 = BeautifulSoup(html0,'lxml')
-            # html1 = BeautifulSoup(html0,'html.parser')   
-        
+
             employee = html1.select('#cTB201 > tbody > tr:nth-of-type(4) > td.c4.txt')[0].get_text().strip().split(' (')[0]
             employee = employee.replace(',','')  
             listing_date = html1.select('#cTB201 > tbody > tr:nth-of-type(3) > td.c2.txt')[0].get_text().strip().rsplit('상장일: ',1)[-1]
@@ -643,7 +636,7 @@ def crawl_stock_info(request):
             employee = 0
             listing_date = ''
 
-        # # 상장일 from model
+        # # 상장일 from model ; 더 느릴 것 같음
         # listing_date = listedCorp.상장일.replace('-','.')
 
         # res[0].update({
@@ -661,7 +654,7 @@ def crawl_stock_info(request):
         result_merge = stock_fair_value(res[0], etc, employee, listing_date)    
 
         # save data in db if necessary
-        # listedCorp = listed_corp.objects.get(종목코드=stock_code)
+        listedCorp = listed_corp.objects.get(종목코드=stockCode)
         listedCorp.정보 = result_merge
         listedCorp.save(update_fields=['정보'])
 
@@ -673,14 +666,17 @@ def crawl_stock_info(request):
         #     '업종' : listedCorp.업종,
         #     '주요제품' : listedCorp.주요제품,
         # })  
-        return JsonResponse(res[0], safe=False)     
+        return JsonResponse(result_merge, safe=False)     
 
 def _crawl_etc_info_sub(html1, value):
-    ''' crawl_info_etc 의 sub def '''    
+    ''' crawl_info_etc 의 sub def '''
+    ''' [{'PER': 1}, {'PBR': 2}, {'EPS': 5}, {'BPS': 6}, {'현금배당수익률': 9}] '''         
     # 2020/12(E)
     try:
         res = html1.select('#wrapper > div.fund.fl_le > table > tbody > tr:nth-of-type(' + str(value) + ') > td.num.noline-right')[0].get_text().strip()
         res = res.replace("N/A","0").replace(",","").replace("원","").replace("%","")
+        if not res:
+            res = 0        
     except:
         res = 0
 
@@ -689,14 +685,17 @@ def _crawl_etc_info_sub(html1, value):
         try:
             res = html1.select('#wrapper > div.fund.fl_le > table > tbody > tr:nth-of-type(' + str(value) + ') > td:nth-of-type(1)')[0].get_text().strip()
             res = res.replace("N/A","0").replace(",","").replace("원","").replace("%","")
+            if not res:
+                res = 0            
         except:
             res = 0
+
         return res
     else:
         return res        
 
 def crawl_info_etc(html1):
-    ''' 현재가, 업종PER, PER(배) 등등 적정주가산출정보 수집 '''
+    ''' 수집 : '현재가','업종PER(%)','PER(배)','PBR','EPS','BPS','현금배당수익률', '영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)' '''
     # 현재가 구하기
     try:
         nowPrice = html1.find_all('strong')[0].get_text()    #현재가 추출
@@ -722,7 +721,9 @@ def crawl_info_etc(html1):
 
     ### 'PER(배)','PBR','EPS','BPS','현금배당수익률' 구하기
     ### 위치 : 펀더멘털 > 주요지표 > 2020/12(E) or 2019/12(A)
-    # 5가지가 나열이 길어져서 _etc_info_sub def 로 만듬
+    ### 'ROE(%)','ROA(%)','PER(배)','PBR(배)'는 최근분기에서 사용 ; 최근 분기없으면 'PER(배)','PBR(배)'는 여기 것으로 대체 
+    #     
+    # 5가지가 나열이 길어져서 _crawl_etc_info_sub def 로 만듬
     r = {}
     dataList = [{'PER': 1}, {'PBR': 2}, {'EPS': 5}, {'BPS': 6}, {'현금배당수익률': 9}] # 뒤의 숫자는 tr:nth-of-type(n) 위치
     for index in range(len(dataList)):
@@ -780,17 +781,17 @@ def crawl_info_etc(html1):
         stock_return_1y = 0        
 
     res = {
-            '현재가' : NowPrice,
-            '업종PER(%)': SectorPer,
+            '현재가' : nowPrice,
+            '업종PER(%)': sectorPer,
             'PER(배)': r['PER'],
             'PBR(배)': r['PBR'],
             'EPS(원)': r['EPS'],
             'BPS(원)': r['BPS'],
             '현금배당수익률': r['현금배당수익률'],
-            '영업이익증감(전전)' :QPrice1,
-            '영업이익증감(직전)' :QPrice2,
-            '순이익증감(전전)' :QPrice3,
-            '순이익증감(직전)' :QPrice4,
+            '영업이익증감(전전)' :qPrice1,
+            '영업이익증감(직전)' :qPrice2,
+            '순이익증감(전전)' :qPrice3,
+            '순이익증감(직전)' :qPrice4,
             '거래량' : stock_volume,
             '시가총액' : market_cap,
             '수익률1d' :stock_return_1d, 
@@ -844,33 +845,49 @@ def stock_fair_value(main, etc, employee, listing_date):
     r['기업가치(백만)'] = int(r['기업가치(백만)'])
     
     sumCnt = 5
-    r['적(1)PER*EPS'] = r['PER(배)'] * r['EPS(원)']   #적정주가(1)PER*EPS
-    r['적(1)PER*EPS'] =  int(r['적(1)PER*EPS'])     
-    if r['적(1)PER*EPS'] == 0:
+    if r['PER(배)'] > 0 and r['EPS(원)'] > 0:
+        r['적(1)PER*EPS'] = r['PER(배)'] * r['EPS(원)']   #적정주가(1)PER*EPS
+        r['적(1)PER*EPS'] =  int(r['적(1)PER*EPS'])     
+    else:        
+        r['적(1)PER*EPS'] = 0
         sumCnt -= 1
-    
-    r['적(2)ROE*EPS'] = r['ROE(%)'] * r['EPS(원)']    #적정주가(2)ROE*EPS
-    r['적(2)ROE*EPS'] = int(r['적(2)ROE*EPS'])
-    if r['적(2)ROE*EPS'] == 0:
+
+    if r['ROE(%)'] > 0 and r['EPS(원)'] > 0:
+        r['적(2)ROE*EPS'] = r['ROE(%)'] * r['EPS(원)']    #적정주가(2)ROE*EPS
+        r['적(2)ROE*EPS'] = int(r['적(2)ROE*EPS'])
+    else:
+        r['적(2)ROE*EPS'] = 0         
         sumCnt -= 1    
 
-    r['적(3)EPS*10'] =  r['EPS(원)']*10    #적정주가(3)EPS*10
-    r['적(3)EPS*10'] = int(r['적(3)EPS*10'])
-    if r['적(3)EPS*10'] == 0:
-        sumCnt -= 1       
+    if r['EPS(원)'] > 0:
+        r['적(3)EPS*10'] =  r['EPS(원)']*10    #적정주가(3)EPS*10
+        r['적(3)EPS*10'] = int(r['적(3)EPS*10'])
+    else:        
+        r['적(3)EPS*10'] = 0
+        sumCnt -= 1  
 
     try:
         r['적(4)s-lim'] = r['기업가치(백만)']/ r['발행주식수(보통주)']*100000000 #100000000     #적정주가(4)s-lim
         r['적(4)s-lim'] = int(r['적(4)s-lim'])
+        if r['적(4)s-lim'] < 0:
+            r['적(4)s-lim'] = 0
     except:
          r['적(4)s-lim'] = 0
-         sumCnt -= 1
+    finally:         
+        if r['적(4)s-lim'] == 0:
+            sumCnt -= 1         
+
     try:
         r['적(5)당기순이익*PER'] = r['당기순이익'] * r['PER(배)'] * 100000000 / r['발행주식수(보통주)'] #100000000    #적정주가(5)당기순이익*PER
         r['적(5)당기순이익*PER'] = int(r['적(5)당기순이익*PER'])
+        if r['적(5)당기순이익*PER'] < 0:
+            r['적(5)당기순이익*PER'] = 0        
     except:
-         r['적(5)당기순이익*PER'] = 0
-         sumCnt -= 1
+        r['적(5)당기순이익*PER'] = 0
+    finally:         
+        if  r['적(5)당기순이익*PER'] == 0:
+            sumCnt -= 1         
+
     
     try:
         r['추천매수가'] = (r['자본총계(지배)']+r['자본총계(지배)']*(r['ROE(%)']-7.9)/7.9*(0.8/(1+7.9-0.8)))/r['발행주식수(보통주)']*100000000 #100000000    #적정매수가
@@ -881,6 +898,8 @@ def stock_fair_value(main, etc, employee, listing_date):
     try:
         r['적정가'] = sum([r['적(1)PER*EPS'],r['적(2)ROE*EPS'],r['적(3)EPS*10'],r['적(4)s-lim'],r['적(5)당기순이익*PER']]) / sumCnt
         r['적정가'] = int(r['적정가'])
+        if r['적정가'] < 0:
+            r['적정가'] = 0        
     except:
         r['적정가'] = 0
 
@@ -1021,12 +1040,15 @@ def clinic_test(request):
         data = json.loads(request.body.decode('utf-8'))
         corpName = data['corpName']
 
-        isExist = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()
-        if not isExist:
-            return JsonResponse([], safe=False)
-            # return HttpResponse('Not Found', status=404)
+        if corpName:
+            isExist = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()
+            if not isExist:
+                return JsonResponse([], safe=False)
 
-        rows = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).values()
+            rows = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).values()
+        else:
+            rows = mdcin_clinc_test_info.objects.all().order_by('-승인일')[:100].values()            
+
         rows = list(rows)
         res = [dict(row, **{
                 '신청자': row['신청자'],

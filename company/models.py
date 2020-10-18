@@ -89,3 +89,20 @@ class nice_corp(models.Model):
 
     class Meta:
         db_table = '"nice_corp"'
+
+class disclosure_report(models.Model):
+    objects = models.Manager()
+    법인구분 = models.CharField(max_length=10, null=True)
+    종목명 = models.CharField(max_length=255)
+    고유번호 = models.CharField(max_length=10) 
+    종목코드 = models.CharField(max_length=10) 
+    보고서명 = models.CharField(max_length=255)
+    접수번호 = models.CharField(max_length=15, primary_key = True)
+    공시제출인명 = models.CharField(max_length=255)
+    접수일자 = models.DateField()
+    비고 = models.CharField(max_length=255, null=True)
+
+    class Meta:
+        db_table = '"disclosure_report"'            
+
+# primary_key가 있어야 id가 생성안됨
