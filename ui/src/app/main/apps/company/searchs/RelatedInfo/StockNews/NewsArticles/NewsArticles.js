@@ -14,7 +14,6 @@ const useStyles = makeStyles(theme => ({
 
 function NewsArticles() {
 	const classes = useStyles();
-	// const { selectCode } = props;
 	const theme = useTheme();
 	const news = useSelector(({ companyApp }) => companyApp.searchs.news);
 	const newsSA = useSelector(({ companyApp }) => companyApp.searchs.newsSA);

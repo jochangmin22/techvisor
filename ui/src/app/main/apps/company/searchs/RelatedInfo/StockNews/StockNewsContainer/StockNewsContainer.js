@@ -5,23 +5,23 @@ import RelatedCompany from '../RelatedCompany';
 import { getNews, getNewsSA, getRelatedCompany } from 'app/main/apps/company/store/searchsSlice';
 
 function StockNewsContainer(props) {
+	const { selectedCode } = props;
 	const dispatch = useDispatch();
-	const { selectCode } = props;
+	const searchText = selectedCode && selectedCode.corpName ? selectedCode.corpName : '주식';
 
 	useEffect(() => {
-		if (selectCode && selectCode.length > 0) {
-			dispatch(getNews({ params: { searchText: selectCode, searchNum: '' }, subParams: {} })).then(() => {
-				dispatch(getNewsSA({ params: { searchText: selectCode, searchNum: '' }, subParams: {} }));
-				dispatch(getRelatedCompany({ params: { searchText: selectCode, searchNum: '' }, subParams: {} }));
-			});
-		}
+		dispatch(getNews({ params: { searchText: searchText, searchNum: '' }, subParams: {} })).then(() => {
+			dispatch(getNewsSA({ params: { searchText: searchText, searchNum: '' }, subParams: {} }));
+			dispatch(getRelatedCompany({ params: { searchText: searchText, searchNum: '' }, subParams: {} }));
+		});
+
 		// eslint-disable-next-line
-	}, [selectCode]);
+	}, [selectedCode]);
 
 	return (
 		<div className="w-full h-full">
-			<NewsArticles selectCode={selectCode} />
-			{selectCode === '주식' && <RelatedCompany selectCode={selectCode} />}
+			<NewsArticles />
+			{searchText === '주식' && <RelatedCompany />}
 		</div>
 	);
 }
