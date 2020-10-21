@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
+import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';
 import { useSelector, useDispatch } from 'react-redux';
 import clsx from 'clsx';
 import { getDisclosureReport } from 'app/main/apps/company/store/searchsSlice';
@@ -17,10 +17,10 @@ const useStyles = makeStyles(theme => ({
 
 const columnName = {
 	공시대상회사: '180',
-	보고서명: '300',
+	보고서명: '320',
 	제출인: '110',
-	접수일자: '180',
-	비고: '100'
+	접수일자: '90',
+	비고: '80'
 };
 
 const columns = Object.entries(columnName).map(([key, value]) => {
@@ -69,7 +69,7 @@ function CorpReport() {
 		// eslint-disable-next-line
 	}, [corpName]);
 
-	const isEmpty = !!(data.length === 0);
+	const isEmpty = !!(data.length === 0 && !showLoading);
 
 	// if (corpName === undefined) {
 	// 	return '';
@@ -91,34 +91,32 @@ function CorpReport() {
 					/>
 				</div>
 			) : (
-				<>
+				<FuseScrollbars className="max-h-360 px-6">
 					{showLoading ? (
-						<SpinLoading />
+						<div className="h-360">
+							<SpinLoading />
+						</div>
 					) : (
-						<>
-							<FuseScrollbars className="max-h-360 px-6">
-								<EnhancedTable
-									columns={columns}
-									// defaultColumn={defaultColumn}
-									data={data}
-									size="small"
-									pageSize={8}
-									pageOptions={[8, 16, 24]}
-									onRowClick={(ev, row) => {
-										if (row) {
-											window.open(
-												'https://dart.fss.or.kr/dsaf001/main.do?rcpNo=' + row.original.접수번호,
-												'_blank'
-											);
-											// props.history.push(row.original.link);
-											// dispatch(openEditContactDialog(row.original));
-										}
-									}}
-								/>
-							</FuseScrollbars>
-						</>
+						<EnhancedTable
+							columns={columns}
+							// defaultColumn={defaultColumn}
+							data={data}
+							size="small"
+							pageSize={8}
+							pageOptions={[8, 16, 24]}
+							onRowClick={(ev, row) => {
+								if (row) {
+									window.open(
+										'https://dart.fss.or.kr/dsaf001/main.do?rcpNo=' + row.original.접수번호,
+										'_blank'
+									);
+									// props.history.push(row.original.link);
+									// dispatch(openEditContactDialog(row.original));
+								}
+							}}
+						/>
 					)}
-				</>
+				</FuseScrollbars>
 			)}
 		</div>
 	);

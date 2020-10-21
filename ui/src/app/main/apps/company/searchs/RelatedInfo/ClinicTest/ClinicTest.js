@@ -70,7 +70,7 @@ function ClinicTest() {
 		// eslint-disable-next-line
 	}, [corpName]);
 
-	const isEmpty = !!(data.length === 0);
+	const isEmpty = !!(data.length === 0 && !showLoading);
 
 	// if (corpName === undefined) {
 	// 	return '';
@@ -90,31 +90,29 @@ function ClinicTest() {
 					text="선택하신 기업명으로 검색된 임상실험 내역이 없습니다."
 				/>
 			) : (
-				<>
+				<FuseScrollbars className="max-h-360 px-6">
 					{showLoading ? (
-						<SpinLoading />
+						<div className="h-360">
+							<SpinLoading />
+						</div>
 					) : (
-						<>
-							<FuseScrollbars className="max-h-360 px-6">
-								<EnhancedTable
-									columns={columns}
-									// defaultColumn={defaultColumn}
-									data={data}
-									size="small"
-									pageSize={8}
-									pageOptions={[8, 16, 24]}
-									onRowClick={(ev, row) => {
-										if (row) {
-											// window.open(row.original.link, '_blank');
-											// props.history.push(row.original.link);
-											// dispatch(openEditContactDialog(row.original));
-										}
-									}}
-								/>
-							</FuseScrollbars>
-						</>
+						<EnhancedTable
+							columns={columns}
+							// defaultColumn={defaultColumn}
+							data={data}
+							size="small"
+							pageSize={8}
+							pageOptions={[8, 16, 24]}
+							onRowClick={(ev, row) => {
+								if (row) {
+									// window.open(row.original.link, '_blank');
+									// props.history.push(row.original.link);
+									// dispatch(openEditContactDialog(row.original));
+								}
+							}}
+						/>
 					)}
-				</>
+				</FuseScrollbars>
 			)}
 		</div>
 	);

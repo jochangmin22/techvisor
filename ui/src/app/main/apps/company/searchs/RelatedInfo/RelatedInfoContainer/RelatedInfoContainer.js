@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
 import StockNewsContainer from '../StockNews/StockNewsContainer';
 import CorpReport from '../CorpReport';
@@ -15,9 +16,9 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function NewsContainer(props) {
+function RelatedInfoContainer(props) {
 	const classes = useStyles();
-	const { selectCode } = props;
+	const { selectedCode } = props;
 	const [currentRange, setCurrentRange] = useState(0);
 
 	function handleChangeRange(range) {
@@ -33,9 +34,13 @@ function NewsContainer(props) {
 						msg="선택한 기업이 있으면 관련 정보를, 선택한 기업이 없으면 최근 정보를 표시합니다."
 					/>
 					<DraggableIcon />
+					{selectedCode.corpName && (
+						<Typography className="font-medium text-gray-600 ml-8" color="inherit">
+							{selectedCode.corpName}
+						</Typography>
+					)}
 				</div>
-
-				<div className="flex w-full sm:w-320 mx-16 px-12 items-center">
+				<div className="flex w-full sm:w-288 mx-16 px-12 items-center">
 					{['뉴스', '공시', '임상', '특허'].map((key, index) => {
 						return (
 							<Button
@@ -55,22 +60,22 @@ function NewsContainer(props) {
 			<div className="flex flex-row flex-wrap">
 				{currentRange === 0 && (
 					<div className="flex w-full">
-						<StockNewsContainer selectCode={selectCode} />
+						<StockNewsContainer selectedCode={selectedCode} />
 					</div>
 				)}
 				{currentRange === 1 && (
 					<div className="flex w-full">
-						<CorpReport selectCode={selectCode} />
+						<CorpReport />
 					</div>
 				)}
 				{currentRange === 2 && (
 					<div className="flex w-full">
-						<ClinicTest selectCode={selectCode} />
+						<ClinicTest />
 					</div>
 				)}
 				{currentRange === 3 && (
 					<div className="flex w-full">
-						<OwnedPatent selectCode={selectCode} />
+						<OwnedPatent />
 					</div>
 				)}
 			</div>
@@ -78,4 +83,4 @@ function NewsContainer(props) {
 	);
 }
 
-export default NewsContainer;
+export default RelatedInfoContainer;

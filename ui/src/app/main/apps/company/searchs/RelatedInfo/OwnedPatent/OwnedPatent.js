@@ -197,68 +197,64 @@ function OwnedPatent(props) {
 		dispatch(updateCols(cols));
 	}, 300);
 
-	const isEmpty = !!(entities.length === 0);
+	const isEmpty = !!(entities.length === 0 && !showLoading);
+	const emptyText =
+		corpName !== undefined && corpName
+			? '선택하신 기업명으로 검색된 보유특허 내역이 없습니다.'
+			: '먼저 기업명을 선택해주세요';
 
 	return (
 		<div className="w-full h-full pb-8">
-			<>
-				<div className="p-12 flex items-center justify-between">
-					<div className="px-12 flex items-center justify-end mb-8">
-						<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4')}>
-							검색 결과 {Number(entities.length).toLocaleString()} 건
-						</Typography>
-					</div>
-					<div className="flex items-center">
-						<Button
-							variant="outlined"
-							color="default"
-							// onClick={onBtExport}
-							className="shadow-none px-16"
-							startIcon={<SaveAltIcon />}
-						>
-							<CSVLink data={csvData} filename={'patent-list.csv'}>
-								Export to CSV
-							</CSVLink>
-						</Button>
-						<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
-					</div>
+			<div className="p-12 flex items-center justify-between">
+				<div className="px-12 flex items-center justify-end mb-8">
+					<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4')}>
+						검색 결과 {Number(entities.length).toLocaleString()} 건
+					</Typography>
 				</div>
-				{isEmpty ? (
-					<div className="max-h-320">
-						<EmptyMsg
-							icon="wb_incandescent"
-							msg="특허"
-							text="선택하신 기업명으로 검색된 보유특허 내역이 없습니다."
-						/>
-					</div>
-				) : (
-					<>
-						{showLoading ? (
+				<div className="flex items-center">
+					<Button
+						variant="outlined"
+						color="default"
+						// onClick={onBtExport}
+						className="shadow-none px-16"
+						startIcon={<SaveAltIcon />}
+					>
+						<CSVLink data={csvData} filename={'patent-list.csv'}>
+							Export to CSV
+						</CSVLink>
+					</Button>
+					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
+				</div>
+			</div>
+			{isEmpty ? (
+				<div className="max-h-320">
+					<EmptyMsg icon="wb_incandescent" msg="특허" text={emptyText} />
+				</div>
+			) : (
+				<FuseScrollbars className="max-h-360 px-6">
+					{showLoading ? (
+						<div className="h-360">
 							<SpinLoading />
-						) : (
-							<>
-								<FuseScrollbars className="max-h-360 px-6">
-									<EnhancedTable
-										columns={columns}
-										data={data}
-										fetchData={fetchData}
-										loading={loading}
-										pageCount={pageCount}
-										pageSize={6}
-										pageOptions={[6, 12, 18]}
-										size="small"
-										onRowClick={(ev, row) => {
-											if (row) {
-												props.history.push(`/apps/search/${row.original.출원번호}`);
-											}
-										}}
-									/>
-								</FuseScrollbars>
-							</>
-						)}
-					</>
-				)}
-			</>
+						</div>
+					) : (
+						<EnhancedTable
+							columns={columns}
+							data={data}
+							fetchData={fetchData}
+							loading={loading}
+							pageCount={pageCount}
+							pageSize={6}
+							pageOptions={[6, 12, 18]}
+							size="small"
+							onRowClick={(ev, row) => {
+								if (row) {
+									props.history.push(`/apps/search/${row.original.출원번호}`);
+								}
+							}}
+						/>
+					)}
+				</FuseScrollbars>
+			)}
 		</div>
 	);
 }

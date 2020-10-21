@@ -12,7 +12,7 @@ const useStyles = makeStyles(theme => ({
 	negativeBackground: { backgroundColor: theme.palette.primary.light }
 }));
 
-function NewsArticles(props) {
+function NewsArticles() {
 	const classes = useStyles();
 	// const { selectCode } = props;
 	const theme = useTheme();

@@ -4,7 +4,7 @@ const settingsConfig = {
 		config: {} // checkout default layout configs at app/fuse-layouts for example  app/fuse-layouts/layout1/Layout1Config.js
 	},
 	customScrollbars: true,
-	animations: false,
+	animations: true,
 	direction: 'ltr', // rtl, ltr
 	theme: {
 		main: 'light7',

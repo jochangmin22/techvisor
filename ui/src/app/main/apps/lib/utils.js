@@ -52,6 +52,6 @@ export function numberToWon(number) {
 		if (!resultArray[i]) continue;
 		resultString = String(resultArray[i]) + unitWords[i] + resultString;
 	}
-	resultString += resultString !== '' ? '원' : '';
+	resultString += resultString !== '' ? '' : '';
 	return resultString;
 }

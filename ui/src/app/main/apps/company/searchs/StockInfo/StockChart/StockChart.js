@@ -1,18 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
-import Button from '@material-ui/core/Button';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardHeader from '@material-ui/core/CardHeader';
 import echarts from 'echarts';
 import moment from 'moment';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import { useSelector, useDispatch } from 'react-redux';
-import { setChartType } from 'app/main/apps/company/store/searchSlice';
+import { useSelector } from 'react-redux';
 import debounce from 'lodash/debounce';
 import clsx from 'clsx';
-import { chartTypes } from 'app/main/apps/lib/variables';
 import FuseAnimate from '@fuse/core/FuseAnimate';
 
 function calculateMA(dayCount, data) {
@@ -32,7 +26,6 @@ function calculateMA(dayCount, data) {
 }
 
 function StockChart() {
-	const dispatch = useDispatch();
 	const chartRef = useRef(null);
 	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode.stockCode);
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.stock.entities);
@@ -41,17 +34,6 @@ function StockChart() {
 	// const [series, setSeries] = useState(null);
 	// const [xAxis, setXAxis] = useState(null);
 	const [echart, setEchart] = useState(null);
-
-	const [currentRange, setCurrentRange] = useState({
-		name: 'day',
-		text: '하루',
-		unit: '5분'
-	});
-
-	function handleChangeRange(range) {
-		setCurrentRange(range);
-		dispatch(setChartType(range));
-	}
 
 	useEffect(() => {
 		if (stockCode && entities) {
@@ -141,8 +123,8 @@ function StockChart() {
 		const option = {
 			animation: false,
 			title: {
-				left: 'left',
-				text: corpName
+				// left: 'left',
+				// text: corpName
 			},
 			legend: {
 				top: 30,
@@ -384,7 +366,7 @@ function StockChart() {
 	if (!stockCode || stockCode.length === 0) {
 		return (
 			<div className="flex flex-col flex-1 items-center justify-center p-16">
-				<div className="max-w-512 text-center">
+				<div className="max-w-400 text-center">
 					<FuseAnimate delay={500}>
 						<Typography variant="h5" color="textSecondary" className="mb-16">
 							주식 차트가 없습니다.
@@ -402,56 +384,35 @@ function StockChart() {
 	}
 
 	if (stockCode && (!entities || entities.length === 0)) {
-		return <SpinLoading />;
+		return (
+			<div className="h-256">
+				<SpinLoading />
+			</div>
+		);
 	}
 
 	return (
 		<div className="md:flex w-full">
-			<Card variant="outlined" className="w-full">
-				<CardHeader
-					className="px-8 pt-16 pb-0"
-					action={
-						<div className="items-end">
-							{chartTypes.map(({ name, text }) => {
-								return (
-									<Button
-										key={name}
-										className={clsx(
-											'shadow-none min-w-48 text-11',
-											currentRange === name ? 'font-bold' : 'font-normal'
-										)}
-										onClick={() => handleChangeRange(name)}
-										color="default"
-										variant={currentRange === name ? 'contained' : 'text'}
-									>
-										{text}
-									</Button>
-								);
-							})}
-						</div>
-					}
-					title={
-						<div className="flex items-center pl-4 -mt-8">
-							{today && (
-								<div className="flex items-center">
-									<Typography className="font-500 text-20">{today.price}</Typography>
-									<div className="flex flex-row items-center">
-										<Icon className={today.color}>{today.icon}</Icon>
-										<div className={clsx(today.color, 'ml-8 min-w-128')}>
-											<Typography variant="body1">
-												{today.increase} ({today.percent})
-											</Typography>
-										</div>
-									</div>
+			<div className="flex flex-col w-full h-full">
+				<div className="flex items-center pl-28">
+					{today && (
+						<div className="flex items-center">
+							<Typography className="font-500 text-20">{today.price}</Typography>
+							<div className="flex flex-row items-center">
+								<Icon className={today.color}>{today.icon}</Icon>
+								<div className={clsx(today.color, 'ml-8 min-w-128')}>
+									<Typography variant="body1">
+										{today.increase} ({today.percent})
+									</Typography>
 								</div>
-							)}
+							</div>
 						</div>
-					}
-				/>
-				<CardContent className="px-8 pt-16 pb-0">
-					<div id="main" className="w-full h-288" ref={chartRef}></div>
-				</CardContent>
-			</Card>
+					)}
+				</div>
+				<div className="px-16">
+					<div id="main" className="w-full h-256" ref={chartRef}></div>
+				</div>
+			</div>
 		</div>
 	);
 }

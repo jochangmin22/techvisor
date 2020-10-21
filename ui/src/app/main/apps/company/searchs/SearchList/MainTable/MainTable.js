@@ -11,14 +11,12 @@ import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import DownloadFilterMenu from '../DownloadFilterMenu';
-// import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
-// import { parseInputSearchText } from 'app/main/apps/lib/parseParamsCompany';
 import {
 	updateCols,
 	resetSelectedCode,
 	setSelectedCode,
-	// setSearchParams,
 	setSearchSubmit
 } from 'app/main/apps/company/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
@@ -31,9 +29,12 @@ const columnName = {
 	대표자명: '150',
 	// 지역: '100',
 	시가총액: '100',
-	'업종PER(%)': '100',
+	'업종PER(배)': '100',
 	'PER(배)': '100',
 	'PER갭(%)': '100',
+	'PRR(배)': '100',
+	'주당R&D(원)': '100',
+	'PGF(%)': '100',
 	'PBR(배)': '100',
 	'EPS(원)': '100',
 	'ROE(%)': '100',
@@ -55,9 +56,12 @@ const csvHeaders = [
 	{ key: '주요제품', label: '주요제품' },
 	{ key: '대표자명', label: '대표자명' },
 	{ key: '시가총액', label: '시가총액' },
-	{ key: '업종PER(%)', label: '업종PER(%)' },
+	{ key: '업종PER(배)', label: '업종PER(배)' },
 	{ key: 'PER(배)', label: 'PER(배)' },
 	{ key: 'PER갭(%)', label: 'PER갭(%)' },
+	{ key: 'PRR(배)', label: 'PRR(배)' },
+	{ key: '주당R&D(원)', label: '주당R&D(원)' },
+	{ key: 'PGF(%)', label: 'PGF(%)' },
 	{ key: 'PBR(배)', label: 'PBR(배)' },
 	{ key: 'EPS(원)', label: 'EPS(원)' },
 	{ key: 'ROE(%)', label: 'ROE(%)' },
@@ -75,16 +79,6 @@ const csvHeaders = [
 	{ key: '적(4)s-lim', label: '적정가(4)' },
 	{ key: '적(5)당기순이익*PER', label: '적정가(5)' }
 ];
-// const columnName = {
-// 	업체명: '180',
-// 	사업자등록번호: '110',
-// 	대표자: '150',
-// 	주소: '100',
-// 	상장일: '100',
-// 	주식코드: '110',
-// 	업종명: '200',
-// 	주요제품: '700'
-// };
 
 const columns = Object.entries(columnName).map(([key, value]) => {
 	const bold = key === '회사명' || key === '종목코드' ? 'text-16 font-500' : 'text-14 font-400';
@@ -106,7 +100,7 @@ const useStyles = makeStyles(theme => ({
 	root: { backgroundColor: theme.palette.primary.dark }
 }));
 
-function MainTable(props) {
+function MainTable() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
@@ -126,20 +120,14 @@ function MainTable(props) {
 
 	const handleClick = (name, stockCode, corpNo) => {
 		dispatch(resetSelectedCode());
-		dispatch(setSelectedCode({ stockCode: stockCode, corpNo: corpNo }));
+		dispatch(setSelectedCode({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
 		dispatch(setSearchSubmit(true));
-		props.onShrink(true);
+		// props.onShrink(true);
 	};
 
 	const handleOnChange = useDebounce(cols => {
 		dispatch(updateCols(cols));
 	}, 300);
-
-	// function onBtExport() {}
-
-	// if (!data || data.length === 0) {
-	// 	return <SpinLoading />;
-	// }
 
 	return (
 		<div className="w-full h-full">
@@ -166,16 +154,22 @@ function MainTable(props) {
 				</div>
 			</div>
 			<FuseScrollbars className="max-h-460 px-6">
-				<EnhancedTable
-					columns={columns}
-					data={data}
-					size="small"
-					onRowClick={(ev, row) => {
-						if (row) {
-							handleClick(row.original.회사명, row.original.종목코드);
-						}
-					}}
-				/>
+				{!data || data.length === 0 ? (
+					<div className="h-460">
+						<SpinLoading />;
+					</div>
+				) : (
+					<EnhancedTable
+						columns={columns}
+						data={data}
+						size="small"
+						onRowClick={(ev, row) => {
+							if (row) {
+								handleClick(row.original.회사명, row.original.종목코드);
+							}
+						}}
+					/>
+				)}
 			</FuseScrollbars>
 		</div>
 	);

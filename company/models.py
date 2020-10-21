@@ -46,11 +46,10 @@ class mdcin_clinc_test_info(models.Model):
     신청자 = models.CharField(max_length=100)
     승인일 = models.IntegerField()
     제품명 = models.CharField(max_length=255)
-    정보 = models.JSONField(default=dict, null=True)
-    # 연구실명 = models.CharField(max_length=255)
-    # 시험제목 = models.CharField(max_length=255)
-    # 임상단계 = models.CharField(max_length=50)
-    # created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    # 정보 = models.JSONField(default=dict, null=True)
+    시험제목 = models.TextField(blank=True, null=True)
+    연구실명 = models.TextField(blank=True, null=True)
+    임상단계 = models.CharField(max_length=50, null=True)
 
     class Meta:
         db_table = '"mdcin_clinc_test_info"'    

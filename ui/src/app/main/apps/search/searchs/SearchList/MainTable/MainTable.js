@@ -190,47 +190,43 @@ function MainTable(props) {
 
 	return (
 		<Paper className="rounded-8 shadow h-512 w-full mb-36">
-			<>
-				<div className="p-12 flex items-center justify-between">
-					<div className="px-12 flex flex-row items-center justify-end mb-8">
-						<Typography
-							className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4 mr-8')}
-						>
-							검색 결과 {Number(entities.length).toLocaleString()} 건
-						</Typography>
-						<DraggableIcon />
-					</div>
-					<div className="flex items-center">
-						<Button
-							variant="outlined"
-							color="default"
-							// onClick={onBtExport}
-							className="shadow-none px-16"
-							startIcon={<SaveAltIcon />}
-						>
-							<CSVLink data={csvData} filename={'patent-list.csv'}>
-								Export to CSV
-							</CSVLink>
-						</Button>
-						<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
-					</div>
+			<div className="p-12 flex items-center justify-between">
+				<div className="px-12 flex flex-row items-center justify-end mb-8">
+					<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4 mr-8')}>
+						검색 결과 {Number(entities.length).toLocaleString()} 건
+					</Typography>
+					<DraggableIcon />
 				</div>
-				<FuseScrollbars className="max-h-460 px-6">
-					<EnhancedTable
-						columns={columns}
-						data={data}
-						fetchData={fetchData}
-						loading={loading}
-						pageCount={pageCount}
-						size="small"
-						onRowClick={(ev, row) => {
-							if (row) {
-								props.history.push(`/apps/search/${row.original.출원번호}`);
-							}
-						}}
-					/>
-				</FuseScrollbars>
-			</>
+				<div className="flex items-center">
+					<Button
+						variant="outlined"
+						color="default"
+						// onClick={onBtExport}
+						className="shadow-none px-16"
+						startIcon={<SaveAltIcon />}
+					>
+						<CSVLink data={csvData} filename={'patent-list.csv'}>
+							Export to CSV
+						</CSVLink>
+					</Button>
+					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
+				</div>
+			</div>
+			<FuseScrollbars className="max-h-460 px-6">
+				<EnhancedTable
+					columns={columns}
+					data={data}
+					fetchData={fetchData}
+					loading={loading}
+					pageCount={pageCount}
+					size="small"
+					onRowClick={(ev, row) => {
+						if (row) {
+							props.history.push(`/apps/search/${row.original.출원번호}`);
+						}
+					}}
+				/>
+			</FuseScrollbars>
 		</Paper>
 	);
 }

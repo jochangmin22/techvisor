@@ -8693,7 +8693,7 @@ fsevents@~2.1.2:
     react-dom: 16.14.0
     react-draggable: 4.4.3
     react-frame-component: 4.1.3
-    react-google-login: ^5.1.21
+    react-google-login: ^5.1.22
     react-highlight-selection: ^1.0.2
     react-highlight-words: ^0.16.0
     react-i18next: 11.7.3
@@ -8719,7 +8719,7 @@ fsevents@~2.1.2:
     redux-logger: 4.0.0
     source-map-explorer: 2.5.0
     styled-components: 5.2.0
-    tailwindcss: 1.9.4
+    tailwindcss: 1.9.5
     tailwindcss-dir: 4.0.0
     typeface-muli: 1.1.13
     velocity-animate: 1.5.2
@@ -15118,16 +15118,16 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-google-login@npm:^5.1.21":
-  version: 5.1.21
-  resolution: "react-google-login@npm:5.1.21"
+"react-google-login@npm:^5.1.22":
+  version: 5.1.22
+  resolution: "react-google-login@npm:5.1.22"
   dependencies:
     "@types/react": "*"
     prop-types: ^15.6.0
   peerDependencies:
     react: ^16.0.0
     react-dom: ^16.0.0
-  checksum: 5d97e093c9b9e1f62acbb7057dbacb952943f26531c8f3dfb562a154a7b58d2238f2a38a2b0be88fdc93bf10b726e532941019810e0f4422a0deeb3dc04366a2
+  checksum: bfac4efca0da1a3cc3bb912bbf4bfea257851a7488b7905c78ea89c7c9cf960b9f1b40be477997c71c8b7b7b216dae68c9d3feda2ccfe37481d03e88537e1b60
   languageName: node
   linkType: hard
 
@@ -17504,9 +17504,9 @@ resolve@1.15.0:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:1.9.4":
-  version: 1.9.4
-  resolution: "tailwindcss@npm:1.9.4"
+"tailwindcss@npm:1.9.5":
+  version: 1.9.5
+  resolution: "tailwindcss@npm:1.9.5"
   dependencies:
     "@fullhuman/postcss-purgecss": ^2.1.2
     autoprefixer: ^9.4.5
@@ -17533,7 +17533,7 @@ resolve@1.15.0:
   bin:
     tailwind: lib/cli.js
     tailwindcss: lib/cli.js
-  checksum: 360b2a287ea3f0c05cb106eb09a0e11d001ac48f1d1796b9d367971347834d0c698db9a93a1345bbc3a8adb3a27e7aad87462e98cb04d9a159c9783336db8b01
+  checksum: 073517a35273c4eb42ff8bdad728474207c2454e9270d00c73eaf18c793810899f3f13dfacfdef0e2a0f00e0ed14a23668c9bb19ee3b2d348f4472c16d6baef0
   languageName: node
   linkType: hard
 
