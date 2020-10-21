@@ -6,22 +6,22 @@ import { getNews, getNewsSA, getRelatedCompany } from 'app/main/apps/company/sto
 
 function StockNewsContainer(props) {
 	const dispatch = useDispatch();
-	const { selectedCode } = props;
-	const searchText = selectedCode && selectedCode.corpName ? selectedCode.corpName : '주식';
+	const { selectCode } = props;
 
 	useEffect(() => {
-		dispatch(getNews({ params: { searchText: searchText, searchNum: '' }, subParams: {} })).then(() => {
-			dispatch(getNewsSA({ params: { searchText: searchText, searchNum: '' }, subParams: {} }));
-			dispatch(getRelatedCompany({ params: { searchText: searchText, searchNum: '' }, subParams: {} }));
-		});
-
+		if (selectCode && selectCode.length > 0) {
+			dispatch(getNews({ params: { searchText: selectCode, searchNum: '' }, subParams: {} })).then(() => {
+				dispatch(getNewsSA({ params: { searchText: selectCode, searchNum: '' }, subParams: {} }));
+				dispatch(getRelatedCompany({ params: { searchText: selectCode, searchNum: '' }, subParams: {} }));
+			});
+		}
 		// eslint-disable-next-line
-	}, [selectedCode]);
+	}, [selectCode]);
 
 	return (
 		<div className="w-full h-full">
-			<NewsArticles />
-			{searchText === '주식' && <RelatedCompany />}
+			<NewsArticles selectCode={selectCode} />
+			{selectCode === '주식' && <RelatedCompany selectCode={selectCode} />}
 		</div>
 	);
 }
