@@ -1,115 +1,190 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import Typography from '@material-ui/core/Typography';
-import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
-import { useSelector, useDispatch } from 'react-redux';
-import clsx from 'clsx';
-import { getClinicTest } from 'app/main/apps/company/store/searchsSlice';
-import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
-import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import debounce from 'lodash/debounce';
+import echarts from 'echarts';
+import 'echarts/theme/blue';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
+import { useTheme } from '@material-ui/core';
+import PopoverContent from 'app/main/apps/lib/PopoverContent';
+import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-// import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
-// import MatrixAnalysisMenu from '../MatrixAnalysisMenu';
 
-const columnName = {
-	신청자: '180',
-	임상단계: '110',
-	승인일: '110',
-	제품명: '180',
-	시험제목: '100',
-	연구실명: '100'
-};
+// const rightNow = new Date();
+// const today = rightNow.toISOString().slice(0, 10); //.replace(/-/g, '');
 
-const columns = Object.entries(columnName).map(([key, value]) => {
-	const bold = key === '신청자' || key === '임상단계' ? 'text-16 font-500' : 'text-13 font-400';
-	return {
-		Header: key,
-		accessor: key,
-		className: clsx(bold, 'text-left truncate'),
-		sortable: true,
-		width: value
-	};
-});
+const content = (
+	<>
+		<Typography variant="body1" className="mb-4">
+			선택한 회사의 적정주가를 분석합니다.
+		</Typography>
+		<Typography variant="body1" className="mb-4">
+			적정가1
+		</Typography>
+		<Typography variant="caption" className="font-300">
+			PER * EPS
+		</Typography>
+		<Typography variant="body1" className="my-4">
+			적정가2
+		</Typography>
+		<Typography variant="caption" className="font-300">
+			ROE * EPS
+		</Typography>
+		<Typography variant="body1" className="my-4">
+			적정가3
+		</Typography>
+		<Typography variant="caption" className="font-300">
+			EPS * 10
+		</Typography>
+		<Typography variant="body1" className="my-4">
+			적정가4
+		</Typography>
+		<Typography variant="caption" className="font-300">
+			s-lim
+		</Typography>
+		<Typography variant="body1" className="my-4">
+			적정가5
+		</Typography>
+		<Typography variant="caption" className="font-300">
+			당기순이익 * PER
+		</Typography>
+	</>
+);
 
-// const colsList = Object.keys(columnName).map((key, index) => ({
-// 	id: key + 1,
-// 	name: key,
-// 	field: key
-// }));
+function StockFairValue(props) {
+	const theme = useTheme();
+	const chartRef = useRef(null);
+	const [echart, setEchart] = useState(null);
 
-function StockFairValue() {
-	const dispatch = useDispatch();
-	const clinicTest = useSelector(({ companyApp }) => companyApp.searchs.clinicTest);
-	// const clinicOptions = useSelector(({ companyApp }) => companyApp.searchs.clinicOptions);
 	const companyInfo = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
-	const { 회사명: corpName } = companyInfo;
 
-	const data = useMemo(() => (clinicTest ? clinicTest : []), [clinicTest]);
+	const { 회사명: corpName, 종목코드: stockCode, FV1, FV2, FV3, FV4, FV5, FV, CV } = companyInfo;
 
-	useEffect(() => {
-		setRowsCount(data.length);
-	}, [data]);
-	const [rowsCount, setRowsCount] = useState(null);
-
-	const [showLoading, setShowLoading] = useState(false);
+	// const [data, setData] = useState(initialState);
 
 	useEffect(() => {
-		setShowLoading(true);
-		if (corpName !== undefined && corpName) {
-			dispatch(getClinicTest({ corpName: corpName })).then(() => {
-				setShowLoading(false);
-			});
+		if (companyInfo && Object.keys(companyInfo).length > 0) {
+			drawChart();
 		}
 		// eslint-disable-next-line
-	}, [corpName]);
+	}, [companyInfo]);
 
-	const isEmpty = !!(data.length === 0);
+	const drawChart = () => {
+		if (!companyInfo || Object.keys(companyInfo).length === 0) return;
 
-	// if (corpName === undefined) {
-	// 	return '';
-	// }
+		if (echart) {
+			echart.dispose();
+			setEchart(null);
+		}
+
+		const myChart = echarts.init(chartRef.current, 'blue');
+		setEchart(myChart);
+
+		const option = {
+			xAxis: {
+				type: 'category',
+				data: ['적정가1', '적정가2', '적정가3', '적정가4', '적정가5', '적정가', '현재가']
+			},
+			yAxis: {
+				type: 'value'
+			},
+			series: [
+				{
+					data: [
+						{ value: FV1, itemStyle: { normal: { color: theme.palette.primary.dark } } },
+						{ value: FV2, itemStyle: { normal: { color: theme.palette.primary.main } } },
+						{ value: FV3, itemStyle: { normal: { color: theme.palette.primary.light } } },
+						{ value: FV4, itemStyle: { normal: { color: theme.palette.secondary.dark } } },
+						{ value: FV5, itemStyle: { normal: { color: theme.palette.secondary.main } } },
+						{ value: FV, itemStyle: { normal: { color: theme.palette.secondary.light } } },
+						{ value: CV, itemStyle: { normal: { color: theme.palette.primary.dark } } }
+					],
+					type: 'bar',
+					label: {
+						show: true,
+						position: 'inside'
+					}
+				}
+			],
+			toolbox: {
+				feature: {
+					dataView: {
+						show: true,
+						title: '표로 보기',
+						lang: ['표로 보기', '닫기', '갱신'],
+						readOnly: false
+					},
+					magicType: {
+						show: true,
+						title: { line: '선', bar: '바', stack: '누적 막대', tiled: '타일' },
+						type: ['line', 'bar', 'stack', 'tiled']
+					},
+					restore: { show: true, title: '원래대로' },
+					saveAsImage: {
+						show: true,
+						name: 'ipgrim 적정주가분석 차트',
+						title: '이미지로 저장',
+						lang: ['Click to Save']
+					}
+				}
+			},
+			grid: [
+				{
+					bottom: 110
+				}
+			]
+		};
+		myChart.setOption(option);
+	};
+
+	const handleResize = debounce(() => {
+		if (echart) {
+			echart.resize();
+		}
+	}, 500);
+
+	useEffect(() => {
+		window.addEventListener('resize', handleResize);
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	}, [handleResize]);
+
+	if (!companyInfo || Object.keys(companyInfo).length === 0) {
+		return <SpinLoading />;
+	}
+
+	const isEmpty = !!(!companyInfo || Object.keys(companyInfo).length === 0);
 
 	return (
-		<Paper className="w-full h-full rounded-8 shadow py-8">
+		<Paper className="w-full h-full shadow-none">
 			<div className="px-12 flex items-center justify-between">
-				<div className="flex flex-row items-center">
-					<PopoverMsg title="적정주가분석" msg="검색한 목록의 적정주가를 분석합니다." />
+				<div className="flex flex-row items-center p-8 pb-0">
+					<PopoverContent content={content} title="적정주가분석" variant="h6" />
 					<DraggableIcon />
-					<Typography variant="h6" className="pl-16">
-						검색 결과 ({Number(rowsCount).toLocaleString()})
+					<Typography className="font-medium text-gray-600 ml-8" color="inherit">
+						{corpName}
 					</Typography>
+					<span className="flex flex-row items-center mx-8">
+						{stockCode && (
+							<Typography className="text-13 mr-8 text-gray-500" color="inherit">
+								종목코드 : {stockCode}
+							</Typography>
+						)}
+					</span>
 				</div>
 			</div>
 			{isEmpty ? (
-				<EmptyMsg icon="equalizer" msg="적정주가분석" text="검색한 목록의 적정주가 내역이 없습니다." />
+				<div className="max-h-320">
+					<EmptyMsg
+						icon="wb_incandescent"
+						msg="적정주가분석"
+						text="먼저 검색목록에서 기업명을 선택해주세요"
+					/>
+				</div>
 			) : (
-				<>
-					{showLoading ? (
-						<SpinLoading />
-					) : (
-						<>
-							<FuseScrollbars className="max-h-360 px-6">
-								<EnhancedTable
-									columns={columns}
-									// defaultColumn={defaultColumn}
-									data={data}
-									size="small"
-									pageSize={8}
-									pageOptions={[8, 16, 24]}
-									onRowClick={(ev, row) => {
-										if (row) {
-											// window.open(row.original.link, '_blank');
-											// props.history.push(row.original.link);
-											// dispatch(openEditContactDialog(row.original));
-										}
-									}}
-								/>
-							</FuseScrollbars>
-						</>
-					)}
-				</>
+				<div id="main" className="w-full h-360" ref={chartRef} />
 			)}
 		</Paper>
 	);

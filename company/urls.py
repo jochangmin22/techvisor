@@ -8,6 +8,7 @@ urlpatterns = [
     re_path(r"^api/company-app/searchs/$", views.get_companies, name='get_companies'),
     re_path(r"^api/company-app/searchs/stock$", csrf_exempt(views.get_stock), name='get_stock'),
     re_path(r"^api/company-app/searchs/companyinfo$", csrf_exempt(views.get_company_info), name='get_company_info'),    
+    re_path(r"^api/company-app/searchs/financialinfo$", csrf_exempt(views.get_financial_info), name='get_financial_info'),    
     re_path(r"^api/company-app/searchs/stockinfo$", csrf_exempt(views.get_stock_info), name='get_stock_info'),
     re_path(r"^api/company-app/searchs/clinic$", csrf_exempt(views.get_clinic_test), name='get_clinic_test'),
     re_path(r"^api/company-app/searchs/disclosurereport$", csrf_exempt(views.get_disclosure_report), name='get_disclosure_report'),

@@ -40,8 +40,9 @@ def get_secret(setting, secrets=secrets):
 SECRET_KEY = get_secret("SECRET_KEY")
 
 KIPRIS = get_secret("KIPRIS")
-DART = get_secret("DART")
 NAVER = get_secret("NAVER")
+DART = get_secret("DART")
+MFDS = get_secret("MFDS")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

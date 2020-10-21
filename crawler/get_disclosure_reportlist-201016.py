@@ -1,4 +1,7 @@
 
+from __future__ import print_function
+import argparse 
+
 # app
 import requests
 import pandas as pd
@@ -25,8 +28,6 @@ import sys
 
 import psycopg2
 from psycopg2.extensions import AsIs
-from datetime import datetime
-
 
 DART = {
     "api_key": "e0e209eea9e65bd15ccbafb3adb8db40477cedc5",
@@ -66,33 +67,6 @@ def backupAndEmptyTable(tableName):
             cursor.close()
             connection.close()
 
-def get_corpcode(crtfc_key, only_stock = True):
-    """
-    OpenDART 기업 고유번호 받아오기
-    return 값: only_stock 에 따라 [주식코드를 가진 업체/ 전체] 의 DataFrame
-    """
-    params = {'crtfc_key':crtfc_key}
-    items = ["corp_code","corp_name","stock_code","modify_date"]
-    item_names = ["고유번호","회사명","종목코드","수정일"]
-    url = "https://opendart.fss.or.kr/api/corpCode.xml"
-    res = requests.get(url,params=params)
-    zfile = zipfile.ZipFile(io.BytesIO(res.content))
-    fin = zfile.open(zfile.namelist()[0])
-    root = et.fromstring(fin.read().decode('utf-8'))
-    data = []
-    for child in root:
-        if only_stock:
-            if len(child.find('stock_code').text.strip()) > 1: # 종목코드가 있는 경우
-                data.append([])
-                for item in items:
-                    data[-1].append(child.find(item).text)
-        else:
-            data.append([])
-            for item in items:
-                data[-1].append(child.find(item).text)                
-    df = pd.DataFrame(data, columns=item_names)
-    return df
-
 def get_list(crtfc_key, show_total = False, **kwargs):
     keys = ['corp_code','bgn_de','end_de','last_reprt_at','pblntf_ty','pblntf_detail_ty','corp_cls','sort','sort_mth','page_no','page_count']
     for key in kwargs.keys():
@@ -131,8 +105,29 @@ def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
         yield date1 + timedelta(n)      
 
-def main_def(bgn_de, end_de):
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')        
+
+def main_def():
     """ 공시정보 - 공시검색 전체목록 크롤러 """
+    now = datetime.now()
+    formattedToday = now.strftime("%Y%m%d")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--start', type=str, default=0, help="What is the start date?")
+    parser.add_argument('--end', type=str, default=formattedToday, help="What is the end date?")
+
+    args = parser.parse_args()
+
+    start = args.start
+    end = args.end
 
     db_connection_url = "postgresql://{}:{}@{}:{}/{}".format(
         DATABASES['default']['USER'],
@@ -145,10 +140,10 @@ def main_def(bgn_de, end_de):
     # start_time = time.time()
     # crtfc_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&bgn_de=20200816&end_de=20201016&corp_cls=Y&page_no=1&page_count=100
 
-    data = str(bgn_de)
+    data = str(start)
     start_dt = date(int(data[0:4]), int(data[4:6]), int(data[6:8]))
 
-    data = str(end_de)
+    data = str(end)
     end_dt = date(int(data[0:4]), int(data[4:6]), int(data[6:8]))
 
     for dt in daterange(start_dt, end_dt):
@@ -166,11 +161,12 @@ def main_def(bgn_de, end_de):
 
                 # df.to_sql('disclosure_report', engine, if_exists='replace', index=False, chunksize=10000)
                 df.to_sql('disclosure_report', engine, if_exists='append', index=False, chunksize=10000)
+                time.sleep(1)
         except:
             print('날짜 :', str(my_date), '자료없음')
             pass
 
-        time.sleep(1)
+        # time.sleep(1)
 
     print('----------------------')
     print('done')    
@@ -180,8 +176,8 @@ if __name__ == "__main__":
     # request = int(sys.argv[1])
     # argv ex) 0 2380 True
     # page_no = int(sys.argv[1])
-    bgn_de = sys.argv[1]
-    end_de = sys.argv[2]
+    # bgn_de = sys.argv[1]
+    # end_de = sys.argv[2]
     # sys.setrecursionlimit(5000)
-    main_def(bgn_de, end_de)    
+    main_def()    
     # main_def()    

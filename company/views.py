@@ -21,6 +21,9 @@ def get_query(request):
 def get_company_info(request):
     return companies.parse_company_info(request)
 
+def get_financial_info(request):
+    return companies.parse_financial_info(request)
+
 def get_stock(request):
     return companies.parse_stock(request)
 

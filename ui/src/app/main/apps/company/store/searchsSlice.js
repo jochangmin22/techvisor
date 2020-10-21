@@ -39,6 +39,13 @@ export const getCompanyInfo = createAsyncThunk(NAME + 'getCompanyInfo', async (p
 	return data;
 });
 
+export const getFinancialInfo = createAsyncThunk(NAME + 'getFinancialInfo', async (params, { dispatch }) => {
+	const response = await axios.post(URL + 'financialinfo', params);
+	const data = await response.data;
+
+	return data;
+});
+
 export const getClinicTest = createAsyncThunk(NAME + 'getClinicTest', async params => {
 	const response = await axios.post(URL + 'clinic', params);
 	const data = await response.data;
@@ -170,7 +177,8 @@ export const initialState = {
 	searchSubmit: null,
 	selectedCode: {
 		stockCode: '',
-		corpNo: ''
+		corpNo: '',
+		corpName: ''
 	},
 	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
 	stock: {
@@ -178,7 +186,8 @@ export const initialState = {
 		chartType: 'year',
 		stockInfo: []
 	},
-	companyInfo: [],
+	companyInfo: {},
+	financialInfo: {},
 	clinicTest: [],
 	disclosureReport: [],
 	ownedPatent: [],
@@ -269,6 +278,9 @@ const searchsSlice = createSlice({
 		},
 		[getCompanyInfo.fulfilled]: (state, action) => {
 			state.companyInfo = action.payload;
+		},
+		[getFinancialInfo.fulfilled]: (state, action) => {
+			state.financialInfo = action.payload;
 		},
 		[getClinicTest.fulfilled]: (state, action) => {
 			state.clinicTest = action.payload;

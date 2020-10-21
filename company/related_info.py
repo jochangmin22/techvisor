@@ -7,6 +7,7 @@ import json
 from .utils import dictfetchall
 from .models import mdcin_clinc_test_info, disclosure_report
 from search.models import listed_corp, disclosure
+from .crawler import update_today_disclosure_report, update_today_crawl_mdcline
 
 def clinic_test(request):
     ''' If there is no corpName, the last 100 rows are displayed '''
@@ -14,12 +15,15 @@ def clinic_test(request):
         data = json.loads(request.body.decode('utf-8'))
         corpName = data['corpName']
 
+         # crawl today report
+        update_today_crawl_mdcline()
+
         if corpName:
             isExist = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()
             if not isExist:
                 return JsonResponse([], safe=False)
 
-            rows = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).values()
+            rows = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).order_by('-승인일').values()
         else:
             rows = mdcin_clinc_test_info.objects.all().order_by('-승인일')[:100].values()            
 
@@ -28,9 +32,9 @@ def clinic_test(request):
                 '신청자': row['신청자'],
                 '승인일': row['승인일'],
                 '제품명': row['제품명'],
-                '시험제목': row['정보']['시험제목'],
-                '연구실명': row['정보']['연구실명'],
-                '임상단계': row['정보']['임상단계'],
+                '시험제목': row['시험제목'],
+                '연구실명': row['연구실명'],
+                '임상단계': row['임상단계'],
             }) for row in rows]
             
         return JsonResponse(res, safe=False) 
@@ -41,12 +45,15 @@ def get_disclosure_report(request):
         data = json.loads(request.body.decode('utf-8'))
         corpName = data['corpName']
 
+        # crawl today report
+        update_today_disclosure_report()
+
         if corpName:
             isExist = disclosure_report.objects.filter(종목명__contains=corpName).exists()
             if not isExist:
                 return JsonResponse([], safe=False)
 
-            rows = disclosure_report.objects.filter(종목명__contains=corpName).values()
+            rows = disclosure_report.objects.filter(종목명__contains=corpName).order_by('-접수일자').values()
         else:
             rows = disclosure_report.objects.all().order_by('-접수일자')[:100].values()            
 

@@ -1,3 +1,6 @@
+from __future__ import print_function
+import argparse 
+
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -24,6 +27,9 @@ import sys
 import psycopg2
 from psycopg2.extensions import AsIs
 from datetime import datetime
+
+
+
 
 dt = datetime.utcnow()
 
@@ -99,15 +105,16 @@ def backupAndEmptyTable():
             cursor.close()
             connection.close()
 
-def insertTable(no, kiscode, info, name, upjong, product, listed_date, settlemonth, representive, homepage, area):
+def insertTable(no, kiscode, info, financial_res, name, upjong, product, listed_date, settlemonth, representive, homepage, area):
     # table = 'listed_corp'    
     info = json.dumps(info)
+    financial_res = json.dumps(financial_res)
     try:
         with connect() as connection:
             with connection.cursor() as cursor:      
         
-                postgres_insert_query = """ INSERT INTO listed_corp (회사명, 종목코드, 업종, 주요제품, 상장일, 결산월, 대표자명, 홈페이지, 지역, 정보) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-                record_to_insert = (name, kiscode, upjong, product, listed_date, settlemonth, representive, homepage, area, info)
+                postgres_insert_query = """ INSERT INTO listed_corp (회사명, 종목코드, 업종, 주요제품, 상장일, 결산월, 대표자명, 홈페이지, 지역, 정보, 재무) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                record_to_insert = (name, kiscode, upjong, product, listed_date, settlemonth, representive, homepage, area, info, financial_res)
                 cursor.execute(postgres_insert_query, record_to_insert)
                 
                 connection.commit()
@@ -126,12 +133,13 @@ def insertTable(no, kiscode, info, name, upjong, product, listed_date, settlemon
             connection.close()
             # print("PostgreSQL connection is closed")
 
-def updateTable(no, kiscode, info):
-    info = json.dumps(info)    
+def updateTable(no, kiscode, info, financial_res):
+    info = json.dumps(info)
+    financial_res = json.dumps(financial_res)    
     try:
         with connect() as connection:
             with connection.cursor() as cursor:         
-                sql_template = "UPDATE listed_corp SET 정보 = $$%s$$ WHERE 종목코드 = $$%s$$ " % (info, kiscode)
+                sql_template = "UPDATE listed_corp SET 정보 = $$%s$$, 재무 = $$%s$$ WHERE 종목코드 = $$%s$$ " % (info, financial_res, kiscode)
                 cursor.execute(sql_template)   
                 connection.commit()
                 # cursor.execute("UPDATE listed_corp SET 정보 = %s WHERE 종목코드 = %s", (info, kiscode))
@@ -198,7 +206,7 @@ def _etc_info_sub(html1, value):
 
 def etc_info(html1):
 
-    ''' 수집 : '현재가','업종PER(%)','PER(배)','PBR','EPS','BPS','현금배당수익률', '영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)' '''
+    ''' 수집 : '현재가','업종PER(배)','PER(배)','PBR','EPS','BPS','현금배당수익률', '영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)' '''
     # 현재가 구하기
     try:
         NowPrice = html1.find_all('strong')[0].get_text()    #현재가 추출
@@ -207,7 +215,7 @@ def etc_info(html1):
     except:
         NowPrice = 0      
 
-    # 업종PER(%) 구하기
+    # 업종PER(배) 구하기
     try:
         SectorPer= html1.find_all('dt',{"class","line-left"})[12].get_text() #업종PER 값
         SectorPer = SectorPer.replace("업종PER ","").replace('N/A','0').replace(",","")
@@ -278,7 +286,7 @@ def etc_info(html1):
 
     res = {
             '현재가' : NowPrice,
-            '업종PER(%)': SectorPer,
+            '업종PER(배)': SectorPer,
             'PER(배)': r['PER'],
             'PBR(배)': r['PBR'],
             'EPS(원)': r['EPS'],
@@ -297,16 +305,16 @@ def etc_info(html1):
 
     return res
           
-def stock_fair_value(main, etc, employee, listing_date):
+def stock_fair_value(main, etc, employee, listing_date, research):
     '''
     적정주가 계산식
-    etc : '현재가','업종PER(%)','PER(배)','PBR(배)','EPS(원)','BPS(원)','현금배당수익률','영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)'     
+    etc : '현재가','업종PER(배)','PER(배)','PBR(배)','EPS(원)','BPS(원)','현금배당수익률','영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)'     
     나머지는 main
     '''
     r = {} 
     
     # numeric으로 미리 변환   - str2round, str2int 사전정의 def
-
+    r['연구개발비(연)'] = str2round(research,2)
     r['매출액'] = str2int(main['매출액'])
     r['상장일'] = listing_date
     r['ROE(%)'] = str2round(main['ROE(%)'],2)
@@ -315,7 +323,7 @@ def stock_fair_value(main, etc, employee, listing_date):
     r['EPS(원)'] = str2int(etc['EPS(원)'])
     r['PBR(배)'] = str2round(etc['PBR(배)'],2)
     r['BPS(원)'] = str2int(etc['BPS(원)'])       
-    r['업종PER(%)'] = str2round(etc['업종PER(%)'],2)
+    r['업종PER(배)'] = str2round(etc['업종PER(배)'],2)
     r['현재가'] = str2int(etc['현재가'])
     r['현금배당수익률'] = str2round(etc['현금배당수익률'],2)
     r['자본총계(지배)'] = str2int(main['자본총계(지배)'])
@@ -385,7 +393,6 @@ def stock_fair_value(main, etc, employee, listing_date):
         if  r['적(5)당기순이익*PER'] == 0:
             sumCnt -= 1         
 
-    
     try:
         r['추천매수가'] = (r['자본총계(지배)']+r['자본총계(지배)']*(r['ROE(%)']-7.9)/7.9*(0.8/(1+7.9-0.8)))/r['발행주식수(보통주)']*100000000 #100000000    #적정매수가
         r['추천매수가'] = int(r['추천매수가'])
@@ -436,11 +443,31 @@ def stock_fair_value(main, etc, employee, listing_date):
     else:
         r['기대수익률'] = 0    
 
-    if r['업종PER(%)'] > 0:                                # 기업 per 비율
-        r['PER갭(%)'] = r['PER(배)'] / r['업종PER(%)'] *100
+    if r['업종PER(배)'] > 0:                                # 기업 per 비율
+        r['PER갭(%)'] = r['PER(배)'] / r['업종PER(배)'] *100
         r['PER갭(%)'] = round(r['PER갭(%)'],1)        
     else:
         r['PER갭(%)'] = 0
+
+    try:
+        r['PRR(배)'] = r['시가총액'] / r['연구개발비(연)'] * 100 # 단위 보정 ; 억원 / 백만원
+        r['PRR(배)'] = round(r['PRR(배)'],2)        
+    except:
+        r['PRR(배)'] = 0
+
+    try:
+        r['주당R&D(원)'] = r['연구개발비(연)'] / r['발행주식수(보통주)'] * 1000000 # 단위 보정 ; 백만원 / 원
+        r['주당R&D(원)'] = int(r['주당R&D(원)'])        
+    except:
+        r['주당R&D(원)'] = 0
+
+    # 가격성장흐름(PGF)
+    try: 
+        r['PGF(%)'] = (r['주당R&D(원)'] + r['EPS(원)'] ) / r['현재가'] * 100
+        r['PGF(%)'] = int(r['PGF(%)'])        
+    except:
+        r['PGF(%)'] = 0  
+
 
     return r
 
@@ -468,7 +495,7 @@ def stock_fair_value(main, etc, employee, listing_date):
 #   'PER(배)': 0,
 #   'PBR(배)': 0,
 #   'BPS(원)': 0,    
-#   '업종PER(%)': 0,
+#   '업종PER(배)': 0,
 #   '현재가': 0,    
 #   '현금배당수익률': 0,
 #   '자본총계(지배)': 0,
@@ -520,7 +547,7 @@ empty_dict = {
 '순이익증감(전전)': 0,
 '순이익증감(직전)': 0,
 '시가총액':0,
-'업종PER(%)': 0,
+'업종PER(배)': 0,
 '영업이익': 0,
 '영업이익증감(전전)': 0,
 '영업이익증감(직전)': 0,
@@ -544,6 +571,18 @@ empty_dict = {
 'PER갭(%)': 0,
 'ROA(%)': 0,
 'ROE(%)': 0,
+}
+
+empty_financial_info = {
+	"date": ["2017/12", "2018/12", "2019/12", "2019/12", "2020/03", "2020/06"],
+	"dataset": [
+		[0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0]
+	]
 }
 
 # def stock_crawler(code):
@@ -696,7 +735,7 @@ def stock_crawler(code):
     # 상장폐지되어 자료없는 경우 - NoSuchElementException 
     try:
         browser.find_element_by_class_name('no_data') # <div class="no_data">
-        return empty_dict
+        return empty_dict, empty_financial_info
     except:
         pass    
     
@@ -705,13 +744,13 @@ def stock_crawler(code):
     try:
         browser.switch_to.frame(browser.find_element_by_id('coinfo_cp'))
     except:
-        return empty_dict        
+        return empty_dict, empty_financial_info        
     
     # page not found handle
     # 상장된지 얼마안되서 자료없는 경우인듯
     try:
         browser.find_element_by_id('pageError') # <div id="pageError">
-        return empty_dict
+        return empty_dict, empty_financial_info
     except:
         pass       
 
@@ -719,7 +758,7 @@ def stock_crawler(code):
     try:
         browser.find_elements_by_xpath('//*[@id="cns_Tab20"]')[0].click()
     except:
-        return empty_dict
+        return empty_dict, empty_financial_info
 
     html0 = browser.page_source
     html1 = BeautifulSoup(html0,'lxml')
@@ -776,7 +815,7 @@ def stock_crawler(code):
         my_df = df.loc[['2019/12'],['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','자본총계(지배)','ROE(%)','ROA(%)','EPS(원)','PER(배)','부채비율','BPS(원)','PBR(배)','발행주식수(보통주)']]
         # my_df = df.loc[['2019/12'],['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','자본총계(지배)','ROE(%)','ROA(%)','부채비율','발행주식수(보통주)']]
     except:
-        return empty_dict
+        return empty_dict, empty_financial_info
     
     res = my_df.to_dict('records')
 
@@ -797,9 +836,42 @@ def stock_crawler(code):
      
     except:
         pass # or etc 자료 그대로 씀
-  
-   
-    #종업원수·상장일 구하기
+
+    # 재무정보
+    financial_res = { "date" : ['2017/12','2018/12','2019/12','2019/12','2020/03','2020/06'], "dataset": []}
+    my_list = [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]]
+    # 연도
+    for idx, mycolumn in enumerate(['2017/12','2018/12','2019/12']):
+        try:
+            my_df = df.loc[[mycolumn],['매출액','영업이익','당기순이익','부채비율','자본유보율','현금배당성향(%)']]
+            my_dict = my_df.to_dict('records')
+            for key in my_dict[0]:
+                index = list(my_dict[0]).index(key)
+                value = my_dict[0][key]
+                value = str2int(value) if key == '매출액' or key == '영업이익' or key == '당기순이익' else str2round(value,2)
+                my_list[index][idx] = value
+        except:
+            pass
+
+    # 분기
+    df = df.loc[~df.index.duplicated(keep='last')] # 2019/12 중복 index 처리     
+
+    for idx, mycolumn in enumerate(['2019/12','2020/03','2020/06']):
+        try:
+            my_df = df.loc[[mycolumn],['매출액','영업이익','당기순이익','부채비율','자본유보율','현금배당성향(%)']]
+            my_dict = my_df.to_dict('records')
+            for key in my_dict[0]:
+                index = list(my_dict[0]).index(key)
+                value = my_dict[0][key]
+                value = str2int(value) if key == '매출액' or key == '영업이익' or key == '당기순이익' else str2round(value,2)
+                my_list[index][idx+3] = value # 네번째부터 이어서 넣기
+        except:
+            pass
+
+    financial_res['dataset'] = my_list
+
+
+    #종업원수·상장일·연구개발비 구하기
 
     #### "기업개요" 클릭하기
     try:
@@ -812,39 +884,75 @@ def stock_crawler(code):
         employee = employee.replace(',','')  
         listing_date = html1.select('#cTB201 > tbody > tr:nth-of-type(3) > td.c2.txt')[0].get_text().strip().rsplit('상장일: ',1)[-1]
         listing_date = listing_date.replace('/','.').replace(')','')   
-   
+        research = html1.select('#cTB205_1 > tbody > tr:nth-of-type(1) > td.c2.line.num')[0].get_text().strip().replace(',','')   
+  
     except:
         employee = 0
         listing_date = ''
-
+        research = 0
 
     
-    # # 적정주가분석 산출
-    # fair = stock_fair_value(res[0], etc)    
+    # # 연구개발비 구하기 (분기 (잘안잡혀서 보류))
+    # #### "재무분석" 클릭하기
+    # try:
+    #     browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[3]')[0].click()
+        
+    #       html0 = browser.page_source
+    #     html1 = BeautifulSoup(html0,'lxml')
 
-    # res[0].update({
-    #     'EPS(원)' : fair['EPS(원)'],
-    #     'PER(배)' : fair['PER(배)'],
-    #     'BPS(원)' : fair['BPS(원)'],
-    #     'PBR(배)' : fair['PBR(배)'],        
-    #     '종업원수' : employee,
-    #     '상장일' : listing_date,
-    #     # '거래량' : stock_volume,
-    #     # '시가총액' : market_cap,
-    #     # '수익률' : stock_return,
-    # })
+    #     html2 = html1.find('table',{'class':'gHead01 all-width data-list','summary':'IFRS연결 분기 재무 정보를 제공합니다.'})    
+
+    #     rnd_expenses = 0
+    #     for i in [3,4,5,6]:
+    #         expenses = html2.select('tbody > tr:nth-of-type(42) > td:nth-of-type(' + str(i) + ')')[0].get_text().strip().replace(',','')
+    #         expenses = str2round(expenses,2)
+
+    #         rnd_expenses += expenses 
+
+    #     rnd_expenses = rnd_expenses
+    # except:
+    #     rnd_expenses = 0
+
+
+
 
     # 적정주가분석 산출 · merge two json 
-    result_merge = stock_fair_value(res[0], etc, employee, listing_date)    
-    return result_merge
+    result_merge = stock_fair_value(res[0], etc, employee, listing_date, research)    
+    return result_merge, financial_res
 # print(stock_crawler('155660'))
 # print(stock_crawler('005930'))
 # stock_crawler('226330')
 # stock_crawler('002170')
 # stock_crawler('357120')
 
-def main_def(start = 0, end = 0, tableclearnow = False):
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+
+# def main_def(start = 0, end = 0, tableclearnow = False):
+def main_def():
     """ 메인 def """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--start', type=int, default=0, help="What is the start number?")
+    parser.add_argument('--end', type=int, default=0, help="What is the end number?")
+    parser.add_argument('--clear', type=str2bool, nargs='?', const=True, default=False, help='Should I truncate the Table before execution?')
+    parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=False, help='Do you want to crawl the entire company regardless of start, end number')          
+
+                       
+    args = parser.parse_args()
+
+    start = args.start
+    end = args.end
+    clear = args.clear
+    entire = args.entire
 
     # start_time = time.time()
 
@@ -854,7 +962,7 @@ def main_def(start = 0, end = 0, tableclearnow = False):
           
     # threading.Timer(1, main_def(repeat_cnt)).start()
 
-    if start == 0 and end == 0:
+    if entire:
         rangeValue = range(len(kindInfo))
     else:
         rangeValue = range(start, end)
@@ -863,7 +971,7 @@ def main_def(start = 0, end = 0, tableclearnow = False):
     print('실행건       :', len(rangeValue))        
     print('실행소요예상 :', int(int(len(rangeValue)) * 1 / 60), '분')        
 
-    if tableclearnow:
+    if clear:
         backupAndEmptyTable()
     # for i in range(len(kindInfo)):
     # for i in range(0,50):
@@ -872,11 +980,11 @@ def main_def(start = 0, end = 0, tableclearnow = False):
 
         kiscode = kindInfo.종목코드.values[i].strip()
     #     print(kiscode)
-        info = stock_crawler(kiscode)
+        info, financial_res = stock_crawler(kiscode)
         if existCheck(kiscode) != 0:
-            updateTable(i, kiscode, info)
+            updateTable(i, kiscode, info, financial_res)
         else:
-            insertTable(i, kiscode, info, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])     
+            insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])     
 
         # memory usage check
         memoryUse = psutil.virtual_memory()[2] 
@@ -892,14 +1000,15 @@ def main_def(start = 0, end = 0, tableclearnow = False):
         )            
             
     print('----------------------')
-    print('done')       
+    print('done')
+
+      
 
 if __name__ == "__main__":
-    ''' 실행하려면 argv 3개가 필요합니다. : startno, endno, tableclearatfirst? (True or False) '''
     # request = int(sys.argv[1])
     # argv ex) 0 2380 True
-    start = int(sys.argv[1])
-    end = int(sys.argv[2])
-    tableclearnow = sys.argv[3]
+    # start = int(sys.argv[1])
+    # end = int(sys.argv[2])
+    # tableclearnow = sys.argv[3]
     sys.setrecursionlimit(5000)
-    main_def(start, end, tableclearnow)    
+    main_def()    

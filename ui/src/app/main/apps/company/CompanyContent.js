@@ -3,13 +3,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setMockData } from './store/searchsSlice';
 // import { authRoles } from "app/auth";
 import searchData from 'app/main/apps/lib/mockDataCompanyApp';
-import { useForm, useUpdateEffect } from '@fuse/hooks';
+import { useForm } from '@fuse/hooks';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import SearchListContainer from './searchs/SearchList/SearchListContainer';
-import CorpInfo from './searchs/CorpInfo';
+import FinancialInfo from './searchs/FinancialInfo';
 import StockInfoContainer from './searchs/StockInfo/StockInfoContainer';
 import RelatedInfoContainer from './searchs/RelatedInfo/RelatedInfoContainer';
+import VisualContainer from './searchs/Visual/VisualContainer';
 import Draggable from 'react-draggable';
 import StockFairValue from './searchs/StockFairValue';
 
@@ -26,20 +27,19 @@ function CompanyContent() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
-	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode.stockCode);
+	const selectedCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode);
 	const searchText = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchText);
 	const searchLoading = useSelector(({ companyApp }) => companyApp.searchs.searchLoading);
 
 	const [searchStatus, setSearchStatus] = useState(null);
-
-	const [selectCode, setSelectCode] = useState(stockCode || '주식');
 
 	const { form, setForm, resetForm } = useForm({
 		A: 100,
 		B: 100,
 		C: 100,
 		D: 100,
-		E: 100
+		E: 100,
+		F: 100
 	});
 
 	function handleStart(name) {
@@ -64,10 +64,8 @@ function CompanyContent() {
 			setSearchStatus(null);
 		}
 	}, [searchText, searchLoading, entities]);
-
-	useUpdateEffect(() => {
-		setSelectCode(stockCode || '주식');
-	}, [stockCode]);
+	const selectOne = !Object.values(selectedCode).every(x => x === null || x === '');
+	// const selectOne = !!(stockCode && stockCode.length !== 0);
 
 	return (
 		<div className="flex flex-wrap w-full h-auto items-start justify-start mt-8 px-8">
@@ -76,40 +74,59 @@ function CompanyContent() {
 					<SearchListContainer status={searchStatus} />
 				</div>
 			</Draggable>
-			{stockCode && stockCode.length !== 0 && (
-				<Draggable
-					handle=".draggable"
-					onStart={() => handleStart('B')}
-					onEnd={() => resetForm()}
-					grid={[25, 25]}
-				>
-					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.B }}>
-						<CorpInfo />
-					</div>
-				</Draggable>
-			)}
-			{stockCode && stockCode.length !== 0 && (
-				<Draggable
-					handle=".draggable"
-					onStart={() => handleStart('C')}
-					onEnd={() => resetForm()}
-					grid={[25, 25]}
-				>
-					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.C }}>
-						<StockInfoContainer />
-					</div>
-				</Draggable>
+			{selectOne && (
+				<>
+					<Draggable
+						handle=".draggable"
+						onStart={() => handleStart('B')}
+						onEnd={() => resetForm()}
+						grid={[25, 25]}
+					>
+						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.B }}>
+							<FinancialInfo />
+						</div>
+					</Draggable>
+					<Draggable
+						handle=".draggable"
+						onStart={() => handleStart('C')}
+						onEnd={() => resetForm()}
+						grid={[25, 25]}
+					>
+						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.C }}>
+							<StockInfoContainer />
+						</div>
+					</Draggable>
+				</>
 			)}
 			<Draggable handle=".draggable" onStart={() => handleStart('D')} onEnd={() => resetForm()} grid={[25, 25]}>
 				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.D }}>
-					<RelatedInfoContainer selectCode={selectCode} />
+					<RelatedInfoContainer selectedCode={selectedCode} />
 				</div>
 			</Draggable>
-			<Draggable handle=".draggable" onStart={() => handleStart('E')} onEnd={() => resetForm()} grid={[25, 25]}>
-				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.E }}>
-					<StockFairValue />
-				</div>
-			</Draggable>
+			{selectOne && (
+				<>
+					<Draggable
+						handle=".draggable"
+						onStart={() => handleStart('E')}
+						onEnd={() => resetForm()}
+						grid={[25, 25]}
+					>
+						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.E }}>
+							<StockFairValue />
+						</div>
+					</Draggable>
+					<Draggable
+						handle=".draggable"
+						onStart={() => handleStart('F')}
+						onEnd={() => resetForm()}
+						grid={[25, 25]}
+					>
+						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.F }}>
+							<VisualContainer />
+						</div>
+					</Draggable>
+				</>
+			)}
 		</div>
 	);
 }

@@ -66,7 +66,7 @@ empty_info = {
 empty_fair = {
   'ROE(%)': 0,
   'PER(배)': 0,
-  '업종PER(%)': 0,
+  '업종PER(배)': 0,
   'EPS(원)': 0,
   '현재가': 0,
   '자본총계(지배)': 0,
@@ -113,7 +113,7 @@ empty_dict = {
     '순이익증감(전전)': 0,
     '순이익증감(직전)': 0,
     '시가총액':0,
-    '업종PER(%)': 0,
+    '업종PER(배)': 0,
     '영업이익': 0,
     '영업이익증감(전전)': 0,
     '영업이익증감(직전)': 0,
@@ -205,7 +205,7 @@ def parse_companies(request, mode="begin"): # mode : begin, nlp, query
     #         del row[i]["전체항token"]
 
     # all entries
-    # entriesToRemove = ('BPS(원)','EPS(원)','PBR(배)','PER(배)','PER갭(%)','ROA(%)','ROE(%)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','대표자명','매출액','발행주식수(보통주)','부채비율','부채총계','적정가','상장일','수익률','순이익증감(전전)','순이익증감(직전)','시가총액','업종','업종PER(%)','영업이익','영업이익증감(전전)','영업이익증감(직전)','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-lim','적(5)당기순이익*PER','종목코드','종업원수','주요제품','지역','추천매수가','현재가','홈페이지','회사명')
+    # entriesToRemove = ('BPS(원)','EPS(원)','PBR(배)','PER(배)','PER갭(%)','ROA(%)','ROE(%)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','대표자명','매출액','발행주식수(보통주)','부채비율','부채총계','적정가','상장일','수익률','순이익증감(전전)','순이익증감(직전)','시가총액','업종','업종PER(배)','영업이익','영업이익증감(전전)','영업이익증감(직전)','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-lim','적(5)당기순이익*PER','종목코드','종업원수','주요제품','지역','추천매수가','현재가','홈페이지','회사명')
     # entriesToRemove = ('BPS(원)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','매출액','발행주식수(보통주)','부채총계','상장일','수익률','영업이익','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-lim','적(5)당기순이익*PER','종업원수','추천매수가')
     if row:
         # res = deepcopy(res)
@@ -372,17 +372,56 @@ def like_parse_nice(keyword=""):
         res = None
     return res       
 
+# def parse_company_info(request):
+#     if request.method == 'POST':
+#         data = json.loads(request.body.decode('utf-8'))
+#         stockCode = data['stockCode']
+
+#         corpCode = get_corpCode(stockCode)
+#         # dart crawl
+#         res = crawl_dart(corpCode) if corpCode else empty_info_dart
+#         # naver crawl
+#         more_info = crawl_naver(stockCode)
+#         res.update(more_info)
+
+#         isExist = listed_corp.objects.filter(종목코드=stockCode).exists()
+#         if not isExist:
+#             return JsonResponse([], safe=False)
+#             # return HttpResponse('Not Found', status=404)
+
+#         row = listed_corp.objects.filter(종목코드=stockCode).values()
+#         row = list(row)
+#         if row:
+#             res.update(row[0])
+#             res.update(row[0]['정보'])
+#             del res['정보']
+
+#         # row = listed_corp.objects.filter(종목코드=stockCode).values()
+#         # row = list(row)
+#         # res.update(row[0]) if row else {} #dict
+
+#     return JsonResponse(res, safe=False)
+
 def parse_company_info(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         stockCode = data['stockCode']
 
-        corpCode = get_corpCode(stockCode)
-        # dart crawl
-        res = crawl_dart(corpCode) if corpCode else empty_info_dart
-        # naver crawl
-        more_info = crawl_naver(stockCode)
-        res.update(more_info)
+        isExist = listed_corp.objects.filter(종목코드=stockCode).exists()
+        if not isExist:
+            return JsonResponse([], safe=False)
+
+        row = listed_corp.objects.filter(종목코드=stockCode).values()
+        row = list(row)
+        if row:
+            res = { '회사명': row[0]['회사명'], '종목코드': stockCode, 'FV1': row[0]['정보']['적(1)PER*EPS'], 'FV2': row[0]['정보']['적(2)ROE*EPS'], 'FV3': row[0]['정보']['적(3)EPS*10'], 'FV4': row[0]['정보']['적(4)s-lim'], 'FV5': row[0]['정보']['적(5)당기순이익*PER'], 'FV': row[0]['정보']['적정가'], 'CV': row[0]['정보']['현재가']}
+
+    return JsonResponse(res, safe=False)
+
+def parse_financial_info(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        stockCode = data['stockCode']
 
         isExist = listed_corp.objects.filter(종목코드=stockCode).exists()
         if not isExist:
@@ -391,16 +430,9 @@ def parse_company_info(request):
 
         row = listed_corp.objects.filter(종목코드=stockCode).values()
         row = list(row)
-        if row:
-            res.update(row[0])
-            res.update(row[0]['정보'])
-            del res['정보']
+        res = row[0]['재무'] if row else {}
 
-        # row = listed_corp.objects.filter(종목코드=stockCode).values()
-        # row = list(row)
-        # res.update(row[0]) if row else {} #dict
-
-    return JsonResponse(res, safe=False)
+    return JsonResponse(res, safe=False)    
 
 def stock_fair(request):
     if request.method == 'POST':
@@ -616,9 +648,43 @@ def crawl_stock_info(request):
             })
         
         except:
-            pass # or etc 자료 그대로 씀        
+            pass # or etc 자료 그대로 씀
 
-        #종업원수·상장일 구하기
+        # 재무정보
+        financial_res = { "date" : ['2017/12','2018/12','2019/12','2019/12','2020/03','2020/06'], "dataset": []}
+        my_list = [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]]
+        # 연도
+        for idx, mycolumn in enumerate(['2017/12','2018/12','2019/12']):
+            try:
+                my_df = df.loc[[mycolumn],['매출액','영업이익','당기순이익','부채비율','자본유보율','현금배당성향(%)']]
+                my_dict = my_df.to_dict('records')
+                for key in my_dict[0]:
+                    index = list(my_dict[0]).index(key)
+                    value = my_dict[0][key]
+                    value = str2int(value) if key == '매출액' or key == '영업이익' or key == '당기순이익' else str2round(value,2)
+                    my_list[index][idx] = value
+            except:
+                pass
+
+        # 분기
+        df = df.loc[~df.index.duplicated(keep='last')] # 2019/12 중복 index 처리     
+
+        for idx, mycolumn in enumerate(['2019/12','2020/03','2020/06']):
+            try:
+                my_df = df.loc[[mycolumn],['매출액','영업이익','당기순이익','부채비율','자본유보율','현금배당성향(%)']]
+                my_dict = my_df.to_dict('records')
+                for key in my_dict[0]:
+                    index = list(my_dict[0]).index(key)
+                    value = my_dict[0][key]
+                    value = str2int(value) if key == '매출액' or key == '영업이익' or key == '당기순이익' else str2round(value,2)
+                    my_list[index][idx+3] = value # 네번째부터 이어서 넣기
+            except:
+                pass
+
+        financial_res['dataset'] = my_list     
+
+
+        #종업원수·상장일·연구개발비 구하기
 
         #### "기업개요" 클릭하기
         try:
@@ -629,12 +695,15 @@ def crawl_stock_info(request):
 
             employee = html1.select('#cTB201 > tbody > tr:nth-of-type(4) > td.c4.txt')[0].get_text().strip().split(' (')[0]
             employee = employee.replace(',','')  
+
             listing_date = html1.select('#cTB201 > tbody > tr:nth-of-type(3) > td.c2.txt')[0].get_text().strip().rsplit('상장일: ',1)[-1]
             listing_date = listing_date.replace('/','.').replace(')','')   
-    
+
+            research = html1.select('#cTB205_1 > tbody > tr:nth-of-type(1) > td.c2.line.num')[0].get_text().strip().replace(',','') 
         except:
             employee = 0
             listing_date = ''
+            research = 0
 
         # # 상장일 from model ; 더 느릴 것 같음
         # listing_date = listedCorp.상장일.replace('-','.')
@@ -651,12 +720,16 @@ def crawl_stock_info(request):
         # fair = fair_value(res[0], etc)
 
         # 적정주가분석 산출 · merge two json 
-        result_merge = stock_fair_value(res[0], etc, employee, listing_date)    
+        result_merge = stock_fair_value(res[0], etc, employee, listing_date, research)    
 
         # save data in db if necessary
         listedCorp = listed_corp.objects.get(종목코드=stockCode)
         listedCorp.정보 = result_merge
         listedCorp.save(update_fields=['정보'])
+
+        listedCorp = listed_corp.objects.get(종목코드=stockCode)
+        listedCorp.재무 = financial_res
+        listedCorp.save(update_fields=['재무'])
 
         # listedCorp.적정 = fair
         # listedCorp.save(update_fields=['적정'])        
@@ -695,7 +768,7 @@ def _crawl_etc_info_sub(html1, value):
         return res        
 
 def crawl_info_etc(html1):
-    ''' 수집 : '현재가','업종PER(%)','PER(배)','PBR','EPS','BPS','현금배당수익률', '영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)' '''
+    ''' 수집 : '현재가','업종PER(배)','PER(배)','PBR','EPS','BPS','현금배당수익률', '영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)' '''
     # 현재가 구하기
     try:
         nowPrice = html1.find_all('strong')[0].get_text()    #현재가 추출
@@ -704,7 +777,7 @@ def crawl_info_etc(html1):
     except:
         nowPrice = 0      
 
-    # 업종PER(%) 구하기
+    # 업종PER(배) 구하기
     try:
         sectorPer= html1.find_all('dt',{"class","line-left"})[12].get_text() #업종PER 값
         sectorPer = sectorPer.replace("업종PER ","").replace('N/A','0').replace(",","")
@@ -782,7 +855,7 @@ def crawl_info_etc(html1):
 
     res = {
             '현재가' : nowPrice,
-            '업종PER(%)': sectorPer,
+            '업종PER(배)': sectorPer,
             'PER(배)': r['PER'],
             'PBR(배)': r['PBR'],
             'EPS(원)': r['EPS'],
@@ -801,16 +874,17 @@ def crawl_info_etc(html1):
 
     return res
 
-def stock_fair_value(main, etc, employee, listing_date):
+def stock_fair_value(main, etc, employee, listing_date, research):
     '''
     적정주가 계산식
-    etc : '현재가','업종PER(%)','PER(배)','영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)'     
+    etc : '현재가','업종PER(배)','PER(배)','영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)'     
     나머지는 main
     '''
     r = {} 
     
     # numeric으로 미리 변환   - str2round, str2int 사전정의 def
 
+    r['연구개발비(연)'] = str2round(research,2)
     r['매출액'] = str2int(main['매출액'])
     r['상장일'] = listing_date
     r['ROE(%)'] = str2round(main['ROE(%)'],2)
@@ -819,7 +893,7 @@ def stock_fair_value(main, etc, employee, listing_date):
     r['EPS(원)'] = str2int(etc['EPS(원)'])
     r['PBR(배)'] = str2round(etc['PBR(배)'],2)
     r['BPS(원)'] = str2int(etc['BPS(원)'])       
-    r['업종PER(%)'] = str2round(etc['업종PER(%)'],2)
+    r['업종PER(배)'] = str2round(etc['업종PER(배)'],2)
     r['현재가'] = str2int(etc['현재가'])
     r['현금배당수익률'] = str2round(etc['현금배당수익률'],2)
     r['자본총계(지배)'] = str2int(main['자본총계(지배)'])
@@ -939,11 +1013,30 @@ def stock_fair_value(main, etc, employee, listing_date):
     else:
         r['기대수익률'] = 0    
 
-    if r['업종PER(%)'] > 0:                                # 기업 per 비율
-        r['PER갭(%)'] = r['PER(배)'] / r['업종PER(%)'] *100
+    if r['업종PER(배)'] > 0:                                # 기업 per 비율
+        r['PER갭(%)'] = r['PER(배)'] / r['업종PER(배)'] *100
         r['PER갭(%)'] = round(r['PER갭(%)'],1)        
     else:
-        r['PER갭(%)'] = 0    
+        r['PER갭(%)'] = 0
+
+    try:
+        r['PRR(배)'] = r['시가총액'] / r['연구개발비(연)'] * 100 # 단위 보정 ; 억원 / 백만원
+        r['PRR(배)'] = round(r['PRR(배)'],2)        
+    except:
+        r['PRR(배)'] = 0
+
+    try:
+        r['주당R&D(원)'] = r['연구개발비(연)'] / r['발행주식수(보통주)'] * 1000000 # 단위 보정 ; 백만원 / 원
+        r['주당R&D(원)'] = int(r['주당R&D(원)'])        
+    except:
+        r['주당R&D(원)'] = 0
+
+    # 가격성장흐름(PGF)
+    try: 
+        r['PGF(%)'] = (r['주당R&D(원)'] + r['EPS(원)'] ) / r['현재가'] * 100
+        r['PGF(%)'] = int(r['PGF(%)'])        
+    except:
+        r['PGF(%)'] = 0         
 
     return r
 
