@@ -85,17 +85,17 @@ def crawl_disclosure_report(**kwargs):
 def update_today_crawl_mdcline():
     today = datetime.today().strftime('%Y%m%d')
     df = crawl_mdcline(today)
-    if df:
+    if not df.empty:
         engine = create_engine(db_connection_url)
         df.to_sql(name='mdcin_clinc_test_info_temp', con=engine, if_exists='replace')
-
+        # note : need CREATE EXTENSION pgcrypto; psql >=12 , when using gen_random_uuid (),
         with engine.begin() as cn:
-            sql = """INSERT INTO mdcin_clinc_test_info (신청자, 승인일, 제품명, 시험제목, 연구실명, 임상단계)
-                        SELECT t.신청자, t.승인일, t.제품명, t.시험제목, t.연구실명, t.임상단계 
+            sql = """INSERT INTO mdcin_clinc_test_info (id, 신청자, 승인일, 제품명, 시험제목, 연구실명, 임상단계)
+                        SELECT gen_random_uuid (), t.신청자, t.승인일::integer, t.제품명, t.시험제목, t.연구실명, t.임상단계 
                         FROM mdcin_clinc_test_info_temp t
                         WHERE NOT EXISTS 
                             (SELECT 1 FROM mdcin_clinc_test_info f
-                            WHERE t.신청자 = f.신청자 and t.승인일 = f.승인일 and t.제품명 = f.제품명 and t.임상단계 = f.임상단계)"""
+                            WHERE t.신청자 = f.신청자 and t.승인일::integer = f.승인일 and t.제품명 = f.제품명 and t.임상단계 = f.임상단계)"""
             cn.execute(sql)                             
 
 def crawl_mdcline(singleDate):

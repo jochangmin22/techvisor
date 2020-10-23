@@ -38,11 +38,11 @@ class financial_statements(models.Model):
 
 class mdcin_clinc_test_info(models.Model):
     objects = models.Manager()
-    # id = models.UUIDField(
-    #     primary_key = True,
-    #     default = uuid.uuid4,
-    #     editable = False
-    # )     
+    id = models.UUIDField(
+        primary_key = True,
+        default = uuid.uuid4,
+        editable = False
+    )     
     신청자 = models.CharField(max_length=100)
     승인일 = models.IntegerField()
     제품명 = models.CharField(max_length=255)
