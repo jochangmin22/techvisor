@@ -13,26 +13,9 @@ const navigationConfig = [
 		id: 'search',
 		title: '기술검색',
 		translate: 'SEARCH',
-		type: 'group',
+		type: 'item',
 		icon: 'search',
-		children: [
-			{
-				id: 'domestic-search',
-				title: '국내특허',
-				translate: 'DOMESTIC_SEARCH',
-				type: 'item',
-				icon: 'search',
-				url: '/apps/searchs'
-			},
-			{
-				id: 'abroad-search',
-				title: '해외특허',
-				translate: 'ABROAD_SEARCH',
-				type: 'item',
-				icon: 'public',
-				url: '/apps/abroads'
-			}
-		]
+		url: '/apps/searchs'
 	},
 	{
 		id: 'company',
@@ -42,6 +25,39 @@ const navigationConfig = [
 		icon: 'domain',
 		url: '/apps/companies'
 	}
+	// {
+	// 	id: 'search',
+	// 	title: '기술검색',
+	// 	translate: 'SEARCH',
+	// 	type: 'group',
+	// 	icon: 'search',
+	// 	children: [
+	// 		{
+	// 			id: 'domestic-search',
+	// 			title: '국내특허',
+	// 			translate: 'DOMESTIC_SEARCH',
+	// 			type: 'item',
+	// 			icon: 'search',
+	// 			url: '/apps/searchs'
+	// 		},
+	// 		{
+	// 			id: 'abroad-search',
+	// 			title: '해외특허',
+	// 			translate: 'ABROAD_SEARCH',
+	// 			type: 'item',
+	// 			icon: 'public',
+	// 			url: '/apps/abroads'
+	// 		}
+	// 	]
+	// },
+	// {
+	// 	id: 'company',
+	// 	title: '기업검색',
+	// 	translate: 'COMPANY',
+	// 	type: 'item',
+	// 	icon: 'domain',
+	// 	url: '/apps/companies'
+	// }
 	// {
 	// 	id: 'applications',
 	// 	title: 'Applications',

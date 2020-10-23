@@ -20,7 +20,7 @@ const routeConfigs = [
 	LogoutConfig,
 	LoginConfig,
 	RegisterConfig,
-	LogoutConfig,
+	LogoutConfig
 	// CallbackConfig
 ];
 
@@ -32,7 +32,8 @@ const routes = [
 	{
 		path: '/',
 		exact: true,
-		component: () => <Redirect to="/apps/searchs" />
+		component: () => <Redirect to="/pages/landing" />
+		// component: () => <Redirect to="/apps/searchs" />
 	},
 	{
 		component: () => <Redirect to="/pages/errors/error-404" />

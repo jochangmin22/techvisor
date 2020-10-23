@@ -1,4 +1,6 @@
+import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
+import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import React from 'react';
 
@@ -30,7 +32,10 @@ function Logo() {
 
 	return (
 		<div className={clsx(classes.root, 'flex items-center')}>
-			<img className="logo-icon" src="assets/images/logos/logo_ipgrim_shadow.svg" alt="logo" />
+			<Button component={Link} to="/pages/landing" role="button">
+				<img className="logo-icon" src="assets/images/logos/logo_ipgrim_shadow.svg" alt="logo" />
+			</Button>
+			{/* <img className="logo-icon" src="assets/images/logos/logo_ipgrim_shadow.svg" alt="logo" /> */}
 			{/* <Typography className="text-16 mx-12 font-light logo-text" color="inherit">
 				FUSE
 			</Typography>
