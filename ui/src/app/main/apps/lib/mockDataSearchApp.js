@@ -7499,20 +7499,212 @@ const searchData = {
 	topicChips: [],
 	news: [
 		{
-			title: "이파피루스, AI OCR 솔루션 '텍스트센스' 출시…이미지인식부터 데이터 활용까...",
-			originallink: 'http://www.etnews.com/20200605000071',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=030&aid=0002886427',
+			title: 'MS AI, 인간 수준의 이미지 묘사능력 구사',
+			originallink: 'https://zdnet.co.kr/view/?no=20201020152125',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=092&aid=0002202448',
 			description:
-				"전자문서 솔루션 전문기업 이파피루스(대표 김정희)는 이미지 속 텍스트 인식부터 데이터 활용 업무까지 자동화하는 인공지능(AI) 기반 광학문자인식(OCR) 솔루션 '텍스트센스(TextSense)'를 출시한다고 밝혔다. 회사는 포스트... ",
-			pubDate: 'Fri, 05 Jun 2020 10:36:00 +0900'
+				'‘알트 텍스트(alt text)’로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한 수준에... ',
+			pubDate: '20-10-20 15:22'
 		},
 		{
-			title: "이파피루스, AI OCR 솔루션 '텍스트센스' 출시",
-			originallink: 'http://www.itdaily.kr/news/articleView.html?idxno=101345',
-			link: 'http://www.itdaily.kr/news/articleView.html?idxno=101345',
+			title: 'AI 이미지 묘사 능력 더 정확해졌다',
+			originallink: 'http://www.inews24.com/view/1308780',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=031&aid=0000563513',
 			description:
-				"전자문서 솔루션 전문기업 이파피루스(대표 김정희)는 이미지 속 텍스트 인식부터 데이터 활용까지 자동화할 수 있는 인공지능 딥러닝 기반 OCR(광학적 문자 인식 Optical Character Recognition) 솔루션 '텍스트센스(TextSense)'를... ",
-			pubDate: 'Wed, 03 Jun 2020 18:10:00 +0900'
+				"20일 한국MS에 따르면 MS는 최근 '알트 텍스트'로 알려진 이미지 캡셔닝 기술을 업데이트했다. 이미지 캡셔닝은 다양한 이미지를 인식하고 분석해 자연어로 해설해주는 기술이다. 이번 업데이트로 보다 구체적이고 정확한... ",
+			pubDate: '20-10-20 13:20'
+		},
+		{
+			title: 'MS AI, 인간 수준 이미지 묘사능력 구사',
+			originallink: 'http://www.datanet.co.kr/news/articleView.html?idxno=151848',
+			link: 'http://www.datanet.co.kr/news/articleView.html?idxno=151848',
+			description:
+				"'알트 텍스트(alt text)'로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한 수준에... ",
+			pubDate: '20-10-20 16:52'
+		},
+		{
+			title: '진화하는 이미지 캡셔닝 AI...MS "사람 수준 도달"',
+			originallink: 'http://www.digitaltoday.co.kr/news/articleView.html?idxno=250203',
+			link: 'http://www.digitaltoday.co.kr/news/articleView.html?idxno=250203',
+			description:
+				"회사측에 따르면 '알트 텍스트(alt text)'로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용돼왔고 이번 업데이트로 사람과... ",
+			pubDate: '20-10-20 11:03'
+		},
+		{
+			title: 'MS, 인간 수준의 이미지 묘사 가능한 AI 공개',
+			originallink: 'http://www.itdaily.kr/news/articleView.html?idxno=102819',
+			link: 'http://www.itdaily.kr/news/articleView.html?idxno=102819',
+			description:
+				"MS의 이미지 캡셔닝 기술은 '알트 텍스트(alt text)'로 알려져 있다. 이는 다양한 이미지를 인식 및 분석해 자연어로 해설해 주는 기술로, 지난 2015년부터 활용돼왔다. MS측은 최근 업데이트를 통해 '알트 텍스트'가... ",
+			pubDate: '20-10-20 17:56'
+		},
+		{
+			title: 'MS AI, “인간 수준의 이미지 묘사능력 구사”',
+			originallink: 'http://www.ddaily.co.kr/news/article.html?no=203451',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=004&oid=138&aid=0002093321',
+			description:
+				'‘알트 텍스트(alt text)’로 알려진 MS 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한 수준에 도달했고... ',
+			pubDate: '20-10-20 12:49'
+		},
+		{
+			title: '사람보다 뛰어난 이미지 캡션 AI 나왔다',
+			originallink: 'http://it.chosun.com/site/data/html_dir/2020/10/20/2020102002093.html',
+			link: 'http://it.chosun.com/site/data/html_dir/2020/10/20/2020102002093.html',
+			description:
+				'이미지 캡션 기술은 정교한 이미지 인식을 기반으로 특정 이미지를 설명하는 기술이다. 데이터 라벨링... 돕거나 이미지를 텍스트로 바꾸는 AI서비스 등을 꾀할 수 있는 중요 분야로 꼽힌다. MS는 이번 AI를... ',
+			pubDate: '20-10-20 15:23'
+		},
+		{
+			title: '마이크로소프트 AI, 인간 수준의 이미지 묘사능력 구사한다',
+			originallink: 'http://www.m-i.kr/news/articleView.html?idxno=755879',
+			link: 'http://www.m-i.kr/news/articleView.html?idxno=755879',
+			description:
+				"'알트 텍스트'로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한 수준에 도달했고... ",
+			pubDate: '20-10-20 11:12'
+		},
+		{
+			title: '마이크로소프트 이미지 캡셔닝 기술, 윈도우·맥 환경서 사용 가능해진다',
+			originallink: 'http://www.hellot.net/new_hellot/magazine/magazine_read.html?code=202&sub=004&idx=54670',
+			link: 'http://www.hellot.net/new_hellot/magazine/magazine_read.html?code=202&sub=004&idx=54670',
+			description:
+				"'알트 텍스트(alt text)'로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한 수준에... ",
+			pubDate: '20-10-20 18:40'
+		},
+		{
+			title: '마이크로소프트 "이미지 캡셔닝 AI 기술, 인간 수준 묘사능력 구사해"',
+			originallink: 'http://www.it-b.co.kr/news/articleView.html?idxno=44621',
+			link: 'http://www.it-b.co.kr/news/articleView.html?idxno=44621',
+			description:
+				"'알트 텍스트(alt text)'로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한 수준에... ",
+			pubDate: '20-10-20 16:25'
+		},
+		{
+			title: '마이크로소프트 AI, 인간에 버금가는 이미지 묘사능력 구사한다',
+			originallink: 'http://www.industrynews.co.kr/news/articleView.html?idxno=39994',
+			link: 'http://www.industrynews.co.kr/news/articleView.html?idxno=39994',
+			description:
+				"'알트 텍스트(Alt Text)'로 알려진 마이크로소프트 이미지 캡셔닝은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 자동화를 통해 검색 엔진부터 프레젠테이션에 삽입된 이미지까지 중요한... ",
+			pubDate: '20-10-20 17:00'
+		},
+		{
+			title: '마이크로소프트AI, 인간 수준의 이미지 묘사능력 구사한다',
+			originallink: 'http://kbench.com/?q=node/215065',
+			link: 'http://kbench.com/?q=node/215065',
+			description:
+				'알트 텍스트(alt text)로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한 수준에... ',
+			pubDate: '20-10-20 17:18'
+		},
+		{
+			title: '마이크로소프트 AI, "인간 수준의 이미지 묘사능력 구사"',
+			originallink: 'http://www.youthdaily.co.kr/news/article.html?no=50637',
+			link: 'http://www.youthdaily.co.kr/news/article.html?no=50637',
+			description:
+				"'알트 텍스트(alt text)'로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설한다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한 수준에 도달했고... ",
+			pubDate: '20-10-20 16:58'
+		},
+		{
+			title: '마이크로소프트 AI, 인간 수준의 이미지 묘사능력 보여준다',
+			originallink: 'https://platum.kr/archives/150547',
+			link: 'https://platum.kr/archives/150547',
+			description:
+				'‘알트 텍스트(alt text)’로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한... ',
+			pubDate: '20-10-20 11:40'
+		},
+		{
+			title: '[이슈] 이미지 해석... 인간인지, 인공지능인지 구분안돼는 마이크로소프트 A...',
+			originallink: 'http://www.aitimes.kr/news/articleView.html?idxno=18091',
+			link: 'http://www.aitimes.kr/news/articleView.html?idxno=18091',
+			description:
+				"'알트 텍스트(alt text)'로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한 수준에... ",
+			pubDate: '20-10-20 12:23'
+		},
+		{
+			title: '캐논코리아, 이미지러너 어드밴스 DX 시리즈 A4 기종 출시',
+			originallink: 'http://kbench.com/?q=node/214837',
+			link: 'http://kbench.com/?q=node/214837',
+			description:
+				'문자를 텍스트로 인식해 텍스트 검색 및 추출을 용이하게 하는 OCR(광학식 문자 인식) 스캔 기능을 기본... 문서 오출력 및 정보 유출을 사전에 방지할 수 있다. 태그 : 캐논코리아,이미지러너 어드밴스 DX,복합기',
+			pubDate: '20-10-13 09:55'
+		},
+		{
+			title: '마이크로소프트 “애저 AI, 인간 수준의 이미지 묘사능력 구사한다”',
+			originallink: 'http://www.itworld.co.kr/news/168645',
+			link: 'http://www.itworld.co.kr/news/168645',
+			description:
+				'‘알트 텍스트(alt text)’로 알려진 마이크로소프트 이미지 캡셔닝 기술은 다양한 이미지를 인식 및 분석해 콘텐츠를 자연어로 해설해 주는 기술이다. 2015년부터 활용된 이 기술은 이번 업데이트로 사람과 비슷한 수준에... ',
+			pubDate: '20-10-20 16:10'
+		},
+		{
+			title: "사이냅소프트, 텍스트 추출 강화 '사이냅 문서필터' 선봬",
+			originallink: 'http://www.inews24.com/view/1299086',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=031&aid=0000557616',
+			description:
+				'회사 측은 이번 OCR 솔루션 연동으로 일반 텍스트는 물론 이미지 내 텍스트까지 인식·추출이 가능해졌다고 설명했다. 또 이를 통해 SK텔레콤, 안랩 등 다양한 레퍼런스를 확보하며 문서필터 시장을 이끌겠다고 했다.... ',
+			pubDate: '20-09-14 14:28'
+		},
+		{
+			title: '로민, 인공지능 광학문자인식 기술 신기술 인증 획득',
+			originallink: 'https://www.sedaily.com/NewsView/1Z7YDAO2UL',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=011&aid=0003801386',
+			description:
+				'이 기술을 활용하면 스마트폰, 팩스, 스캐너 등 이미지가 생성된 기기, 실내외 등의 촬영 환경, 인식할 텍스트의 배치와 형태 등의 제약조건 없이 이미지에 존재하는 모든 텍스트의 인식이 가능하다. 그림자, 노이즈... ',
+			pubDate: '20-09-22 14:30'
+		},
+		{
+			title: '사이냅 문서필터, AI OCR 연동…텍스트 추출 강화',
+			originallink: 'http://www.datanet.co.kr/news/articleView.html?idxno=150657',
+			link: 'http://www.datanet.co.kr/news/articleView.html?idxno=150657',
+			description:
+				'두 솔루션의 결합으로 일반 텍스트는 물론 이미지 내 텍스트까지 인식과 추출이 가능해졌다. 문서에 포함된 모든 텍스트를 완벽히 추출할 수 있게 되어 문서필터의 가치를 한 단계 끌어 올렸다는 평가다. 사이냅... ',
+			pubDate: '20-09-14 10:06'
+		},
+		{
+			title: '2020년 팬데믹, ‘비접촉 생체인식’이 뜬다',
+			originallink: 'https://ppss.kr/archives/225471',
+			link: 'https://ppss.kr/archives/225471',
+			description:
+				'얼굴 옆면의 이미지에서 그래프의 형태로 모델링을 하면, 뚜렷하면서도 쉽게 귀의 기하학적인 구조를... 이를테면 사용자 등록 및 인식을 위해서 다양한 구문을 활용하는 텍스트 의존(text-dependent) 알고리즘이 될 수... ',
+			pubDate: '20-10-12 17:41'
+		},
+		{
+			title: '사이냅 문서필터, 인공지능 OCR 연동으로 이미지속 텍스트 추출 강화',
+			originallink: 'http://www.etnews.com/20200915000122',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=030&aid=0002903040',
+			description:
+				'일반 텍스트는 물론 이미지 내 텍스트까지 인식과 추출이 가능해졌다. 문서에 포함된 모든 텍스트를 완벽히 추출할 수 있게 되어 문서필터의 가치를 한 단계 끌어 올렸다. 김시연 사이냅소프트 부사장은 “기존... ',
+			pubDate: '20-09-15 12:31'
+		},
+		{
+			title: '로민, 딥러닝 기반 문자인식(OCR) 기술 신기술(NET) 획득 인증 눈앞',
+			originallink: 'https://www.news1.kr/articles/?4019771',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=421&aid=0004801790',
+			description:
+				'스마트폰, 팩스, 스캐너 등 이미지가 생성된 기기, 실내외 등의 촬영 환경, 인식할 텍스트의 배치와 형태 등의 제약조건 없이 이미지에 존재하는 모든 텍스트를 인식한다. 그림자, 노이즈, 흔들림 등의 조건에서도... ',
+			pubDate: '20-08-07 15:19'
+		},
+		{
+			title: '사이냅 문서필터, 인공지능 OCR 연동으로 텍스트 추출 강화',
+			originallink: 'http://www.aitimes.kr/news/articleView.html?idxno=17695',
+			link: 'http://www.aitimes.kr/news/articleView.html?idxno=17695',
+			description:
+				'두 솔루션의 결합으로 일반 텍스트는 물론 이미지 내 텍스트까지 인식과 추출이 가능해졌다. 문서에 포함된 모든 텍스트를 완벽히 추출할 수 있게 되어 문서필터의 가치를 한 단계 끌어 올렸다. 사이냅 문서필터는... ',
+			pubDate: '20-09-14 12:05'
+		},
+		{
+			title: '네이버, 한미약품에 클라우드 문자인식 기술 제공…규정준수 수작업 덜어',
+			originallink: 'http://www.ajunews.com/view/20200820153639939',
+			link: 'http://www.ajunews.com/view/20200820153639939',
+			description:
+				"OCR은 이미지나 문서의 텍스트를 인식해 디지털 데이터로 변환하는 기술이다. 네이버의 인공지능(AI) 비즈니스 조직인 '네이버 클로바'에서 연구개발한 OCR 기술이 NBP의 OCR 서비스로 제공된다. 이 서비스는 스캔... ",
+			pubDate: '20-08-20 15:40'
+		},
+		{
+			title: '로민, 딥러닝 기반 문자인식 기술 신기술 획득 인증 눈앞',
+			originallink: 'http://www.edaily.co.kr/news/newspath.asp?newsid=02866726625865024',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=018&aid=0004709044',
+			description:
+				'스마트폰, 팩스, 스캐너 등 이미지가 생성된 기기, 실내외 등의 촬영 환경, 인식할 텍스트의 배치와 형태 등의 제약조건 없이 이미지에 존재하는 모든 텍스트를 인식한다. 그림자, 노이즈, 흔들림 등의 조건에서도... ',
+			pubDate: '20-08-07 15:27'
 		},
 		{
 			title: '화면 캡처로 노래 옮긴다…플로, 이미지서 텍스트 추출 서비스 선보여',
@@ -7520,15 +7712,71 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=366&aid=0000441213',
 			description:
 				'OCR은 이미지에서 텍스트를 인식해 추출하는 기능이다. 플로는 화면 캡처를 통해 플레이리스트를 자동 생성할 수 있는 서비스를 추가했다. 이용자가 플레이리스트를 캡처할 경우, OCR 기능이 곡명과 가수명을 인지해... ',
-			pubDate: 'Tue, 20 Aug 2019 10:10:00 +0900'
+			pubDate: '19-08-20 10:10'
 		},
 		{
-			title: '네이버, 삼정KPMG에 OCR제공…"이미지·텍스트, 디지털로 자동 변환"',
-			originallink: 'https://www.news1.kr/articles/?3935363',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=421&aid=0004639197',
+			title: '사이냅 문서필터, 인공지능 OCR 연동으로 텍스트 추출 강화',
+			originallink: 'http://www.ddaily.co.kr/news/article.html?no=201661',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=138&aid=0002091643',
 			description:
-				'OCR은 이미지나 문서의 글씨를 인식해 디지털 데이터로 변환시켜주는 기술이다. 삼정KMPG는 그동안 금융거래조회서를 단순 입력해왔으나 업무의 효율을 높이기 위해 네이버 클라우드 플랫폼의 OCR 기술을 활용했다.... ',
-			pubDate: 'Fri, 15 May 2020 09:28:00 +0900'
+				'두 솔루션의 결합으로 일반 텍스트는 물론 이미지 내 텍스트까지 인식과 추출이 가능해졌다. 문서에 포함된 모든 텍스트를 완벽히 추출할 수 있게 되어 문서필터의 가치를 한 단계 끌어 올렸다. 사이냅 문서필터는 사이냅... ',
+			pubDate: '20-09-14 10:56'
+		},
+		{
+			title: '로민, 인공지능(AI) 광학문자인식(OCR) 기술 신기술(NET) 인증',
+			originallink: 'http://www.fnnews.com/news/202009221408357928',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=014&aid=0004498976',
+			description:
+				'이 기술을 활용하면 스마트폰, 팩스, 스캐너 등 이미지가 생성된 기기, 실내외 등의 촬영 환경, 인식할 텍스트의 배치와 형태 등의 제약조건 없이 이미지에 존재하는 모든 텍스트의 인식이 가능하다. 그림자, 노이즈... ',
+			pubDate: '20-09-22 14:12'
+		},
+		{
+			title: '로민, 딥러닝 기반 문자인식(OCR) 기술 신기술(NET) 획득 인증 눈앞',
+			originallink: 'http://news.heraldcorp.com/view.php?ud=20200807000528',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=103&oid=016&aid=0001709498',
+			description:
+				'스마트폰, 팩스, 스캐너 등 이미지가 생성된 기기, 실내외 등의 촬영 환경, 인식할 텍스트의 배치와 형태 등의 제약조건 없이 이미지에 존재하는 모든 텍스트를 인식한다. 그림자, 노이즈, 흔들림 등의 조건에서도... ',
+			pubDate: '20-08-07 12:49'
+		},
+		{
+			title: '로민, 딥러닝 기반 문자인식(OCR) 기술 신기술(NET) 획득 인증 앞둬',
+			originallink: 'http://www.dt.co.kr/contents.html?article_no=2020080702109919607009&ref=naver',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=029&aid=0002616246',
+			description:
+				'스마트폰, 팩스, 스캐너 등 이미지가 생성된 기기, 실내외 등의 촬영 환경, 인식할 텍스트의 배치와 형태 등의 제약조건 없이 이미지에 존재하는 모든 텍스트를 인식한다. 그림자, 노이즈, 흔들림 등의 조건에서도... ',
+			pubDate: '20-08-07 17:26'
+		},
+		{
+			title: '인텔로이드, 의료현장 음성인식 AI 선도',
+			originallink: 'http://www.dailymedi.com/detail.php?number=860714&thread=22r06',
+			link: 'http://www.dailymedi.com/detail.php?number=860714&thread=22r06',
+			description:
+				'양태영 대표는 “음성인식뿐만 아니라 텍스트 분석 및 이미지 인식 AI를 One 플랫폼으로 제공해 폭넓은 스펙트럼을 가진 AI 전문회사로 진화해 갈 것”이라고 말했다.',
+			pubDate: '20-09-21 16:16'
+		},
+		{
+			title: '로민, 인공지능(AI) 광학문자인식(OCR) 기술 신기술(NET) 인증 획득',
+			originallink: 'http://mbnmoney.mbn.co.kr/news/view?news_no=MM1004118292',
+			link: 'http://mbnmoney.mbn.co.kr/news/view?news_no=MM1004118292',
+			description:
+				'이 기술을 활용하면 스마트폰, 팩스, 스캐너 등 이미지가 생성된 기기, 실내외 등의 촬영 환경, 인식할 텍스트의 배치와 형태 등의 제약조건 없이 이미지에 존재하는 모든 텍스트의 인식이 가능하다. 그림자, 노이즈... ',
+			pubDate: '20-09-22 15:58'
+		},
+		{
+			title: 'AI 솔루션 기업 로민, 문자인식(OCR) 솔루션 신기술(NET) 획득 인증 앞둬',
+			originallink: 'http://it.chosun.com/site/data/html_dir/2020/08/07/2020080702293.html',
+			link: 'http://it.chosun.com/site/data/html_dir/2020/08/07/2020080702293.html',
+			description:
+				'없이 이미지에 존재하는 모든 텍스트를 인식한다. 그림자, 노이즈, 흔들림 등의 조건에서도 문자인식이 가능하다. 로민은 금융사 및 보험사들과의 협업을 통해 인공지능(AI) 기반으로 다양한 비정형문서의 구조를... ',
+			pubDate: '20-08-07 14:16'
+		},
+		{
+			title: "이파피루스, AI OCR 솔루션 '텍스트센스' 출시…이미지인식부터 데이터 활용까...",
+			originallink: 'http://www.etnews.com/20200605000071',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=030&aid=0002886427',
+			description:
+				"전자문서 솔루션 전문기업 이파피루스(대표 김정희)는 이미지 속 텍스트 인식부터 데이터 활용 업무까지 자동화하는 인공지능(AI) 기반 광학문자인식(OCR) 솔루션 '텍스트센스(TextSense)'를 출시한다고 밝혔다. 회사는 포스트... ",
+			pubDate: '20-06-05 10:36'
 		},
 		{
 			title: 'SKT 플로 "캡쳐 이미지로 플레이리스트 만드세요"',
@@ -7536,7 +7784,15 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=092&aid=0002168664',
 			description:
 				'OCR은 이미지에서 텍스트를 인식해 추출하는 기능이다. 플로는 최근 OCR을 적용한 기능을 시범 도입하고 캡쳐만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를 개선했다. 회사 측은 "그동안... ',
-			pubDate: 'Tue, 20 Aug 2019 15:05:00 +0900'
+			pubDate: '19-08-20 15:05'
+		},
+		{
+			title: '사이냅 문서필터, 인공지능 OCR 연동으로 텍스트 추출 강화',
+			originallink: 'https://www.dailysecu.com/news/articleView.html?idxno=113659',
+			link: 'https://www.dailysecu.com/news/articleView.html?idxno=113659',
+			description:
+				'두 솔루션의 결합으로 일반 텍스트는 물론 이미지 내 텍스트까지 인식과 추출이 가능해졌다. 문서에 포함된 모든 텍스트를 완벽히 추출할 수 있게 되어 문서필터의 가치를 한 단계 끌어 올렸다. 사이냅 문서필터는... ',
+			pubDate: '20-09-14 15:44'
 		},
 		{
 			title: 'SK텔레콤 플로, 딥러닝 기반 문자인식 기술 적용',
@@ -7544,71 +7800,7 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=014&aid=0004279831',
 			description:
 				'플로 제공 OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로 플로는 최근 OCR을 적용한 캡쳐 이미지로 플레이리스트 만들기 기능을 시범 도입하고 캡쳐만으로 간편하게 플레이리스트를 자동 생성할 수 있도록... ',
-			pubDate: 'Tue, 20 Aug 2019 11:55:00 +0900'
-		},
-		{
-			title: '플로, 문자인식 기술로 플레이리스트 작성…타 음악 플랫폼 이용자 확보 목적',
-			originallink: 'http://it.chosun.com/site/data/html_dir/2019/08/20/2019082002247.html',
-			link: 'http://it.chosun.com/site/data/html_dir/2019/08/20/2019082002247.html',
-			description:
-				'OCR은 이미지에서 텍스트를 인식해 추출하는 기능이다. 플로는 OCR 기술을 활용해 캡쳐 이미지에서 플레이리스트를 만드는 기능을 시범 도입했다. 플로가 OCR기능을 도입한 이유는 다른 음악 플랫폼 이용자를 플로로... ',
-			pubDate: 'Tue, 20 Aug 2019 17:36:00 +0900'
-		},
-		{
-			title: '플로, 캡쳐 이미지로 플레이리스트 만들기 기능 도입',
-			originallink: 'http://www.inews24.com/view/1202846',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=031&aid=0000505753',
-			description:
-				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 '캡쳐 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡쳐만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ",
-			pubDate: 'Tue, 20 Aug 2019 12:06:00 +0900'
-		},
-		{
-			title: '네이버, AI 적용 사례 소개… “얼굴 인식 정확도 99.98%”',
-			originallink: 'https://biz.chosun.com/site/data/html_dir/2019/10/20/2019102001229.html',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=366&aid=0000445525',
-			description:
-				'정 리더는 "클로바는 챗봇, 음성 인식, 음성 합성, OCR, 이미지 검색, 얼굴 인식, 비디오 분석, 머신러닝 플랫폼, 텍스트 분석 등 총 9개의 AI 핵심 엔진을 자체 개발하고 있다"며 "폭넓은 기술 라인업과 방대한 데이터를... ',
-			pubDate: 'Sun, 20 Oct 2019 18:32:00 +0900'
-		},
-		{
-			title: '독일항공우주센터, 달 임무 로봇에 AI 음성인식 기술 넣는다',
-			originallink: 'https://www.zdnet.co.kr/view/?no=20200503165559',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=092&aid=0002187594',
-			description:
-				'독일항공우주센터에서 개발한 휴머노이드 로봇 롤링저스틴(이미지=독일항공우주센터) 음성 인식 기술을... 컴퓨터가 인식할 수 있는 텍스트로 전환해 시스템에 입력하는 기술이다. 독일항공우주센터는 딥스피치를 어떻게... ',
-			pubDate: 'Sun, 03 May 2020 18:12:00 +0900'
-		},
-		{
-			title: '지금은 언택트 시대, "컴트루테크놀로지 솔루션으로 더 쉽게 인식∙인증한다"',
-			originallink: 'http://www.epnc.co.kr/news/articleView.html?idxno=96910',
-			link: 'http://www.epnc.co.kr/news/articleView.html?idxno=96910',
-			description:
-				'해당 솔루션을 통해 신분증이나 문서 등을 인식시키면 이미지∙텍스트 영역이 검출된다. AI는 검출된 데이터를 토대로 분석하고, 데이터화하는데, 이는 주로 핀테크 기업의 비대면 가입∙인증에 주로 사용된다.... ',
-			pubDate: 'Wed, 27 May 2020 11:26:00 +0900'
-		},
-		{
-			title: "사이냅소프트, AI 딥러닝 기반 최고 수준의 인식률... '사이냅 OCR'",
-			originallink: 'http://www.aitimes.kr/news/articleView.html?idxno=15841',
-			link: 'http://www.aitimes.kr/news/articleView.html?idxno=15841',
-			description:
-				"설치형 OCR 솔루션인 '사이냅 OCR'은 딥러닝 기술을 활용해 이미지 내 텍스트를 인식하고 텍스트와 텍스트 위치정보, 패턴정보를 제공한다. '사이냅 OCR'이 제공하는 정보들은 RPA, DLP, 검색엔진, 웹 팩스 등 다양한... ",
-			pubDate: 'Tue, 31 Mar 2020 10:01:00 +0900'
-		},
-		{
-			title: 'SKT 플로, 딥러닝 기반 문자인식 기술 적용',
-			originallink: 'http://www.itdaily.kr/news/articleView.html?idxno=96488',
-			link: 'http://www.itdaily.kr/news/articleView.html?idxno=96488',
-			description:
-				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 '캡쳐 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡처만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ",
-			pubDate: 'Tue, 20 Aug 2019 17:16:00 +0900'
-		},
-		{
-			title: '“시각장애인 읽을 수 없는 이미지형 선거공보물 개선해야”',
-			originallink: 'http://www.hani.co.kr/arti/society/society_general/930863.html',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=102&oid=028&aid=0002487648',
-			description:
-				'이미지나 텍스트 형식으로 정보가 제공되는데, 이 경우 화면낭독 프로그램을 사용하는 시각장애인들은 이미지 형식의 파일을 인식할 수 없는 어려움이 있는 것으로 나타났다. 또한 인권위는 중앙선관위가 2017년... ',
-			pubDate: 'Tue, 03 Mar 2020 15:12:00 +0900'
+			pubDate: '19-08-20 11:55'
 		},
 		{
 			title: "멜론·지니 등 플레이리스트, 캡쳐 이미지로 '플로'서 재생",
@@ -7616,7 +7808,79 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=003&aid=0009409056',
 			description:
 				'OCR은(Optical Character Recognition)은 이미지에서 텍스트를 인식해 추출하는 기능을 말한다. 플로에 적용된 OCR 기능은 일반 문서에서 문자 인식과 달리 플레이리스트의 레이아웃 형태를 정확히 분석한 후 곡명, 가수명을... ',
-			pubDate: 'Tue, 20 Aug 2019 17:27:00 +0900'
+			pubDate: '19-08-20 17:27'
+		},
+		{
+			title: '플로, 캡쳐 이미지로 플레이리스트 만들기 기능 도입',
+			originallink: 'http://www.inews24.com/view/1202846',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=031&aid=0000505753',
+			description:
+				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 '캡쳐 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡쳐만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ",
+			pubDate: '19-08-20 12:06'
+		},
+		{
+			title: "이파피루스, AI OCR 솔루션 '텍스트센스' 출시",
+			originallink: 'http://www.itdaily.kr/news/articleView.html?idxno=101345',
+			link: 'http://www.itdaily.kr/news/articleView.html?idxno=101345',
+			description:
+				"전자문서 솔루션 전문기업 이파피루스(대표 김정희)는 이미지 속 텍스트 인식부터 데이터 활용까지 자동화할 수 있는 인공지능 딥러닝 기반 OCR(광학적 문자 인식 Optical Character Recognition) 솔루션 '텍스트센스(TextSense)'를... ",
+			pubDate: '20-06-03 18:10'
+		},
+		{
+			title: '플로, 문자인식 기술로 플레이리스트 작성…타 음악 플랫폼 이용자 확보 목적',
+			originallink: 'http://it.chosun.com/site/data/html_dir/2019/08/20/2019082002247.html',
+			link: 'http://it.chosun.com/site/data/html_dir/2019/08/20/2019082002247.html',
+			description:
+				'OCR은 이미지에서 텍스트를 인식해 추출하는 기능이다. 플로는 OCR 기술을 활용해 캡쳐 이미지에서 플레이리스트를 만드는 기능을 시범 도입했다. 플로가 OCR기능을 도입한 이유는 다른 음악 플랫폼 이용자를 플로로... ',
+			pubDate: '19-08-20 17:36'
+		},
+		{
+			title: '사이냅소프트, OCR 영역 설정만으로 민증 정보 읽는 도구 도입',
+			originallink: 'https://zdnet.co.kr/view/?no=20201022153438',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=092&aid=0002202720',
+			description:
+				'사이냅 OCR은 올해 3월 출시된 인공지능 기반의 광학 문자 인식 솔루션으로, 딥러닝 기술을 활용해 이미지 내 텍스트를 인식하고 텍스트와 텍스트 위치정보, 패턴 정보를 제공한다. 높은 한글 인식률과 빠른 인식 속도로... ',
+			pubDate: '20-10-22 15:57'
+		},
+		{
+			title: 'SKT 플로, 딥러닝 기반 문자인식 기술 적용',
+			originallink: 'http://www.itdaily.kr/news/articleView.html?idxno=96488',
+			link: 'http://www.itdaily.kr/news/articleView.html?idxno=96488',
+			description:
+				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 '캡쳐 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡처만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ",
+			pubDate: '19-08-20 17:16'
+		},
+		{
+			title: '로민, 인공지능(AI) 광학문자인식(OCR) 기술 신기술(NET) 인증 획득',
+			originallink: 'http://www.kbanker.co.kr/news/articleView.html?idxno=93658',
+			link: 'http://www.kbanker.co.kr/news/articleView.html?idxno=93658',
+			description:
+				'이 기술을 활용하면 스마트폰, 팩스, 스캐너 등 이미지가 생성된 기기, 실내외 등의 촬영 환경, 인식할 텍스트의 배치와 형태 등의 제약조건 없이 이미지에 존재하는 모든 텍스트의 인식이 가능하다. 그림자, 노이즈... ',
+			pubDate: '20-09-23 09:54'
+		},
+		{
+			title: '“화면 캡처해 노래 목록 옮긴다”…SKT 플로, 문자 인식 서비스 선보여',
+			originallink: 'http://news.kmib.co.kr/article/view.asp?arcid=0013622386&code=61151111&cp=nv',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=005&aid=0001230971',
+			description:
+				'이미지에서 텍스트를 인식해 추출하는 OCR(광학 문자 인식 기술) 기반 서비스를 활용했다. 플로는 최근 OCR을 적용한 ‘캡쳐 이미지로 플레이리스트 만들기’ 기능을 시범 도입, 화면 캡쳐만으로 간편하게 플레이리스트를... ',
+			pubDate: '19-08-20 18:05'
+		},
+		{
+			title: '네이버, AI 적용 사례 소개… “얼굴 인식 정확도 99.98%”',
+			originallink: 'https://biz.chosun.com/site/data/html_dir/2019/10/20/2019102001229.html',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=366&aid=0000445525',
+			description:
+				'정 리더는 "클로바는 챗봇, 음성 인식, 음성 합성, OCR, 이미지 검색, 얼굴 인식, 비디오 분석, 머신러닝 플랫폼, 텍스트 분석 등 총 9개의 AI 핵심 엔진을 자체 개발하고 있다"며 "폭넓은 기술 라인업과 방대한 데이터를... ',
+			pubDate: '19-10-20 18:32'
+		},
+		{
+			title: '네이버, 삼정KPMG에 OCR제공…"이미지·텍스트, 디지털로 자동 변환"',
+			originallink: 'https://www.news1.kr/articles/?3935363',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=421&aid=0004639197',
+			description:
+				'OCR은 이미지나 문서의 글씨를 인식해 디지털 데이터로 변환시켜주는 기술이다. 삼정KMPG는 그동안 금융거래조회서를 단순 입력해왔으나 업무의 효율을 높이기 위해 네이버 클라우드 플랫폼의 OCR 기술을 활용했다.... ',
+			pubDate: '20-05-15 09:28'
 		},
 		{
 			title: 'SKT 플로, 딥러닝 기반 문자인식 기술 활용 나서',
@@ -7624,7 +7888,127 @@ const searchData = {
 			link: 'http://www.gvalley.co.kr/567095',
 			description:
 				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 '캡쳐 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡쳐만으로 간편하게 플레이리스트를 자동 생성할 수... ",
-			pubDate: 'Tue, 20 Aug 2019 18:08:00 +0900'
+			pubDate: '19-08-20 18:08'
+		},
+		{
+			title: 'SKT, 플로에 사진 인식기술 적용',
+			originallink: 'http://www.finomy.com/news/articleView.html?idxno=68603',
+			link: 'http://www.finomy.com/news/articleView.html?idxno=68603',
+			description:
+				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능이다. SK텔레콤은 플로에 OCR을 적용해 '캡쳐 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡쳐만으로 간편하게 플레이리스트를 자동 생성할 수 있도록... ",
+			pubDate: '19-08-20 11:16'
+		},
+		{
+			title: "사이냅소프트, AI 딥러닝 기반 최고 수준의 인식률... '사이냅 OCR'",
+			originallink: 'http://www.aitimes.kr/news/articleView.html?idxno=15841',
+			link: 'http://www.aitimes.kr/news/articleView.html?idxno=15841',
+			description:
+				"설치형 OCR 솔루션인 '사이냅 OCR'은 딥러닝 기술을 활용해 이미지 내 텍스트를 인식하고 텍스트와 텍스트 위치정보, 패턴정보를 제공한다. '사이냅 OCR'이 제공하는 정보들은 RPA, DLP, 검색엔진, 웹 팩스 등 다양한... ",
+			pubDate: '20-03-31 10:01'
+		},
+		{
+			title: '사이냅 OCR, GUI 기반 서식 템플릿 작성 도구 제공',
+			originallink: 'http://www.datanet.co.kr/news/articleView.html?idxno=151913',
+			link: 'http://www.datanet.co.kr/news/articleView.html?idxno=151913',
+			description:
+				'사이냅 OCR은 올해 3월 출시된 AI 기반의 OCR 솔루션으로 딥러닝 기술을 활용해 이미지 내 텍스트를 인식하고, 텍스트와 텍스트 위치정보, 패턴 정보를 제공한다. 높은 한글 인식률과 빠른 인식 속도로 RPA, 개인정보 보호... ',
+			pubDate: '20-10-22 09:57'
+		},
+		{
+			title: '“시각장애인 읽을 수 없는 이미지형 선거공보물 개선해야”',
+			originallink: 'http://www.hani.co.kr/arti/society/society_general/930863.html',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=102&oid=028&aid=0002487648',
+			description:
+				'이미지나 텍스트 형식으로 정보가 제공되는데, 이 경우 화면낭독 프로그램을 사용하는 시각장애인들은 이미지 형식의 파일을 인식할 수 없는 어려움이 있는 것으로 나타났다. 또한 인권위는 중앙선관위가 2017년... ',
+			pubDate: '20-03-03 15:12'
+		},
+		{
+			title: '[최은수 기자의 미래이야기]‘이미지-텍스트-음성’ 변환 자유자재로 한다',
+			originallink: 'https://www.mk.co.kr/opinion/columnists/view/2020/03/258200/',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=103&oid=009&aid=0004535011',
+			description:
+				'이 기술을 활용하면 이미지 속의 텍스트를 인식해 상품을 검색하도록 할 수 있고 외국어를 원하는 원어로 번역할 수도 있다. OCR이 우리의 일상을 어떻게 바꿔놓고 있을까?# 사진 찍으면 자동으로 번역해줘요 네이버의... ',
+			pubDate: '20-03-12 10:47'
+		},
+		{
+			title: '네이버 문자 인식 기술, 국제 경진대회서 최고점',
+			originallink: 'http://www.inews24.com/php/news_view.php?g_serial=1107945&g_menu=020310&rrf=nv',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=031&aid=0000453634',
+			description:
+				'이 대회는 디지털 이미지와 비디오 상에서 텍스트를 감지·인식하는 기술인 Robust Reading 분야에서 가장 권위있는 국제경진 대회다. OCR(Optical Character Recognition)은 크게 이미지에서 ▲문자의 위치를 찾는 검출... ',
+			pubDate: '18-07-10 13:49'
+		},
+		{
+			title: "SK텔레콤 '플로', 딥러닝 기반 광학문자인식 기술로 신규 고객 확보 나서",
+			originallink: 'http://www.it-b.co.kr/news/articleView.html?idxno=32824',
+			link: 'http://www.it-b.co.kr/news/articleView.html?idxno=32824',
+			description:
+				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 '캡처 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡처만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ",
+			pubDate: '19-08-20 10:45'
+		},
+		{
+			title: "갤노트10 써보니…'한 손에 쏙' 크기·S펜 텍스트 변환 눈길(종합)",
+			originallink: 'http://yna.kr/AKR20190807156451017?did=1195m',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=001&aid=0011007887',
+			description:
+				'공간을 인식하는 알고리즘을 사용해 피사체를 트래킹하고, 사용자가 S펜으로 그린 이미지와 움직이는... 추가·텍스트 삽입·배경음악 설정을 할 수 있는 기능 모두 유용해 보였다. 다만 기대를 모았던 S펜의 에어... ',
+			pubDate: '19-08-08 07:44'
+		},
+		{
+			title: "'장애인 인식개선을 위해 힘쓰는 제21대 국회의원, 더불어민주당 최혜영 의원...",
+			originallink: 'https://www.ytn.co.kr/_ln/0103_202007201521040442',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=102&oid=052&aid=0001467062',
+			description:
+				'이것은 분명 사회적 인식의 문제다. 이런 것들을 당사자가 한 번 바꿔보면 어떨까? 제가 열심히 활동하고, 제 얘기로써 부정적인 이미지를 긍정적인 이미지로 바꾸는 일을 해야겠다는 생각을 했었어요. 그때 혼자 할 수는... ',
+			pubDate: '20-07-20 15:21'
+		},
+		{
+			title: '로민, KB국민카드 문자 자동인식 자원 도입 사업 우선협상대상자 선정',
+			originallink: 'https://www.hankyung.com/economy/article/202007304898a',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=015&aid=0004389767',
+			description:
+				'문서 이미지에서 필요한 정보를 추출하고 데이터로 만들어 비즈니스에 활용할 수 있는 서비스까지 바라보고 있다”고 밝혔다. 로민은 비정형문서에 대해 높은 인식률을 보유한 OCR 솔루션 텍스트스코프(Textscope™)를... ',
+			pubDate: '20-07-30 11:45'
+		},
+		{
+			title: "네이버 검색창 디자인 바뀐다…입력에서 '인식'으로",
+			originallink: 'http://news.hankyung.com/article/201708232449g',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=015&aid=0003813373',
+			description:
+				"기존에는 검색어를 입력하는 데 최적화됐다면 바뀐 검색창은 텍스트뿐 아니라 음성과 이미지를 '인식'하는 데 초점을 맞췄다. 김승언 네이버 디자인설계 리더는 23일 서울 강남구 그랜드인터컨티넨탈서울파르나스에서... ",
+			pubDate: '17-08-23 12:40'
+		},
+		{
+			title: '독일항공우주센터, 달 임무 로봇에 AI 음성인식 기술 넣는다',
+			originallink: 'https://www.zdnet.co.kr/view/?no=20200503165559',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=092&aid=0002187594',
+			description:
+				'독일항공우주센터에서 개발한 휴머노이드 로봇 롤링저스틴(이미지=독일항공우주센터) 음성 인식 기술을... 컴퓨터가 인식할 수 있는 텍스트로 전환해 시스템에 입력하는 기술이다. 독일항공우주센터는 딥스피치를 어떻게... ',
+			pubDate: '20-05-03 18:12'
+		},
+		{
+			title: '사이냅 OCR, GUI 기반 서식 템플릿 작성 도구로 사용자 편의성 향상',
+			originallink: 'http://www.aitimes.kr/news/articleView.html?idxno=18131',
+			link: 'http://www.aitimes.kr/news/articleView.html?idxno=18131',
+			description:
+				'사이냅 OCR은 올해 3월 출시된 인공지능 기반의 광학 문자 인식 솔루션으로, 딥러닝 기술을 활용해 이미지 내 텍스트를 인식하고 텍스트와 텍스트 위치정보, 패턴 정보를 제공한다. 높은 한글 인식률과 빠른 인식... ',
+			pubDate: '20-10-22 12:38'
+		},
+		{
+			title: 'SKT 플로, 딥러닝 기반의 문자인식 기술로 모객 가속',
+			originallink: 'http://www.m-i.kr/news/articleView.html?idxno=631107',
+			link: 'http://www.m-i.kr/news/articleView.html?idxno=631107',
+			description:
+				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 '캡쳐 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡쳐만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ",
+			pubDate: '19-08-20 10:54'
+		},
+		{
+			title: '네이버 문자인식기술, 국제 경진대회서 1위…경쟁력 입증',
+			originallink: 'http://news.hankyung.com/article/201807106737g',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=015&aid=0003976780',
+			description:
+				'해당 경진 대회는 디지털 이미지와 비디오 상에서 텍스트를 감지하고 인식하는 기술 분야에서 권위를 자랑한다. 문자인식기술은 크게 이미지에서 ▲문자의 위치를 찾는 ‘검출 기술’과 ▲문자가 무엇인지 알아내는... ',
+			pubDate: '18-07-10 15:52'
 		},
 		{
 			title: '네이버 비즈니스 플랫폼, 문자인식기술 파트너사 모집',
@@ -7632,7 +8016,41 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=421&aid=0004436424',
 			description:
 				'OCR은 이미지 속에 있는 문자를 인식해 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술이다. 문서 자동 분류를 실현해 반복 검증 업무를 줄일 수 있고, 청구서와 영수증 등의 자동 입력 정확도를 높이는 등... ',
-			pubDate: 'Fri, 31 Jan 2020 10:32:00 +0900'
+			pubDate: '20-01-31 10:32'
+		},
+		{
+			title: '네이버 문자 인식 기술, 국제 경진대회서 1위',
+			originallink: 'http://www.enewstoday.co.kr/news/articleView.html?idxno=1210290',
+			link: 'http://www.enewstoday.co.kr/news/articleView.html?idxno=1210290',
+			description:
+				'이 대회는 디지털 이미지와 비디오 상에서 텍스트를 감지ㆍ인식하는 기술 분야에서 가장 권위있는 국제경진 대회이다. OCR(Optical Character Recognition)은 이미지에서 문자의 위치를 찾는 ‘검출 기술’과 문자가... ',
+			pubDate: '18-07-10 15:54'
+		},
+		{
+			title: '지금은 언택트 시대, "컴트루테크놀로지 솔루션으로 더 쉽게 인식∙인증한다"',
+			originallink: 'http://www.epnc.co.kr/news/articleView.html?idxno=96910',
+			link: 'http://www.epnc.co.kr/news/articleView.html?idxno=96910',
+			description:
+				'해당 솔루션을 통해 신분증이나 문서 등을 인식시키면 이미지∙텍스트 영역이 검출된다. AI는 검출된 데이터를 토대로 분석하고, 데이터화하는데, 이는 주로 핀테크 기업의 비대면 가입∙인증에 주로 사용된다.... ',
+			pubDate: '20-05-27 11:26'
+		},
+		{
+			title: '[이지누 칼럼]가짜·허구 이미지의 시대, 사진이란 무엇일까',
+			originallink: 'http://news.khan.co.kr/kh_news/khan_art_view.html?artid=202007140300035&code=990100',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=110&oid=032&aid=0003020533',
+			description:
+				'어느덧 지금 시대의 사진은 ‘~질’을 거치지 않으면 안 되는 것으로 인식하게 되었으며 ‘~질’은 컴퓨터... 제공하여 이미지의 구석에 ‘사실 확인(fact checks)’을 알리는 쪽지를 붙이겠다고 했다. 이미 텍스트로 된... ',
+			pubDate: '20-07-14 03:00'
+		},
+		{
+			title: '마음을 움직이는 UI 텍스트 사례',
+			originallink:
+				'https://ditoday.com/%eb%a7%88%ec%9d%8c%ec%9d%84-%ec%9b%80%ec%a7%81%ec%9d%b4%eb%8a%94-ui-%ed%85%8d%ec%8a%a4%ed%8a%b8-%ec%82%ac%eb%a1%80/',
+			link:
+				'https://ditoday.com/%eb%a7%88%ec%9d%8c%ec%9d%84-%ec%9b%80%ec%a7%81%ec%9d%b4%eb%8a%94-ui-%ed%85%8d%ec%8a%a4%ed%8a%b8-%ec%82%ac%eb%a1%80/',
+			description:
+				'여러분이 보는 앱 속 텍스트는 마케터와 서비스 기획자가 하는 온갖 노력의 결정체인 셈입니다. 한정된... 위 이미지 속 클래스101과 배달의 민족 광고의 타깃은 이런 ‘고민거리 많은 사장님’인 듯 합니다. 그런데 둘은... ',
+			pubDate: '20-07-30 10:40'
 		},
 		{
 			title: "안양시, 안양예술공원에 '이미지매칭' 시스템 도입",
@@ -7641,151 +8059,7 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=103&oid=047&aid=0002259425',
 			description:
 				'해당 이미지와의 매칭을 통해 인식하는 방식으로, 안양예술공원의 박물관 3곳 내부 전시작품 60점과... ⓒ 안양시 이 기술은 스마트폰을 활용한 해당 이미지에 대한 설명 및 안내서비스로 카메라 촬영과 동시에 텍스트는... ',
-			pubDate: 'Tue, 03 Mar 2020 14:32:00 +0900'
-		},
-		{
-			title: 'SKT, 플로에 사진 인식기술 적용',
-			originallink: 'http://www.finomy.com/news/articleView.html?idxno=68603',
-			link: 'http://www.finomy.com/news/articleView.html?idxno=68603',
-			description:
-				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능이다. SK텔레콤은 플로에 OCR을 적용해 '캡쳐 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡쳐만으로 간편하게 플레이리스트를 자동 생성할 수 있도록... ",
-			pubDate: 'Tue, 20 Aug 2019 11:16:00 +0900'
-		},
-		{
-			title: '“화면 캡처해 노래 목록 옮긴다”…SKT 플로, 문자 인식 서비스 선보여',
-			originallink: 'http://news.kmib.co.kr/article/view.asp?arcid=0013622386&code=61151111&cp=nv',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=005&aid=0001230971',
-			description:
-				'이미지에서 텍스트를 인식해 추출하는 OCR(광학 문자 인식 기술) 기반 서비스를 활용했다. 플로는 최근 OCR을 적용한 ‘캡쳐 이미지로 플레이리스트 만들기’ 기능을 시범 도입, 화면 캡쳐만으로 간편하게 플레이리스트를... ',
-			pubDate: 'Tue, 20 Aug 2019 18:05:00 +0900'
-		},
-		{
-			title: '인권위 “시각 장애인 위해, 선거 정보 그림 아닌 텍스트로 제공해야”',
-			originallink: 'http://news.heraldcorp.com/view.php?ud=20200303000576',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=102&oid=016&aid=0001643390',
-			description:
-				'또는 텍스트 형식으로 저장된다. 이미지 형식은 그림으로 읽혀 시각장애인들이 사용하는 화면낭독프로그램인 센스리더 등 보조출력기로는 인식이 되지 않는다. 이 출력기는 텍스트 형식은 인식할 수 있다. 인권위는 또... ',
-			pubDate: 'Tue, 03 Mar 2020 12:02:00 +0900'
-		},
-		{
-			title: '[최은수 기자의 미래이야기]‘이미지-텍스트-음성’ 변환 자유자재로 한다',
-			originallink: 'https://www.mk.co.kr/opinion/columnists/view/2020/03/258200/',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=103&oid=009&aid=0004535011',
-			description:
-				'이 기술을 활용하면 이미지 속의 텍스트를 인식해 상품을 검색하도록 할 수 있고 외국어를 원하는 원어로 번역할 수도 있다. OCR이 우리의 일상을 어떻게 바꿔놓고 있을까?# 사진 찍으면 자동으로 번역해줘요 네이버의... ',
-			pubDate: 'Thu, 12 Mar 2020 10:47:00 +0900'
-		},
-		{
-			title: 'SKT 플로, 딥러닝 기반의 문자인식 기술로 모객 가속',
-			originallink: 'http://www.m-i.kr/news/articleView.html?idxno=631107',
-			link: 'http://www.m-i.kr/news/articleView.html?idxno=631107',
-			description:
-				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 '캡쳐 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡쳐만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ",
-			pubDate: 'Tue, 20 Aug 2019 10:54:00 +0900'
-		},
-		{
-			title: '[IT오늘] KT, 디지털 홍보 경쟁력 강화를 위해 SNS 채널 리브랜딩 진행…SKT,...',
-			originallink: 'http://www.sisaon.co.kr/news/articleView.html?idxno=113578',
-			link: 'http://www.sisaon.co.kr/news/articleView.html?idxno=113578',
-			description:
-				'KT는 유튜브와 네이버 TV를 통해 통신3사 최초로 동영상 보도자료를 주기적으로 배포하여 텍스트 중심의... 따뜻한 이미지와 국민기업으로서의 가치를 제고하겠다"고 말했다. 한편, KT는 SNS 채널 오픈을 기념하여 5월... ',
-			pubDate: 'Fri, 29 May 2020 15:28:00 +0900'
-		},
-		{
-			title: '[노영희의출발새아침] 김세연 "정치도련님? 스스로 당 정서, 인식과 잘 맞다고...',
-			originallink: 'https://www.ytn.co.kr/_ln/0101_202004290916107357',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=100&oid=052&aid=0001434014',
-			description:
-				'아래 텍스트는 실제 방송 내용과 차이가 있을 수 있으니 보다 정확한 내용은 방송으로 확인하시기 바랍니다.... 별 어려움 없었던 사람이다, 이런 취지, 너무 곱게 자랐다, 이런 취지로 도련님이라는 이미지가 연결되기는... ',
-			pubDate: 'Wed, 29 Apr 2020 09:16:00 +0900'
-		},
-		{
-			title: "SK텔레콤 '플로', 딥러닝 기반 광학문자인식 기술로 신규 고객 확보 나서",
-			originallink: 'http://www.it-b.co.kr/news/articleView.html?idxno=32824',
-			link: 'http://www.it-b.co.kr/news/articleView.html?idxno=32824',
-			description:
-				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 '캡처 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡처만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ",
-			pubDate: 'Tue, 20 Aug 2019 10:45:00 +0900'
-		},
-		{
-			title: "갤노트10 써보니…'한 손에 쏙' 크기·S펜 텍스트 변환 눈길(종합)",
-			originallink: 'http://yna.kr/AKR20190807156451017?did=1195m',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=001&aid=0011007887',
-			description:
-				'공간을 인식하는 알고리즘을 사용해 피사체를 트래킹하고, 사용자가 S펜으로 그린 이미지와 움직이는... 추가·텍스트 삽입·배경음악 설정을 할 수 있는 기능 모두 유용해 보였다. 다만 기대를 모았던 S펜의 에어... ',
-			pubDate: 'Thu, 08 Aug 2019 07:44:00 +0900'
-		},
-		{
-			title: '김세연 "정치도련님? 스스로 당 정서, 인식과 잘 맞다고 보진 않아"',
-			originallink: 'https://radio.ytn.co.kr/program/?f=2&id=69405&s_mcd=0214&s_hcd=01',
-			link: 'https://radio.ytn.co.kr/program/?f=2&id=69405&s_mcd=0214&s_hcd=01',
-			description:
-				'아래 텍스트는 실제 방송 내용과 차이가 있을 수 있으니 보다 정확한 내용은 방송으로 확인하시기 바랍니다.... 별 어려움 없었던 사람이다, 이런 취지, 너무 곱게 자랐다, 이런 취지로 도련님이라는 이미지가 연결되기는... ',
-			pubDate: 'Wed, 29 Apr 2020 09:30:00 +0900'
-		},
-		{
-			title: '네이버, 삼정KPMG에 OCR제공…"이미지·텍스트, 디지털로 자동 변환"',
-			originallink: 'http://www.aitimes.com/news/articleView.html?idxno=128424',
-			link: 'http://www.aitimes.com/news/articleView.html?idxno=128424',
-			description:
-				'OCR은 이미지나 문서의 글씨를 인식해 디지털 데이터로 변환시켜주는 기술이다. 삼정KMPG는 그동안 금융거래조회서를 단순 입력해왔으나 업무의 효율을 높이기 위해 네이버 클라우드 플랫폼의 OCR 기술을 활용했다.... ',
-			pubDate: 'Fri, 15 May 2020 14:42:00 +0900'
-		},
-		{
-			title: '안양예술공원 작품 이미지매칭 서비스',
-			originallink: 'http://www.kgnews.co.kr/news/articleView.html?idxno=576859',
-			link: 'http://www.kgnews.co.kr/news/articleView.html?idxno=576859',
-			description:
-				'해당 이미지에 대한 설명 및 안내를 서비스하는 시스템으로, 카메라 촬영과 동시에 텍스트나 음성으로... 스마트폰으로 원하는 이미지를 검색하면 인공지능으로 저장된 해당 이미지와의 매칭을 통해 인식하는 방식이다.... ',
-			pubDate: 'Tue, 03 Mar 2020 20:43:00 +0900'
-		},
-		{
-			title: "NBP, 네이버 클로바 '문자 인식기술' 파트너사 모집",
-			originallink: 'https://view.asiae.co.kr/article/2020013109581748480',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=277&aid=0004615408',
-			description:
-				'OCR은 이미지 속에 있는 문자를 인식해 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술로, 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 주로 사용된다. NBP는 지난해 네이버 클라우드 플랫폼을 통해 네이버의... ',
-			pubDate: 'Fri, 31 Jan 2020 09:58:00 +0900'
-		},
-		{
-			title: '네이버 문자 인식 기술, 국제 경진대회서 최고점',
-			originallink: 'http://www.inews24.com/php/news_view.php?g_serial=1107945&g_menu=020310&rrf=nv',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=031&aid=0000453634',
-			description:
-				'이 대회는 디지털 이미지와 비디오 상에서 텍스트를 감지·인식하는 기술인 Robust Reading 분야에서 가장 권위있는 국제경진 대회다. OCR(Optical Character Recognition)은 크게 이미지에서 ▲문자의 위치를 찾는 검출... ',
-			pubDate: 'Tue, 10 Jul 2018 13:49:00 +0900'
-		},
-		{
-			title: "로민, '코리아 핀테크 위크 2020'에서 AI 문자인식(OCR) 솔루션 공개",
-			originallink: 'http://www.sentv.co.kr/news/view/573590',
-			link: 'http://www.sentv.co.kr/news/view/573590',
-			description:
-				'로민 강지홍 대표는 "코로나19를 계기로 금융과 보험 업계의 비대면 서비스 도입이 가속화될 것"이라며 "텍스트스코프(Textscope™)가 다양한 환경과 조건에서 생성된 문서 이미지 속 문자를 정확도 높게 인식해... ',
-			pubDate: 'Tue, 26 May 2020 15:32:00 +0900'
-		},
-		{
-			title: 'NBP, 네이버 클로바의 문자인식기술 기술 파트너 모집',
-			originallink: 'http://www.edaily.co.kr/news/newspath.asp?newsid=02551846625643296',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=018&aid=0004565898',
-			description:
-				'OCR은 이미지 속에 있는 문자를 인식하여 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술이다. 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용되며, 문서 자동 분류를 실현해 반복 검증 업무를 줄일 수 있다.... ',
-			pubDate: 'Fri, 31 Jan 2020 10:24:00 +0900'
-		},
-		{
-			title: 'NBP, 문자인식기술 파트너사 모집...AI 사업 본격화',
-			originallink: 'http://www.newspim.com/news/view/20200131000310',
-			link: 'http://www.newspim.com/news/view/20200131000310',
-			description:
-				'OCR은 이미지 속에 있는 문자를 인식하여 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술로, 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용되며, 문서 자동 분류를 실현하여 반복 검증 업무를 줄일 수... ',
-			pubDate: 'Fri, 31 Jan 2020 10:02:00 +0900'
-		},
-		{
-			title: '네이버 클로바 문자 인식 기술 파트너 모집…2월 1일 정식 서비스',
-			originallink: 'http://news.heraldcorp.com/view.php?ud=20200131000195',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=016&aid=0001630009',
-			description:
-				'OCR은 이미지 속에 있는 문자를 인식해 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술이로 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용된다. NBP는 다음달 1일부터 OCR 상품를 정식 서비스할 계획이다.',
-			pubDate: 'Fri, 31 Jan 2020 10:29:00 +0900'
+			pubDate: '20-03-03 14:32'
 		},
 		{
 			title: '네이버 비즈니스 플랫폼, 문자인식기술(OCR) 파트너 모집',
@@ -7793,7 +8067,41 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=011&aid=0003687779',
 			description:
 				'OCR은 이미지 속에 있는 문자를 인식해 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술로, 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 주로 사용된다. NBP는 지난해 네이버 클라우드 플랫폼을 통해 네이버의... ',
-			pubDate: 'Fri, 31 Jan 2020 11:05:00 +0900'
+			pubDate: '20-01-31 11:05'
+		},
+		{
+			title: 'NBP, 네이버 클로바의 문자인식기술 기술 파트너 모집',
+			originallink: 'http://www.edaily.co.kr/news/newspath.asp?newsid=02551846625643296',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=018&aid=0004565898',
+			description:
+				'OCR은 이미지 속에 있는 문자를 인식하여 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술이다. 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용되며, 문서 자동 분류를 실현해 반복 검증 업무를 줄일 수 있다.... ',
+			pubDate: '20-01-31 10:24'
+		},
+		{
+			title: "네이버, 새 음성인식 기술 'NEST' 공개",
+			originallink: 'http://www.mediapen.com/news/view/516943',
+			link: 'http://www.mediapen.com/news/view/516943',
+			description:
+				'네이버의 진화된 음성인식 기술을 안내하는 화면 이미지. /사진=네이버 클로바 스피치 홈페이지 네이버가... 네이버는 "NEST는 제한된 데이터 학습만으로도 복잡하고 다양한 장문의 음성 표현을 정확하게 인식, 텍스트로... ',
+			pubDate: '20-04-13 15:14'
+		},
+		{
+			title: '"텍스트는 이미지 \'너머\'를 상상하게끔 만든다"',
+			originallink: 'http://www.idaegu.co.kr/news/articleView.html?idxno=323770',
+			link: 'http://www.idaegu.co.kr/news/articleView.html?idxno=323770',
+			description:
+				'" 시각적인 완결성보다 작업과정 전반을 미술의 핵심으로 인식한다는 측면에서 그는 개념미술가로 분류된다.... 구름의 이미지와 텍스트가 공존함으로 인해 작품과의 거리에 따라 이미지가 부각되기도 하고 텍스트가 더 잘... ',
+			pubDate: '20-09-21 21:13'
+		},
+		{
+			title: '텍스트 개선 반영한 웹사이트 품질관리, 기업 성패 가른다',
+			originallink:
+				'https://ditoday.com/%ed%85%8d%ec%8a%a4%ed%8a%b8-%ea%b0%9c%ec%84%a0-%eb%b0%98%ec%98%81%ed%95%9c-%ec%9b%b9%ec%82%ac%ec%9d%b4%ed%8a%b8-%ed%92%88%ec%a7%88%ea%b4%80%eb%a6%ac-%ea%b8%b0%ec%97%85-%ec%84%b1%ed%8c%a8-%ea%b0%80/',
+			link:
+				'https://ditoday.com/%ed%85%8d%ec%8a%a4%ed%8a%b8-%ea%b0%9c%ec%84%a0-%eb%b0%98%ec%98%81%ed%95%9c-%ec%9b%b9%ec%82%ac%ec%9d%b4%ed%8a%b8-%ed%92%88%ec%a7%88%ea%b4%80%eb%a6%ac-%ea%b8%b0%ec%97%85-%ec%84%b1%ed%8c%a8-%ea%b0%80/',
+			description:
+				'또한 특정 경로 정보를 이미지로만 표시하기보다 대체 텍스트를 제공하면 이미지를 더 쉽게 이해할 수 있다.... 인식 부문에서는 쉽고 바르고, 빠르게 이해할 수 있는 적절한 대체 텍스트 제공을 준수하도록 했다. 텍스트가... ',
+			pubDate: '20-08-31 15:10'
 		},
 		{
 			title: '이미지 캡처로 플레이리스트 만드는 플로',
@@ -7801,7 +8109,15 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=014&aid=0004280167',
 			description:
 				'OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로 플로는 최근 OCR을 적용한 캡쳐 이미지로 플레이리스트 만들기 기능을 시범 도입하고 캡쳐만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ',
-			pubDate: 'Tue, 20 Aug 2019 18:40:00 +0900'
+			pubDate: '19-08-20 18:40'
+		},
+		{
+			title: '로민, KB국민카드 문자 자동인식(OCR) 자원 도입 사업 우선협상대상자 선정',
+			originallink: 'http://www.dt.co.kr/contents.html?article_no=2020073002109919029003&ref=naver',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=029&aid=0002614324',
+			description:
+				'문서 이미지에서 필요한 정보를 추출하고 데이터로 만들어 비즈니스에 활용할 수 있는 서비스까지 바라보고 있다"고 밝혔다. 로민은 비정형문서에 대해 높은 인식률을 보유한 OCR 솔루션 텍스트스코프(Textscope™)를... ',
+			pubDate: '20-07-30 09:45'
 		},
 		{
 			title: '네이버, 파파고 이미지 번역 기술 고도화',
@@ -7809,144 +8125,23 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=092&aid=0002168325',
 			description:
 				'개선된 이미지 번역 엔진의 핵심은 딥러닝 기술을 활용해 문자 추출 및 인식이 기존 엔진 대비 57% 가량... 회사 측은 또 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출해 번역할 수 있는 ‘전체 번역’... ',
-			pubDate: 'Tue, 13 Aug 2019 17:35:00 +0900'
+			pubDate: '19-08-13 17:35'
 		},
 		{
-			title: '네이버 문자 인식 기술, 국제 경진대회서 1위',
-			originallink: 'http://www.enewstoday.co.kr/news/articleView.html?idxno=1210290',
-			link: 'http://www.enewstoday.co.kr/news/articleView.html?idxno=1210290',
+			title: '유니버설 디자인으로 점자에 대한 인식 바꾼 ‘닷’',
+			originallink: 'https://www.jungle.co.kr/magazine/201869',
+			link: 'https://www.jungle.co.kr/magazine/201869',
 			description:
-				'이 대회는 디지털 이미지와 비디오 상에서 텍스트를 감지ㆍ인식하는 기술 분야에서 가장 권위있는 국제경진 대회이다. OCR(Optical Character Recognition)은 이미지에서 문자의 위치를 찾는 ‘검출 기술’과 문자가... ',
-			pubDate: 'Tue, 10 Jul 2018 15:54:00 +0900'
+				'대한 인식을 변화시켜 대중들이 점자를 친숙하게 느낄 수 있도록 했다. 닷 워치의 유니버설 디자인은... 닷은 텍스트를 넘어 그래픽과 이미지로도 정보를 전달할 수 있는 닷 패드(Dot Pad)를 개발해내기에 이르렀다.... ',
+			pubDate: '20-08-05 01:44'
 		},
 		{
-			title: "SKT 플로, 빅데이터 상위 기술 '딥러닝' 기반 문자인식 기술로 신규 고객 확보",
-			originallink: 'http://www.thebigdata.co.kr/view.php?ud=201908201000537537d0a8833aad_23',
-			link: 'http://www.thebigdata.co.kr/view.php?ud=201908201000537537d0a8833aad_23',
+			title: '로민, KB국민카드 문자 자동인식(OCR) 자원 도입 사업 우선협상대상자 선정',
+			originallink: 'http://news.heraldcorp.com/view.php?ud=20200730000184',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=103&oid=016&aid=0001705916',
 			description:
-				'OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 ‘캡쳐 이미지로 플레이리스트 만들기’ 기능을 시범 도입하고 캡처만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ',
-			pubDate: 'Tue, 20 Aug 2019 10:05:00 +0900'
-		},
-		{
-			title: 'SKT 플로, 딥러닝 기반의 문자인식 기술로 신규 고객 확보 가속화',
-			originallink: 'http://www.newsworks.co.kr/news/articleView.html?idxno=386721',
-			link: 'http://www.newsworks.co.kr/news/articleView.html?idxno=386721',
-			description:
-				"OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 '캡처 이미지로 플레이리스트 만들기' 기능을 시범 도입하고 캡처만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ",
-			pubDate: 'Tue, 20 Aug 2019 11:13:00 +0900'
-		},
-		{
-			title: '네이버 문자인식기술, 국제 경진대회서 1위…경쟁력 입증',
-			originallink: 'http://news.hankyung.com/article/201807106737g',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=015&aid=0003976780',
-			description:
-				'해당 경진 대회는 디지털 이미지와 비디오 상에서 텍스트를 감지하고 인식하는 기술 분야에서 권위를 자랑한다. 문자인식기술은 크게 이미지에서 ▲문자의 위치를 찾는 ‘검출 기술’과 ▲문자가 무엇인지 알아내는... ',
-			pubDate: 'Tue, 10 Jul 2018 15:52:00 +0900'
-		},
-		{
-			title: "네이버 검색창 디자인 바뀐다…입력에서 '인식'으로",
-			originallink: 'http://news.hankyung.com/article/201708232449g',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=015&aid=0003813373',
-			description:
-				"기존에는 검색어를 입력하는 데 최적화됐다면 바뀐 검색창은 텍스트뿐 아니라 음성과 이미지를 '인식'하는 데 초점을 맞췄다. 김승언 네이버 디자인설계 리더는 23일 서울 강남구 그랜드인터컨티넨탈서울파르나스에서... ",
-			pubDate: 'Wed, 23 Aug 2017 12:40:00 +0900'
-		},
-		{
-			title: '네이버 파파고 이미지 번역 더 정확해졌다',
-			originallink: 'http://www.fnnews.com/news/201908131822205630',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=014&aid=0004276913',
-			description:
-				"이번에 개선된 이미지 번역 기능 핵심은 딥러닝 기술을 활용해 문자 추출과 인식 정확도를 기존 엔진보다 약... 네이버는 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출해 번역할 수 있는 '전체 번역... ",
-			pubDate: 'Tue, 13 Aug 2019 18:23:00 +0900'
-		},
-		{
-			title: '네이버, 클로바 문자 인식 기술(OCR) 파트너 모집',
-			originallink: 'http://kbench.com/?q=node/207199',
-			link: 'http://kbench.com/?q=node/207199',
-			description:
-				'OCR은 이미지 속에 있는 문자를 인식하여 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술로, 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용되며, 문서 자동 분류를 실현하여 반복 검증 업무를 줄일 수 있고... ',
-			pubDate: 'Fri, 31 Jan 2020 09:52:00 +0900'
-		},
-		{
-			title: "로민, AI 기반 OCR 솔루션 '텍스트스코프' 선보인다",
-			originallink: 'http://www.aitimes.kr/news/articleView.html?idxno=16472',
-			link: 'http://www.aitimes.kr/news/articleView.html?idxno=16472',
-			description:
-				'OCR은 이미지나 문서의 텍스트를 인식하여 디지털 데이터로 변환시켜주는 기술로 최근에는 고객이 직접 스마트폰으로 촬영한 다양한 유형의 문서 이미지를 금융과 보험 업무에 사용하는 경우가 많아지면서 OCR... ',
-			pubDate: 'Mon, 25 May 2020 19:00:00 +0900'
-		},
-		{
-			title: '로민, ‘코리아 핀테크 위크 2020’에서 AI 문자인식(OCR) 솔루션 공개',
-			originallink: 'http://www.fnnews.com/news/202005261340597289',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=014&aid=0004431373',
-			description:
-				'것”이라며, “텍스트스코프(Textscope™)가 다양한 환경과 조건에서 생성된 문서 이미지 속 문자를 정확도 높게 인식해 개념검증(PoC) 중인 기업들로부터 긍정적 피드백을 얻고 있어, 문서인식(OCR)을 활용한... ',
-			pubDate: 'Tue, 26 May 2020 13:43:00 +0900'
-		},
-		{
-			title: '"영어·중국어 메뉴판도 척척"…파파고, \'이미지 번역\' 업데이트',
-			originallink: 'http://news1.kr/articles/?3694388',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=421&aid=0004142286',
-			description:
-				"언어의 이미지 속 문자 추출·인식·번역 기능을 업데이트했다고 13일 밝혔다. 이미지 번역은 파파고 앱... 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출하여 번역하는 '전체 번역'(Translate all) 기능도... ",
-			pubDate: 'Tue, 13 Aug 2019 10:33:00 +0900'
-		},
-		{
-			title: '네이버 파파고. 英·中·韓 이미지 번역 정확도 57%↑',
-			originallink: 'http://www.inews24.com/view/1201340',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=031&aid=0000504981',
-			description:
-				'이번에 개선된 이미지 번역 엔진의 핵심은 딥러닝 기술을 활용해 문자 추출 및 인식이 기존 엔진 대비 57... 회사 측은 또 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출하여 번역할 수 있는 전체 번역... ',
-			pubDate: 'Tue, 13 Aug 2019 10:37:00 +0900'
-		},
-		{
-			title: 'NBP, 클로바 OCR 문자인식기술(OCR) 기술파트너 모집',
-			originallink: 'http://www.itbiznews.com/news/newsview.php?ncode=1065598992508588',
-			link: 'http://www.itbiznews.com/news/newsview.php?ncode=1065598992508588',
-			description:
-				'OCR은 이미지 속에 있는 문자를 인식하여 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술로, 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용된다. 문서 자동 분류를 실현해 반복 검증 업무를 줄일 수 있고... ',
-			pubDate: 'Fri, 31 Jan 2020 16:46:00 +0900'
-		},
-		{
-			title: '이미지 속 문자 식별·검색… OCR 기술 전방위 확산',
-			originallink:
-				'https://biz.chosun.com/site/data/html_dir/2020/04/30/2020043001812.html?utm_source=naver&utm_medium=original&utm_campaign=biz',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=366&aid=0000517890',
-			description:
-				'등 이미지에서 글자로 쓰인 부분을 추출해 문자로 식별하는 OCR(Optical Character Recognition·광학문자인식)... 한국어와 영어로 작성된 문서 이미지 속 텍스트, 문자, 표, 그림 등을 분석해 hwp, docx, pptx 등 다양한 포맷의... ',
-			pubDate: 'Fri, 01 May 2020 08:02:00 +0900'
-		},
-		{
-			title: '네이버 문자 인식 기술(OCR), 글로벌 기술 경쟁력 입증',
-			originallink: 'http://www.rpm9.com/news/article.html?id=20180710090034',
-			link: 'http://www.rpm9.com/news/article.html?id=20180710090034',
-			description:
-				'ICDAR Robust Reading Competition은 디지털 이미지와 비디오 상에서 텍스트를 감지/인식하는 기술인 Robust Reading 분야에서 가장 권위있는 국제경진 대회이다. OCR(Optical Character Recognition)은 크게 이미지에서... ',
-			pubDate: 'Tue, 10 Jul 2018 16:42:00 +0900'
-		},
-		{
-			title: 'NHN, 의료진 전용 메신저 ‘토스트 메디컬톡’ 출시',
-			originallink: 'http://www.fnnews.com/news/202006291105248399',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=014&aid=0004451505',
-			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 디지털 저작권 관리(DRM) 솔루션을 적용해 텍스트, 이미지, 문서... ',
-			pubDate: 'Mon, 29 Jun 2020 11:15:00 +0900'
-		},
-		{
-			title: "NBP, '문자 인식 기술' 파트너사 모집",
-			originallink: 'http://www.koreastocknews.com/news/articleView.html?idxno=50057',
-			link: 'http://www.koreastocknews.com/news/articleView.html?idxno=50057',
-			description:
-				'OCR은 이미지 속에 있는 문자를 인식하여 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술이다. 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용된다. 문서 자동 분류를 실현해 반복 검증 업무를 줄일 수... ',
-			pubDate: 'Fri, 31 Jan 2020 10:36:00 +0900'
-		},
-		{
-			title: "안양시, 안양예술공원 (전시)작품 설명·방문민원안내에 '이미지매칭 서비스'",
-			originallink: 'http://www.enewstoday.co.kr/news/articleView.html?idxno=1371966',
-			link: 'http://www.enewstoday.co.kr/news/articleView.html?idxno=1371966',
-			description:
-				'해당 이미지에 대한 설명 및 안내서비스로 QR코드와 비콘 보다 한 단계 진화해, 카메라촬영과 동시에 텍스트... 스마트폰으로 원하는 이미지를 검색, 인공지능으로 저장된 해당 이미지와의 매칭을 통해 인식하는 방식이다.... ',
-			pubDate: 'Tue, 03 Mar 2020 13:30:00 +0900'
+				'문서 이미지에서 필요한 정보를 추출하고 데이터로 만들어 비즈니스에 활용할 수 있는 서비스까지 바라보고 있다”고 밝혔다. 로민은 비정형문서에 대해 높은 인식률을 보유한 OCR 솔루션 텍스트스코프(Textscope™)를... ',
+			pubDate: '20-07-30 10:09'
 		},
 		{
 			title: '네이버 문자인식기술(OCR), 국제 경진 대회서 1위..알리바바, 텐센트 제쳐',
@@ -7954,39 +8149,71 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=018&aid=0004146272',
 			description:
 				'ICDAR Robust Reading Competition은 디지털 이미지와 비디오 상에서 텍스트를 감지/인식하는 기술인 Robust Reading 분야에서 가장 권위있는 국제경진 대회다. 국제패턴인식협회인 IAPR이 시작했으며, ICDAR Robust... ',
-			pubDate: 'Tue, 10 Jul 2018 10:37:00 +0900'
+			pubDate: '18-07-10 10:37'
 		},
 		{
-			title: '파파고, 英·中·韓 이미지 번역 정확도 57%↑',
-			originallink: 'http://www.dt.co.kr/contents.html?article_no=2019081302109931033003&ref=naver',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=029&aid=0002546113',
+			title: "SKT 플로, 빅데이터 상위 기술 '딥러닝' 기반 문자인식 기술로 신규 고객 확보",
+			originallink: 'http://www.thebigdata.co.kr/view.php?ud=201908201000537537d0a8833aad_23',
+			link: 'http://www.thebigdata.co.kr/view.php?ud=201908201000537537d0a8833aad_23',
 			description:
-				"이번에 개선된 이미지 번역 엔진은 딥러닝 기술을 활용해 문자 추출 및 인식의 정확도를 높인 것이... 또한 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출해 번역할 수 있는 '전체 번역' 기능도 영어... ",
-			pubDate: 'Tue, 13 Aug 2019 10:16:00 +0900'
+				'OCR은 이미지에서 텍스트를 인식해 추출하는 기능으로, 플로는 최근 OCR을 적용한 ‘캡쳐 이미지로 플레이리스트 만들기’ 기능을 시범 도입하고 캡처만으로 간편하게 플레이리스트를 자동 생성할 수 있도록 서비스를... ',
+			pubDate: '19-08-20 10:05'
 		},
 		{
-			title: '페북 인식, 구글 번역 "女 천문학자 덕분"',
-			originallink: 'http://www.astronomer.rocks/news/articleView.html?idxno=88844',
-			link: 'http://www.astronomer.rocks/news/articleView.html?idxno=88844',
+			title: '네이버 파파고 이미지 번역 더 정확해졌다',
+			originallink: 'http://www.fnnews.com/news/201908131822205630',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=014&aid=0004276913',
 			description:
-				'AI에서 패턴 인식은 방정식을 데이터에 맞춘다는 의미입니다. 물론 이미지, 텍스트, 동영상 등의 대용량 데이터에서 나타나는 패턴은 복잡하기 때문에 AI는 훨씬 어려운 방정식으로 기술되긴 하겠지만 말이죠. 따라서... ',
-			pubDate: 'Mon, 20 Apr 2020 17:24:00 +0900'
+				"이번에 개선된 이미지 번역 기능 핵심은 딥러닝 기술을 활용해 문자 추출과 인식 정확도를 기존 엔진보다 약... 네이버는 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출해 번역할 수 있는 '전체 번역... ",
+			pubDate: '19-08-13 18:23'
 		},
 		{
-			title: '네이버가 연구한 문자인식기술(OCR), 국제 경진 대회에서 최고점 기록',
-			originallink: 'http://www.lawissue.co.kr/view.php?ud=2018071019593920889817d053b9_12',
-			link: 'http://www.lawissue.co.kr/view.php?ud=2018071019593920889817d053b9_12',
+			title: 'NBP, 문자인식기술 파트너사 모집...AI 사업 본격화',
+			originallink: 'http://www.newspim.com/news/view/20200131000310',
+			link: 'http://www.newspim.com/news/view/20200131000310',
 			description:
-				'‘ICDAR Robust Reading Competition’은 디지털 이미지와 비디오 상에서 텍스트를 감지/인식하는 기술인 Robust Reading 분야에서 가장 권위있는 국제경진 대회로 알려졌다. 네이버에 따르면 OCR(문자인식기술, Optical... ',
-			pubDate: 'Tue, 10 Jul 2018 20:38:00 +0900'
+				'OCR은 이미지 속에 있는 문자를 인식하여 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술로, 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용되며, 문서 자동 분류를 실현하여 반복 검증 업무를 줄일 수... ',
+			pubDate: '20-01-31 10:02'
 		},
 		{
-			title: "NHN, 의료용 메신저 '토스트 메디컬톡' 출시…용인 세브란스 첫 도입",
-			originallink: 'https://www.news1.kr/articles/?3979345',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=421&aid=0004722771',
+			title: "NBP, 네이버 클로바 '문자 인식기술' 파트너사 모집",
+			originallink: 'https://view.asiae.co.kr/article/2020013109581748480',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=277&aid=0004615408',
 			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 또 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 디지털 저작권 관리(DRM) 솔루션을 적용해 텍스트, 이미지, 문서... ',
-			pubDate: 'Mon, 29 Jun 2020 11:02:00 +0900'
+				'OCR은 이미지 속에 있는 문자를 인식해 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술로, 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 주로 사용된다. NBP는 지난해 네이버 클라우드 플랫폼을 통해 네이버의... ',
+			pubDate: '20-01-31 09:58'
+		},
+		{
+			title: 'LG CNS, “AI 도입 어렵지 않아요”',
+			originallink: 'https://www.dnews.co.kr/uhtml/view.jsp?idxno=202010151756390940164',
+			link: 'https://www.dnews.co.kr/uhtml/view.jsp?idxno=202010151756390940164',
+			description:
+				'출력되는 모든 문서를 스캔하고 이미지 인식·텍스트 인식 등 2가지 복합 AI 기술로 스캔한 문서를 분석·보안등급을 매겨 보안담당자에게 전송한다. LG CNS가 15일 AI 시스템 도입을 어려워 하는 기업을 겨냥해... ',
+			pubDate: '20-10-15 18:02'
+		},
+		{
+			title: '인권위 “시각 장애인 위해, 선거 정보 그림 아닌 텍스트로 제공해야”',
+			originallink: 'http://news.heraldcorp.com/view.php?ud=20200303000576',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=102&oid=016&aid=0001643390',
+			description:
+				'또는 텍스트 형식으로 저장된다. 이미지 형식은 그림으로 읽혀 시각장애인들이 사용하는 화면낭독프로그램인 센스리더 등 보조출력기로는 인식이 되지 않는다. 이 출력기는 텍스트 형식은 인식할 수 있다. 인권위는 또... ',
+			pubDate: '20-03-03 12:02'
+		},
+		{
+			title: '안양예술공원 작품 이미지매칭 서비스',
+			originallink: 'http://www.kgnews.co.kr/news/articleView.html?idxno=576859',
+			link: 'http://www.kgnews.co.kr/news/articleView.html?idxno=576859',
+			description:
+				'해당 이미지에 대한 설명 및 안내를 서비스하는 시스템으로, 카메라 촬영과 동시에 텍스트나 음성으로... 스마트폰으로 원하는 이미지를 검색하면 인공지능으로 저장된 해당 이미지와의 매칭을 통해 인식하는 방식이다.... ',
+			pubDate: '20-03-03 20:43'
+		},
+		{
+			title: '네이버, 삼정KPMG에 OCR제공…"이미지·텍스트, 디지털로 자동 변환"',
+			originallink: 'http://www.aitimes.com/news/articleView.html?idxno=128424',
+			link: 'http://www.aitimes.com/news/articleView.html?idxno=128424',
+			description:
+				'OCR은 이미지나 문서의 글씨를 인식해 디지털 데이터로 변환시켜주는 기술이다. 삼정KMPG는 그동안 금융거래조회서를 단순 입력해왔으나 업무의 효율을 높이기 위해 네이버 클라우드 플랫폼의 OCR 기술을 활용했다.... ',
+			pubDate: '20-05-15 14:42'
 		},
 		{
 			title: '[올댓차이나] 中안면인식 센스타임 기업가치 75억＄…최대 AI 스타트업',
@@ -7994,311 +8221,89 @@ const searchData = {
 			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=104&oid=003&aid=0009458788',
 			description:
 				'얼굴과 이미지, 텍스트 인식과 의료 영상-비디오 분석, 자율주행 시스템, 금융, 헬스케어, 보안, 자동차 등 광범위한 분야에서 산업화 AI 기술의 연구와 개발을 추진해 성과를 내고 있다.',
-			pubDate: 'Wed, 18 Sep 2019 13:54:00 +0900'
+			pubDate: '19-09-18 13:54'
 		},
 		{
-			title: "SSG닷컴, '문자까지 식별' 이미지 검색 '쓱렌즈' 업그레이드",
-			originallink: 'http://news1.kr/articles/?3667541',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=421&aid=0004086926',
+			title: '삼성SDS, 국내외 AI 경진대회 1위 석권',
+			originallink: 'http://www.edaily.co.kr/news/newspath.asp?newsid=01728566625935544',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=018&aid=0004765506',
 			description:
-				"직접 촬영한 사진 등 이미지에서 글자로 적힌 부분을 추출해 이를 문자로 식별하는 인식 기술 'OCR'(Optical... 일일이 손으로 입력하기 까다로운 상품 모델번호나 브랜드 이름도 사진만 찍으면 텍스트로 추출해... ",
-			pubDate: 'Thu, 11 Jul 2019 09:22:00 +0900'
+				'(AAAI), 이미지처리 국제 학술대회(ICIP), 패턴인식 국제 학술대회(ICPR) 등 세계적인 AI 학회에 11건의... 최근 미국 MIT 링컨연구소 출신 AI 멀티모달(음성·텍스트·영상·이미지) 분야 전문가와 구글 출신 컴퓨터... ',
+			pubDate: '20-10-22 08:55'
 		},
 		{
-			title: '네이버 파파고 한·중·영 이미지 번역기능, 정확도 57%↑',
-			originallink: 'http://news.heraldcorp.com/view.php?ud=20190813000229',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=016&aid=0001568022',
+			title: '‘음성과 웹디자인의 통합은 대세’, 웹디자이너가 챙겨야 할 음성인식 기술',
+			originallink:
+				'https://ditoday.com/%ec%9d%8c%ec%84%b1%ea%b3%bc-%ec%9b%b9%eb%94%94%ec%9e%90%ec%9d%b8%ec%9d%98-%ed%86%b5%ed%95%a9%ec%9d%80-%eb%8c%80%ec%84%b8-%ec%9b%b9%eb%94%94%ec%9e%90%ec%9d%b4%eb%84%88%ea%b0%80/',
+			link:
+				'https://ditoday.com/%ec%9d%8c%ec%84%b1%ea%b3%bc-%ec%9b%b9%eb%94%94%ec%9e%90%ec%9d%b8%ec%9d%98-%ed%86%b5%ed%95%a9%ec%9d%80-%eb%8c%80%ec%84%b8-%ec%9b%b9%eb%94%94%ec%9e%90%ec%9d%b4%eb%84%88%ea%b0%80/',
 			description:
-				'개선된 이미지 번역 엔진은 딥러닝 기술을 활용해 문자 추출 및 인식의 정확도를 기존보다 57% 가량 높였다.... 또 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출해 번역할 수 있는 ‘전체 번역’ 기능도... ',
-			pubDate: 'Tue, 13 Aug 2019 10:43:00 +0900'
+				'이는 음성 인식 UI/UX 디자이너가 주목받는 데 일조했다. 기존 웹 디자이너와 차이가 있겠지만 음성 인식 UI... 자유롭다) 텍스트 프리(문자를 쓸 필요가 없다.) (자료. 사카다 유리코 阪田裕里子, 2019) (이미지: 네이버... ',
+			pubDate: '20-09-23 11:42'
 		},
 		{
-			title: 'NBP, 문자인식기술(OCR) 파트너 모집',
-			originallink: 'http://www.worktoday.co.kr/news/articleView.html?idxno=5833',
-			link: 'http://www.worktoday.co.kr/news/articleView.html?idxno=5833',
+			title: 'LG CNS, 골라쓰는 AI 서비스 첫선…"쉽고, 바로 쓸 수 있는 AI"',
+			originallink: 'https://www.news1.kr/articles/?4088331',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=421&aid=0004929809',
 			description:
-				'OCR은 이미지 속에 있는 문자를 인식하여 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술로 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용된다. 특히 문서 자동 분류를 실현하여 반복 검증 업무를 줄일 수... ',
-			pubDate: 'Fri, 31 Jan 2020 14:44:00 +0900'
+				"또 언어 AI 중 '문서 유형 분류'을 통해서 하루에(약 20시간) 10만개의 문서 분류를 할 수 있으며 복합 AI 중 '출력물 문서보안'을 통해 보고서 등 출력 문서를 이미지와 텍스트 인식으로 나눠 스캔, 해당 문서에 보안... ",
+			pubDate: '20-10-15 17:56'
 		},
 		{
-			title: 'NHN, 의료용 메신저 출시...용인 세브란스에 첫 도입',
-			originallink: 'http://www.bloter.net/archives/392788',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=293&aid=0000029187',
+			title: "뉴로클, 이미지 해석용 딥러닝 SW '뉴로티·뉴로알' 2.0 출시",
+			originallink: 'http://www.datanet.co.kr/news/articleView.html?idxno=148604',
+			link: 'http://www.datanet.co.kr/news/articleView.html?idxno=148604',
 			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 DRM(디지털 저작권 관리) 솔루션을 적용해 텍스트, 이미지, 문서... ',
-			pubDate: 'Mon, 29 Jun 2020 15:14:00 +0900'
+				'뉴로티와 뉴로알은 물류, 의료, 제조 산업군 등의 비전문가가 이미지에 대한 해석이 필요할 때,담당자가... 기존 기능인 물체 위치 개수/위치 탐지와 딥러닝 OCR(텍스트 인식), 2.0 버전의 신기능 등을 앞세워 다양한... ',
+			pubDate: '20-07-21 19:30'
 		},
 		{
-			title: '안양시, 행정 접목한 ‘이미지매칭’ 신기술 첫 선…예술공원 작품 등 상세 정...',
-			originallink: 'https://www.seoul.co.kr/news/newsView.php?id=20200303500075&wlog_tag3=naver',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=102&oid=081&aid=0003070332',
+			title: '네이버 문자 인식 기술(OCR), 글로벌 기술 경쟁력 입증',
+			originallink: 'http://www.rpm9.com/news/article.html?id=20180710090034',
+			link: 'http://www.rpm9.com/news/article.html?id=20180710090034',
 			description:
-				'동시에 텍스트는 물론, 음성으로 서비스를 받을 수 있는 QR코드와 비콘 보다 한 단계 진화한 기술이다. 스마트폰으로 원하는 이미지를 검색, 인공지능으로 저장된 해당 이미지와의 매칭을 통해 인식하는 방식이다. 시는 이... ',
-			pubDate: 'Tue, 03 Mar 2020 12:46:00 +0900'
+				'ICDAR Robust Reading Competition은 디지털 이미지와 비디오 상에서 텍스트를 감지/인식하는 기술인 Robust Reading 분야에서 가장 권위있는 국제경진 대회이다. OCR(Optical Character Recognition)은 크게 이미지에서... ',
+			pubDate: '18-07-10 16:42'
 		},
 		{
-			title: "NHN, 의료용 메신저 '토스트 메디컬톡' 용인세브란스 첫 도입",
-			originallink: 'http://www.newsis.com/view/?id=NISX20200629_0001076961&cID=13001&pID=13000',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=003&aid=0009940123',
+			title: '[노영희의출발새아침] 김세연 "정치도련님? 스스로 당 정서, 인식과 잘 맞다고...',
+			originallink: 'https://www.ytn.co.kr/_ln/0101_202004290916107357',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=100&oid=052&aid=0001434014',
 			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 또한 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 DRM(디지털 저작권 관리) 솔루션을 적용해 텍스트, 이미지... ',
-			pubDate: 'Mon, 29 Jun 2020 16:34:00 +0900'
+				'아래 텍스트는 실제 방송 내용과 차이가 있을 수 있으니 보다 정확한 내용은 방송으로 확인하시기 바랍니다.... 별 어려움 없었던 사람이다, 이런 취지, 너무 곱게 자랐다, 이런 취지로 도련님이라는 이미지가 연결되기는... ',
+			pubDate: '20-04-29 09:16'
 		},
 		{
-			title: '[7문 7답] 구병모 작가 “한계 없는 텍스트로 가 닿고 싶다”',
-			originallink: 'http://ch.yes24.com/Article/View/41418',
-			link: 'http://ch.yes24.com/Article/View/41418',
+			title: '네이버가 연구한 문자인식기술(OCR), 국제 경진 대회에서 최고점 기록',
+			originallink: 'http://www.lawissue.co.kr/view.php?ud=2018071019593920889817d053b9_12',
+			link: 'http://www.lawissue.co.kr/view.php?ud=2018071019593920889817d053b9_12',
 			description:
-				'빛나는 이미지가 두 편의 소설에서 쓰였으니 빛에 대해 이야기를 하자면, 티베트의 불교철학에서는... 누군가한테 가서 닿는 건 텍스트로 충분하다고 생각합니다. 텍스트라면 한계 없이 누구한테든 가 닿을 수 있습니다.... ',
-			pubDate: 'Tue, 31 Mar 2020 17:12:00 +0900'
+				'‘ICDAR Robust Reading Competition’은 디지털 이미지와 비디오 상에서 텍스트를 감지/인식하는 기술인 Robust Reading 분야에서 가장 권위있는 국제경진 대회로 알려졌다. 네이버에 따르면 OCR(문자인식기술, Optical... ',
+			pubDate: '18-07-10 20:38'
 		},
 		{
-			title: '정확도 높인 파파고 이미지 번역 ‘영중한 확대’',
-			originallink: 'https://www.venturesquare.net/788118',
-			link: 'https://www.venturesquare.net/788118',
+			title: '네이버 파파고. 英·中·韓 이미지 번역 정확도 57%↑',
+			originallink: 'http://www.inews24.com/view/1201340',
+			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=031&aid=0000504981',
 			description:
-				'이번에 업데이트한 파파고 이미지 번역 엔진은 딥러닝 기술을 통해 문자 추출과 인식을 기존 엔진보다 57... 네이버는 또 사용자가 지정하지 않아도 이미지 내 텍스트를 자동 검출해 번역하는 전체 번역 기능도 3개 언어로... ',
-			pubDate: 'Tue, 13 Aug 2019 11:50:00 +0900'
+				'이번에 개선된 이미지 번역 엔진의 핵심은 딥러닝 기술을 활용해 문자 추출 및 인식이 기존 엔진 대비 57... 회사 측은 또 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출하여 번역할 수 있는 전체 번역... ',
+			pubDate: '19-08-13 10:37'
 		},
 		{
-			title: '최적 치료법 찾는 `의료용 메신저`',
-			originallink: 'http://www.dt.co.kr/contents.html?article_no=2020062902109931054005&ref=naver',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=029&aid=0002607410',
+			title: '‘사이드바’에 손글씨 인식까지... ‘아이패드OS 14’ 새 기능들',
+			originallink: 'http://www.ajunews.com/view/20200918085337797',
+			link: 'http://www.ajunews.com/view/20200918085337797',
 			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 또한 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 디지털 저작권 관리(DRM) 솔루션을 적용해 텍스트, 이미지... ',
-			pubDate: 'Mon, 29 Jun 2020 15:59:00 +0900'
+				'‘도형 인식’ 기능이 새롭게 추가됐다. 타원, 삼각형, 구름, 오각형 등 다양한 도형이 지원된다. 애플 펜슬로 글자를 쓰면 실시간 텍스트로 전환돼 웹서핑 시 검색에 활용할 수 있고, 작성된 필기체를 복사해... ',
+			pubDate: '20-09-18 08:58'
 		},
 		{
-			title: "NHN, 의료용 메신저 '토스트 메디컬톡' 출시",
-			originallink: 'http://www.datanet.co.kr/news/articleView.html?idxno=147581',
-			link: 'http://www.datanet.co.kr/news/articleView.html?idxno=147581',
+			title: '김세연 "정치도련님? 스스로 당 정서, 인식과 잘 맞다고 보진 않아"',
+			originallink: 'https://radio.ytn.co.kr/program/?f=2&id=69405&s_mcd=0214&s_hcd=01',
+			link: 'https://radio.ytn.co.kr/program/?f=2&id=69405&s_mcd=0214&s_hcd=01',
 			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 또한 병원 요구사항에 따라 환자 개인정보 보호 및 정보보안을 위한 디지털 저작권 관리(DRM) 솔루션을 적용해 텍스트, 이미지... ',
-			pubDate: 'Mon, 29 Jun 2020 10:06:00 +0900'
-		},
-		{
-			title: 'NHN, 의료용 메신저 ‘토스트 메디컬톡’ 용인 세브란스 첫 도입',
-			originallink: 'http://isplus.live.joins.com/news/article/article.asp?total_id=23813163',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=241&aid=0003034618',
-			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 또 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 DRM(디지털 저작권 관리) 솔루션을 적용해 텍스트, 이미지... ',
-			pubDate: 'Mon, 29 Jun 2020 18:33:00 +0900'
-		},
-		{
-			title: "제스처 인식 S펜 장착 '갤럭시탭 S6' 출시",
-			originallink: 'http://www.idaegu.co.kr/news/articleView.html?idxno=286753',
-			link: 'http://www.idaegu.co.kr/news/articleView.html?idxno=286753',
-			description:
-				'제스처를 인식해 원격으로 사진을 촬영하거나 멀티미디어를 편리하게 제어할 수 있으며 태블릿 뒷면에 S펜을 부착해 휴대가 간편하며 부착하는 동안 무선 충전을 지원한다. 또 S펜으로 작성한 손글씨를 손쉽게 텍스트... ',
-			pubDate: 'Wed, 28 Aug 2019 21:25:00 +0900'
-		},
-		{
-			title: "네이버, '파파고' 이미지 번역 기능 업그레이드",
-			originallink: 'http://biz.newdaily.co.kr/site/data/html/2019/08/13/2019081300073.html',
-			link: 'http://biz.newdaily.co.kr/site/data/html/2019/08/13/2019081300073.html',
-			description:
-				"네이버는 문자 추출 및 인식이 기존 엔진 대비 57% 가량 정확도를 높였다고 설명했다. 회사 측은 또 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출해 번역할 수 있는 '전체 번역' 기능을 영어, 중국어... ",
-			pubDate: 'Tue, 13 Aug 2019 11:40:00 +0900'
-		},
-		{
-			title: '네이버 파파고, 개선된 이미지 번역 한국어·영어·중국어에 적용',
-			originallink: 'http://www.bloter.net/archives/349603',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=293&aid=0000024759',
-			description:
-				'및 인식 정확도를 기존보다 57% 높였다고 밝혔다. 해당 기술은 일본어에 먼저 적용된 바 있다. 네이버 측은 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출하여 번역할 수 있는 ‘전체 번역’ 기능도 영어... ',
-			pubDate: 'Tue, 13 Aug 2019 12:27:00 +0900'
-		},
-		{
-			title: '파파고 "이미지 번역 정확도 57% 높였다"',
-			originallink: 'http://www.greenpostkorea.co.kr/news/articleView.html?idxno=107901',
-			link: 'http://www.greenpostkorea.co.kr/news/articleView.html?idxno=107901',
-			description:
-				'파파고는 번역 엔진에 딥러닝 기술을 적용해 이미지 번역 시 문자 추출 및 인식 정확도를 이전보다 57% 가량... 전체 번역은 사용자의 지정 없이도 이미지 내 텍스트를 자동으로 검출하고 번역하는 기능이다. 네이버는... ',
-			pubDate: 'Tue, 13 Aug 2019 15:04:00 +0900'
-		},
-		{
-			title: "네이버 파파고, 영어·중국어 이미지 번역 '업그레이드'",
-			originallink: 'http://www.edaily.co.kr/news/newspath.asp?newsid=02289446622586992',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=018&aid=0004444328',
-			description:
-				'업그레이드된 이미지 번역 엔진의 핵심은 딥러닝 기술을 활용해 문자 추출·인식이 기존 엔진 대비 57% 가량... 아울러 이번 업그레이드를 통해 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출해 번역할 수... ',
-			pubDate: 'Tue, 13 Aug 2019 10:07:00 +0900'
-		},
-		{
-			title: "네이버 '파파고', 韓·英·中 이미지 번역 기능 업데이트",
-			originallink: 'http://www.datanet.co.kr/news/articleView.html?idxno=136454',
-			link: 'http://www.datanet.co.kr/news/articleView.html?idxno=136454',
-			description:
-				"개선된 이미지 번역 엔진의 핵심은 딥러닝 기술을 활용해 문자 추출 및 인식이 기존 엔진 대비 57% 가량... 회사 측은 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출해 번역할 수 있는 '전체 번역' 기능도... ",
-			pubDate: 'Tue, 13 Aug 2019 16:30:00 +0900'
-		},
-		{
-			title: 'SSG닷컴, 이미지 속 텍스트까지 읽어준다…500만개 상품 검색 가능',
-			originallink: 'https://view.asiae.co.kr/article/2019071106374808813',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=277&aid=0004499413',
-			description:
-				'OCR이란 직접 촬영한 사진과 같은 이미지에서 글자로 쓰인 부분을 추출해 이를 문자로 식별하는 인식 기술로, 직접 일일이 손으로 입력하기 까다로운 상품의 모델번호나 브랜드명도 사진만 찍으면 텍스트로 추출해... ',
-			pubDate: 'Thu, 11 Jul 2019 06:38:00 +0900'
-		},
-		{
-			title: "NHN, 의료진 전용 협업 메신지 '토스트 메디컬톡' 출시",
-			originallink: 'http://www.edaily.co.kr/news/newspath.asp?newsid=02036886625806640',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=018&aid=0004675910',
-			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 또한 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 DRM(디지털 저작권 관리) 솔루션을 적용해 텍스트, 이미지... ',
-			pubDate: 'Mon, 29 Jun 2020 10:06:00 +0900'
-		},
-		{
-			title: "NHN, 의료용 메신저 '토스트 메디컬톡' 출시",
-			originallink: 'http://www.itdaily.kr/news/articleView.html?idxno=101682',
-			link: 'http://www.itdaily.kr/news/articleView.html?idxno=101682',
-			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 또한 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 DRM(디지털 저작권 관리) 솔루션을 적용해 텍스트, 이미지... ',
-			pubDate: 'Mon, 29 Jun 2020 14:28:00 +0900'
-		},
-		{
-			title: '안양예술공원 (전시)작품 설명·방문민원안내에 이미지매칭 서비스',
-			originallink: 'http://www.kmaeil.com/news/articleView.html?idxno=213187',
-			link: 'http://www.kmaeil.com/news/articleView.html?idxno=213187',
-			description:
-				'해당 이미지에 대한 설명 및 안내서비스로 QR코드와 비콘 보다 한 단계 진화해, 카메라촬영과 동시에 텍스트... 스마트폰으로 원하는 이미지를 검색, 인공지능으로 저장된 해당 이미지와의 매칭을 통해 인식하는 방식이다.... ',
-			pubDate: 'Tue, 03 Mar 2020 13:40:00 +0900'
-		},
-		{
-			title: "'사진찍어도 번역되네'‥ 네이버 파파고 '이미지 번역 기능' 정확도 57% 높여",
-			originallink: 'http://www.fnnews.com/news/201908131040247931',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=014&aid=0004276523',
-			description:
-				'이번에 개선된 이미지 번역 기능 핵심은 딥러닝 기술을 활용해 문자 추출과 인식 정확도를 기존 엔진보다 약... 네이버 제공 네이버는 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출해 번역할 수 있는... ',
-			pubDate: 'Tue, 13 Aug 2019 11:06:00 +0900'
-		},
-		{
-			title: '현대모비스, AI 영상인식 스타트업에 80억 투자',
-			originallink: 'https://cnbc.sbs.co.kr/article_hub/10000912510?division=NAVER',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=374&aid=0000164818',
-			description:
-				'포스텍 졸업생들이 모여 설립한 스트라드비젼은 차량이나 보행자, 도로표지판 문자(텍스트) 등을 인식하고 읽는 딥러닝 기반의 카메라 영상인식 기술을 보유하고 있습니다. 이밖에도 이미지에 포함된 텍스트를... ',
-			pubDate: 'Wed, 22 Aug 2018 10:00:00 +0900'
-		},
-		{
-			title: "'외국간판·메뉴판 자동 번역'...네이버 파파고, 이미지 번역",
-			originallink: 'http://www.newspim.com/news/view/20190813000363',
-			link: 'http://www.newspim.com/news/view/20190813000363',
-			description:
-				'엔진 [이미지=네이버] 이번에 개선된 이미지 번역 엔진의 핵심은 딥러닝 기술을 활용해 문자 추출 및 인식... 회사 측은 또 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출하여 번역할 수 있는 ‘전체... ',
-			pubDate: 'Tue, 13 Aug 2019 10:39:00 +0900'
-		},
-		{
-			title: '네이버 문자 인식 기술, 국제 경진 대회에서 점수 가장 높아',
-			originallink: 'http://www.kyeonggi.com/?mod=news&act=articleView&idxno=1495607',
-			link: 'http://www.kyeonggi.com/?mod=news&act=articleView&idxno=1495607',
-			description:
-				'‘ICDAR Robust Reading Competition’은 디지털 이미지와 비디오 상에서 텍스트를 감지/인식하는 기술인 Robust Reading 분야에서 가장 권위 있는 국제경진 대회다. 네이버에 따르면 OCR(Optical Character Recognition)은... ',
-			pubDate: 'Tue, 10 Jul 2018 16:30:00 +0900'
-		},
-		{
-			title: "네이버, AI '클로바' 문자인식기술 파트너사 모집",
-			originallink: 'http://www.newsis.com/view/?id=NISX20200131_0000904191&cID=13001&pID=13000',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=101&oid=003&aid=0009679799',
-			description:
-				'OCR은 이미지 속에 있는 문자를 인식해 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술로, 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용된다. 문서 자동 분류를 실현해 반복 검증 업무를 줄일 수 있고... ',
-			pubDate: 'Sat, 01 Feb 2020 01:13:00 +0900'
-		},
-		{
-			title: "NHN, 의료용 메신저 '토스트 미디컬톡' 출시",
-			originallink: 'http://www.seoulfn.com/news/articleView.html?idxno=387336',
-			link: 'http://www.seoulfn.com/news/articleView.html?idxno=387336',
-			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 또한 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 DRM(디지털 저작권 관리) 솔루션을 적용해 텍스트, 이미지... ',
-			pubDate: 'Mon, 29 Jun 2020 10:05:00 +0900'
-		},
-		{
-			title: '네이버 파파고, "이미지 번역 정확도 기존 대비 57% 높여"',
-			originallink: 'http://www.ebn.co.kr/news/view/996955',
-			link: 'http://www.ebn.co.kr/news/view/996955',
-			description:
-				"이번에 개선된 이미지 번역 엔진의 핵심은 딥러닝 기술을 활용해 문자 추출 및 인식이 기존 엔진 대비 57... 또 사용자가 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출하여 번역할 수 있는 '전체 번역' 기능도 영어... ",
-			pubDate: 'Tue, 13 Aug 2019 10:14:00 +0900'
-		},
-		{
-			title: "NHN, 의료용 메신저 'TOAST MedicalTalk' 출시…용인 세브란스 병원에 첫 도입",
-			originallink: 'http://news.kbiz.or.kr/news/articleView.html?idxno=69381',
-			link: 'http://news.kbiz.or.kr/news/articleView.html?idxno=69381',
-			description:
-				'안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 또한 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 DRM(디지털 저작권 관리) 솔루션을 적용해 텍스트, 이미지, 문서, 동영상 등의... ',
-			pubDate: 'Mon, 29 Jun 2020 15:48:00 +0900'
-		},
-		{
-			title: '150㎞ 달리는 차량 번호판 인식…수출국 현지화 팔 걷었다',
-			originallink: 'http://www.idaegu.com/newsView/idg201901300007',
-			link: 'http://www.idaegu.com/newsView/idg201901300007',
-			description:
-				'사진은 김재용 한국알파시스템 대표가 현지 바이어들과 상담하고 있는 모습.한국알파시스템의 차량번호인식시스템(LPR)은 주행 중인 자동차의 번호를 영상검지기술로 인식해 차량번호 이미지와 정보를 텍스트화해... ',
-			pubDate: 'Wed, 30 Jan 2019 14:01:00 +0900'
-		},
-		{
-			title: "네이버 파파고, 정확도 57% 높인 '이미지 번역' 기능 제공",
-			originallink: 'https://view.asiae.co.kr/article/2019081310185137120',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=277&aid=0004517859',
-			description:
-				'인식이 기존 엔진보다 57% 가량 정확도를 높아졌다는 점이다. 해당 엔진을 이미 적용한 일본어의 경우 지난해 같은 기간 대비 이미지 번역 사용량이 3배가량 증가했다. 사용자가 지정하지 않더라도 이미지 내 텍스트를... ',
-			pubDate: 'Tue, 13 Aug 2019 10:18:00 +0900'
-		},
-		{
-			title: '“협진에 최적화”···NHN, 의료 전용 메신저 ‘토스트 메디컬톡’ 출시',
-			originallink: 'https://www.sedaily.com/NewsView/1Z47R6T0LT',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=011&aid=0003760448',
-			description:
-				'병원 바깥 망에서 접속할 때는 지문·안면 인식 등을 거쳐야 한다. 또 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 디지털 저작권 관리(DRM) 솔루션을 적용해 텍스트, 이미지, 문서, 동영상 등의 미디어의... ',
-			pubDate: 'Mon, 29 Jun 2020 10:54:00 +0900'
-		},
-		{
-			title: "네이버, '파파고'에 향상된 이미지 번역 기술 적용",
-			originallink: 'http://www.itdaily.kr/news/articleView.html?idxno=96411',
-			link: 'http://www.itdaily.kr/news/articleView.html?idxno=96411',
-			description:
-				"이번 업데이트에서는 이미지 번역 엔진을 개선해 딥러닝 기술 기반의 문자 추출 및 인식 정확도를 57% 가량 향상시켰다. 또한 별도로 지정하지 않더라도 이미지 내 텍스트를 자동으로 검출하고 번역하는 '전체 번역... ",
-			pubDate: 'Tue, 13 Aug 2019 22:30:00 +0900'
-		},
-		{
-			title: '안양예술공원 작품 설명·방문민원안내에 이미지매칭 서비스',
-			originallink: 'http://www.weeklytoday.com/news/articleView.html?idxno=151267',
-			link: 'http://www.weeklytoday.com/news/articleView.html?idxno=151267',
-			description:
-				'해당 이미지에 대한 설명 및 안내서비스로 QR코드와 비콘 보다 한 단계 진화해, 카메라촬영과 동시에 텍스트... 스마트폰으로 원하는 이미지를 검색, 인공지능으로 저장된 해당 이미지와의 매칭을 통해 인식하는 방식이다.... ',
-			pubDate: 'Tue, 03 Mar 2020 16:58:00 +0900'
-		},
-		{
-			title: "[갤럭시노트10]꽉 찬 화면이 한손에 쏙…S펜 텍스트 변환 '탄성'",
-			originallink: 'http://www.ebn.co.kr/news/view/996427',
-			link: 'http://www.ebn.co.kr/news/view/996427',
-			description:
-				"악필인 글씨체도 정확히 인식해 텍스트로 변환됐다. 텍스트 뿐만 아니라 PDF, 이미지 파일, 워드 파일로도 변환돼 바로 공유할 수 있다. 또 S펜에 '에어 액션' 기능도 새로 적용됐다. 버튼이 아닌 제스처를 인식한다.... ",
-			pubDate: 'Thu, 08 Aug 2019 15:56:00 +0900'
-		},
-		{
-			title: '안양예술공원 전시작품 설명·방문민원안내에 이미지매칭 서비스',
-			originallink: 'http://www.m-i.kr/news/articleView.html?idxno=687320',
-			link: 'http://www.m-i.kr/news/articleView.html?idxno=687320',
-			description:
-				'해당 이미지에 대한 설명 및 안내서비스로 QR코드와 비콘 보다 한 단계 진화해, 카메라촬영과 동시에 텍스트... 스마트폰으로 원하는 이미지를 검색, 인공지능으로 저장된 해당 이미지와의 매칭을 통해 인식하는 방식이다.... ',
-			pubDate: 'Tue, 03 Mar 2020 13:28:00 +0900'
-		},
-		{
-			title: "NHN, 협진에 최적화된 의료 메신저 '토스트 메디컬톡' 출시",
-			originallink: 'http://news.heraldcorp.com/view.php?ud=20200629000129',
-			link: 'https://news.naver.com/main/read.nhn?mode=LSD&mid=sec&sid1=105&oid=016&aid=0001692354',
-			description:
-				'원외망 접속 시에는 지문, 안면 인식 등을 통한 생채인증과 PIN 활용 2차 인증을 적용했다. 또한 병원 요구 사항에 따라 환자 개인정보보호 및 정보보안을 위한 디지털 저작권 관리(DRM) 솔루션을 적용해 텍스트, 이미지... ',
-			pubDate: 'Mon, 29 Jun 2020 09:35:00 +0900'
-		},
-		{
-			title: '네이버 비즈니스 플랫폼, 문자 인식기술 솔루션 사업 파트너사 모집',
-			originallink: 'http://www.newslock.co.kr/news/articleView.html?idxno=25431',
-			link: 'http://www.newslock.co.kr/news/articleView.html?idxno=25431',
-			description:
-				'OCR은 이미지 속에 있는 문자를 인식하여 기계가 읽고 활용할 수 있는 텍스트로 변환하는 기술로, 번역이나 이미지 검색, 텍스트 분석, 챗봇 등에 사용되며, 문서 자동 분류를 실현해 반복 검증 업무를 줄일 수 있고... ',
-			pubDate: 'Fri, 31 Jan 2020 10:36:00 +0900'
+				'아래 텍스트는 실제 방송 내용과 차이가 있을 수 있으니 보다 정확한 내용은 방송으로 확인하시기 바랍니다.... 별 어려움 없었던 사람이다, 이런 취지, 너무 곱게 자랐다, 이런 취지로 도련님이라는 이미지가 연결되기는... ',
+			pubDate: '20-04-29 09:30'
 		}
 	],
 	newsSA: 16.9,

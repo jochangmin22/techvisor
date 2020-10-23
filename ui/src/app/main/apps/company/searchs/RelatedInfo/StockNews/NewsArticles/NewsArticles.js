@@ -40,9 +40,27 @@ function NewsArticles() {
 					</span>
 				),
 				className: 'text-15'
+			},
+			{
+				Header: '일자',
+				accessor: 'pubDate',
+				Cell: row => (
+					<span>
+						<span
+							style={{
+								color: theme.palette.primary.light,
+								transition: 'all .3s ease'
+							}}
+						>
+							&#10625;
+						</span>{' '}
+						{row.value}
+					</span>
+				),
+				className: 'text-12'
 			}
 		],
-		[theme.palette.primary.main]
+		[theme.palette.primary.main, theme.palette.primary.light]
 	);
 
 	if (!data || data.length === 0) {
@@ -82,13 +100,13 @@ function NewsArticles() {
 					</div>
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-320 px-8">
+			<FuseScrollbars className="max-h-288 px-8">
 				<EnhancedTable
 					columns={columns}
 					data={data}
 					size="small"
-					pageSize={8}
-					pageOptions={[8, 16, 24]}
+					pageSize={7}
+					pageOptions={[7, 14, 50]}
 					showHeader={false}
 					onRowClick={(ev, row) => {
 						if (row) {

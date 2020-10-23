@@ -40,9 +40,27 @@ function NewsArticles() {
 					</span>
 				),
 				className: 'text-15'
+			},
+			{
+				Header: '일자',
+				accessor: 'pubDate',
+				Cell: row => (
+					<span>
+						<span
+							style={{
+								color: theme.palette.primary.light,
+								transition: 'all .3s ease'
+							}}
+						>
+							&#10625;
+						</span>{' '}
+						{row.value}
+					</span>
+				),
+				className: 'text-12'
 			}
 		],
-		[theme.palette.primary.main]
+		[theme.palette.primary.main, theme.palette.primary.light]
 	);
 
 	if (!data || data.length === 0) {

@@ -1,4 +1,7 @@
 
+# app
+from datetime import datetime
+
 import urllib.request
 import json
 import re
@@ -84,6 +87,11 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
             # strip b tag
             response_body['items'][i]['title'] = re.sub('<[^<]+?>', '', response_body['items'][i]['title'].replace('&quot;', '\"'))
             response_body['items'][i]['description'] = re.sub('<[^<]+?>', '', response_body['items'][i]['description'].replace('&quot;', '\"'))
+
+            pDate = datetime.strptime(response_body['items'][i]['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
+            # pDate = pDate.strftime('%Y-%m-%d %H:%M:%S')
+            pDate = pDate.strftime('%y-%m-%d %H:%M')
+            response_body['items'][i]['pubDate'] = pDate
             # link_description[response_body['items'][i]['link']] = response_body['items'][i]['description']
             # title_link[response_body['items'][i]['title']] = \
             #     response_body['items'][i]['link']
