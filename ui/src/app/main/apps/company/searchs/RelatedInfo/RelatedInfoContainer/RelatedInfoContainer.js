@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
 
 function RelatedInfoContainer(props) {
 	const classes = useStyles();
-	const { selectedCode } = props;
+	const { selectedCorp } = props;
 	const [currentRange, setCurrentRange] = useState(0);
 
 	function handleChangeRange(range) {
@@ -34,9 +34,9 @@ function RelatedInfoContainer(props) {
 						msg="선택한 기업이 있으면 관련 정보를, 선택한 기업이 없으면 최근 정보를 표시합니다."
 					/>
 					<DraggableIcon />
-					{selectedCode.corpName && (
+					{selectedCorp.corpName && (
 						<Typography className="font-medium text-gray-600 ml-8" color="inherit">
-							{selectedCode.corpName}
+							{selectedCorp.corpName}
 						</Typography>
 					)}
 				</div>
@@ -60,7 +60,7 @@ function RelatedInfoContainer(props) {
 			<div className="flex flex-row flex-wrap">
 				{currentRange === 0 && (
 					<div className="flex w-full">
-						<StockNewsContainer selectedCode={selectedCode} />
+						<StockNewsContainer selectedCorp={selectedCorp} />
 					</div>
 				)}
 				{currentRange === 1 && (

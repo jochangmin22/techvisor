@@ -12,7 +12,6 @@ import StockInfoContainer from './searchs/StockInfo/StockInfoContainer';
 import RelatedInfoContainer from './searchs/RelatedInfo/RelatedInfoContainer';
 import VisualContainer from './searchs/Visual/VisualContainer';
 import Draggable from 'react-draggable';
-import StockFairValue from './searchs/StockFairValue';
 
 const useStyles = makeStyles(theme => ({
 	paper: {
@@ -27,7 +26,7 @@ function CompanyContent() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
-	const selectedCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode);
+	const selectedCorp = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp);
 	const searchText = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchText);
 	const searchLoading = useSelector(({ companyApp }) => companyApp.searchs.searchLoading);
 
@@ -38,8 +37,7 @@ function CompanyContent() {
 		B: 100,
 		C: 100,
 		D: 100,
-		E: 100,
-		F: 100
+		E: 100
 	});
 
 	function handleStart(name) {
@@ -64,47 +62,57 @@ function CompanyContent() {
 			setSearchStatus(null);
 		}
 	}, [searchText, searchLoading, entities]);
-	const selectOne = !Object.values(selectedCode).every(x => x === null || x === '');
-	// const selectOne = !!(stockCode && stockCode.length !== 0);
+
+	const selectOne = !Object.values(selectedCorp).every(x => x === null || x === '');
 
 	return (
-		<div className="flex flex-wrap w-full h-auto items-start justify-start mt-8 px-8">
-			<Draggable handle=".draggable" onStart={() => handleStart('A')} onEnd={() => resetForm()} grid={[25, 25]}>
-				<div className={classes.paper} style={{ zIndex: form.A }}>
-					<SearchListContainer status={searchStatus} />
-				</div>
-			</Draggable>
-			{selectOne && (
-				<>
-					<Draggable
-						handle=".draggable"
-						onStart={() => handleStart('B')}
-						onEnd={() => resetForm()}
-						grid={[25, 25]}
-					>
-						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.B }}>
-							<FinancialInfo />
-						</div>
-					</Draggable>
-					<Draggable
-						handle=".draggable"
-						onStart={() => handleStart('C')}
-						onEnd={() => resetForm()}
-						grid={[25, 25]}
-					>
-						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.C }}>
-							<StockInfoContainer />
-						</div>
-					</Draggable>
-				</>
-			)}
-			<Draggable handle=".draggable" onStart={() => handleStart('D')} onEnd={() => resetForm()} grid={[25, 25]}>
-				<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.D }}>
-					<RelatedInfoContainer selectedCode={selectedCode} />
-				</div>
-			</Draggable>
-			{selectOne && (
-				<>
+		<div className="flex h-full w-full justify-center">
+			<div className="flex flex-wrap w-full h-460 items-start justify-start mt-8 px-8">
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('A')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={classes.paper} style={{ zIndex: form.A }}>
+						<SearchListContainer status={searchStatus} />
+					</div>
+				</Draggable>
+				{selectOne && (
+					<>
+						<Draggable
+							handle=".draggable"
+							onStart={() => handleStart('B')}
+							onEnd={() => resetForm()}
+							grid={[25, 25]}
+						>
+							<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.B }}>
+								<FinancialInfo />
+							</div>
+						</Draggable>
+						<Draggable
+							handle=".draggable"
+							onStart={() => handleStart('C')}
+							onEnd={() => resetForm()}
+							grid={[25, 25]}
+						>
+							<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.C }}>
+								<StockInfoContainer />
+							</div>
+						</Draggable>
+					</>
+				)}
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('D')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.D }}>
+						<RelatedInfoContainer selectedCorp={selectedCorp} />
+					</div>
+				</Draggable>
+				{selectOne && (
 					<Draggable
 						handle=".draggable"
 						onStart={() => handleStart('E')}
@@ -112,21 +120,11 @@ function CompanyContent() {
 						grid={[25, 25]}
 					>
 						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.E }}>
-							<StockFairValue />
-						</div>
-					</Draggable>
-					<Draggable
-						handle=".draggable"
-						onStart={() => handleStart('F')}
-						onEnd={() => resetForm()}
-						grid={[25, 25]}
-					>
-						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.F }}>
 							<VisualContainer />
 						</div>
 					</Draggable>
-				</>
-			)}
+				)}
+			</div>
 		</div>
 	);
 }

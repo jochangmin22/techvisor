@@ -38,7 +38,7 @@ def parse_searchs(request, mode="begin"):
         mode : begin, nlp, query, matrix, indicator
     """
 
-    mainKey, _, params, subParams = get_redis_key(request)
+    mainKey, _, params, _ = get_redis_key(request)
 
     context = cache.get(mainKey)
 
@@ -194,7 +194,6 @@ def parse_searchs(request, mode="begin"):
         return mtx_raw          
     elif mode == "indicator":
         return row          
- 
 
 def parse_nlp(request, analType):
     """ 쿼리 실행 및 결과 저장

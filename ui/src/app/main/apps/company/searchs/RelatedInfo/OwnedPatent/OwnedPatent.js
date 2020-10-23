@@ -123,8 +123,8 @@ function OwnedPatent(props) {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.ownedPatent);
-	const companyInfo = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
-	const { 회사명: corpName } = companyInfo;
+	const selectedCorp = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp);
+	const { corpName } = selectedCorp;
 
 	const [data, setData] = useState(entities);
 	const [csvData, setCsvData] = useState(entities);
@@ -138,10 +138,12 @@ function OwnedPatent(props) {
 
 	useEffect(() => {
 		setShowLoading(true);
-		let params = { corpName: '' };
-		if (corpName !== undefined && corpName) {
-			params = { corpName: corpName };
-		}
+
+		const params = {
+			params: { corpName: corpName || '' },
+			subParams: {}
+		};
+
 		dispatch(getOwnedPatent(params)).then(() => {
 			setShowLoading(false);
 		});
@@ -227,15 +229,11 @@ function OwnedPatent(props) {
 				</div>
 			</div>
 			{isEmpty ? (
-				<div className="max-h-320">
-					<EmptyMsg icon="wb_incandescent" msg="특허" text={emptyText} />
-				</div>
+				<EmptyMsg icon="wb_incandescent" msg="특허" text={emptyText} className="h-320" />
 			) : (
-				<FuseScrollbars className="max-h-360 px-6">
+				<FuseScrollbars className="max-h-320 px-6">
 					{showLoading ? (
-						<div className="h-360">
-							<SpinLoading />
-						</div>
+						<SpinLoading className="h-320" />
 					) : (
 						<EnhancedTable
 							columns={columns}

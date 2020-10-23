@@ -14,15 +14,15 @@ import { numberToWon } from 'app/main/apps/lib/utils';
 function CorpInfo() {
 	const dispatch = useDispatch();
 	const arr = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
-	const selectedCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode);
+	const selectedCorp = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp);
 
 	useEffect(() => {
-		const isEmpty = Object.values(selectedCode).every(x => x === null || x === '');
+		const isEmpty = Object.values(selectedCorp).every(x => x === null || x === '');
 		if (!isEmpty) {
-			dispatch(getCompanyInfo(selectedCode));
+			dispatch(getCompanyInfo(selectedCorp));
 		}
 		// eslint-disable-next-line
-	}, [selectedCode]);
+	}, [selectedCorp]);
 
 	const corpInfo = useMemo(
 		() =>

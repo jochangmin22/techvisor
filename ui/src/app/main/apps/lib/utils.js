@@ -34,7 +34,8 @@ export function numberToWon(number) {
 	if (number === '') return '';
 	const inputNumber = parseInt(String(number).replace(/,/gi, '')) * 100000000;
 	// const inputNumber = number < 0 ? false : number;
-	const unitWords = ['', '만', '억', '조', '경'];
+	// const unitWords = ['', '만', '억', '조', '경'];
+	const unitWords = ['', '', '', '조', '경']; // 조 미만 표기 안함
 	const splitUnit = 10000;
 	const splitCount = unitWords.length;
 	const resultArray = [];

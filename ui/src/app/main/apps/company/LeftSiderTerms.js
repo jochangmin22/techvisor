@@ -15,18 +15,17 @@ import clsx from 'clsx';
 import parseSearchOptions from 'app/main/apps/lib/parseParamsCompany';
 import {
 	getSearchs,
-	// getWordCloud,
-	// getKeywords,
-	// getMatrix,
 	clearSearchs,
 	clearSearchText,
 	setSearchLoading,
 	setSearchParams,
 	setSearchSubmit,
+	getNews,
+	getNewsSA,
+	getRelatedCompany,
 	initialState
 } from 'app/main/apps/company/store/searchsSlice';
 
-// TODO: change focus next textField
 // TODO: DnD word chip
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -35,10 +34,6 @@ const useStyles = makeStyles(theme => ({
 		'& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
 			borderWidth: 0
 		},
-		// '& .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline': {
-		// 	borderWidth: 2,
-		// 	borderColor: 'red'
-		// },
 		'&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
 			borderWidth: 1,
 			borderColor: theme.palette.secondary.main
@@ -79,6 +74,8 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	// const [searchVolume, setSearchVolume] = useState('SUM');
 
 	const searchParams = useSelector(({ companyApp }) => companyApp.searchs.searchParams);
+	const corpName = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp.corpName);
+
 	const searchSubmit = useSelector(({ companyApp }) => companyApp.searchs.searchSubmit);
 
 	const [submitted, setSubmitted] = useState(searchSubmit);
@@ -204,7 +201,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	React.useImperativeHandle(ref, () => {
 		return {
 			clearTerms() {
-				dispatch(clearSearchText());
+				dispatch(clearSearchText(corpName));
 			}
 		};
 	});
@@ -267,9 +264,15 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 			subParams: {}
 		};
 
+		const searchWord = corpName ? corpName : '주식';
+
 		dispatch(setSearchLoading(true));
 		dispatch(clearSearchs());
 		dispatch(getSearchs(params)).then(() => {
+			dispatch(getNews({ params: { searchText: searchWord }, subParams: {} })).then(() => {
+				dispatch(getNewsSA({ params: { searchText: searchWord }, subParams: {} }));
+				dispatch(getRelatedCompany({ params: { searchText: searchWord }, subParams: {} }));
+			});
 			dispatch(setSearchLoading(false));
 			dispatch(setSearchSubmit(false));
 		});

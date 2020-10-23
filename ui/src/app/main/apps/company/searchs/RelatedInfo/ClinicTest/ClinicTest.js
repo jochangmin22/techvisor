@@ -88,13 +88,12 @@ function ClinicTest() {
 					icon="local_pharmacy"
 					msg="임상실험"
 					text="선택하신 기업명으로 검색된 임상실험 내역이 없습니다."
+					className="h-360"
 				/>
 			) : (
 				<FuseScrollbars className="max-h-360 px-6">
 					{showLoading ? (
-						<div className="h-360">
-							<SpinLoading />
-						</div>
+						<SpinLoading className="h-360" />
 					) : (
 						<EnhancedTable
 							columns={columns}

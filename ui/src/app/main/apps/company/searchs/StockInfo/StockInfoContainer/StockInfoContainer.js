@@ -18,11 +18,10 @@ const useStyles = makeStyles(theme => ({
 function StockInfoContainer() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
-	const selectedCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode);
-	const corpName = useSelector(({ companyApp }) => companyApp.searchs.companyInfo.회사명);
+	const selectedCorp = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp);
 	const [currentRange, setCurrentRange] = useState({
 		name: 'day',
-		text: '하루',
+		text: '일봉',
 		unit: '5분'
 	});
 
@@ -40,17 +39,17 @@ function StockInfoContainer() {
 					</Typography>
 					<DraggableIcon />
 					<Typography className="font-medium text-gray-600 ml-8" color="inherit">
-						{corpName}
+						{selectedCorp.corpName}
 					</Typography>
 					<span className="flex flex-row items-center mx-8">
-						{selectedCode.stockCode && (
+						{selectedCorp.stockCode && (
 							<Typography className="text-13 mr-8 text-gray-500" color="inherit">
-								종목코드 : {selectedCode.stockCode}
+								종목코드 : {selectedCorp.stockCode}
 							</Typography>
 						)}
-						{selectedCode.corpNo && (
+						{selectedCorp.corpNo && (
 							<Typography className="text-13  text-gray-500" color="inherit">
-								사업자등록번호 : {selectedCode.corpNo}
+								사업자등록번호 : {selectedCorp.corpNo}
 							</Typography>
 						)}
 					</span>

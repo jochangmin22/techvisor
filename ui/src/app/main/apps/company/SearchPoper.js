@@ -8,7 +8,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import { parseInputSearchText } from 'app/main/apps/lib/parseParamsCompany';
-import { setSearchParams, setSearchSubmit, setSelectedCode } from 'app/main/apps/company/store/searchsSlice';
+import { setSearchParams, setSearchSubmit, setSelectedCorp } from 'app/main/apps/company/store/searchsSlice';
 import { useDispatch } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
@@ -125,7 +125,7 @@ const SearchPoper = React.forwardRef(function (props, ref) {
 		// const [_params] = parseInputSearchText(inputSearchText);
 		// _params['companyName'] = [name];
 		// _params['searchNum'] = ''; // prevent uncontrolled error
-		dispatch(setSelectedCode({ stockCode: stockCode, corpNo: corpNo }));
+		dispatch(setSelectedCorp({ stockCode: stockCode, corpNo: corpNo }));
 		// dispatch(setSearchParams(_params));
 		dispatch(setSearchSubmit(true));
 

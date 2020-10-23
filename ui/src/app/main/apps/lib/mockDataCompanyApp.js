@@ -3959,7 +3959,7 @@ const searchData = {
 	},
 	searchLoading: null,
 	searchSubmit: true,
-	selectedCode: {
+	selectedCorp: {
 		stockCode: '001360',
 		corpNo: '2078100726'
 	},
@@ -5502,208 +5502,7 @@ const searchData = {
 			}
 		]
 	},
-	wordCloud: [
-		{
-			name: '바이러스',
-			value: 2089
-		},
-		{
-			name: '단백질',
-			value: 1676
-		},
-		{
-			name: '치료',
-			value: 1330
-		},
-		{
-			name: '세포',
-			value: 938
-		},
-		{
-			name: '감염',
-			value: 693
-		},
-		{
-			name: '조성물',
-			value: 654
-		},
-		{
-			name: '유전자',
-			value: 646
-		},
-		{
-			name: '예방',
-			value: 568
-		},
-		{
-			name: '질환',
-			value: 528
-		},
-		{
-			name: '발현',
-			value: 519
-		},
-		{
-			name: '면역',
-			value: 493
-		},
-		{
-			name: '벡터',
-			value: 492
-		},
-		{
-			name: '백신',
-			value: 464
-		},
-		{
-			name: '항원',
-			value: 463
-		},
-		{
-			name: '항체',
-			value: 448
-		},
-		{
-			name: '재조합',
-			value: 367
-		},
-		{
-			name: '서열',
-			value: 359
-		},
-		{
-			name: '결합',
-			value: 353
-		},
-		{
-			name: '활성',
-			value: 325
-		},
-		{
-			name: '반응',
-			value: 257
-		},
-		{
-			name: '화합물',
-			value: 256
-		},
-		{
-			name: '억제',
-			value: 252
-		},
-		{
-			name: '간염',
-			value: 251
-		},
-		{
-			name: '효과',
-			value: 243
-		},
-		{
-			name: '유도',
-			value: 229
-		},
-		{
-			name: '특이',
-			value: 227
-		},
-		{
-			name: '인플루엔자',
-			value: 227
-		},
-		{
-			name: '핵산',
-			value: 223
-		},
-		{
-			name: '융합',
-			value: 221
-		},
-		{
-			name: '관련',
-			value: 214
-		},
-		{
-			name: '분자',
-			value: 210
-		},
-		{
-			name: '생산',
-			value: 210
-		},
-		{
-			name: '용도',
-			value: 204
-		},
-		{
-			name: '인간',
-			value: 193
-		},
-		{
-			name: '펩타이드',
-			value: 186
-		},
-		{
-			name: '입자',
-			value: 177
-		},
-		{
-			name: 'HCV',
-			value: 176
-		},
-		{
-			name: '종양',
-			value: 168
-		},
-		{
-			name: 'HIV',
-			value: 167
-		},
-		{
-			name: '약학',
-			value: 164
-		},
-		{
-			name: '질병',
-			value: 153
-		},
-		{
-			name: 'DNA',
-			value: 150
-		},
-		{
-			name: '코딩',
-			value: 149
-		},
-		{
-			name: '개시',
-			value: 141
-		},
-		{
-			name: '동물',
-			value: 134
-		},
-		{
-			name: 'RSV',
-			value: 133
-		},
-		{
-			name: '진단',
-			value: 133
-		},
-		{
-			name: '성분',
-			value: 132
-		},
-		{
-			name: '투여',
-			value: 131
-		},
-		{
-			name: '신규',
-			value: 128
-		}
-	],
+	wordCloud: [],
 	keywords: {
 		topic: [
 			'바이러스',
@@ -5769,8 +5568,7 @@ const searchData = {
 				value: 0.3861456513404846
 			}
 		]
-	},
-	selectedIndex: null
+	}
 };
 
 export default searchData;

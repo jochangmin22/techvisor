@@ -27,7 +27,7 @@ function calculateMA(dayCount, data) {
 
 function StockChart() {
 	const chartRef = useRef(null);
-	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCode.stockCode);
+	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp.stockCode);
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.stock.entities);
 	const corpName = useSelector(({ companyApp }) => companyApp.searchs.companyInfo.회사명);
 	const [today, setToday] = useState(null);
@@ -384,11 +384,7 @@ function StockChart() {
 	}
 
 	if (stockCode && (!entities || entities.length === 0)) {
-		return (
-			<div className="h-256">
-				<SpinLoading />
-			</div>
-		);
+		return <SpinLoading className="h-320" />;
 	}
 
 	return (
@@ -410,7 +406,7 @@ function StockChart() {
 					)}
 				</div>
 				<div className="px-16">
-					<div id="main" className="w-full h-256" ref={chartRef}></div>
+					<div id="main" className="w-full h-320" ref={chartRef}></div>
 				</div>
 			</div>
 		</div>
