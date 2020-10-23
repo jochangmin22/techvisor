@@ -4,17 +4,21 @@ from itertools import islice
 
 def get_redis_key(request):
     "Return mainKey, subKey, params, subParams"
-    params = request.GET.get('params','')
-    params = json.loads(params)
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        params = data['params']
+        subParams = data['subParams']
+    else:
+        params = request.GET.get('params','')
+        subParams = request.GET.get('subParams','')
+        params = json.loads(params)
+        subParams = json.loads(subParams)
 
-    mainKey = "¶".join(params.values()) if params['searchNum'] == '' else params['searchNum']
-
-    subParams = request.GET.get('subParams','')
-    subParams = json.loads(subParams)
-
+    searchNum = params['searchNum'] if hasattr(params, 'searchNum') else ''
+    mainKey = "¶".join(params.values()) if searchNum == '' else searchNum
 
     # one more key to be used for a separated from searchParams
-    subKey = mainKey + "¶".join(list(NestedDictValues(subParams))) if params['searchNum'] == '' else params['searchNum']   
+    subKey = mainKey + "¶".join(list(NestedDictValues(subParams))) if searchNum == '' else searchNum   
 
     return mainKey, subKey, params, subParams
 

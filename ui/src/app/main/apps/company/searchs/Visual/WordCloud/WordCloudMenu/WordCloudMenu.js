@@ -12,12 +12,12 @@ import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { useSelector, useDispatch } from 'react-redux';
-import { setWordCloudOptions } from 'app/main/apps/search/store/searchsSlice';
+import { setWordCloudOptions } from 'app/main/apps/company/store/searchsSlice';
 import React, { useState } from 'react';
 
 function WordCloudMenu() {
 	const dispatch = useDispatch();
-	const wordCloudOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions.wordCloudOptions);
+	const wordCloudOptions = useSelector(({ companyApp }) => companyApp.searchs.menuOptions.wordCloudOptions);
 	const [anchorEl, setAnchorEl] = useState(null);
 
 	const { form, handleChange } = useForm(wordCloudOptions);

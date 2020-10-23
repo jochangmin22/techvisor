@@ -10,9 +10,9 @@ import debounce from 'lodash/debounce';
 import echarts from 'echarts';
 import 'echarts/theme/blue';
 import _ from '@lodash';
-import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useTheme } from '@material-ui/core';
 import { nationality } from 'app/main/apps/lib/variables';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
 function calculateCnt(name, val, arr) {
 	const filterType = val === 'A' ? `${name}1` : `${name}국가코드1`;
@@ -32,16 +32,16 @@ function calculateCnt(name, val, arr) {
 	return result;
 }
 
-function RelatedPerson(props) {
+function RelatedPerson() {
 	const theme = useTheme();
 	const chartRef = useRef(null);
 	const [echart, setEchart] = useState(null);
 
-	const entities = useSelector(({ searchApp }) => searchApp.searchs.entities);
+	const entities = useSelector(({ companyApp }) => companyApp.searchs.ownedPatent);
 
 	const [data, setData] = useState({});
 
-	const [currentRange, setCurrentRange] = useState('출원인');
+	const [currentRange, setCurrentRange] = useState('발명자');
 
 	useEffect(() => {
 		function updateState(arr) {
@@ -56,7 +56,7 @@ function RelatedPerson(props) {
 			drawChart();
 		}
 		// eslint-disable-next-line
-	}, [props.searchText, currentRange, entities]);
+	}, [currentRange, entities]);
 
 	const drawChart = () => {
 		if (!data || data.length === 0) return;
@@ -150,8 +150,15 @@ function RelatedPerson(props) {
 		};
 	}, [handleResize]);
 
-	if (!entities || entities.length === 0) {
-		return <SpinLoading />;
+	if (entities.length === 0) {
+		return (
+			<EmptyMsg
+				icon="wb_incandescent"
+				msg="분석할 보유 특허가 없습니다."
+				text="선택하신 기업명으로 검색된 보유특허 내역이 없습니다."
+				className="max-h-320"
+			/>
+		);
 	}
 
 	return (

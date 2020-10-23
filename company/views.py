@@ -43,7 +43,10 @@ def get_owned_patent(request):
     return related_info.get_owned_patent(request)    
 
 def get_stock_fair(request):
-    return companies.stock_fair(request)    
+    return companies.stock_fair(request)
+
+def get_wordcloud(request):
+    return related_info.wordcloud(request)        
 
 # company
 # def get_company(request, companyId=""):

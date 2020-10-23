@@ -3,81 +3,46 @@ import Paper from '@material-ui/core/Paper';
 import 'echarts-wordcloud';
 import echarts from 'echarts';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
-import parseSearchOptions from 'app/main/apps/lib/parseParamsSearch';
 import { useSelector, useDispatch } from 'react-redux';
-import { setSearchSubmit, setSearchParams, getWordCloud, initialState } from 'app/main/apps/search/store/searchsSlice';
-import { showMessage } from 'app/store/fuse/messageSlice';
-import _ from '@lodash';
+import { getWordCloud } from 'app/main/apps/company/store/searchsSlice';
 import debounce from 'lodash/debounce';
 import randomColor from 'randomcolor';
-// import WordCloudToobar from '../components/WordCloudToobar';
 import WordCloudMenu from '../WordCloudMenu';
-import { useUpdateEffect } from '@fuse/hooks';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
 function WordCloudChart() {
 	const dispatch = useDispatch();
 	const chartRef = useRef(null);
-	const entities = useSelector(({ searchApp }) => searchApp.searchs.wordCloud);
-	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
-	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	const [form, setForm] = useState(searchParams || initialState.searchParams);
+	const ownedPatent = useSelector(({ companyApp }) => companyApp.searchs.ownedPatent);
+	const entities = useSelector(({ companyApp }) => companyApp.searchs.wordCloud);
+	const menuOptions = useSelector(({ companyApp }) => companyApp.searchs.menuOptions);
+	const corpName = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp.corpName);
+	const [showLoading, setShowLoading] = useState(false);
 	const [echart, setEchart] = useState(null);
 
 	useEffect(() => {
-		const [, params] = parseSearchOptions(searchParams);
-		const subParams = {
-			analysisOptions: analysisOptions
+		setShowLoading(true);
+
+		const params = {
+			params: { corpName: corpName || '' },
+			subParams: { menuOptions: menuOptions }
 		};
-		dispatch(getWordCloud({ params, subParams }));
+		if (ownedPatent && ownedPatent.length > 0) {
+			dispatch(getWordCloud(params)).then(() => {
+				setShowLoading(false);
+			});
+		}
+
 		// eslint-disable-next-line
-	}, [analysisOptions.wordCloudOptions]);
+	}, [menuOptions.wordCloudOptions, corpName]);
 
 	useEffect(() => {
-		if (entities) {
+		if (!showLoading) {
 			drawChart();
 			// updateChart();
 		}
 		// eslint-disable-next-line
-	}, [entities]);
-
-	function handleClick(chart, value, name = 'terms') {
-		chart.setOption({ animation: false });
-		// let array = [...form[name]];
-		let array = [...searchParams[name]];
-		const newValue = value.trim().replace(/\s+/g, ' adj1 ');
-		let existCheck = true;
-		array.map(arr => {
-			if (arr.includes(newValue)) {
-				return (existCheck = false);
-			}
-			return true;
-		});
-		if (existCheck) {
-			array.push([newValue]);
-		} else {
-			dispatch(
-				showMessage({
-					message: '이미 포함되어 있습니다.',
-					autoHideDuration: 2000,
-					anchorOrigin: {
-						vertical: 'top',
-						horizontal: 'right'
-					}
-				})
-			);
-		}
-		setForm(_.set({ ...form }, name, array));
-
-		dispatch(setSearchSubmit(true));
-
-		chart.setOption({ animation: true });
-		return;
-	}
-
-	useUpdateEffect(() => {
-		const [_params] = parseSearchOptions(form);
-		dispatch(setSearchParams(_params));
-	}, [form]);
+	}, [entities, showLoading]);
 
 	const drawChart = () => {
 		if (!entities || entities.length === 0) return;
@@ -148,12 +113,6 @@ function WordCloudChart() {
 			]
 		};
 		myChart.setOption(option);
-
-		myChart.on('click', param => {
-			if (param.name) {
-				handleClick(myChart, param.name);
-			}
-		});
 	};
 
 	const handleResize = debounce(() => {
@@ -169,8 +128,18 @@ function WordCloudChart() {
 		};
 	}, [handleResize]);
 
-	if (!entities || entities.length === 0) {
-		return <SpinLoading />;
+	if (showLoading) {
+		return <SpinLoading className="h-360" />;
+	}
+	if (!showLoading && entities.length === 0) {
+		return (
+			<EmptyMsg
+				icon="wb_incandescent"
+				msg="분석할 보유 특허가 없습니다."
+				text="선택하신 기업명으로 검색된 보유특허 내역이 없습니다."
+				className="max-h-320"
+			/>
+		);
 	}
 
 	return (

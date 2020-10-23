@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
@@ -8,12 +8,14 @@ import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import PropTypes from 'prop-types';
-
-// import WordCloudChart from '../WordCloud/WordCloudChart';
-// import IndicatorAnalysis from '../IndicatorAnalysis/IndicatorAnalysisContainer';
-// import ApplicationNumber from '../ApplicationNumber';
-// import IpcChart from '../Ipc/IpcChart';
+import { getOwnedPatent } from 'app/main/apps/company/store/searchsSlice';
+import StockFairValue from '../StockFairValue/StockFairValue';
+import WordCloudChart from '../WordCloud/WordCloudChart';
+import ApplicationNumber from '../ApplicationNumber';
+import IpcChart from '../Ipc/IpcChart';
+import RelatedPerson from '../RelatedPerson';
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -69,18 +71,29 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function VisualContainer() {
+	const dispatch = useDispatch();
 	const classes = useStyles();
-	const companyInfo = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
-	const { 회사명: corpName, 종목코드: stockCode } = companyInfo;
+	const selectedCorp = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp);
+	const [showLoading, setShowLoading] = useState(false);
 	const [tabValue, setTabValue] = useState(0);
-
 	function handleChangeTab(event, tabValue) {
 		setTabValue(tabValue);
 	}
 
-	const isEmpty = !!(!corpName && !stockCode);
+	useEffect(() => {
+		setShowLoading(true);
 
-	useEffect(() => {}, [companyInfo]);
+		const params = {
+			params: { corpName: selectedCorp.corpName || '' },
+			subParams: {}
+		};
+		dispatch(getOwnedPatent(params)).then(() => {
+			setShowLoading(false);
+		});
+		// eslint-disable-next-line
+	}, [selectedCorp.corpName]);
+
+	const isEmpty = Object.values(selectedCorp).every(x => x === null || x === '');
 
 	return (
 		<div className={clsx(classes.root, 'w-full h-full rounded-8 shadow')}>
@@ -95,7 +108,7 @@ function VisualContainer() {
 					onChange={handleChangeTab}
 					className={classes.tabs}
 				>
-					{['지표분석', '워드클', '연도별', '기술별'].map((key, index) => (
+					{['적정주', '워드클', '연도별', '기술별', '인명별'].map((key, index) => (
 						<Tab label={key} key={key} className={classes.tab} {...a11yProps(index)} />
 					))}
 				</Tabs>
@@ -103,34 +116,53 @@ function VisualContainer() {
 			</div>
 			<TabPanel value={tabValue} index={0}>
 				{tabValue === 0 &&
-					(isEmpty ? (
-						<EmptyMsg icon="assessment" msg="특허 지표분석" />
+					(showLoading ? (
+						<SpinLoading className="h-360" />
+					) : isEmpty ? (
+						<EmptyMsg icon="text_fields" msg="워드클라우드" />
 					) : (
-						<div>지표분석</div>
-						// <IndicatorAnalysis searchText={searchText} />
+						<StockFairValue />
 					))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={1}>
 				{tabValue === 1 &&
-					(isEmpty ? (
+					(showLoading ? (
+						<SpinLoading className="h-360" />
+					) : isEmpty ? (
 						<EmptyMsg icon="text_fields" msg="워드클라우드" />
 					) : (
-						<div>워드클라우드</div>
-						// <WordCloudChart searchText={searchText} />
+						<WordCloudChart />
 					))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={2}>
 				{tabValue === 2 &&
-					(isEmpty ? (
+					(showLoading ? (
+						<SpinLoading className="h-360" />
+					) : isEmpty ? (
 						<EmptyMsg icon="photo" msg="연도별 출원건수" />
 					) : (
-						<div>출원건수</div>
-						// <ApplicationNumber searchText={searchText} />
+						<ApplicationNumber />
 					))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={3}>
 				{tabValue === 3 &&
-					(isEmpty ? <EmptyMsg icon="layers" msg="기술분야별 동향" /> : <div>기술분야별 동향</div>)}
+					(showLoading ? (
+						<SpinLoading className="h-360" />
+					) : isEmpty ? (
+						<EmptyMsg icon="layers" msg="기술분야별 동향" />
+					) : (
+						<IpcChart />
+					))}
+			</TabPanel>
+			<TabPanel value={tabValue} index={4}>
+				{tabValue === 4 &&
+					(showLoading ? (
+						<SpinLoading className="h-360" />
+					) : isEmpty ? (
+						<EmptyMsg icon="layers" msg="기술분야별 동향" />
+					) : (
+						<RelatedPerson />
+					))}
 			</TabPanel>
 		</div>
 	);

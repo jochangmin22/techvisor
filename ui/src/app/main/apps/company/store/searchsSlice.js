@@ -81,8 +81,8 @@ export const getDisclosureReport = createAsyncThunk(NAME + 'getDisclosureReport'
 	return data;
 });
 
-export const getOwnedPatent = createAsyncThunk(NAME + 'getOwnedPatent', async params => {
-	const response = await axios.post(URL + 'ownedpatent', params);
+export const getOwnedPatent = createAsyncThunk(NAME + 'getOwnedPatent', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'ownedpatent', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -102,8 +102,8 @@ export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async 
 	return data;
 });
 
-export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async (params, subParams) => {
-	const response = await axios.get(URL + 'wordcloud', { params: params, subParams: subParams });
+export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'wordcloud', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -167,15 +167,22 @@ export const initialState = {
 		netIncomeBQStart: '',
 		netIncomeBQEnd: ''
 	},
-	clinicOptions: {
-		category: '연도별', // '국가별', '연도별', '기술별', '기업별'
-		volume: '요약',
-		unit: '구문', // '구문', '워드',
-		output: 50
+	menuOptions: {
+		wordCloudOptions: {
+			volume: '요약',
+			unit: '구문', // '구문', '워드',
+			output: 50
+		},
+		clinicOptions: {
+			category: '연도별',
+			volume: '요약',
+			unit: '구문',
+			output: 50
+		}
 	},
 	searchLoading: null,
 	searchSubmit: null,
-	selectedCode: {
+	selectedCorp: {
 		stockCode: '',
 		corpNo: '',
 		corpName: ''
@@ -191,6 +198,7 @@ export const initialState = {
 	clinicTest: [],
 	disclosureReport: [],
 	ownedPatent: [],
+	wordCloud: [],
 	news: [],
 	newsSA: null,
 	relatedCompany: []
@@ -201,32 +209,45 @@ const searchsSlice = createSlice({
 	initialState: searchsAdapter.getInitialState(initialState),
 	reducers: {
 		setMockData: (state, action) => {
-			const { entities, searchParams, matrix, wordCloud, keywords } = action.payload;
+			const { entities, searchParams, matrix, keywords } = action.payload;
 
 			state.entities = entities;
 			state.searchParams = searchParams;
 			state.matrix = matrix;
-			state.wordCloud = wordCloud;
 			state.keywords = keywords;
 		},
 		clearSearchs: (state, action) => {
-			const { entities, wordCloud, keywords, indicator } = initialState;
+			const { entities, selectedCorp, wordCloud, keywords, indicator } = initialState;
 
 			state.entities = entities;
+			state.selectedCorp = selectedCorp;
 			state.wordCloud = wordCloud;
 			state.keywords = keywords;
 			state.indicator = indicator;
 		},
-		clearSearchText: (state, action) => initialState,
+		// clearSearchText: (state, action) => initialState,
+		clearSearchText: (state, action) => {
+			const { entities, searchParams, selectedCorp, wordCloud, news, newsSA, relatedCompany } = initialState;
 
+			if (initialState.selectedCorp.corpName !== action.payload) {
+				// no need to reset
+				state.news = news;
+				state.newsSA = newsSA;
+				state.relatedCompany = relatedCompany;
+			}
+			state.entities = entities;
+			state.searchParams = searchParams;
+			state.wordCloud = wordCloud;
+			state.selectedCorp = selectedCorp;
+		},
 		setSearchLoading: (state, action) => {
 			state.searchLoading = action.payload;
 		},
-		setSelectedCode: (state, action) => {
-			state.selectedCode = action.payload;
+		setSelectedCorp: (state, action) => {
+			state.selectedCorp = action.payload;
 		},
-		resetSelectedCode: (state, action) => {
-			state.selectedCode = initialState.selectedCode;
+		resetSelectedCorp: (state, action) => {
+			state.selectedCorp = initialState.selectedCorp;
 			state.stock = initialState.stock;
 		},
 		setSearchParams: (state, action) => {
@@ -239,13 +260,13 @@ const searchsSlice = createSlice({
 			state.searchParams.searchVolume = action.payload;
 		},
 		setWordCloudOptions: (state, action) => {
-			state.analysisOptions.wordCloudOptions = action.payload;
+			state.menuOptions.wordCloudOptions = action.payload;
 		},
 		setkeywordsOptions: (state, action) => {
-			state.analysisOptions.keywordsOptions = action.payload;
+			state.menuOptions.keywordsOptions = action.payload;
 		},
 		setMatrixOptions: (state, action) => {
-			state.analysisOptions.matrixOptions = action.payload;
+			state.menuOptions.matrixOptions = action.payload;
 		},
 		setSearchSubmit: (state, action) => {
 			state.searchSubmit = action.payload;
@@ -336,8 +357,8 @@ export const {
 	clearSearchs,
 	clearSearchText,
 	setSearchLoading,
-	setSelectedCode,
-	resetSelectedCode,
+	setSelectedCorp,
+	resetSelectedCorp,
 	setSearchParams,
 	setSearchNum,
 	setSearchVolume,

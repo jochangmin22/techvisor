@@ -6,10 +6,10 @@ import debounce from 'lodash/debounce';
 import echarts from 'echarts';
 import 'echarts/theme/blue';
 import _ from '@lodash';
-import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { ipc } from 'app/main/apps/lib/variables';
 import { useTheme } from '@material-ui/core';
 import IpcPopover from '../IpcPopover';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
 function calculateCnt(arr) {
 	const filterA = 'ipc요약';
@@ -34,7 +34,7 @@ function IpcChart(props) {
 	const chartRef = useRef(null);
 	const [echart, setEchart] = useState(null);
 
-	const entities = useSelector(({ searchApp }) => searchApp.searchs.entities);
+	const entities = useSelector(({ companyApp }) => companyApp.searchs.ownedPatent);
 
 	const [data, setData] = useState(null);
 
@@ -43,7 +43,7 @@ function IpcChart(props) {
 			setData(calculateCnt(entities));
 		}
 		// eslint-disable-next-line
-	}, [props.searchText, entities]);
+	}, [entities]);
 
 	useEffect(() => {
 		drawChart();
@@ -129,8 +129,16 @@ function IpcChart(props) {
 		};
 	}, [handleResize]);
 
-	if (!entities || entities.length === 0) {
-		return <SpinLoading />;
+	if (entities.length === 0) {
+		return (
+			<div className="max-h-320">
+				<EmptyMsg
+					icon="wb_incandescent"
+					msg="분석할 보유 특허가 없습니다."
+					text="선택하신 기업명으로 검색된 보유특허 내역이 없습니다."
+				/>
+			</div>
+		);
 	}
 
 	return (
