@@ -15,8 +15,8 @@ import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
 import {
 	updateCols,
-	resetSelectedCode,
-	setSelectedCode,
+	resetSelectedCorp,
+	setSelectedCorp,
 	setSearchSubmit
 } from 'app/main/apps/company/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
@@ -27,13 +27,11 @@ const columnName = {
 	업종: '200',
 	주요제품: '400',
 	대표자명: '150',
-	// 지역: '100',
 	시가총액: '100',
 	'업종PER(배)': '100',
 	'PER(배)': '100',
 	'PER갭(%)': '100',
 	'PRR(배)': '100',
-	'주당R&D(원)': '100',
 	'PGF(%)': '100',
 	'PBR(배)': '100',
 	'EPS(원)': '100',
@@ -60,7 +58,6 @@ const csvHeaders = [
 	{ key: 'PER(배)', label: 'PER(배)' },
 	{ key: 'PER갭(%)', label: 'PER갭(%)' },
 	{ key: 'PRR(배)', label: 'PRR(배)' },
-	{ key: '주당R&D(원)', label: '주당R&D(원)' },
 	{ key: 'PGF(%)', label: 'PGF(%)' },
 	{ key: 'PBR(배)', label: 'PBR(배)' },
 	{ key: 'EPS(원)', label: 'EPS(원)' },
@@ -81,11 +78,15 @@ const csvHeaders = [
 ];
 
 const columns = Object.entries(columnName).map(([key, value]) => {
-	const bold = key === '회사명' || key === '종목코드' ? 'text-16 font-500' : 'text-14 font-400';
+	const bold = key === '회사명' ? 'text-16 font-500' : 'text-14 font-400';
+	const align =
+		key === '종목코드' || key === '회사명' || key === '업종' || key === '주요제품' || key === '대표자명'
+			? 'text-left'
+			: 'text-right';
 	return {
 		Header: key,
 		accessor: key,
-		className: clsx(bold, 'text-left truncate'),
+		className: clsx(bold, align, 'truncate'),
 		sortable: true,
 		width: value
 	};
@@ -100,13 +101,36 @@ const useStyles = makeStyles(theme => ({
 	root: { backgroundColor: theme.palette.primary.dark }
 }));
 
+function addZeroes(num) {
+	return num === 0 || isNaN(num) ? 0 : Number(num).toFixed(2);
+}
+
 function MainTable() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
 	const cols = useSelector(({ companyApp }) => companyApp.searchs.cols);
 	const [csvData, setCsvData] = useState(entities);
-	const data = useMemo(() => (entities ? entities : []), [entities]);
+	const data = useMemo(
+		() =>
+			entities
+				? entities.map(row => ({
+						...row,
+						'업종PER(배)': addZeroes(row['업종PER(배)']),
+						'PER(배)': addZeroes(row['PER(배)']),
+						'PER갭(%)': addZeroes(row['PER갭(%)']),
+						'PRR(배)': addZeroes(row['PRR(배)']),
+						'PBR(배)': addZeroes(row['PBR(배)']),
+						'ROA(%)': addZeroes(row['ROA(%)']),
+						'영업이익증감(전전)': addZeroes(row['영업이익증감(전전)']),
+						'순이익증감(전전)': addZeroes(row['순이익증감(전전)']),
+						'영업이익증감(직전)': addZeroes(row['영업이익증감(직전)']),
+						'순이익증감(직전)': addZeroes(row['순이익증감(직전)']),
+						현금배당수익률: addZeroes(row['현금배당수익률'])
+				  }))
+				: [],
+		[entities]
+	);
 	useEffect(() => {
 		setRowsCount(entities.length);
 		setCsvData(
@@ -119,8 +143,8 @@ function MainTable() {
 	const [rowsCount, setRowsCount] = useState(null);
 
 	const handleClick = (name, stockCode, corpNo) => {
-		dispatch(resetSelectedCode());
-		dispatch(setSelectedCode({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
+		dispatch(resetSelectedCorp());
+		dispatch(setSelectedCorp({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
 		dispatch(setSearchSubmit(true));
 		// props.onShrink(true);
 	};
@@ -153,16 +177,16 @@ function MainTable() {
 					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-460 px-6">
+			<FuseScrollbars className="max-h-360 px-6">
 				{!data || data.length === 0 ? (
-					<div className="h-460">
-						<SpinLoading />;
-					</div>
+					<SpinLoading className="h-360" />
 				) : (
 					<EnhancedTable
 						columns={columns}
 						data={data}
 						size="small"
+						pageSize={8}
+						pageOptions={[8, 25, 50]}
 						onRowClick={(ev, row) => {
 							if (row) {
 								handleClick(row.original.회사명, row.original.종목코드);
