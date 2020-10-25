@@ -16,7 +16,7 @@ const LandingPageConfig = {
 	routes: [
 		{
 			path: '/pages/landing',
-			component: React.lazy(() => import('./Pages/LandingPage'))
+			component: React.lazy(() => import('./LandingPage'))
 		}
 	]
 };
