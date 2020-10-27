@@ -9,6 +9,7 @@ from . import companies
 from . import related_info
 # from . import company
 from . import finance
+from . import crawler
 # from . import company_info
 
 # companies 
@@ -47,6 +48,9 @@ def get_stock_fair(request):
 
 def get_wordcloud(request):
     return related_info.wordcloud(request)        
+
+def get_stock_search_top(request):
+    return crawler.crawl_stock_search_top()
 
 # company
 # def get_company(request, companyId=""):

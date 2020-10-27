@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setMockData } from './store/searchsSlice';
+import { getSearchs } from './store/searchsSlice';
+// import { setMockData, getSearchs } from './store/searchsSlice';
+// import searchData from 'app/main/apps/lib/mockDataCompanyApp';
 // import { authRoles } from "app/auth";
-import searchData from 'app/main/apps/lib/mockDataCompanyApp';
 import { useForm } from '@fuse/hooks';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
@@ -12,6 +13,7 @@ import StockInfoContainer from './searchs/StockInfo/StockInfoContainer';
 import RelatedInfoContainer from './searchs/RelatedInfo/RelatedInfoContainer';
 import VisualContainer from './searchs/Visual/VisualContainer';
 import Draggable from 'react-draggable';
+import StockSearchTop from './searchs/StockSearchTop';
 
 const useStyles = makeStyles(theme => ({
 	paper: {
@@ -37,7 +39,8 @@ function CompanyContent() {
 		B: 100,
 		C: 100,
 		D: 100,
-		E: 100
+		E: 100,
+		F: 100
 	});
 
 	function handleStart(name) {
@@ -46,8 +49,17 @@ function CompanyContent() {
 	}
 
 	// 개발용 mock data 넣기
+	// useEffect(() => {
+	// 	dispatch(setMockData(searchData));
+	// 	// eslint-disable-next-line
+	// }, []);
+
 	useEffect(() => {
-		dispatch(setMockData(searchData));
+		const params = {
+			params: { searchText: 'all' },
+			subParams: {}
+		};
+		dispatch(getSearchs(params));
 		// eslint-disable-next-line
 	}, []);
 
@@ -112,14 +124,24 @@ function CompanyContent() {
 						<RelatedInfoContainer selectedCorp={selectedCorp} />
 					</div>
 				</Draggable>
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('E')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.E }}>
+						<StockSearchTop />
+					</div>
+				</Draggable>
 				{selectOne && (
 					<Draggable
 						handle=".draggable"
-						onStart={() => handleStart('E')}
+						onStart={() => handleStart('F')}
 						onEnd={() => resetForm()}
 						grid={[25, 25]}
 					>
-						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.E }}>
+						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.F }}>
 							<VisualContainer />
 						</div>
 					</Draggable>

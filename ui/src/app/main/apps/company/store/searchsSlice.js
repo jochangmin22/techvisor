@@ -130,6 +130,13 @@ export const getIndicator = createAsyncThunk(NAME + 'getIndicator', async (param
 	return data;
 });
 
+export const getStockSearchTop = createAsyncThunk(NAME + 'stocksearchtop', async () => {
+	const response = await axios.post(URL + 'stocksearchtop');
+	const data = await response.data;
+
+	return data;
+});
+
 const searchsAdapter = createEntityAdapter({});
 
 export const { selectAll: selectSearchs, selectById: selectSearchById } = searchsAdapter.getSelectors(
@@ -193,6 +200,7 @@ export const initialState = {
 		chartType: 'year',
 		stockInfo: []
 	},
+	stockSearchTop: [],
 	companyInfo: {},
 	financialInfo: {},
 	clinicTest: [],
@@ -348,6 +356,9 @@ const searchsSlice = createSlice({
 		},
 		[getIndicator.fulfilled]: (state, action) => {
 			state.indicator = action.payload;
+		},
+		[getStockSearchTop.fulfilled]: (state, action) => {
+			state.stockSearchTop = action.payload;
 		}
 	}
 });

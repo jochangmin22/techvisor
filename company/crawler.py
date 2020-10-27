@@ -5,6 +5,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from datetime import datetime
 from bs4 import BeautifulSoup
+from django.http import JsonResponse, HttpResponse
 
 # caching with redis
 from django.core.cache import cache
@@ -17,6 +18,8 @@ from .models import disclosure_report
 
 DART = settings.DART
 MFDS = settings.MFDS
+NAVER = settings.NAVER
+
 DATABASES =settings.DATABASES
 
 db_connection_url = "postgresql://{}:{}@{}:{}/{}".format(
@@ -81,7 +84,6 @@ def crawl_disclosure_report(**kwargs):
 
     return json_dict['total_page'], df
 
-
 def update_today_crawl_mdcline():
     today = datetime.today().strftime('%Y%m%d')
     df = crawl_mdcline(today)
@@ -112,3 +114,24 @@ def crawl_mdcline(singleDate):
 
     df = pd.DataFrame(rawdata)            
     return df    
+
+def crawl_stock_search_top():
+    ''' 네이버 금융 > 국내증시 > 검색상위 종목'''
+    df = pd.read_html(NAVER['stock_search_top_url'], match = '종목명', header=0, encoding = 'euc-kr')[0]
+
+    # remove null row
+    df = df.iloc[1:]
+    
+    # convert values to numeric
+    df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']] = df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    df[['PER', 'ROE']] = df[['PER', 'ROE']].fillna("0").astype(float).round(2)
+    df['검색비율'] = df['검색비율'].str.replace('%', '').fillna("0").astype(float).round(2)
+    df['등락률'] = df['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
+
+    #remove null row
+    df = df[df.순위 != 0]
+
+    res = df.to_dict('records')
+
+    return JsonResponse(res, safe=False)
+

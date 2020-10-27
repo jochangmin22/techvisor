@@ -15,6 +15,7 @@ urlpatterns = [
     re_path(r"^api/company-app/searchs/ownedpatent$", csrf_exempt(views.get_owned_patent), name='get_owned_patent'),
     re_path(r"^api/company-app/searchs/stockfair$", csrf_exempt(views.get_stock_fair), name='get_stock_fair'),
     re_path(r"^api/company-app/searchs/wordcloud$", csrf_exempt(views.get_wordcloud), name='get_wordcloud'),
+    re_path(r"^api/company-app/searchs/stocksearchtop$", csrf_exempt(views.get_stock_search_top), name='get_stock_search_top'),
     # re_path(r"^api/company-app/searchs/searchsnum$", get_companies_num, name='get_companies_num'),
     # re_path(r"^api/company-app/searchs/stock$", get_stock, name='get_stock'),
     # re_path(r"^api/company-app/searchs/vec$", get_vec, name='get_vec'),
