@@ -95,16 +95,16 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
             # link_description[response_body['items'][i]['link']] = response_body['items'][i]['description']
             # title_link[response_body['items'][i]['title']] = \
             #     response_body['items'][i]['link']
-       
+        res = sorted(response_body['items'], key=lambda k: k['pubDate'], reverse=True) 
         # redis save {
         new_context = {}
-        new_context['news'] = response_body['items']
+        new_context['news'] = res
         cache.set(mainKey, new_context, CACHE_TTL)
         # redis save }
         if mode == "needJson":
-            return JsonResponse(response_body['items'], safe=False)
+            return JsonResponse(res, safe=False)
         elif mode == "noJson":
-            return response_body['items']
+            return res
         # return title_link
 
     else:
