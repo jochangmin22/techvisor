@@ -6,6 +6,19 @@ from sqlalchemy import create_engine
 from datetime import datetime
 from bs4 import BeautifulSoup
 from django.http import JsonResponse, HttpResponse
+from urllib.request import urlopen
+import uuid
+
+# astype(int) error handle
+import numpy
+from psycopg2.extensions import register_adapter, AsIs
+def addapt_numpy_float64(numpy_float64):
+    return AsIs(numpy_float64)
+def addapt_numpy_int64(numpy_int64):
+    return AsIs(numpy_int64)
+register_adapter(numpy.float64, addapt_numpy_float64)
+register_adapter(numpy.int64, addapt_numpy_int64)
+
 
 # caching with redis
 from django.core.cache import cache
@@ -14,7 +27,8 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-from .models import disclosure_report
+from search.models import listed_corp
+from .models import disclosure_report, stock_quotes
 
 DART = settings.DART
 MFDS = settings.MFDS
@@ -131,7 +145,113 @@ def crawl_stock_search_top():
     #remove null row
     df = df[df.순위 != 0]
 
+    # add stockCode from model
+    df['종목코드'] = [get_stockCode(corpName) for corpName in df['종목명']]
+      
     res = df.to_dict('records')
 
     return JsonResponse(res, safe=False)
 
+def get_stockCode(corpName):
+    listed = listed_corp.objects.filter(회사명=corpName)
+    if listed.exists():
+        rows = list(listed.values())
+        row = rows[0]
+        return row['종목코드']   
+    else:
+        return None      
+
+def crawl_stock(request):
+    ''' 
+    * dataframe 스타일로 rebuild
+    page 1 부터 crawling -> if exist at db ? 
+              yes -> return
+              no -> stock_quotes.objects.create(**newStock)
+    '''
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        stockCode = data["stockCode"]
+
+        # exist ? {
+        try:
+            stockQuotes = stock_quotes.objects.filter(stock_code=stockCode).latest('price_date')
+            maxRecordDate = stockQuotes.price_date if stockQuotes else None
+        except:
+            maxRecordDate = None
+
+        # exist ? }
+
+        # get last page num
+        url = NAVER['stock_sese_day_url'] + stockCode
+        html = urlopen(url) 
+        source = BeautifulSoup(html.read(), "html.parser")
+        
+        maxPage=source.find_all("table",align="center")
+        mp = maxPage[0].find_all("td",class_="pgRR")
+        if mp:
+            mpNum = int(mp[0].a.get('href').split('page=')[1])
+        else:
+            mpNum = 1    
+        
+
+        isCrawlBreak = None                                                    
+        for page in range(1, mpNum+1):
+            if isCrawlBreak:
+                break
+
+            df = pd.read_html(NAVER['stock_sese_day_url'] + stockCode +'&page='+ str(page), match = '날짜', header=0, encoding = 'euc-kr')[0]
+
+            # remove null row
+            df = df.iloc[1:]
+
+            # remove column not in used
+            del df['전일비']
+
+            # convert values to numeric or date
+            df[['종가','시가', '고가', '저가','거래량']] = df[['종가','시가', '고가', '저가','거래량']].fillna("0").astype(int)
+            df[['날짜']] = df[['날짜']].astype('datetime64[ns]')
+
+            #remove all NaT values
+            df = df[df.날짜.notnull()]
+
+            maxDate = df.iloc[0]['날짜'] # first
+            minDate = df.iloc[-1]['날짜'] # last
+
+            maxRecordDate = datetime.combine(maxRecordDate, datetime.min.time()) if maxRecordDate else None
+
+            if maxRecordDate and maxRecordDate.date() > maxDate.date(): 
+                isCrawlBreak = True 
+            else:
+                # delete date column not included in tolist
+                datelist = df['날짜'].tolist() 
+                del df['날짜']
+
+                # Change the order of df columns according to the recordset 종,시,고,저,거래량 => 시,종,저,고,거래량
+                columnsTitles = ['시가','종가','저가','고가','거래량']
+                df = df.reindex(columns=columnsTitles)
+
+                for (index, price_date) in enumerate(datelist):
+                    newStock = {
+                        'stock_code': stockCode,
+                        'price_date': price_date,
+                        'stock': df.iloc[index].tolist(),
+                        'volume' : df.iloc[index]['거래량']
+                    }
+
+                    if maxRecordDate and maxRecordDate.date() > minDate.date():
+                        # print ("current page content is in db partially")
+                        if maxRecordDate and maxRecordDate.date() == price_date.date():
+                            # print("match today")
+                            stock_quotes.objects.filter(stock_code=stockCode, price_date=price_date).update(**newStock)
+                        elif maxRecordDate and maxRecordDate.date() < price_date.date():
+                            # print("db date is lower then price_date")    
+                            stock_quotes.objects.create(**newStock)
+                    else:
+                        # print("db date is older then the page")
+                        stock_quotes.objects.create(**newStock)
+
+
+            # True after waiting the today's stock was updated; skip next page crawl
+            if maxRecordDate and maxRecordDate.date() == maxDate.date():
+                isCrawlBreak = True                      
+    return

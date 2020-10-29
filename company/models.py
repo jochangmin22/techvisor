@@ -17,10 +17,11 @@ class stock_quotes(models.Model):
     volume = models.IntegerField()
     # volume = models.CharField(max_length=255)
     # created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = '"stock_quotes"'
+        indexes = [models.Index(fields=['stock_code', 'price_date'])]
 
 class financial_statements(models.Model):
     objects = models.Manager()

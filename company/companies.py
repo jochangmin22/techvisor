@@ -27,7 +27,7 @@ from copy import deepcopy
 import json
 
 from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc, like_parse, str2int, str2round
-
+from .crawler import crawl_stock
 from .models import nice_corp, stock_quotes, mdcin_clinc_test_info, financial_statements
 from search.models import listed_corp, disclosure
 
@@ -858,104 +858,23 @@ def stock_fair_value(main, etc, employee, listing_date, research):
         r['주당R&D(원)'] = int(r['주당R&D(원)'])        
     except:
         r['주당R&D(원)'] = 0
+    finally:
+        if not r['주당R&D(원)']:
+            r['주당R&D(원)'] = 0
 
     # 가격성장흐름(PGF)
     try: 
         r['PGF(%)'] = (r['주당R&D(원)'] + r['EPS(원)'] ) / r['현재가'] * 100
         r['PGF(%)'] = int(r['PGF(%)'])        
     except:
-        r['PGF(%)'] = 0         
+        r['PGF(%)'] = 0
+    finally:
+        if not r['PGF(%)']:
+            r['PGF(%)'] = 0                
 
     return r
 
-def crawl_stock(request):
-    ''' 
-    page 1 부터 crawling -> if exist at db ? 
-              yes -> return
-              no -> stock_quotes.objects.create(**newStock)
-    '''
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        stockCode = data["stockCode"]
-
-        # exist ? {
-        try:
-            stockQuotes = stock_quotes.objects.filter(stock_code=stockCode).latest('price_date')
-            lastRecordDate = stockQuotes.price_date if stockQuotes else None
-        except:
-            lastRecordDate = None
-
-        # exist ? }
-
-        naver_url = 'http://finance.naver.com/item/sise_day.nhn?code='
-        url = naver_url + stockCode
-        html = urlopen(url) 
-        source = BeautifulSoup(html.read(), "html.parser")
-        
-        maxPage=source.find_all("table",align="center")
-        mp = maxPage[0].find_all("td",class_="pgRR")
-        if mp:
-            # mpNum = int(mp[0].a.get('href')[-3:])
-            mpNum = int(mp[0].a.get('href').split('page=')[1])
-        else:
-            mpNum = 1    
-        
-
-        isCrawlBreak = None                                                    
-        for page in range(1, mpNum+1):
-            if isCrawlBreak:
-                break
-            # print (str(page) )
-            url = naver_url + stockCode +'&page='+ str(page)
-            html = urlopen(url)
-            source = BeautifulSoup(html.read(), "html.parser")
-            srlists=source.find_all("tr")
-            isCheckNone = None
-
-            # if((page % 1) == 0):
-            #     time.sleep(1.50)
-
-            # data : open, close, lowest, highest, volume
-            # naver : 종가, 전일비, 시가, 고가, 저가, 거래량
-            # ResultSet order : 2,0,4,3,5 
-            for i in range(1,len(srlists)-1):
-                if(srlists[i].span != isCheckNone):
-
-                    newDate = srlists[i].find_all("td",align="center")[0].text
-                    newDate = newDate.replace('.','-')
-                    newDate_obj = datetime.strptime(newDate, '%Y-%m-%d')
-                    lastRecordDate_obj = datetime.combine(lastRecordDate, datetime.min.time()) if lastRecordDate else ''
-
-                    if not lastRecordDate or (lastRecordDate and lastRecordDate_obj.date() <= newDate_obj.date()):
-                        first = srlists[i].find_all("td",class_="num")[2].text
-                        second = srlists[i].find_all("td",class_="num")[0].text
-                        third = srlists[i].find_all("td",class_="num")[4].text
-                        fourth = srlists[i].find_all("td",class_="num")[3].text
-                        fifth = srlists[i].find_all("td",class_="num")[5].text
-
-                        first = int(first.replace(',',''))
-                        second = int(second.replace(',',''))
-                        third = int(third.replace(',',''))
-                        fourth = int(fourth.replace(',',''))
-                        fifth = int(fifth.replace(',',''))
-                        
-                        newStock = {
-                            'stock_code': stockCode,
-                            'price_date': newDate,
-                            'stock': [first, second, third, fourth, fifth],
-                            'volume' : fifth
-                        }
-                        isMatchToday = True if lastRecordDate and lastRecordDate_obj.date() == newDate_obj.date() else False
-
-                        if not isMatchToday:
-                            stock_quotes.objects.create(**newStock)
-                        else:                            
-                            stock_quotes.objects.filter(stock_code=stockCode, price_date=newDate).update(**newStock)
-                        # stock_quotes.objects.update_or_create(**newStock)
-                    else:
-                        isCrawlBreak = True    
-    return    
-    
+  
 def clinic_test(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
