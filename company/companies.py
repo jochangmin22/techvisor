@@ -178,6 +178,7 @@ def parse_companies(request, mode="begin"): # mode : begin, nlp, query
 
             if whereAll.endswith(" or "):
                 whereAll = whereAll[:-4]            
+            whereAll += ')'            
         # 키워드 검색
         else:
             if (params["searchText"] == 'all'):
@@ -324,8 +325,8 @@ def parse_stock(request):
                 kwargs['months'] = -1
             elif chartType == "year":
                 kwargs['years'] = -1
-            elif chartType == "all":
-                kwargs['years'] = -10
+            # elif chartType == "all":
+            #     kwargs['years'] = -10
 
             temp = datetime.now() + relativedelta(**kwargs)
             range_from = temp.strftime('%Y-%m-%d')
@@ -341,7 +342,7 @@ def parse_stock(request):
             myStock = list(stockQuotes.values_list('stock', flat=True).order_by('price_date'))
             myVolume = list(stockQuotes.values_list('volume', flat=True).order_by('price_date'))
 
-            response = { 'dates': myDate, 'data': myStock, 'volumes': myVolume}          
+            response = { 'dates': myDate, 'data': myStock, 'volumes': myVolume}
             return JsonResponse(response,status=200, safe=False)
         except:
             return HttpResponse() # 500    
