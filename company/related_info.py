@@ -62,9 +62,10 @@ def get_disclosure_report(request):
             if not isExist:
                 return JsonResponse([], safe=False)
 
-            rows = disclosure_report.objects.filter(종목명__contains=corpName).order_by('-접수일자').values()
+            rows = disclosure_report.objects.filter(종목명__contains=corpName).order_by('-접수번호').values()
         else:
-            rows = disclosure_report.objects.all().order_by('-접수일자')[:100].values()            
+            # rows = disclosure_report.objects.all().order_by('-접수일자')[:100].values()            
+            rows = disclosure_report.objects.exclude(종목코드__exact='').order_by('-접수번호')[:100].values()            
 
         rows = list(rows)
         res = [dict(row, **{
