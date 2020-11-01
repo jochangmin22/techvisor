@@ -460,14 +460,19 @@ def stock_fair_value(main, etc, employee, listing_date, research):
         r['주당R&D(원)'] = int(r['주당R&D(원)'])        
     except:
         r['주당R&D(원)'] = 0
+    finally:
+        if not r['주당R&D(원)']:
+            r['주당R&D(원)'] = 0
 
     # 가격성장흐름(PGF)
     try: 
         r['PGF(%)'] = (r['주당R&D(원)'] + r['EPS(원)'] ) / r['현재가'] * 100
         r['PGF(%)'] = int(r['PGF(%)'])        
     except:
-        r['PGF(%)'] = 0  
-
+        r['PGF(%)'] = 0
+    finally:
+        if not r['PGF(%)']:
+            r['PGF(%)'] = 0             
 
     return r
 
