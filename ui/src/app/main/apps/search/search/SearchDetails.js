@@ -48,16 +48,16 @@ const useStyles = makeStyles(theme => ({
 const TurnOffHightlight = true;
 
 function SearchDetails(props) {
-	const classes = useStyles();
 	const dispatch = useDispatch();
+	const classes = useStyles();
 	const theme = useTheme();
 	const search = useSelector(({ searchApp }) => searchApp.search.search);
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
 	const { searchText } = searchParams;
 	const terms = [].concat(...searchParams.terms.flatMap(x => x.toString().split(' ').join(',').split(',')));
 	const appNo = String(props.match.params.appNo).replace(/-/gi, '');
-	const rgNo = search && search.등록번호 !== null && search.등록번호 !== undefined ? search.등록번호 : null;
-	// const cusNo = search && search.출원인코드1 !== null && search.출원인코드1 !== undefined ? search.출원인코드1 : null;
+	const rgNo = search && search.등록번호 ? search.등록번호 : null;
+	const applicant = search && search['출원인1'] ? search['출원인1'] : null;
 	const pageLayout = useRef(null);
 	const [tabValue, setTabValue] = useState(0);
 
@@ -71,16 +71,6 @@ function SearchDetails(props) {
 		dispatch(getSimilar(params));
 		dispatch(getIpcCpc(params));
 		dispatch(getRnd(params));
-		// if (cusNo) {
-		// 	const params = { cusNo: cusNo };
-		// 	dispatch(getApplicant(params));
-		// 	dispatch(getApplicantTrend(params));
-		// }
-		// if (rgNo) {
-		// 	const params = { rgNo: rgNo };
-		// 	dispatch(getRegisterFee(params));
-		// 	dispatch(getRightHolder(params));
-		// }
 		// eslint-disable-next-line
 	}, [dispatch, props.match.params]);
 
@@ -210,7 +200,7 @@ function SearchDetails(props) {
 						{tabValue === 3 && <ApplicantContainer search={search} />}
 						{tabValue === 4 && <SimilarContainer appNo={appNo} />}
 						{tabValue === 5 && <GradeContainer rgNo={rgNo} />}
-						{tabValue === 6 && <AssociateCompany search={search} />}
+						{tabValue === 6 && <AssociateCompany applicant={applicant} />}
 					</div>
 				)
 			}

@@ -33,4 +33,5 @@ urlpatterns = [
     re_path(r"^api/search-app/search/applicanttrend$", csrf_exempt(views.get_search_applicant_trend), name='get_search_applicant_trend'),
     re_path(r"^api/search-app/search/applicantipc$", csrf_exempt(views.get_search_applicant_ipc), name='get_search_applicant_ipc'),
     re_path(r"^api/search-app/search/similar$", csrf_exempt(views.get_search_similar), name='get_search_similar'),         
+    re_path(r"^api/search-app/search/associatecorp$", csrf_exempt(views.get_associate_corp), name='get_associate_corp'),         
 ]

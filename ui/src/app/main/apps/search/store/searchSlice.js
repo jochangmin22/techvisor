@@ -121,6 +121,13 @@ export const getSimilar = createAsyncThunk(NAME + 'getSimilar', async params => 
 	return data;
 });
 
+export const getAssociateCorp = createAsyncThunk(NAME + 'getAssociateCorp', async params => {
+	const response = await axios.post(URL + 'associatecorp', params);
+	const data = await response.data;
+
+	return data;
+});
+
 const searchAdapter = createEntityAdapter({});
 
 const initialState = {
@@ -139,7 +146,9 @@ const initialState = {
 	similar: {
 		entities: [],
 		modelType: 'doc2vec' // ['doc2vec', 'cosine similarity'],
-	}
+	},
+	associateCorp: [],
+	cols: ['1', '2', '3', '4', '5', '6', '7', '8']
 };
 
 const searchSlice = createSlice({
@@ -196,6 +205,9 @@ const searchSlice = createSlice({
 				...state.similar,
 				entities: action.payload
 			};
+		},
+		[getAssociateCorp.fulfilled]: (state, action) => {
+			state.associateCorp = action.payload;
 		}
 	}
 });
