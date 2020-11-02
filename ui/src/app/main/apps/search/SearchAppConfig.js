@@ -16,6 +16,10 @@ const SearchAppConfig = {
 		{
 			path: '/apps/search/:appNo',
 			component: React.lazy(() => import('./search/SearchDetails'))
+		},
+		{
+			path: '/apps/searchPage/:appNo',
+			component: React.lazy(() => import('./search/SearchPageLayout'))
 		}
 	]
 };
