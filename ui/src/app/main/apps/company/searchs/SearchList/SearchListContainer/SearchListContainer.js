@@ -15,14 +15,14 @@ function SearchListContainer(props) {
 	const WhatMsgToShow = useCallback(() => {
 		if (status === 'noResults') {
 			return (
-				<Paper className="rounded-8 shadow h-224 w-full">
-					<NoResultMsg />
+				<Paper className="rounded-8 shadow h-full w-full">
+					<NoResultMsg className="h-360" />
 				</Paper>
 			);
 		} else if (status === 'notStarted') {
 			return (
-				<Paper className="rounded-8 shadow h-auto w-full">
-					<EmptyMsg icon="chat" msg="검색결과" />
+				<Paper className="rounded-8 shadow h-full w-full">
+					<EmptyMsg icon="chat" msg="검색결과" className="h-360" />
 				</Paper>
 			);
 		} else {

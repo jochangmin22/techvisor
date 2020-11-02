@@ -3,8 +3,9 @@ import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CSVLink } from 'react-csv';
 import { withRouter } from 'react-router-dom';
-import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';
+import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithFilter';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
+import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
@@ -13,13 +14,10 @@ import clsx from 'clsx';
 import DownloadFilterMenu from '../DownloadFilterMenu';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
-import {
-	updateCols,
-	resetSelectedCorp,
-	setSelectedCorp,
-	setSearchSubmit
-} from 'app/main/apps/company/store/searchsSlice';
+import { updateCols, resetSelectedCorp, setSelectedCorp } from 'app/main/apps/company/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import { DefaultColumnFilter, NumberRangeColumnFilter } from 'app/main/apps/lib/EnhancedFilters';
+import NoResultMsg from 'app/main/apps/lib/NoResultMsg';
 
 const columnName = {
 	종목코드: '110',
@@ -77,18 +75,53 @@ const csvHeaders = [
 	{ key: '적(5)당기순이익*PER', label: '적정가(5)' }
 ];
 
+const colorizeColumns = [
+	'PGF(%)',
+	'EPS(원)',
+	'ROE(%)',
+	'ROA(%)',
+	'영업이익증감(전전)',
+	'순이익증감(전전)',
+	'영업이익증감(직전)',
+	'순이익증감(직전)'
+];
+
 const columns = Object.entries(columnName).map(([key, value]) => {
 	const bold = key === '회사명' ? 'text-16 font-500' : 'text-14 font-400';
 	const align =
 		key === '종목코드' || key === '회사명' || key === '업종' || key === '주요제품' || key === '대표자명'
 			? 'text-left'
 			: 'text-right';
+	const textFilters = ['종목코드', '회사명', '업종', '주요제품', '대표자명'].includes(key);
+
 	return {
 		Header: key,
 		accessor: key,
 		className: clsx(bold, align, 'truncate'),
 		sortable: true,
-		width: value
+		width: value,
+		// defaultCanFilter: false,
+		// disableFilters: disableFilters,
+		Filter: textFilters ? DefaultColumnFilter : NumberRangeColumnFilter,
+		filter: textFilters ? 'text' : 'between',
+		Cell: ({ cell }) => {
+			return (
+				<div>
+					<span
+						className={clsx(
+							colorizeColumns.includes(cell.column.id) && cell.value < 0
+								? 'text-blue'
+								: colorizeColumns.includes(cell.column.id) && cell.value > 0
+								? 'text-red'
+								: 'text-black'
+						)}
+						title={cell.value}
+					>
+						{cell.value}
+					</span>
+				</div>
+			);
+		}
 	};
 });
 const colsList = Object.keys(columnName).map((key, index) => ({
@@ -98,7 +131,10 @@ const colsList = Object.keys(columnName).map((key, index) => ({
 }));
 
 const useStyles = makeStyles(theme => ({
-	root: { backgroundColor: theme.palette.primary.dark }
+	root: { backgroundColor: theme.palette.primary.dark },
+	backdrop: {
+		zIndex: theme.zIndex.drawer + 1
+	}
 }));
 
 function addZeroes(num) {
@@ -109,7 +145,10 @@ function MainTable() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
+	const searchText = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchText);
+	const searchLoading = useSelector(({ companyApp }) => companyApp.searchs.searchLoading);
 	const cols = useSelector(({ companyApp }) => companyApp.searchs.cols);
+
 	const [csvData, setCsvData] = useState(entities);
 	const data = useMemo(
 		() =>
@@ -140,22 +179,31 @@ function MainTable() {
 			}))
 		);
 	}, [entities]);
+
+	useEffect(() => {}, [searchLoading]);
+
 	const [rowsCount, setRowsCount] = useState(null);
 
 	const handleClick = (name, stockCode, corpNo) => {
 		dispatch(resetSelectedCorp());
 		dispatch(setSelectedCorp({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
-		dispatch(setSearchSubmit(true));
-		// props.onShrink(true);
 	};
 
 	const handleOnChange = useDebounce(cols => {
 		dispatch(updateCols(cols));
 	}, 300);
 
+	if (!!(searchText && !searchLoading && entities && entities.length === 0)) {
+		return (
+			<Paper className="rounded-8 shadow h-full w-full">
+				<NoResultMsg className="h-360" />
+			</Paper>
+		);
+	}
+
 	return (
-		<div className="w-full h-full">
-			<div className="p-12 flex items-center justify-between">
+		<Paper className="rounded-8 shadow h-full w-full">
+			<div className="p-12 pb-0 flex items-center justify-between">
 				<div className="px-12 flex flex-row items-center justify-end mb-8">
 					<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4 mr-8')}>
 						검색 결과 {Number(rowsCount).toLocaleString()} 건
@@ -166,7 +214,6 @@ function MainTable() {
 					<Button
 						variant="outlined"
 						color="default"
-						// onClick={onBtExport}
 						className="shadow-none px-16"
 						startIcon={<SaveAltIcon />}
 					>
@@ -177,25 +224,24 @@ function MainTable() {
 					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-360 px-6">
-				{!data || data.length === 0 ? (
-					<SpinLoading className="h-360" />
-				) : (
-					<EnhancedTable
-						columns={columns}
-						data={data}
-						size="small"
-						pageSize={8}
-						pageOptions={[8, 25, 50]}
-						onRowClick={(ev, row) => {
-							if (row) {
-								handleClick(row.original.회사명, row.original.종목코드);
-							}
-						}}
-					/>
-				)}
+			<FuseScrollbars className="max-h-384 px-6">
+				<EnhancedTable
+					columns={columns}
+					data={data}
+					size="small"
+					pageSize={7}
+					pageOptions={[7, 20, 50]}
+					onRowClick={(ev, row) => {
+						if (row) {
+							handleClick(row.original.회사명, row.original.종목코드);
+						}
+					}}
+				/>
 			</FuseScrollbars>
-		</div>
+			<SpinLoading
+				className={clsx(searchLoading ? 'visible' : 'hidden', classes.backdrop, 'absolute h-360 inset-0')}
+			/>
+		</Paper>
 	);
 }
 

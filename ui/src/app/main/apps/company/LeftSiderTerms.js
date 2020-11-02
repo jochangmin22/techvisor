@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm, useUpdateEffect } from '@fuse/hooks';
-import InputAdornment from '@material-ui/core/InputAdornment';
+// import InputAdornment from '@material-ui/core/InputAdornment';
 import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
+// import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
-import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
+// import IconButton from '@material-ui/core/IconButton';
+// import Icon from '@material-ui/core/Icon';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import ChipInput from 'material-ui-chip-input';
 import { makeStyles } from '@material-ui/core/styles';
@@ -54,19 +54,19 @@ const tempObj = {
 	업종: 'bizDomain',
 	주요제품: 'mainProduct'
 };
-const tempDoubleObj = {
-	시가총액: 'marketCap',
-	'PER(%)': 'per',
-	'PBR(배)': 'pbr',
-	'EPS(원)': 'eps',
-	'ROE(%)': 'roe',
-	'ROA(%)': 'roa',
-	'현재가(원)': 'nowPrice',
-	'영업이익(전전분기)': 'operatingProfitTBQ',
-	'당기순이익증감(전전분기)': 'netIncomeTBQ',
-	'영업이익(전분기)': 'operatingProfitBQ',
-	'당기순이익증감(전분기)': 'netIncomeBQ'
-};
+// const tempDoubleObj = {
+// 	시가총액: 'marketCap',
+// 	'PER(%)': 'per',
+// 	'PBR(배)': 'pbr',
+// 	'EPS(원)': 'eps',
+// 	'ROE(%)': 'roe',
+// 	'ROA(%)': 'roa',
+// 	'현재가(원)': 'nowPrice',
+// 	'영업이익(전전분기)': 'operatingProfitTBQ',
+// 	'당기순이익증감(전전분기)': 'netIncomeTBQ',
+// 	'영업이익(전분기)': 'operatingProfitBQ',
+// 	'당기순이익증감(전분기)': 'netIncomeBQ'
+// };
 
 const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	const dispatch = useDispatch();
@@ -206,16 +206,16 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		};
 	});
 
-	function handleDoubleChange(ev) {
-		const { value, name } = ev.target;
-		setDoubleState({ ...doubleState, [name]: value });
-		if (/^\d+$/.test(value) || value.length === 0) {
-			if (form[name] !== value) {
-				setForm(_.set({ ...form }, name, value));
-			}
-		}
-		setSubmitted(true);
-	}
+	// function handleDoubleChange(ev) {
+	// 	const { value, name } = ev.target;
+	// 	setDoubleState({ ...doubleState, [name]: value });
+	// 	if (/^\d+$/.test(value) || value.length === 0) {
+	// 		if (form[name] !== value) {
+	// 			setForm(_.set({ ...form }, name, value));
+	// 		}
+	// 	}
+	// 	setSubmitted(true);
+	// }
 
 	function handleAddChip(value, key, name) {
 		let array = [...form[name]];
@@ -280,30 +280,30 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 		setSubmitted(false);
 	}
 
-	function handleReset(name) {
-		setDoubleState({ ...doubleState, [name]: '', [`${name}Reset`]: `${name}Reset` + 1 });
-		setForm(_.set({ ...form }, name, ''));
-	}
+	// function handleReset(name) {
+	// 	setDoubleState({ ...doubleState, [name]: '', [`${name}Reset`]: `${name}Reset` + 1 });
+	// 	setForm(_.set({ ...form }, name, ''));
+	// }
 
-	function clearIconAdornment(name) {
-		return form[name]
-			? {
-					classes: {
-						root: 'p-0',
-						input: 'pl-14 pr-0'
-					},
-					endAdornment: (
-						<InputAdornment position="end">
-							<IconButton onClick={() => handleReset(name)} size="small">
-								<Icon className="text-20" color="action">
-									clear
-								</Icon>
-							</IconButton>
-						</InputAdornment>
-					)
-			  }
-			: {};
-	}
+	// function clearIconAdornment(name) {
+	// 	return form[name]
+	// 		? {
+	// 				classes: {
+	// 					root: 'p-0',
+	// 					input: 'pl-14 pr-0'
+	// 				},
+	// 				endAdornment: (
+	// 					<InputAdornment position="end">
+	// 						<IconButton onClick={() => handleReset(name)} size="small">
+	// 							<Icon className="text-20" color="action">
+	// 								clear
+	// 							</Icon>
+	// 						</IconButton>
+	// 					</InputAdornment>
+	// 				)
+	// 		  }
+	// 		: {};
+	// }
 
 	return (
 		<FuseScrollbars className="flex flex-auto flex-col min-h-2xl">
@@ -354,7 +354,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 						</FormControl>
 					</div>
 				))}
-				{Object.entries(tempDoubleObj).map(([key, value]) => (
+				{/* {Object.entries(tempDoubleObj).map(([key, value]) => (
 					<div key={value}>
 						<Typography variant="subtitle1" className="mt-8">
 							{key}
@@ -392,7 +392,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 							/>
 						</FormControl>
 					</div>
-				))}
+				))} */}
 			</div>
 		</FuseScrollbars>
 	);
