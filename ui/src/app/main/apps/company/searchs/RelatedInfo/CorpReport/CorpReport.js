@@ -45,8 +45,7 @@ function CorpReport() {
 	const classes = useStyles();
 	const disclosureReport = useSelector(({ companyApp }) => companyApp.searchs.disclosureReport);
 	// const clinicOptions = useSelector(({ companyApp }) => companyApp.searchs.clinicOptions);
-	const companyInfo = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
-	const { 회사명: corpName } = companyInfo;
+	const corpName = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp.corpName);
 
 	const data = useMemo(() => (disclosureReport ? disclosureReport : []), [disclosureReport]);
 
@@ -83,19 +82,16 @@ function CorpReport() {
 				</Typography>
 			</div>
 			{isEmpty ? (
-				<div className="max-h-320">
-					<EmptyMsg
-						icon="camera"
-						msg="전자공시"
-						text="선택하신 기업명으로 검색된 전자공시 내역이 없습니다."
-					/>
-				</div>
+				<EmptyMsg
+					icon="camera"
+					msg="전자공시"
+					text="선택하신 기업명으로 검색된 전자공시 내역이 없습니다."
+					className="h-320"
+				/>
 			) : (
 				<FuseScrollbars className="max-h-360 px-6">
 					{showLoading ? (
-						<div className="h-360">
-							<SpinLoading />
-						</div>
+						<SpinLoading className="h-360" />
 					) : (
 						<EnhancedTable
 							columns={columns}

@@ -221,7 +221,7 @@ function MatrixAnalysis() {
 						</div>
 					</FuseScrollbars>
 					{showLoading ? (
-						<SpinLoading />
+						<SpinLoading className="h-360" />
 					) : (
 						<>
 							<FuseScrollbars className="max-h-360 px-6">

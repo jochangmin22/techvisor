@@ -9,6 +9,10 @@ from collections import Counter
 from .similarity import similarity
 
 import requests
+import json
+
+from django.db.models import Q
+from .models import listed_corp
 
 # caching with redis
 from django.core.cache import cache
@@ -31,7 +35,7 @@ KIPRIS = settings.KIPRIS
 
 def parse_search(request):
     """ searchDetails용 검색 """
-    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
+    appNo = request.GET.get('appNo', '')
     appNo = appNo.replace("-", "")
 
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
@@ -49,7 +53,7 @@ def parse_search(request):
             # TO_CHAR(출원번호,'99-9999-9999999')
             # TO_CHAR(등록번호,'99-9999999-9999')
         cursor.execute(
-            "SELECT A.*, B.발명자1, B.발명자2, B.발명자3, B.발명자4, B.발명자5, B.발명자6, B.발명자7, B.발명자8, B.발명자9, B.발명자10, C.코드1, C.코드2, C.코드3, C.코드4, C.코드5, C.코드6, C.코드7, C.코드8, C.코드9, C.코드10, D.명세서, E.존속기간만료일자, E.소멸일자 FROM (SELECT 등록사항, \"발명의명칭(국문)\" as 명칭, 출원번호 as 출원번호원본, 출원번호, to_char(to_date(출원일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 출원일자, 공개번호, to_char(to_date(공개일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 공개일자, 공고번호, to_char(to_date(공고일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 공고일자, 등록번호, to_char(to_date(등록일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 등록일자, ipc코드, 출원인1, 출원인2, 출원인3, 출원인코드1, 출원인주소1, 출원인국가코드1,  청구항수, 초록, 청구항, concat(명칭token, ' ', 요약token, ' ', 대표항token) 전문소token FROM 공개공보 "
+            "SELECT A.*, B.발명자1, B.발명자2, B.발명자3, B.발명자4, B.발명자5, B.발명자6, B.발명자7, B.발명자8, B.발명자9, B.발명자10, C.코드1, C.코드2, C.코드3, C.코드4, C.코드5, C.코드6, C.코드7, C.코드8, C.코드9, C.코드10, D.명세서, E.존속기간만료일자, E.소멸일자 FROM (SELECT 등록사항, \"발명의명칭(국문)\" as 명칭, \"발명의명칭(영문)\" as 영문명칭, 출원번호 as 출원번호원본, 출원번호, to_char(to_date(출원일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 출원일자, 공개번호, to_char(to_date(공개일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 공개일자, 공고번호, to_char(to_date(공고일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 공고일자, 등록번호, to_char(to_date(등록일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 등록일자, ipc코드, 출원인1, 출원인2, 출원인3, 출원인코드1, 출원인주소1, 출원인국가코드1,  청구항수, 초록, 청구항, concat(명칭token, ' ', 요약token, ' ', 대표항token) 전문소token FROM 공개공보 "
             + whereAppNo
             + ") A LEFT JOIN "
             + " (select * from crosstab('SELECT 출원번호, \"RN2\", 성명 FROM 공개인명정보 "
@@ -585,6 +589,21 @@ def parse_search_similar(request):
     # Redis }
 
     return HttpResponse(res, content_type="application/json")
+
+def associate_corp(request):
+    ''' Search for a company name that matches the applicant and representative or company name '''
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        applicant = data['applicant']
+        if applicant:
+            isExist = listed_corp.objects.filter(Q(회사명__contains=applicant) | Q(대표자명__contains=applicant)).exists()
+            if not isExist:
+                return JsonResponse([], safe=False)
+            
+            row = listed_corp.objects.filter(Q(회사명__contains=applicant)| Q(대표자명__contains=applicant)).values()
+            row = list(row)
+
+    return JsonResponse(row, safe=False)
 
 def handleRedis(redisKey, keys, data="", mode="r"):
     """ read or write to redis """

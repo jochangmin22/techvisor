@@ -9,15 +9,24 @@ import debounce from 'lodash/debounce';
 import clsx from 'clsx';
 import FuseAnimate from '@fuse/core/FuseAnimate';
 
+const addStyleEntities = myArray => {
+	// add opacity for a [0,x,0,0] value
+	let res = [];
+	myArray.map((p, index) => {
+		return (res[index] = p[0] === 0 ? { value: p, itemStyle: { opacity: 0.01 } } : p);
+	});
+	return res;
+};
+
 function calculateMA(dayCount, data) {
-	var result = [];
-	for (var i = 0, len = data.length; i < len; i++) {
+	let result = [];
+	for (let i = 0, len = data.length; i < len; i++) {
 		if (i < dayCount) {
 			result.push('-');
 			continue;
 		}
-		var sum = 0;
-		for (var j = 0; j < dayCount; j++) {
+		let sum = 0;
+		for (let j = 0; j < dayCount; j++) {
 			sum += data[i - j][1];
 		}
 		result.push((sum / dayCount).toFixed(0));
@@ -270,7 +279,7 @@ function StockChart() {
 				{
 					type: 'candlestick',
 					name: '가치변화',
-					data: entities.data,
+					data: addStyleEntities(entities.data),
 					itemStyle: {
 						normal: {
 							opacity: 1.0,

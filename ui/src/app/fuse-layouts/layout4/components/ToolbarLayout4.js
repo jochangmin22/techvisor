@@ -41,16 +41,15 @@ function ToolbarLayout4(props) {
 						</Hidden>
 					)}
 
-					<div className="flex flex-1">
-						{/* <Hidden mdDown>
+					<div className="flex flex-1">{/* <Hidden mdDown>
 							<FuseShortcuts />
-						</Hidden> */}
-					</div>
+						</Hidden> */}</div>
 
 					<div className="flex items-center px-16">
 						<UserMenu />
 
 						<FullScreenToggle />
+						<Button className="font-300">서비스안내</Button>
 						<Button className="font-300">고객센터</Button>
 					</div>
 

@@ -17,6 +17,7 @@
 		"axios": "0.20.0",
 		"axios-mock-adapter": "1.18.2",
 		"chart.js": "2.9.4",
+		"classnames": "^2.2.6",
 		"clsx": "1.1.1",
 		"cross-fetch": "3.0.6",
 		"date-fns": "2.16.1",
@@ -28,6 +29,7 @@
 		"handsontable": "^8.1.0",
 		"history": "4.10.1",
 		"i18next": "19.7.0",
+		"include-media": "^1.4.9",
 		"isomorphic-fetch": "2.2.1",
 		"jsonwebtoken": "8.5.1",
 		"jss": "10.4.0",
@@ -42,7 +44,9 @@
 		"material-ui-popup-state": "1.7.0",
 		"mobile-detect": "1.4.4",
 		"moment": "2.29.1",
+		"node-sass": "4.14.0",
 		"notistack": "0.9.17",
+		"open-color": "^1.7.0",
 		"path-to-regexp": "3.2.0",
 		"perfect-scrollbar": "1.5.0",
 		"prismjs": "1.22.0",
@@ -62,6 +66,7 @@
 		"react-draggable": "4.4.3",
 		"react-frame-component": "4.1.3",
 		"react-google-login": "^5.1.22",
+		"react-helmet": "^6.1.0",
 		"react-highlight-selection": "^1.0.2",
 		"react-highlight-words": "^0.16.0",
 		"react-i18next": "11.7.3",
@@ -80,14 +85,14 @@
 		"react-spring": "8.0.27",
 		"react-swipeable-views": "0.13.9",
 		"react-swipeable-views-utils": "0.14.0-alpha.0",
-		"react-table": "7.6.0",
+		"react-table": "7.6.1",
 		"react-text-mask": "5.4.3",
 		"react-virtualized": "9.22.2",
-		"react-window": "1.8.5",
+		"react-window": "1.8.6",
 		"redux": "4.0.5",
 		"redux-logger": "4.0.0",
 		"slick-carousel": "^1.8.1",
-		"styled-components": "5.2.0",
+		"styled-components": "5.2.1",
 		"typeface-muli": "1.1.13",
 		"velocity-animate": "1.5.2",
 		"velocity-react": "1.4.3"
@@ -118,6 +123,7 @@
 		"prettier": "^2.1.2",
 		"promise": "8.1.0",
 		"purgecss": "1.4.2",
+		"sass-loader": "^10.0.4",
 		"source-map-explorer": "2.5.0",
 		"tailwindcss": "1.9.6",
 		"tailwindcss-dir": "4.0.0"
@@ -150,7 +156,19 @@
 		]
 	},
 	"dependenciesMeta": {
+		"include-media": {
+			"unplugged": true
+		},
+		"open-color": {
+			"unplugged": true
+		},
+		"sass-material-colors": {
+			"unplugged": true
+		},
 		"slick-carousel": {
+			"unplugged": true
+		},
+		"tailwindcss": {
 			"unplugged": true
 		}
 	}

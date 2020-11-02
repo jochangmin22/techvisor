@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getSearchs } from './store/searchsSlice';
 // import { setMockData, getSearchs } from './store/searchsSlice';
@@ -7,7 +7,8 @@ import { getSearchs } from './store/searchsSlice';
 import { useForm } from '@fuse/hooks';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import SearchListContainer from './searchs/SearchList/SearchListContainer';
+// import SearchListContainer from './searchs/SearchList/SearchListContainer';
+import MainTable from './searchs/SearchList/MainTable';
 import FinancialInfo from './searchs/FinancialInfo';
 import StockInfoContainer from './searchs/StockInfo/StockInfoContainer';
 import RelatedInfoContainer from './searchs/RelatedInfo/RelatedInfoContainer';
@@ -27,13 +28,7 @@ const useStyles = makeStyles(theme => ({
 function CompanyContent() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
-	const entities = useSelector(({ companyApp }) => companyApp.searchs.entities);
 	const selectedCorp = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp);
-	const searchText = useSelector(({ companyApp }) => companyApp.searchs.searchParams.searchText);
-	const searchLoading = useSelector(({ companyApp }) => companyApp.searchs.searchLoading);
-
-	const [searchStatus, setSearchStatus] = useState(null);
-
 	const { form, setForm, resetForm } = useForm({
 		A: 100,
 		B: 100,
@@ -63,18 +58,6 @@ function CompanyContent() {
 		// eslint-disable-next-line
 	}, []);
 
-	useEffect(() => {
-		if (!!(searchText && !searchLoading && entities && entities.length === 0)) {
-			setSearchStatus('noResults');
-		}
-		if (!searchText) {
-			setSearchStatus('notStarted');
-		}
-		if (entities && entities.length > 0) {
-			setSearchStatus(null);
-		}
-	}, [searchText, searchLoading, entities]);
-
 	const selectOne = !Object.values(selectedCorp).every(x => x === null || x === '');
 
 	return (
@@ -87,7 +70,7 @@ function CompanyContent() {
 					grid={[25, 25]}
 				>
 					<div className={classes.paper} style={{ zIndex: form.A }}>
-						<SearchListContainer status={searchStatus} />
+						<MainTable />
 					</div>
 				</Draggable>
 				{selectOne && (
@@ -124,28 +107,28 @@ function CompanyContent() {
 						<RelatedInfoContainer selectedCorp={selectedCorp} />
 					</div>
 				</Draggable>
-				<Draggable
-					handle=".draggable"
-					onStart={() => handleStart('E')}
-					onEnd={() => resetForm()}
-					grid={[25, 25]}
-				>
-					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.E }}>
-						<StockSearchTop />
-					</div>
-				</Draggable>
 				{selectOne && (
 					<Draggable
 						handle=".draggable"
-						onStart={() => handleStart('F')}
+						onStart={() => handleStart('E')}
 						onEnd={() => resetForm()}
 						grid={[25, 25]}
 					>
-						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.F }}>
+						<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.E }}>
 							<VisualContainer />
 						</div>
 					</Draggable>
 				)}
+				<Draggable
+					handle=".draggable"
+					onStart={() => handleStart('F')}
+					onEnd={() => resetForm()}
+					grid={[25, 25]}
+				>
+					<div className={clsx(classes.paper, 'md:w-1/2')} style={{ zIndex: form.F }}>
+						<StockSearchTop />
+					</div>
+				</Draggable>
 			</div>
 		</div>
 	);

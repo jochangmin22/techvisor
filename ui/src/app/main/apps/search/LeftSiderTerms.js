@@ -37,7 +37,6 @@ import {
 } from 'app/main/apps/search/store/searchsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
 
-// TODO: change focus next textField
 // TODO: DnD word chip
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -46,10 +45,6 @@ const useStyles = makeStyles(theme => ({
 		'& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
 			borderWidth: 0
 		},
-		// "& .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline": {
-		//     borderWidth: 2,
-		//     borderColor: "red"
-		// },
 		'&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
 			borderWidth: 1,
 			borderColor: theme.palette.secondary.main
@@ -72,10 +67,6 @@ const BootstrapInput = withStyles(theme => ({
 		'label + &': {
 			marginTop: theme.spacing(3)
 		},
-		// "& input:invalid": {
-		//     borderColor: "red",
-		//     borderWidth: 2
-		// },
 		'& input': {
 			borderRadius: 4,
 			position: 'relative',

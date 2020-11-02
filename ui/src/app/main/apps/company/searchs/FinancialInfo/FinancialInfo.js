@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getCompanyInfo, getFinancialInfo } from 'app/main/apps/company/store/searchsSlice';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import { numberToWon } from 'app/main/apps/lib/utils';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 // const arr = {date: ['2017/12', '2018/12', '2019/12', '2019/12', '2020/03', '2020/06'],dataset: [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]]};
 
@@ -23,22 +24,24 @@ const itemName = ['매출액(억)', '영업이익(억)', '당기순이익(억)',
 
 function FinancialInfo() {
 	const dispatch = useDispatch();
-	const arr = useSelector(({ companyApp }) => companyApp.searchs.financialInfo);
+	const entities = useSelector(({ companyApp }) => companyApp.searchs.financialInfo);
 	const selectedCorp = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp);
-	const corpName = useSelector(({ companyApp }) => companyApp.searchs.companyInfo.회사명);
+	const { corpName } = selectedCorp;
+	const [showLoading, setShowLoading] = useState(false);
 
 	useEffect(() => {
 		const isEmpty = Object.values(selectedCorp).every(x => x === null || x === '');
 		if (!isEmpty) {
+			setShowLoading(true);
 			dispatch(getCompanyInfo(selectedCorp));
-			dispatch(getFinancialInfo(selectedCorp));
+			dispatch(getFinancialInfo(selectedCorp)).then(() => {
+				setShowLoading(false);
+			});
 		}
 		// eslint-disable-next-line
 	}, [selectedCorp]);
 
-	useEffect(() => {}, [arr]);
-
-	if (Object.values(arr).every(x => x === null || x === '')) return '';
+	useEffect(() => {}, [entities]);
 
 	return (
 		<div className="md:flex w-full">
@@ -108,51 +111,55 @@ function FinancialInfo() {
 				/>
 				<CardContent>
 					<div className="flex justify-center items-center">
-						<TableContainer>
-							<Table size="small" aria-label="a dense table">
-								<TableHead>
-									<TableRow>
-										<TableCell align="center" rowSpan={2} className="text-12 truncate">
-											주요재무정보
-										</TableCell>
-										<TableCell align="center" colSpan={3} className="text-12 truncate">
-											연도별 (최근 3년)
-										</TableCell>
-										<TableCell align="center" colSpan={3} className="text-12 truncate">
-											분기별 (최근 3분기)
-										</TableCell>
-									</TableRow>
-									<TableRow>
-										{arr.date.map((row, index) => (
-											<TableCell key={index} align="center" className="text-12 truncate">
-												{row}
+						{Object.values(entities).every(x => x === null || x === '') || showLoading ? (
+							<SpinLoading className="h-360" />
+						) : (
+							<TableContainer>
+								<Table size="small" aria-label="a dense table">
+									<TableHead>
+										<TableRow>
+											<TableCell align="center" rowSpan={2} className="text-12 truncate">
+												주요재무정보
 											</TableCell>
-										))}
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{arr.dataset.map((row, index) => (
-										<TableRow key={index}>
-											<TableCell component="th" scope="row" className="text-12 truncate">
-												{itemName[index]}
+											<TableCell align="center" colSpan={4} className="text-12 truncate">
+												연도별
 											</TableCell>
-											{row.map((val, index) => (
-												<TableCell
-													key={index}
-													align="right"
-													className={clsx(
-														val < 0 ? 'text-red' : 'text-black',
-														'text-12 truncate'
-													)}
-												>
-													{index < 3 ? numberToWon(val) : val}
+											<TableCell align="center" colSpan={4} className="text-12 truncate">
+												분기별
+											</TableCell>
+										</TableRow>
+										<TableRow>
+											{entities.date.map((row, index) => (
+												<TableCell key={index} align="right" className="text-12 truncate">
+													{row}
 												</TableCell>
 											))}
 										</TableRow>
-									))}
-								</TableBody>
-							</Table>
-						</TableContainer>
+									</TableHead>
+									<TableBody>
+										{entities.dataset.map((row, index) => (
+											<TableRow key={index}>
+												<TableCell component="th" scope="row" className="text-12 truncate">
+													{itemName[index]}
+												</TableCell>
+												{row.map((val, index) => (
+													<TableCell
+														key={index}
+														align="right"
+														className={clsx(
+															val < 0 ? 'text-red' : 'text-black',
+															'text-12 truncate'
+														)}
+													>
+														{index < 3 ? numberToWon(val) : val}
+													</TableCell>
+												))}
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							</TableContainer>
+						)}
 					</div>
 				</CardContent>
 			</Card>
