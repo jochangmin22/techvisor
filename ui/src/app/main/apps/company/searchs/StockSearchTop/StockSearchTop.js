@@ -3,10 +3,10 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import {
-	getStockSearchTop
-	// resetSelectedCorp,
-	// setSelectedCorp,
-	// setSearchSubmit
+	getStockSearchTop,
+	resetSelectedCorp,
+	setSelectedCorp,
+	setSearchSubmit
 } from 'app/main/apps/company/store/searchsSlice';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
@@ -97,11 +97,11 @@ function StockSearchTop() {
 		// eslint-disable-next-line
 	}, []);
 
-	// const handleClick = (name, stockCode, corpNo) => {
-	// 	dispatch(resetSelectedCorp());
-	// 	dispatch(setSelectedCorp({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
-	// 	dispatch(setSearchSubmit(true));
-	// };
+	const handleClick = (name, stockCode, corpNo) => {
+		dispatch(resetSelectedCorp());
+		dispatch(setSelectedCorp({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
+		dispatch(setSearchSubmit(true));
+	};
 
 	const isEmpty = !!(stockSearchTop.length === 0 && !showLoading);
 
@@ -131,7 +131,7 @@ function StockSearchTop() {
 							size="small"
 							onRowClick={(ev, row) => {
 								if (row) {
-									// TODO: handleClick(row.original.회사명, row.original.종목코드);
+									handleClick(row.original.회사명, row.original.종목코드);
 								}
 							}}
 						/>
