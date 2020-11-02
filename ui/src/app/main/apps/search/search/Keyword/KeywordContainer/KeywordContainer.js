@@ -55,7 +55,7 @@ function KeywordContainer(props) {
 			}}
 		>
 			<>
-				<div className="flex w-full sm:w-1/3 pr-12">
+				<div className="flex w-full md:w-1/3 pr-12">
 					<Paper className="w-full rounded-8 shadow mb-16">
 						<div className="flex flex-col items-start p-12">
 							<Typography className="text-14 p-12 font-bold">키워드 분석</Typography>
@@ -63,7 +63,7 @@ function KeywordContainer(props) {
 						</div>
 					</Paper>
 				</div>
-				<div className="flex w-full sm:w-1/3 pr-12">
+				<div className="flex w-full md:w-1/3 pr-12">
 					<Paper className="w-full rounded-8 shadow mb-16">
 						<div className="flex flex-col items-start p-12">
 							<h6 className="font-600 text-14 p-16" color="secondary">
@@ -73,7 +73,7 @@ function KeywordContainer(props) {
 						</div>
 					</Paper>
 				</div>
-				<div className="flex w-full sm:w-1/3">
+				<div className="flex w-full md:w-1/3">
 					<Paper className="w-full rounded-8 shadow mb-16">
 						<div className="flex flex-col items-start p-12">
 							<h6 className="font-600 text-14 p-16" color="secondary">
