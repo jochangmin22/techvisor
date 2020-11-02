@@ -7,6 +7,7 @@ import 'typeface-muli';
 import './i18n';
 import './react-chartjs-2-defaults';
 import './styles/index.css';
+import './scss/main.scss';
 import App from 'app/App';
 import * as serviceWorker from './serviceWorker';
 
