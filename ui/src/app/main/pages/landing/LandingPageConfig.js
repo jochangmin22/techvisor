@@ -6,6 +6,11 @@ const LandingPageConfig = {
 			config: {
 				toolbar: {
 					display: false
+				},
+				footer: {
+					display: true,
+					style: 'static',
+					position: 'below'
 				}
 			}
 		},
@@ -15,7 +20,7 @@ const LandingPageConfig = {
 	},
 	routes: [
 		{
-			path: '/pages/landing',
+			path: '/landing',
 			component: React.lazy(() => import('./LandingPage'))
 		}
 	]

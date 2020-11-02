@@ -32,7 +32,7 @@ function Logo() {
 
 	return (
 		<div className={clsx(classes.root, 'flex items-center')}>
-			<Button component={Link} to="/pages/landing" role="button">
+			<Button component={Link} to="/landing" role="button">
 				<img className="logo-icon" src="assets/images/logos/logo_ipgrim_shadow.svg" alt="logo" />
 			</Button>
 			{/* <img className="logo-icon" src="assets/images/logos/logo_ipgrim_shadow.svg" alt="logo" /> */}
