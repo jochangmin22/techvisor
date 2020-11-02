@@ -13,7 +13,7 @@ import clsx from 'clsx';
 import DownloadFilterMenu from '../DownloadFilterMenu';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
-import { updateCols } from 'app/main/apps/search/store/searchsSlice';
+import { updateCols, setTableOptions } from 'app/main/apps/search/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 
 const columns = [
@@ -171,10 +171,13 @@ function MainTable(props) {
 							출원인코드1: '=""' + row.출원인코드1 + '""'
 						}))
 					);
+					dispatch(
+						setTableOptions({ totalPosts: entities.length, pageIndex: pageIndex, pageSize: pageSize })
+					);
 				}
 			}
-			// eslint-disable-next-line
 		},
+		// eslint-disable-next-line
 		[entities]
 	);
 
@@ -190,7 +193,7 @@ function MainTable(props) {
 
 	return (
 		<Paper className="rounded-8 shadow h-512 w-full mb-36">
-			<div className="p-12 flex items-center justify-between">
+			<div className="p-12 p-0 flex items-center justify-between">
 				<div className="px-12 flex flex-row items-center justify-end mb-8">
 					<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4 mr-8')}>
 						검색 결과 {Number(entities.length).toLocaleString()} 건
@@ -222,7 +225,7 @@ function MainTable(props) {
 					size="small"
 					onRowClick={(ev, row) => {
 						if (row) {
-							props.history.push(`/apps/search/${row.original.출원번호}`);
+							props.history.push(`/apps/searchPage/${row.original.출원번호}`);
 						}
 					}}
 				/>

@@ -102,11 +102,11 @@ export const initialState = {
 	clickedSearchId: null,
 	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
 	analysisOptions: {
-		// tableOptions: {
-		// 	dataCount: 0,
-		// 	pageIndex: 0,
-		// 	pageSize: 10
-		// },
+		tableOptions: {
+			totalPosts: 0,
+			pageIndex: 0,
+			pageSize: 10
+		},
 		wordCloudOptions: {
 			volume: '요약',
 			unit: '구문', // '구문', '워드',
@@ -188,6 +188,9 @@ const searchsSlice = createSlice({
 		},
 		setSearchVolume: (state, action) => {
 			state.searchParams.searchVolume = action.payload;
+		},
+		setTableOptions: (state, action) => {
+			state.analysisOptions.tableOptions = action.payload;
 		},
 		setWordCloudOptions: (state, action) => {
 			state.analysisOptions.wordCloudOptions = action.payload;
@@ -272,6 +275,7 @@ export const {
 	setSearchParams,
 	setSearchNum,
 	setSearchVolume,
+	setTableOptions,
 	setWordCloudOptions,
 	setKeywordsOptions,
 	setMatrixOptions,
