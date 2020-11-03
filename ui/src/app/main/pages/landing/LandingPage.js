@@ -2,13 +2,14 @@ import FuseAnimate from '@fuse/core/FuseAnimate';
 import { makeStyles } from '@material-ui/core/styles';
 import { darken } from '@material-ui/core/styles/colorManipulator';
 import Typography from '@material-ui/core/Typography';
+import Container from '@material-ui/core/Container';
 import Icon from '@material-ui/core/Icon';
 import clsx from 'clsx';
 import React from 'react';
 import MessageBox from './message-box';
-// import TextStepper from './text-stepper';
-
-// import { Link } from 'react-router-dom';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -24,12 +25,109 @@ const useStyles = makeStyles(theme => ({
 			0.5
 		)} 100%)`,
 		color: theme.palette.primary.contrastText
+	},
+	section: {
+		paddingTop: 70,
+		paddingBottom: 70,
+		'& .section-title': {
+			marginBottom: '52',
+			'& h6': {
+				color: '#ffae47',
+				letterSpacing: '1.2rem',
+				fontSize: 16
+			},
+			'& h1': {
+				fontWeight: 700,
+				color: '#000',
+				fontSize: 42
+			}
+		},
+		'& .section-title h6': {
+			color: theme.palette.primary.light
+		},
+		'& .service-item': {
+			padding: '48px 28px',
+			position: 'relative',
+			overflow: 'visible',
+			transition: 'all .3s ease',
+			'& img': {
+				width: 55,
+				height: 55,
+				verticalAlign: 'middle'
+			},
+			'& .content h6': {
+				fontSize: 16,
+				fontWeight: 700,
+				color: '#000',
+				marginBottom: '20px',
+				'& p': {
+					lineHeight: '30px',
+					marginBottom: '20px',
+					fontSize: 16
+				}
+			},
+			'&::hover': {
+				background: 'url("../../assets/images/icons/pattern.png")',
+				position: 'absolute',
+				top: 0,
+				left: 0,
+				content: '""',
+				width: '100%',
+				height: '100%',
+				transform: 'translate(20px,20px)',
+				opacity: 0,
+				zIndex: -1,
+				transition: 'all .6s ease'
+			}
+		},
+		'& [data-aos=text-reveal]': {
+			clipPath: 'inset(0 100% 0 0)',
+			'&.aos-animate': {
+				position: 'relative',
+				whiteSpace: 'nowrap',
+				animationName: 'reveal-text',
+				animationDuration: '1s',
+				animationFillMode: 'both',
+				animationTimingFunction: 'cubic-bezier(1, 0.01, 0, 1)',
+				clipPath: 'inset(0 100% 0 0)',
+				'&::after': {
+					content: '""',
+					position: 'absolute',
+					zIndex: 999,
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+					backgroundColor: '#ffc275',
+					transform: 'scaleX(0)',
+					transformOrigin: '0 50%',
+					animationDuration: '1s',
+					animationFillMode: 'both',
+					animationTimingFunction: 'cubic-bezier(1, 0.01, 0, 1)',
+					animationName: 'revealer-text'
+				}
+			}
+		}
+	},
+	'@global': {
+		'@keyframes reveal-text': {
+			from: { clipPath: 'inset(0 100% 0 0)' },
+			to: { clipPath: 'inset(0 0 0 0)' }
+		},
+		'@keyframes revealer-text': {
+			'0%,50%': { transformOrigin: '0 50%' },
+			'51%,100%': { transformOrigin: '100% 50%' },
+			'50%': { transform: 'scaleX(1)' },
+			'100%': { transform: 'scaleX(0)' }
+		}
 	}
 }));
 
 function LandingPage() {
 	const classes = useStyles();
 	const videoSource = 'assets/videos/main_bg_video.mp4';
+
+	AOS.init();
 
 	return (
 		<>
@@ -67,284 +165,93 @@ function LandingPage() {
 							</FuseAnimate>
 
 							<MessageBox />
-							{/* <TextStepper /> */}
 							<div className="flex flex-row m-auto items-center justify-center mt-192">
-								<div className="flex p-24 mr-24 w-288 rounded-lg cursor-pointer items-center justify-center bg-blue-600 hover:bg-blue-500 text-20">
+								<Link
+									role="button"
+									to="/login"
+									className="flex p-24 mr-24 w-288 rounded-lg cursor-pointer items-center justify-center bg-blue-600 hover:bg-blue-500 text-20"
+								>
 									시작하기 <Icon>arrow_forward</Icon>
-								</div>
-								<div className="flex p-24 w-288 rounded-lg cursor-pointer items-center justify-center hover:bg-blue-500 active:bg-blue-600 transition duration-300 ease-in-out border border-blue-400 hover:text-white text-20">
-									더 알아보기 <Icon>arrow_forward</Icon>
-								</div>
+								</Link>
+								<a
+									role="button"
+									href="https://www.notion.so/jingu0705/060138803fe046d4a4d4eaab641ca06a"
+									target="_blank"
+									rel="noreferrer noopener"
+								>
+									<div className="flex p-24 w-288 rounded-lg cursor-pointer items-center justify-center hover:bg-blue-500 active:bg-blue-600 transition duration-300 ease-in-out border border-blue-400 hover:text-white text-20">
+										더 알아보기 <Icon>arrow_forward</Icon>
+									</div>
+								</a>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-
-			{/* <section id="bars" className="mx-auto flex flex-wrap items-center">
-				<div className="text-center w-full">
-					<h1 className="my-0 text-4xl sm:text-5xl md:text-6xl">Skills</h1>
-
-					<h2 className="font-light mt-0">I am really good at the following technical skills</h2>
+			<section className={clsx(classes.section)}>
+				<div className="absolute inset-0 -z-1">
+					<img
+						src="http://demo.themefisher.com/icelab-hugo/images/shape-big.png"
+						className="max-w-full h-auto align-middle"
+						alt="big-shape"
+					/>
 				</div>
-				<div className="w-full flex flex-col">
-					<div className="mt-8">
-						<img
-							className="mx-auto h-32"
-							src="https://themes.gohugo.io//theme/hugo-theme-pico/icons/precision.svg"
-							alt="Precision icon"
-						/>
-
-						<h2 className="inline-block">Precision</h2>
-						<div className="flex items-center">
-							<div className="h-4 flex-1 mr-4 shadow-2 rounded-sm bg-gray-200">
-								<div
-									className="h-full bg-green-300 rounded-sm"
-									style={{
-										width: '95%',
-										background:
-											'radial-gradient( circle farthest-corner at 0.8% 3.1%,  rgba(255,188,224,1) 0%, rgba(170,165,255,1) 46%, rgba(165,255,205,1) 100.2% )'
-									}}
-								></div>
+				<Container className="flex">
+					<div className="flex flex-col">
+						<div className="w-full h-auto">
+							<div className="section-title">
+								<h6 className="sm">
+									<span data-aos="text-reveal" data-aos-once="true" className="aos-init aos-animate">
+										What We Do
+									</span>
+								</h6>
+								<h1>
+									<span data-aos="text-reveal" data-aos-once="true" className="aos-init aos-animate">
+										기업, 기술에 대해
+										<br />
+										다양한 분석정보를 제공
+									</span>
+								</h1>
 							</div>
-							<span className="font-bold">95%</span>
 						</div>
-					</div>
-
-					<div className="mt-8">
-						<img
-							className="mx-auto h-32"
-							src="https://themes.gohugo.io//theme/hugo-theme-pico/icons/heat.svg"
-							alt="Heat Control icon"
-						/>
-
-						<h2 className="inline-block">Heat Control</h2>
-						<div className="flex items-center">
-							<div className="h-4 flex-1 mr-4 shadow-2 rounded-sm bg-gray-200">
-								<div
-									className="h-full bg-green-300 rounded-sm"
-									style={{
-										width: '90%',
-										background:
-											'radial-gradient( circle farthest-corner at 0.8% 3.1%,  rgba(255,188,224,1) 0%, rgba(170,165,255,1) 46%, rgba(165,255,205,1) 100.2% )'
-									}}
-								></div>
-							</div>
-							<span className="font-bold">90%</span>
-						</div>
-					</div>
-
-					<div className="mt-8">
-						<img
-							className="mx-auto h-32"
-							src="https://themes.gohugo.io//theme/hugo-theme-pico/icons/chicken.svg"
-							alt="Quality of Food icon"
-						/>
-
-						<h2 className="inline-block">Quality of Food</h2>
-						<div className="flex items-center">
-							<div className="h-4 flex-1 mr-4 shadow-2 rounded-sm bg-gray-200">
-								<div
-									className="h-full bg-green-300 rounded-sm"
-									style={{
-										width: '87%',
-										background:
-											'radial-gradient( circle farthest-corner at 0.8% 3.1%,  rgba(255,188,224,1) 0%, rgba(170,165,255,1) 46%, rgba(165,255,205,1) 100.2% )'
-									}}
-								></div>
-							</div>
-							<span className="font-bold">87%</span>
-						</div>
-					</div>
-
-					<div className="mt-8">
-						<img
-							className="mx-auto h-32"
-							src="https://themes.gohugo.io//theme/hugo-theme-pico/icons/presentation.svg"
-							alt="Presentation icon"
-						/>
-
-						<h2 className="inline-block">Presentation</h2>
-						<div className="flex items-center">
-							<div className="h-4 flex-1 mr-4 shadow-2 rounded-sm bg-gray-200">
-								<div
-									className="h-full bg-green-300 rounded-sm"
-									style={{
-										width: '75%',
-										background:
-											'radial-gradient( circle farthest-corner at 0.8% 3.1%,  rgba(255,188,224,1) 0%, rgba(170,165,255,1) 46%, rgba(165,255,205,1) 100.2% )'
-									}}
-								></div>
-							</div>
-							<span className="font-bold">75%</span>
-						</div>
-					</div>
-				</div>
-			</section>
-			<section className="bar background-gray no-mb">
-				<div className="container">
-					<div className="row">
-						<div className="col-md-12">
-							<div className="heading text-center">
-								<h2>Our Clients</h2>
-							</div>
-
-							<p className="lead"></p>
-
-							<ul className="owl-carousel customers owl-theme">
-								<div className="owl-wrapper-outer">
-									<div className="owl-wrapper">
-										<div className="owl-item w-200">
-											<li className="item" title="customer-1">
-												<a href="http://www.customer1.com" target="_blank">
-													<img
-														src="img/clients/customer-1.png"
-														alt="customer-1"
-														className="img-responsive"
-													/>
-												</a>
-											</li>
-										</div>
-										<div className="owl-item w-200">
-											<li className="item" title="customer-2">
-												<a href="http://www.customer2.com" target="_blank">
-													<img
-														src="img/clients/customer-2.png"
-														alt="customer-2"
-														className="img-responsive"
-													/>
-												</a>
-											</li>
-										</div>
-										<div className="owl-item w-200">
-											<li className="item" title="customer-3">
-												<a href="http://www.customer3.com" target="_blank">
-													<img
-														src="img/clients/customer-3.png"
-														alt="customer-3"
-														className="img-responsive"
-													/>
-												</a>
-											</li>
-										</div>
-										<div className="owl-item w-200">
-											<li className="item" title="customer-4">
-												<a href="http://www.customer4.com" target="_blank">
-													<img
-														src="img/clients/customer-4.png"
-														alt="customer-4"
-														className="img-responsive"
-													/>
-												</a>
-											</li>
-										</div>
-										<div className="owl-item w-200">
-											<li className="item" title="customer-5">
-												<a href="http://www.customer5.com" target="_blank">
-													<img
-														src="img/clients/customer-5.png"
-														alt="customer-5"
-														className="img-responsive"
-													/>
-												</a>
-											</li>
-										</div>
-										<div className="owl-item w-200">
-											<li className="item" title="customer-6">
-												<a href="http://www.customer6.com" target="_blank">
-													<img
-														src="img/clients/customer-6.png"
-														alt="customer-6"
-														className="img-responsive"
-													/>
-												</a>
-											</li>
-										</div>
+						<div className="flex flex-row w-full">
+							<div className="flex w-1/2 md:w-1/3">
+								<div className="service-item hover">
+									<div className="mb-48">
+										<img src="assets/images/icons/icon-1.svg" alt="" />
+									</div>
+									<div className="content">
+										<h6 className="sm">기술검색 활용법</h6>
+										<p>관심 키워드, 주제어 검색을 통해 유망 기술 & R&D기업 찾기</p>
 									</div>
 								</div>
-
-								<div className="owl-controls clickable">
-									<div className="owl-pagination">
-										<div className="owl-page active">
-											<span className=""></span>
-										</div>
-										<div className="owl-page">
-											<span className=""></span>
-										</div>
+							</div>
+							<div className="flex w-1/2 md:w-1/3">
+								<div className="service-item">
+									<div className="mb-48">
+										<img src="assets/images/icons/icon-2.svg" alt="" />
+									</div>
+									<div className="content">
+										<h6 className="sm">기업검색 활용법</h6>
+										<p>관심 기업의 실시간 시세, 재무, 공시, 임상, 특허, 적정주가 분석하기</p>
 									</div>
 								</div>
-							</ul>
+							</div>
+							<div className="flex w-1/2 md:w-1/3">
+								<div className="service-item">
+									<div className="mb-48">
+										<img src="assets/images/icons/icon-3.svg" alt="" />
+									</div>
+									<div className="content">
+										<h6 className="sm">Wordpress</h6>
+										<p>다양한 시각화를 통해 여러분의 콘텐츠를 화려하게 만들어 드림</p>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
-				</div>
+				</Container>
 			</section>
-			<footer id="footer">
-				<div class="container">
-					<div class="col-md-4 col-sm-6">
-						<h4>About us</h4>
-
-						<p>
-							Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis
-							egestas.
-						</p>
-
-						<hr class="hidden-md hidden-lg hidden-sm" />
-					</div>
-
-					<div class="col-md-4 col-sm-6">
-						<h4>Recent posts</h4>
-
-						<div class="blog-entries"></div>
-
-						<hr class="hidden-md hidden-lg" />
-					</div>
-
-					<div class="col-md-4 col-sm-6">
-						<h4>Contact</h4>
-
-						<p class="text-uppercase">
-							<strong>Universal Ltd.</strong>
-							<br />
-							13/25 New Avenue
-							<br />
-							Newtown upon River
-							<br />
-							45Y 73J
-							<br />
-							England
-							<br />
-							<strong>Great Britain</strong>
-						</p>
-
-						<a
-							href="https://themes.gohugo.io//theme/hugo-universal-theme/contact"
-							class="btn btn-small btn-template-main"
-						>
-							Go to contact page
-						</a>
-
-						<hr class="hidden-md hidden-lg hidden-sm" />
-					</div>
-				</div>
-			</footer> */}
-			{/* <div id="copyright" className="bg-gray-900 text-gray-200 py-52 text-12 leading-loose">
-				<div className="flex m-auto px-12">
-					<div class="flex flex-row m-auto">
-						<p class="mr-16">Copyright (c) Btowin Partners; all rights reserved.</p>
-
-						<p class="mr-16">
-							<a href="#" target="_blank" rel="noopener noreferrer">
-								서비스 이용약관
-							</a>
-						</p>
-						<p>
-							<a href="#" target="_blank" rel="noopener noreferrer">
-								개인정보 처리 방침
-							</a>
-						</p>
-					</div>
-				</div>
-			</div> */}
 		</>
 	);
 }
