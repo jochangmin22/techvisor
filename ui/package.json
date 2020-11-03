@@ -12,6 +12,7 @@
 		"@material-ui/lab": "4.0.0-alpha.56",
 		"@material-ui/pickers": "3.2.10",
 		"@reduxjs/toolkit": "1.4.0",
+		"aos": "next",
 		"auth0-lock": "11.27.0",
 		"autosuggest-highlight": "3.1.1",
 		"axios": "0.20.0",
@@ -158,6 +159,9 @@
 		]
 	},
 	"dependenciesMeta": {
+		"aos": {
+			"unplugged": true
+		},
 		"include-media": {
 			"unplugged": true
 		},

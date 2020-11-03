@@ -4067,6 +4067,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"aos@npm:next":
+  version: 3.0.0-beta.6
+  resolution: "aos@npm:3.0.0-beta.6"
+  dependencies:
+    classlist-polyfill: ^1.2.0
+    lodash.debounce: ^4.0.8
+    lodash.throttle: ^4.1.1
+  checksum: 56ce31b391dfeaf6ed2b50fca0ca30632e10aca187c011ebc09e88299e18b7029b21850498074b4903c95f5d6d9297298e0090e0beee364d61ba73ef9cc89035
+  languageName: node
+  linkType: hard
+
 "aproba@npm:^1.0.3, aproba@npm:^1.1.1, aproba@npm:^1.1.2":
   version: 1.2.0
   resolution: "aproba@npm:1.2.0"
@@ -5657,6 +5668,13 @@ __metadata:
     isobject: ^3.0.0
     static-extend: ^0.1.1
   checksum: 6411679ad4d2bde81b62ad721d4771d108d5d8ef32805d10ebfa6f1d6bdcfd5cb6dfea5232b85221f079e42691c36cf2db05a5e76b87ba8f6deb37a2c23a4a41
+  languageName: node
+  linkType: hard
+
+"classlist-polyfill@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "classlist-polyfill@npm:1.2.0"
+  checksum: 17b18e3ef8a3f57423afb132cec8032e3751c5e2bca8ce5783d4167c967ad48f693910dd74abb0f4716ce2099eba79cfa593d2eb76ceea6f8413c53101a8177a
   languageName: node
   linkType: hard
 
@@ -9152,6 +9170,7 @@ fsevents@~2.1.2:
     "@material-ui/pickers": 3.2.10
     "@reduxjs/toolkit": 1.4.0
     "@yarnpkg/pnpify": 2.3.1
+    aos: next
     auth0-lock: 11.27.0
     autosuggest-highlight: 3.1.1
     axios: 0.20.0
@@ -9258,6 +9277,8 @@ fsevents@~2.1.2:
     velocity-animate: 1.5.2
     velocity-react: 1.4.3
   dependenciesMeta:
+    aos:
+      unplugged: true
     include-media:
       unplugged: true
     open-color:
@@ -12852,6 +12873,13 @@ fsevents@~2.1.2:
   dependencies:
     lodash._reinterpolate: ^3.0.0
   checksum: 45546a5b76376b138ef4f01aa2722813127c639428eb9baef3fbac176b509ee2dab5cb9d1ee8267dbeeef8d49371f9a748af3df83649bf8b75fa54993f65b7aa
+  languageName: node
+  linkType: hard
+
+"lodash.throttle@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "lodash.throttle@npm:4.1.1"
+  checksum: d9107c79033f609f23552f48f5ba93b8a98a07a2b38914745a48d33f18704a4c6a125610ad2bab2a0139974d1da7c5d6a24271243e21571f01e21bf3b2f6b21d
   languageName: node
   linkType: hard
 
