@@ -257,6 +257,13 @@ GOOGLE_ID = SECRET_GOOGLE["client_id"]
 GOOGLE_SECRET = SECRET_GOOGLE["client_secret"]
 GOOGLE_PROJECT_ID = SECRET_GOOGLE["project_id"]
 
+BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
 TOKEN_EXPIRATION_DELTA = datetime.timedelta(days=1)
 
 # Cache time to live is 15 minutes.
