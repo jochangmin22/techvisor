@@ -251,7 +251,6 @@ def sectorPer(df):
 import math
 def fundamental(df):
     ''' df[5] :  'PER', 'PBR', 'EPS', 'BPS', '현금배당수익률' '''
-
     r = {}
     df.columns = ['A','B','C']
 
@@ -381,7 +380,13 @@ def financialSummary(df):
 def employee_listingdate_research(df):
     ''' 기업개요 - df[1] : 종업원수,상장일, df[4]: 연구개발비 '''
     r = {}
-    df[1].columns = ['A','B','C','D']
+    # columns이 종종 안읽히는 경우
+    try:
+        df[1].columns = ['A','B','C','D']
+    except:
+        df[1].columns = ['A','B']
+        print('===종업원수 제대로 안읽혀짐=== retry required')
+
     r['상장일'] = df[1].loc[df[1]['A'] =='설립일', 'B'].str.split('상장일: ').str[1].str.replace('/','.').str.replace(')','').to_list()[0]  
     try:
         r['종업원수'] = df[1].loc[df[1]['C'] =='종업원수', 'D'].str.strip().str.split(r' \(').str[0].str.replace(',','').fillna(0).astype(int).to_list()[0]
@@ -594,7 +599,10 @@ def financial_crawler(code):
     res.update(temp_res)
 
     browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[2]')[0].click() # "기업개요" 클릭하기
+
     df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
+
+
     res.update(employee_listingdate_research(df))
 
     res.update(calculate_stock_fair_value(res))
@@ -655,9 +663,14 @@ def main_def():
     # for i in range(0,50):
     for i in rangeValue:
         start_time = time.time()
-
-        kiscode = kindInfo.종목코드.values[i].strip()
         print(kiscode)
+        try:
+            kiscode = kindInfo.종목코드.values[i].strip()
+        except:
+            print('----------------------')
+            print(i + "번에 대한 종목코드가 없어서 종료합니다.")            
+            print('done')
+            break
         info, financial_res = financial_crawler(kiscode)
         if existCheck(kiscode) != 0:
             updateTable(i, kiscode, info, financial_res)

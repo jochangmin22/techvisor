@@ -141,7 +141,7 @@ def crawl_mdcline(singleDate):
         return 0, {}
 
     soup = BeautifulSoup(html.content, 'lxml')
-    totalCount = soup.find('totalCount').get_text()
+    totalCount = soup.find("totalcount").get_text()
     if totalCount == '0':  # 결과 없으면
         return 0, {}
 
@@ -426,7 +426,12 @@ def financialSummary(df):
 def employee_listingdate_research(df):
     ''' 기업개요 - df[1] : 종업원수,상장일, df[4]: 연구개발비 '''
     r = {}
-    df[1].columns = ['A','B','C','D']
+    # columns이 종종 안읽히는 경우
+    try:
+        df[1].columns = ['A','B','C','D']
+    except:
+        df[1].columns = ['A','B']
+        
     r['상장일'] = df[1].loc[df[1]['A'] =='설립일', 'B'].str.split('상장일: ').str[1].str.replace('/','.').str.replace(')','').to_list()[0]  
     try:
         r['종업원수'] = df[1].loc[df[1]['C'] =='종업원수', 'D'].str.strip().str.split(r' \(').str[0].str.replace(',','').fillna(0).astype(int).to_list()[0]
