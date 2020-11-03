@@ -19,6 +19,7 @@ import {
 	useResizeColumns,
 	useTable
 } from 'react-table';
+import { useSticky } from 'react-table-sticky';
 import clsx from 'clsx';
 
 // import ContactsTablePaginationActions from './ContactsTablePaginationActions';
@@ -47,7 +48,8 @@ const EnhancedTable = ({
 	showHeader = true,
 	showFooter = true,
 	rowClick = true,
-	onRowClick
+	onRowClick,
+	className
 }) => {
 	const {
 		getTableProps,
@@ -74,7 +76,8 @@ const EnhancedTable = ({
 		useSortBy,
 		usePagination,
 		useRowSelect,
-		useResizeColumns
+		useResizeColumns,
+		useSticky
 		// hooks => {
 		// 	hooks.allColumns.push(_columns => [
 		// 		// Let's make a column for selection
@@ -118,12 +121,16 @@ const EnhancedTable = ({
 
 	// Render the UI for your table
 	return (
-		<MaUTable {...getTableProps()} size="small" className={showFooter ? '' : 'mb-20'}>
-			<TableHead className={showHeader ? '' : 'hidden'}>
+		<MaUTable
+			{...getTableProps()}
+			size="small"
+			className={clsx(className, showFooter ? '' : 'mb-20', 'table sticky')}
+		>
+			<TableHead className={clsx(showHeader ? '' : 'hidden', 'header')}>
 				{headerGroups.map(headerGroup => (
-					<TableRow {...headerGroup.getHeaderGroupProps()}>
+					<TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
 						{headerGroup.headers.map(column => (
-							<TableCell className="whitespace-no-wrap px-12" {...column.getHeaderProps()}>
+							<TableCell className="whitespace-no-wrap px-12 th" {...column.getHeaderProps()}>
 								<span {...(column.sortable && column.getSortByToggleProps())}>
 									{column.render('Header')}
 									{column.sortable ? (
@@ -147,20 +154,20 @@ const EnhancedTable = ({
 					</TableRow>
 				))}
 			</TableHead>
-			<TableBody>
+			<TableBody className="body">
 				{page.map((row, i) => {
 					prepareRow(row);
 					return (
 						<TableRow
 							{...row.getRowProps()}
 							onClick={ev => onRowClick(ev, row)}
-							className={clsx('truncate', rowClick ? 'cursor-pointer' : 'cursor-default')}
+							className={clsx('tr', rowClick ? 'cursor-pointer' : 'cursor-default')}
 						>
 							{row.cells.map(cell => {
 								return (
 									<TableCell
 										{...cell.getCellProps()}
-										className={clsx('px-12 py-6', cell.column.className)}
+										className={clsx('td px-12 py-6', cell.column.className)}
 									>
 										{cell.render('Cell')}
 									</TableCell>
@@ -171,9 +178,10 @@ const EnhancedTable = ({
 				})}
 			</TableBody>
 
-			<TableFooter className={showFooter ? '' : 'hidden'}>
-				<TableRow>
+			<TableFooter className={clsx('footer', showFooter ? '' : 'hidden')}>
+				<TableRow className="tr">
 					<TablePagination
+						className="td"
 						classes={{
 							root: 'overflow-hidden',
 							spacer: 'w-0 max-w-0'

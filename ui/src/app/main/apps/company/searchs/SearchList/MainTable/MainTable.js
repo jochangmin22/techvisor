@@ -42,6 +42,7 @@ const columnName = {
 	'순이익증감(전전)': 130,
 	'영업이익증감(직전)': 130,
 	'순이익증감(직전)': 130,
+	부채비율: 130,
 	현금배당수익률: 100
 };
 
@@ -68,6 +69,7 @@ const csvHeaders = [
 	{ key: '영업이익증감(직전)', label: '영업이익증감(직전)' },
 	{ key: '순이익증감(직전)', label: '순이익증감(직전)' },
 	{ key: '부채비율', label: '부채비율' },
+	{ key: '현금배당수익률', label: '현금배당수익률' },
 	{ key: '적(1)PER*EPS', label: '적정가(1)' },
 	{ key: '적(2)ROE*EPS', label: '적정가(2)' },
 	{ key: '적(3)EPS*10', label: '적정가(3)' },
@@ -93,13 +95,14 @@ const columns = Object.entries(columnName).map(([key, value]) => {
 			? 'text-left'
 			: 'text-right';
 	const textFilters = ['종목코드', '회사명', '업종', '주요제품', '대표자명'].includes(key);
-
+	const stickyColumns = key === '회사명' || key === '종목코드' ? true : false;
 	return {
 		Header: key,
 		accessor: key,
 		className: clsx(bold, align, 'truncate'),
 		sortable: true,
 		width: value,
+		sticky: clsx(stickyColumns ? 'left' : ''),
 		// defaultCanFilter: false,
 		// disableFilters: disableFilters,
 		Filter: textFilters ? DefaultColumnFilter : NumberRangeColumnFilter,
@@ -134,6 +137,61 @@ const useStyles = makeStyles(theme => ({
 	root: { backgroundColor: theme.palette.primary.dark },
 	backdrop: {
 		zIndex: theme.zIndex.drawer + 1
+	},
+	table: {
+		// border: '1px solid #ddd',
+		// '&.tr': {
+		// 	'&:last-child': {
+		// 		'&.td': {
+		// 			borderBottom: 0
+		// 		}
+		// 	}
+		// },
+		// '&.th, &.td': {
+		// 	padding: 5,
+		// 	borderBottom: '1px solid #ddd',
+		// 	borderRight: '1px solid #ddd',
+		// 	backgroundColor: '#fff',
+		// 	overflow: 'hidden',
+		// 	'&:last-child': {
+		// 		'&.td': {
+		// 			borderRight: 0
+		// 		}
+		// 	}
+		// },
+		'&.sticky': {
+			overflow: 'scroll',
+			'& .header, & .footer': {
+				position: 'sticky',
+				zIndex: 1,
+				width: 'fit-content'
+			},
+			// '&.header': {
+			// 	top: 0,
+			// 	boxShadow: '0 3px 3px #ccc'
+			// },
+			// '&.footer': {
+			// 	bottom: 0,
+			// 	boxShadow: '0 -3px 3px #ccc'
+			// },
+			'& tbody': {
+				position: 'relative',
+				zIndex: 0
+			},
+			'& [data-sticky-td]': {
+				position: 'sticky',
+				backgroundColor: 'white'
+			},
+			'& [data-sticky-last-left-td]': {
+				// boxShadow: '0 4px 10px 0 rgba(0,0,0,.25)'
+				// boxShadow: '#ebebeb 0 2px 2px'
+				boxShadow: '1px 0px 0px #ccc'
+			}
+			// '& [data-sticky-first-right-td]': {
+			// 	// boxShadow: '#ebebeb 0 2px 0px'
+			// 	boxShadow: '0px 0px 0px #ccc'
+			// }
+		}
 	}
 }));
 
@@ -196,7 +254,7 @@ function MainTable() {
 	if (!!(searchText && !searchLoading && entities && entities.length === 0)) {
 		return (
 			<Paper className="rounded-8 shadow h-full w-full">
-				<NoResultMsg className="h-360" />
+				<NoResultMsg className="h-384" />
 			</Paper>
 		);
 	}
@@ -224,22 +282,23 @@ function MainTable() {
 					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-384 px-6">
+			<FuseScrollbars className="max-h-460 px-6">
 				<EnhancedTable
 					columns={columns}
 					data={data}
 					size="small"
-					pageSize={7}
-					pageOptions={[7, 20, 50]}
+					pageSize={8}
+					pageOptions={[16, 24, 50]}
 					onRowClick={(ev, row) => {
 						if (row) {
 							handleClick(row.original.회사명, row.original.종목코드);
 						}
 					}}
+					className={classes.table}
 				/>
 			</FuseScrollbars>
 			<SpinLoading
-				className={clsx(searchLoading ? 'visible' : 'hidden', classes.backdrop, 'absolute h-360 inset-0')}
+				className={clsx(searchLoading ? 'visible' : 'hidden', classes.backdrop, 'absolute h-384 inset-0')}
 			/>
 		</Paper>
 	);

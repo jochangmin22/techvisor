@@ -627,7 +627,8 @@ module.exports = {
 			full: '100%',
 			screen: '100vh',
 			330: '33rem',
-			460: '46rem'
+			460: '46rem',
+			480: '48rem'
 		}),
 		inset: {
 			0: '0',
@@ -786,7 +787,9 @@ module.exports = {
 			50: '50',
 			99: '99',
 			999: '999',
-			9999: '9999'
+			9999: '9999',
+			'-1': '-1',
+			'-10': '-10'
 		},
 		gap: theme => theme('spacing'),
 		gridTemplateColumns: {
