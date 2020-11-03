@@ -121,16 +121,12 @@ const EnhancedTable = ({
 
 	// Render the UI for your table
 	return (
-		<MaUTable
-			{...getTableProps()}
-			size="small"
-			className={clsx(className, showFooter ? '' : 'mb-20', 'table sticky')}
-		>
-			<TableHead className={clsx(showHeader ? '' : 'hidden', 'header')}>
+		<MaUTable {...getTableProps()} size="small" className={clsx(className, showFooter ? '' : 'mb-20', 'sticky')}>
+			<TableHead className={showHeader ? '' : 'hidden'}>
 				{headerGroups.map(headerGroup => (
-					<TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
+					<TableRow {...headerGroup.getHeaderGroupProps()}>
 						{headerGroup.headers.map(column => (
-							<TableCell className="whitespace-no-wrap px-12 th" {...column.getHeaderProps()}>
+							<TableCell className="whitespace-no-wrap px-12" {...column.getHeaderProps()}>
 								<span {...(column.sortable && column.getSortByToggleProps())}>
 									{column.render('Header')}
 									{column.sortable ? (
@@ -154,20 +150,20 @@ const EnhancedTable = ({
 					</TableRow>
 				))}
 			</TableHead>
-			<TableBody className="body">
+			<TableBody>
 				{page.map((row, i) => {
 					prepareRow(row);
 					return (
 						<TableRow
 							{...row.getRowProps()}
 							onClick={ev => onRowClick(ev, row)}
-							className={clsx('tr', rowClick ? 'cursor-pointer' : 'cursor-default')}
+							className={clsx(rowClick ? 'cursor-pointer' : 'cursor-default')}
 						>
 							{row.cells.map(cell => {
 								return (
 									<TableCell
 										{...cell.getCellProps()}
-										className={clsx('td px-12 py-6', cell.column.className)}
+										className={clsx('px-12 py-6', cell.column.className)}
 									>
 										{cell.render('Cell')}
 									</TableCell>
@@ -178,10 +174,9 @@ const EnhancedTable = ({
 				})}
 			</TableBody>
 
-			<TableFooter className={clsx('footer', showFooter ? '' : 'hidden')}>
-				<TableRow className="tr">
+			<TableFooter className={showFooter ? '' : 'hidden'}>
+				<TableRow>
 					<TablePagination
-						className="td"
 						classes={{
 							root: 'overflow-hidden',
 							spacer: 'w-0 max-w-0'

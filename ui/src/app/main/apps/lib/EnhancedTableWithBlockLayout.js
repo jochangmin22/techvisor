@@ -18,6 +18,7 @@ import {
 	useResizeColumns,
 	useTable
 } from 'react-table';
+import { useSticky } from 'react-table-sticky';
 import clsx from 'clsx';
 
 // import ContactsTablePaginationActions from './ContactsTablePaginationActions';
@@ -46,7 +47,8 @@ const EnhancedTable = ({
 	showHeader = true,
 	showFooter = true,
 	rowClick = true,
-	onRowClick
+	onRowClick,
+	className
 }) => {
 	const {
 		getTableProps,
@@ -72,7 +74,8 @@ const EnhancedTable = ({
 		useSortBy,
 		usePagination,
 		useRowSelect,
-		useResizeColumns
+		useResizeColumns,
+		useSticky
 		// hooks => {
 		// 	hooks.allColumns.push(_columns => [
 		// 		// Let's make a column for selection
@@ -116,7 +119,7 @@ const EnhancedTable = ({
 
 	// Render the UI for your table
 	return (
-		<MaUTable {...getTableProps()} size="small" className={showFooter ? '' : 'mb-20'}>
+		<MaUTable {...getTableProps()} size="small" className={clsx(className, showFooter ? '' : 'mb-20', 'sticky')}>
 			<TableHead className={showHeader ? '' : 'hidden'}>
 				{headerGroups.map(headerGroup => (
 					<TableRow {...headerGroup.getHeaderGroupProps()}>
@@ -151,7 +154,7 @@ const EnhancedTable = ({
 						<TableRow
 							{...row.getRowProps()}
 							onClick={ev => onRowClick(ev, row)}
-							className={clsx('truncate', rowClick ? 'cursor-pointer' : 'cursor-default')}
+							className={rowClick ? 'cursor-pointer' : 'cursor-default'}
 						>
 							{row.cells.map(cell => {
 								return (

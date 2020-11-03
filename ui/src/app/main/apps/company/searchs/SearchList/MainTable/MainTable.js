@@ -139,41 +139,13 @@ const useStyles = makeStyles(theme => ({
 		zIndex: theme.zIndex.drawer + 1
 	},
 	table: {
-		// border: '1px solid #ddd',
-		// '&.tr': {
-		// 	'&:last-child': {
-		// 		'&.td': {
-		// 			borderBottom: 0
-		// 		}
-		// 	}
-		// },
-		// '&.th, &.td': {
-		// 	padding: 5,
-		// 	borderBottom: '1px solid #ddd',
-		// 	borderRight: '1px solid #ddd',
-		// 	backgroundColor: '#fff',
-		// 	overflow: 'hidden',
-		// 	'&:last-child': {
-		// 		'&.td': {
-		// 			borderRight: 0
-		// 		}
-		// 	}
-		// },
 		'&.sticky': {
 			overflow: 'scroll',
-			'& .header, & .footer': {
+			'& thead, & .tfooter': {
 				position: 'sticky',
 				zIndex: 1,
 				width: 'fit-content'
 			},
-			// '&.header': {
-			// 	top: 0,
-			// 	boxShadow: '0 3px 3px #ccc'
-			// },
-			// '&.footer': {
-			// 	bottom: 0,
-			// 	boxShadow: '0 -3px 3px #ccc'
-			// },
 			'& tbody': {
 				position: 'relative',
 				zIndex: 0
@@ -183,14 +155,8 @@ const useStyles = makeStyles(theme => ({
 				backgroundColor: 'white'
 			},
 			'& [data-sticky-last-left-td]': {
-				// boxShadow: '0 4px 10px 0 rgba(0,0,0,.25)'
-				// boxShadow: '#ebebeb 0 2px 2px'
 				boxShadow: '1px 0px 0px #ccc'
 			}
-			// '& [data-sticky-first-right-td]': {
-			// 	// boxShadow: '#ebebeb 0 2px 0px'
-			// 	boxShadow: '0px 0px 0px #ccc'
-			// }
 		}
 	}
 }));
@@ -282,19 +248,19 @@ function MainTable() {
 					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-460 px-6">
+			<FuseScrollbars className="max-h-460 mx-8">
 				<EnhancedTable
 					columns={columns}
 					data={data}
 					size="small"
-					pageSize={8}
-					pageOptions={[16, 24, 50]}
+					className={classes.table}
+					pageSize={7}
+					pageOptions={[14, 21, 50]}
 					onRowClick={(ev, row) => {
 						if (row) {
 							handleClick(row.original.회사명, row.original.종목코드);
 						}
 					}}
-					className={classes.table}
 				/>
 			</FuseScrollbars>
 			<SpinLoading

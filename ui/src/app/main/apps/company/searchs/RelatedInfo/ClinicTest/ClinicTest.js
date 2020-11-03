@@ -91,7 +91,7 @@ function ClinicTest() {
 					className="h-360"
 				/>
 			) : (
-				<FuseScrollbars className="max-h-360 px-6">
+				<FuseScrollbars className="max-h-360 mx-8">
 					{showLoading ? (
 						<SpinLoading className="h-360" />
 					) : (

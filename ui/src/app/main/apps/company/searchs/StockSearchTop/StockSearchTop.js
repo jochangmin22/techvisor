@@ -18,7 +18,28 @@ import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
 const useStyles = makeStyles(theme => ({
 	root: { backgroundColor: theme.palette.background.paper },
-	label: { backgroundColor: theme.palette.primary.dark }
+	label: { backgroundColor: theme.palette.primary.dark },
+	table: {
+		'&.sticky': {
+			overflow: 'scroll',
+			'& thead, & .tfooter': {
+				position: 'sticky',
+				zIndex: 1,
+				width: 'fit-content'
+			},
+			'& tbody': {
+				position: 'relative',
+				zIndex: 0
+			},
+			'& [data-sticky-td]': {
+				position: 'sticky',
+				backgroundColor: 'white'
+			},
+			'& [data-sticky-last-left-td]': {
+				boxShadow: '1px 0px 0px #ccc'
+			}
+		}
+	}
 }));
 
 const columnName = {
@@ -38,12 +59,14 @@ const columnName = {
 
 const columns = Object.entries(columnName).map(([key, value]) => {
 	const align = key === '순위' || key === '종목명' ? 'text-left' : 'text-right';
+	const stickyColumns = key === '순위' || key === '종목명' ? true : false;
 	return {
 		Header: key,
 		accessor: key,
 		className: clsx(align, 'text-12 font-400 truncate'),
 		sortable: true,
 		width: value,
+		sticky: clsx(stickyColumns ? 'left' : ''),
 		Cell: ({ cell }) => {
 			return (
 				<div>
@@ -121,7 +144,7 @@ function StockSearchTop() {
 			{isEmpty ? (
 				<EmptyMsg icon="camera" msg="종목검색 상위" text="내용이 없습니다." className="h-320" />
 			) : (
-				<FuseScrollbars className="max-h-400 px-6">
+				<FuseScrollbars className="max-h-400 mx-8">
 					{showLoading ? (
 						<SpinLoading className="h-400" />
 					) : (
@@ -129,6 +152,7 @@ function StockSearchTop() {
 							columns={columns}
 							data={data}
 							size="small"
+							className={classes.table}
 							onRowClick={(ev, row) => {
 								if (row) {
 									handleClick(row.original.회사명, row.original.종목코드);
