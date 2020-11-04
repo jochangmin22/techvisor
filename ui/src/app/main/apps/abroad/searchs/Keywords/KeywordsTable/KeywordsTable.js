@@ -86,7 +86,7 @@ function KeywordsTable() {
 	}
 
 	return (
-		<FuseScrollbars className="max-h-288 px-12 py-0 items-center">
+		<FuseScrollbars className="max-h-288 mx-8 py-0 items-center">
 			<MuiTable stickyHeader size="small">
 				<TableHead>
 					<TableRow>

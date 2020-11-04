@@ -1,13 +1,38 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
-import { useTheme } from '@material-ui/core/styles';
+import { useTheme, makeStyles } from '@material-ui/core/styles';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';
 
+const useStyles = makeStyles(theme => ({
+	table: {
+		'&.sticky': {
+			overflow: 'scroll',
+			'& thead, & .tfooter': {
+				position: 'sticky',
+				zIndex: 1,
+				width: 'fit-content'
+			},
+			'& tbody': {
+				position: 'relative',
+				zIndex: 0
+			},
+			'& [data-sticky-td]': {
+				position: 'sticky',
+				backgroundColor: 'white'
+			},
+			'& [data-sticky-last-left-td]': {
+				boxShadow: '1px 0px 0px #ccc'
+			}
+		}
+	}
+}));
+
 function IndicatorTable(props) {
 	const theme = useTheme();
+	const classes = useStyles();
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.indicator);
 
 	const [data, setData] = useState([]);
@@ -71,7 +96,8 @@ function IndicatorTable(props) {
 				),
 				className: 'text-12 overflow-hidden',
 				sortable: true,
-				width: 180
+				width: 180,
+				sticky: 'left'
 			}
 		].concat(
 			['피인용수', '총등록건', 'CPP', 'PII', 'TS', 'PFS'].map((item, index) => ({
@@ -96,13 +122,15 @@ function IndicatorTable(props) {
 	}
 
 	return (
-		<Paper className="w-full h-full shadow-none">
-			<FuseScrollbars className="max-h-360 w-256 sm:w-400 md:w-320 lg:w-620 xl:w-620 px-8">
+		<Paper className="w-full h-full shadow-none px-8">
+			{/* <FuseScrollbars className="max-h-360 w-256 sm:w-400 md:w-320 lg:w-620 xl:w-620 px-8"> */}
+			<FuseScrollbars className="mx-8">
 				<EnhancedTable
 					columns={columns}
 					data={data}
 					defaultColumn={defaultColumn}
 					size="small"
+					className={classes.table}
 					pageSize={9}
 					pageOptions={[9, 18, 27]}
 					onRowClick={(ev, row) => {

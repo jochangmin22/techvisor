@@ -67,7 +67,7 @@ function MatrixDialogTable(props) {
 	}
 
 	return (
-		<FuseScrollbars className="max-h-512 px-6">
+		<FuseScrollbars className="max-h-512 mx-8">
 			<EnhancedTable
 				columns={columns}
 				data={data}

@@ -27,7 +27,6 @@ import {
 	// getRightHolder,
 	// getApplicant,
 	// getApplicantTrend,
-	getSimilar,
 	resetSearch
 } from 'app/main/apps/search/store/searchSlice';
 
@@ -68,7 +67,6 @@ function SearchDetails(props) {
 		dispatch(getQuote(params));
 		dispatch(getFamily(params));
 		dispatch(getLegal(params));
-		dispatch(getSimilar(params));
 		dispatch(getIpcCpc(params));
 		dispatch(getRnd(params));
 		// eslint-disable-next-line

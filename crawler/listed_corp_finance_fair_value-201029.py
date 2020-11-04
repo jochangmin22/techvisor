@@ -663,9 +663,9 @@ def main_def():
     # for i in range(0,50):
     for i in rangeValue:
         start_time = time.time()
-        print(kiscode)
         try:
             kiscode = kindInfo.종목코드.values[i].strip()
+            print(kiscode)
         except:
             print('----------------------')
             print(i + "번에 대한 종목코드가 없어서 종료합니다.")            

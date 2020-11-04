@@ -19,7 +19,6 @@ import {
 	getIpcCpc,
 	getRnd,
 	getLegal,
-	getSimilar,
 	resetSearch
 } from 'app/main/apps/search/store/searchSlice';
 
@@ -59,7 +58,6 @@ function SearchPageLayout(props) {
 		dispatch(getQuote(params));
 		dispatch(getFamily(params));
 		dispatch(getLegal(params));
-		dispatch(getSimilar(params));
 		dispatch(getIpcCpc(params));
 		dispatch(getRnd(params));
 		// eslint-disable-next-line

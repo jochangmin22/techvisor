@@ -224,19 +224,15 @@ function MatrixAnalysis() {
 						<SpinLoading className="h-360" />
 					) : (
 						<>
-							<FuseScrollbars className="max-h-360 px-6">
+							<FuseScrollbars className="max-h-360 mx-8">
 								<EnhancedTable
 									columns={columns}
-									// defaultColumn={defaultColumn}
 									data={data}
 									size="small"
-									pageSize={8}
-									pageOptions={[8, 16, 24]}
+									pageSize={7}
+									pageOptions={[7, 14, 24]}
 									onRowClick={(ev, row) => {
 										if (row) {
-											// window.open(row.original.link, '_blank');
-											// props.history.push(row.original.link);
-											// dispatch(openEditContactDialog(row.original));
 										}
 									}}
 								/>

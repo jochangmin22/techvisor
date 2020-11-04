@@ -89,7 +89,7 @@ function Family(props) {
 				<div className="px-16">
 					<FamilyTree data={data} />
 				</div>
-				<FuseScrollbars className="max-h-512 px-6">
+				<FuseScrollbars className="max-h-512 mx-8">
 					<EnhancedTable
 						columns={columns}
 						data={data}

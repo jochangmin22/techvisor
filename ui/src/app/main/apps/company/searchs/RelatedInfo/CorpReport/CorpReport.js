@@ -70,10 +70,6 @@ function CorpReport() {
 
 	const isEmpty = !!(data.length === 0 && !showLoading);
 
-	// if (corpName === undefined) {
-	// 	return '';
-	// }
-
 	return (
 		<div className="w-full h-full py-8">
 			<div className="px-12 flex items-center justify-end mb-8">

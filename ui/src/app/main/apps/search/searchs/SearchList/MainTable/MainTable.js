@@ -4,7 +4,6 @@ import { CSVLink } from 'react-csv';
 import { withRouter } from 'react-router-dom';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableServerSide';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
@@ -117,7 +116,8 @@ const colsList = [
 ];
 
 const useStyles = makeStyles(theme => ({
-	root: { backgroundColor: theme.palette.primary.dark }
+	root: { backgroundColor: theme.palette.primary.dark },
+	paper: { backgroundColor: theme.palette.background.paper }
 }));
 
 function MainTable(props) {
@@ -187,12 +187,8 @@ function MainTable(props) {
 
 	// function onBtExport() {}
 
-	if (!entities || entities.length === 0) {
-		return <SpinLoading />;
-	}
-
 	return (
-		<Paper className="rounded-8 shadow h-512 w-full mb-36">
+		<div className={clsx(classes.paper, 'rounded-8 shadow h-512 w-full mb-36')}>
 			<div className="p-12 p-0 flex items-center justify-between">
 				<div className="px-12 flex flex-row items-center justify-end mb-8">
 					<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4 mr-8')}>
@@ -215,22 +211,26 @@ function MainTable(props) {
 					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-460 px-6">
-				<EnhancedTable
-					columns={columns}
-					data={data}
-					fetchData={fetchData}
-					loading={loading}
-					pageCount={pageCount}
-					size="small"
-					onRowClick={(ev, row) => {
-						if (row) {
-							props.history.push(`/apps/searchPage/${row.original.출원번호}`);
-						}
-					}}
-				/>
+			<FuseScrollbars className="max-h-460 mx-8">
+				{!entities || entities.length === 0 ? (
+					<SpinLoading className="h-460" />
+				) : (
+					<EnhancedTable
+						columns={columns}
+						data={data}
+						fetchData={fetchData}
+						loading={loading}
+						pageCount={pageCount}
+						size="small"
+						onRowClick={(ev, row) => {
+							if (row) {
+								props.history.push(`/apps/searchPage/${row.original.출원번호}`);
+							}
+						}}
+					/>
+				)}
 			</FuseScrollbars>
-		</Paper>
+		</div>
 	);
 }
 

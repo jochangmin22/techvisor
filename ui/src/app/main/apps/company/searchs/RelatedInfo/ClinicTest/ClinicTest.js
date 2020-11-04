@@ -8,8 +8,6 @@ import clsx from 'clsx';
 import { getClinicTest } from 'app/main/apps/company/store/searchsSlice';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-// import parseSearchOptions from 'app/main/apps/lib/parseSearchText';
-// import MatrixAnalysisMenu from '../MatrixAnalysisMenu';
 
 const useStyles = makeStyles(theme => ({
 	root: { backgroundColor: theme.palette.primary.dark }
@@ -35,19 +33,11 @@ const columns = Object.entries(columnName).map(([key, value]) => {
 	};
 });
 
-// const colsList = Object.keys(columnName).map((key, index) => ({
-// 	id: key + 1,
-// 	name: key,
-// 	field: key
-// }));
-
 function ClinicTest() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const clinicTest = useSelector(({ companyApp }) => companyApp.searchs.clinicTest);
-	// const clinicOptions = useSelector(({ companyApp }) => companyApp.searchs.clinicOptions);
-	const companyInfo = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
-	const { 회사명: corpName } = companyInfo;
+	const corpName = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp.corpName);
 
 	const data = useMemo(() => (clinicTest ? clinicTest : []), [clinicTest]);
 
@@ -72,10 +62,6 @@ function ClinicTest() {
 
 	const isEmpty = !!(data.length === 0 && !showLoading);
 
-	// if (corpName === undefined) {
-	// 	return '';
-	// }
-
 	return (
 		<div className="w-full h-full py-8">
 			<div className="px-12 flex items-center justify-end mb-8">
@@ -97,16 +83,12 @@ function ClinicTest() {
 					) : (
 						<EnhancedTable
 							columns={columns}
-							// defaultColumn={defaultColumn}
 							data={data}
 							size="small"
 							pageSize={8}
 							pageOptions={[8, 16, 24]}
 							onRowClick={(ev, row) => {
 								if (row) {
-									// window.open(row.original.link, '_blank');
-									// props.history.push(row.original.link);
-									// dispatch(openEditContactDialog(row.original));
 								}
 							}}
 						/>

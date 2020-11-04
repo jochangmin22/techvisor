@@ -19,7 +19,7 @@ function NewsArticles() {
 	const newsSA = useSelector(({ companyApp }) => companyApp.searchs.newsSA);
 
 	const data = useMemo(() => news, [news]);
-	const dataSA = useMemo(() => (newsSA === 0 || newsSA < 15 || newsSA > 85 ? 50 : newsSA), [newsSA]);
+	const dataSA = useMemo(() => (newsSA ? newsSA : 50), [newsSA]);
 
 	const columns = useMemo(
 		() => [
@@ -79,7 +79,7 @@ function NewsArticles() {
 								'h-full items-center justify-center text-center text-11 p-4 text-white'
 							)}
 							style={{
-								width: `${dataSA}%`,
+								width: `${30 > dataSA ? 30 : dataSA}%`,
 								transition: 'all .2s ease-out'
 							}}
 						>
@@ -91,7 +91,7 @@ function NewsArticles() {
 								'h-full items-center justify-center text-center text-11 p-4 text-white'
 							)}
 							style={{
-								width: `${100 - dataSA}%`,
+								width: `${70 < dataSA ? 70 : 100 - dataSA}%`,
 								transition: 'all .2s ease-out'
 							}}
 						>

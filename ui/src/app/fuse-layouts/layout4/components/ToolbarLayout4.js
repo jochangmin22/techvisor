@@ -49,7 +49,16 @@ function ToolbarLayout4(props) {
 						<UserMenu />
 
 						<FullScreenToggle />
-						<Button className="font-300">서비스안내</Button>
+						<Button
+							component="a"
+							href="https://www.notion.so/jingu0705/060138803fe046d4a4d4eaab641ca06a"
+							target="_blank"
+							rel="noreferrer noopener"
+							role="button"
+							className="font-300"
+						>
+							서비스안내
+						</Button>
 						<Button className="font-300">고객센터</Button>
 					</div>
 

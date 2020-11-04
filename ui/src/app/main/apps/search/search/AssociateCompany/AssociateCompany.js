@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { CSVLink } from 'react-csv';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import { makeStyles } from '@material-ui/core/styles';
@@ -13,15 +12,11 @@ import DownloadFilterMenu from '../DownloadFilterMenu';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
 import { getAssociateCorp } from 'app/main/apps/search/store/searchSlice';
-import {
-	updateCols,
-	resetSelectedCorp,
-	setSelectedCorp,
-	setSearchSubmit
-} from 'app/main/apps/company/store/searchsSlice';
+import { updateCols, resetSelectedCorp, setSelectedCorp } from 'app/main/apps/company/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
-// TO-DO: KSIC 산업코드 - IPC로 검색 - 현재 출원인명 <-> 대표자, 기업명으로 검색됨
+// TO-DO: KSIC 산업코드 - IPC로 검색 ; 현재, 출원인명 <-> 대표자, 기업명으로 검색됨
 
 const columnName = {
 	종목코드: '110',
@@ -100,7 +95,8 @@ const colsList = Object.keys(columnName).map((key, index) => ({
 }));
 
 const useStyles = makeStyles(theme => ({
-	root: { backgroundColor: theme.palette.primary.dark }
+	root: { backgroundColor: theme.palette.background.paper },
+	label: { backgroundColor: theme.palette.primary.dark }
 }));
 
 function addZeroes(num) {
@@ -108,7 +104,6 @@ function addZeroes(num) {
 }
 
 function AssociateCompany(props) {
-	console.log('AssociateCompany -> props', props);
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const { applicant } = props;
@@ -116,9 +111,14 @@ function AssociateCompany(props) {
 	const cols = useSelector(({ searchApp }) => searchApp.search.cols);
 	const [csvData, setCsvData] = useState(entities);
 
+	const [showLoading, setShowLoading] = useState(false);
+
 	useEffect(() => {
 		if (applicant) {
-			dispatch(getAssociateCorp({ applicant: applicant }));
+			setShowLoading(true);
+			dispatch(getAssociateCorp({ applicant: applicant })).then(() => {
+				setShowLoading(false);
+			});
 		}
 		// eslint-disable-next-line
 	}, [applicant]);
@@ -157,23 +157,24 @@ function AssociateCompany(props) {
 	const handleClick = (name, stockCode, corpNo) => {
 		dispatch(resetSelectedCorp());
 		dispatch(setSelectedCorp({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
-		dispatch(setSearchSubmit(true));
-		// props.onShrink(true);
 	};
 
 	const handleOnChange = useDebounce(cols => {
 		dispatch(updateCols(cols));
 	}, 300);
 
+	const isEmpty = !!(entities.length === 0 && !showLoading);
+
 	return (
-		<Paper className="w-full h-auto shadow rounded-8">
-			<div className="p-12 flex items-center justify-between">
+		<div className={clsx(classes.root, 'w-full h-auto shadow rounded-8 py-8')}>
+			<div className="flex items-center justify-between">
 				<div className="px-12 flex flex-row items-center justify-end mb-8">
-					<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4 mr-8')}>
+					<Typography className={clsx(classes.label, 'text-13 font-400 rounded-4 text-white px-8 py-4 mr-8')}>
 						기업 매칭 결과 {Number(rowsCount).toLocaleString()} 건
 					</Typography>
 					<Typography className="text-right text-12 items-center">
-						** 본 기술과의 출원인업종 분류 키워드가 일치하는 기업정보를 표시합니다.
+						{/* ** 본 기술과의 출원인업종 분류 키워드가 일치하는 기업정보를 표시합니다. */}
+						** 본 기술과의 출원인 키워드가 일치하는 기업정보를 표시합니다.
 					</Typography>
 				</div>
 				<div className="flex items-center">
@@ -191,27 +192,35 @@ function AssociateCompany(props) {
 					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-360 px-6">
-				{!data || data.length === 0 ? (
-					<SpinLoading className="h-360" />
-				) : (
-					<EnhancedTable
-						columns={columns}
-						data={data}
-						size="small"
-						pageSize={8}
-						pageOptions={[8, 25, 50]}
-						onRowClick={(ev, row) => {
-							if (row) {
-								handleClick(row.original.회사명, row.original.종목코드);
-							}
-						}}
-					/>
-				)}
-			</FuseScrollbars>
-		</Paper>
+			{isEmpty ? (
+				<EmptyMsg
+					icon="domain"
+					msg="검색된 기업이 없습니다."
+					text="출원인 키워드와 일치하는 기업이 발견되지 않았습니다."
+					className="h-360"
+				/>
+			) : (
+				<FuseScrollbars className="max-h-360 mx-8">
+					{showLoading ? (
+						<SpinLoading className="h-360" />
+					) : (
+						<EnhancedTable
+							columns={columns}
+							data={data}
+							size="small"
+							pageSize={8}
+							pageOptions={[8, 25, 50]}
+							onRowClick={(ev, row) => {
+								if (row) {
+									handleClick(row.original.회사명, row.original.종목코드);
+								}
+							}}
+						/>
+					)}
+				</FuseScrollbars>
+			)}
+		</div>
 	);
 }
 
-// export default withReducer("searchApp", reducer)(AssociateCompany);
 export default AssociateCompany;

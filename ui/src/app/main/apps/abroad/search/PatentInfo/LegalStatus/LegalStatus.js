@@ -79,7 +79,7 @@ function LegalStatus(props) {
 	return (
 		<Paper className="w-full rounded-8 shadow mb-16">
 			<Typography className="p-16 pl-28 text-14 font-bold">법적 상태</Typography>
-			<FuseScrollbars className="max-h-512 px-6">
+			<FuseScrollbars className="max-h-512 mx-8">
 				<EnhancedTable
 					columns={columns}
 					data={data}

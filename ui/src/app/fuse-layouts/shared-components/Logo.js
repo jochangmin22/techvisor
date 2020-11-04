@@ -4,8 +4,8 @@ import React from 'react';
 
 const useStyles = makeStyles(theme => ({
 	logoIcon: {
-		width: 100, // 24,
-		height: 32, // 24,
+		width: 100,
+		height: 32,
 		transition: theme.transitions.create(['width', 'height'], {
 			duration: theme.transitions.duration.shortest,
 			easing: theme.transitions.easing.easeInOut

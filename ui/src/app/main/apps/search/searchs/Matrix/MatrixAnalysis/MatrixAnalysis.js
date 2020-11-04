@@ -206,7 +206,7 @@ function MatrixAnalysis() {
 				<EmptyMsg icon="blur_linear" msg="매트릭스 분석" text="검색결과가 적어서 분석할 데이타가 부족합니다." />
 			) : (
 				<>
-					<FuseScrollbars className="h-40 px-12">
+					<FuseScrollbars className="h-40 mx-12">
 						<div className="flex w-full ">
 							{/* {matrix.entities && (
 						<Chip label={category} key={category} size="small" className="mx-4" />
@@ -224,14 +224,14 @@ function MatrixAnalysis() {
 						<SpinLoading />
 					) : (
 						<>
-							<FuseScrollbars className="max-h-360 px-6">
+							<FuseScrollbars className="max-h-360 mx-8">
 								<EnhancedTable
 									columns={columns}
 									// defaultColumn={defaultColumn}
 									data={data}
 									size="small"
-									pageSize={8}
-									pageOptions={[8, 16, 24]}
+									pageSize={7}
+									pageOptions={[7, 14, 50]}
 									onRowClick={(ev, row) => {
 										if (row) {
 											// window.open(row.original.link, '_blank');

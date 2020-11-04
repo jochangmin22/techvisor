@@ -158,7 +158,7 @@ function Quotation(props) {
 				<div className="px-16">
 					<QuoteTree data={dataB} />
 				</div>
-				<FuseScrollbars className="max-h-512 px-6">
+				<FuseScrollbars className="max-h-512 mx-8">
 					<EnhancedTable
 						columns={columnsB}
 						data={dataB}

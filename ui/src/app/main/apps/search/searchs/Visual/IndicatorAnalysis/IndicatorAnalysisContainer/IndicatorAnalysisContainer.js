@@ -18,7 +18,6 @@ function IndicatorAnalysisContainer(props) {
 
 	const analysisOptions = useSelector(({ searchApp }) => searchApp.searchs.analysisOptions);
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	// const [showLoading, setShowLoading] = useState(false);
 	const [currentRange, setCurrentRange] = useState(0);
 
 	function handleSelectedCategory(event) {
@@ -32,17 +31,21 @@ function IndicatorAnalysisContainer(props) {
 	const isEmpty = !!(!searchText && !searchNum && !inventor && !assignee);
 
 	useEffect(() => {
-		// setShowLoading(true);
-		const [, params] = parseSearchOptions(searchParams);
-		const subParams = { analysisOptions: analysisOptions };
-		dispatch(getIndicator({ params, subParams })).then(() => {
-			// setShowLoading(false);
-		});
+		const [, mainParams] = parseSearchOptions(searchParams);
+
+		const params = {
+			params: mainParams,
+			subParams: {
+				analysisOptions: analysisOptions
+			}
+		};
+
+		dispatch(getIndicator(params));
 		// eslint-disable-next-line
 	}, [analysisOptions.indicatorOptions]);
 
 	return (
-		<div className="flex flex-col w-full">
+		<div className="flex flex-col">
 			<div className="flex flex-col w-full sm:flex-row justify-between sm:px-8">
 				<FormControl className="flex w-full sm:w-128 mb-16 sm:mb-0 px-12">
 					<Select value={selectedCategory} onChange={handleSelectedCategory} displayEmpty>
@@ -70,7 +73,7 @@ function IndicatorAnalysisContainer(props) {
 					})}
 				</div>
 			</div>
-			<div className="flex flex-row flex-wrap">
+			<div className="flex flex-row flex-wrap w-full">
 				{currentRange === 0 &&
 					(isEmpty ? (
 						<EmptyMsg icon="photo" msg="CPP, PII, TS 및 PFS 경쟁력분석" />

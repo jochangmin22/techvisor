@@ -2,8 +2,6 @@ import React, { useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import Typography from '@material-ui/core/Typography';
-import FuseAnimate from '@fuse/core/FuseAnimate';
 
 const columns = [
 	{
@@ -72,28 +70,8 @@ function SimilarTable(props) {
 		return '';
 	}
 
-	if (data && data.length === 0) {
-		return (
-			<div className="flex flex-col flex-1 items-center justify-center p-16">
-				<div className="max-w-512 text-center">
-					<FuseAnimate delay={500}>
-						<Typography variant="h5" color="textSecondary" className="mb-16">
-							검색된 유사특허가 없습니다.
-						</Typography>
-					</FuseAnimate>
-
-					<FuseAnimate delay={600}>
-						<Typography variant="subtitle1" color="textSecondary" className="mb-48">
-							유사도가 높은 특허가 발견되지 않았습니다.
-						</Typography>
-					</FuseAnimate>
-				</div>
-			</div>
-		);
-	}
-
 	return (
-		<FuseScrollbars className="max-h-512 px-6">
+		<FuseScrollbars className="max-h-512 mx-8">
 			<EnhancedTable
 				columns={columns}
 				data={data}

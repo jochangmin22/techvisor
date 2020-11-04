@@ -17,7 +17,6 @@ import ApplicationNumber from '../ApplicationNumber';
 import IpcChart from '../Ipc/IpcChart';
 import RelatedPerson from '../RelatedPerson';
 
-
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
 
@@ -52,9 +51,7 @@ function a11yProps(index) {
 const useStyles = makeStyles(theme => ({
 	root: {
 		display: 'flex',
-		// flexGrow: 1,
 		backgroundColor: theme.palette.background.paper
-		// minHeight: 360
 	},
 	tabs: {
 		width: 90,
@@ -70,6 +67,9 @@ const useStyles = makeStyles(theme => ({
 		},
 		minHeight: 36,
 		fontSize: '1.2rem'
+	},
+	tabPanel: {
+		width: 'calc(100% - 90px)'
 	}
 }));
 
@@ -85,7 +85,7 @@ function VisualContainer() {
 
 	const isEmpty = !!(!searchText && !inventor && !assignee);
 
-	useEffect(() => { }, [searchParams]);
+	useEffect(() => {}, [searchParams]);
 
 	return (
 		<div className={clsx(classes.root, 'w-full h-full rounded-8 shadow')}>
@@ -117,29 +117,29 @@ function VisualContainer() {
 				</Tabs>
 				<DraggableIcon />
 			</div>
-			<TabPanel value={tabValue} index={0}>
+			<TabPanel value={tabValue} index={0} className={classes.tabPanel}>
 				{tabValue === 0 &&
 					(isEmpty ? (
 						<EmptyMsg icon="assessment" msg="특허 지표분석" />
 					) : (
-							<IndicatorAnalysis searchText={searchText} />
-						))}
+						<IndicatorAnalysis searchText={searchText} />
+					))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={1}>
 				{tabValue === 1 &&
 					(isEmpty ? (
 						<EmptyMsg icon="text_fields" msg="워드클라우드" />
 					) : (
-							<WordCloudChart searchText={searchText} />
-						))}
+						<WordCloudChart searchText={searchText} />
+					))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={2}>
 				{tabValue === 2 &&
 					(isEmpty ? (
 						<EmptyMsg icon="photo" msg="연도별 출원건수" />
 					) : (
-							<ApplicationNumber searchText={searchText} />
-						))}
+						<ApplicationNumber searchText={searchText} />
+					))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={3}>
 				{tabValue === 3 &&
@@ -150,16 +150,16 @@ function VisualContainer() {
 					(isEmpty ? (
 						<EmptyMsg icon="receipt" msg="출원주체별 건수" />
 					) : (
-							<ApplicantClassify searchText={searchText} />
-						))}
+						<ApplicantClassify searchText={searchText} />
+					))}
 			</TabPanel>
 			<TabPanel value={tabValue} index={5}>
 				{tabValue === 5 &&
 					(isEmpty ? (
 						<EmptyMsg icon="assessment" msg="인명정보 동향" />
 					) : (
-							<RelatedPerson searchText={searchText} />
-						))}
+						<RelatedPerson searchText={searchText} />
+					))}
 			</TabPanel>
 		</div>
 	);

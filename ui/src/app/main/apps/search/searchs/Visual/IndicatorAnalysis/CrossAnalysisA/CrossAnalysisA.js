@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useMemo, useLayoutEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
@@ -9,7 +9,6 @@ import _ from '@lodash';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useTheme } from '@material-ui/core';
 import PopoverContent from 'app/main/apps/lib/PopoverContent';
-// import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 const content = (
 	<>
@@ -56,16 +55,16 @@ function CrossAnalysisA(props) {
 
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.indicator);
 
-	const [data, setData] = useState([]);
+	const data = useMemo(() => (entities ? calculateCnt(entities) : []), [entities]);
 
-	useEffect(() => {
-		if (entities && entities.length > 0) {
-			setData(calculateCnt(entities));
-		}
-		// eslint-disable-next-line
-	}, [props.searchText, entities]);
+	// useEffect(() => {
+	// 	if (entities && entities.length > 0) {
+	// 		setData(calculateCnt(entities));
+	// 	}
+	// 	// eslint-disable-next-line
+	// }, [props.searchText, entities]);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		drawChart();
 		// eslint-disable-next-line
 	}, [data]);
@@ -237,7 +236,7 @@ function CrossAnalysisA(props) {
 		}
 	}, 500);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		window.addEventListener('resize', handleResize);
 		return () => {
 			window.removeEventListener('resize', handleResize);
@@ -245,7 +244,7 @@ function CrossAnalysisA(props) {
 	}, [handleResize]);
 
 	if (!entities || entities.length === 0) {
-		return <SpinLoading />;
+		return <SpinLoading className="h-xs" />;
 	}
 
 	return (

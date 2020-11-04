@@ -97,7 +97,7 @@ function IndicatorTable(props) {
 
 	return (
 		<Paper className="w-full h-full shadow-none">
-			<FuseScrollbars className="max-h-360 w-256 sm:w-400 md:w-320 lg:w-620 xl:w-620 px-8">
+			<FuseScrollbars className="max-h-360 w-256 sm:w-400 md:w-320 lg:w-620 xl:w-620 mx-8">
 				<EnhancedTable
 					columns={columns}
 					data={data}

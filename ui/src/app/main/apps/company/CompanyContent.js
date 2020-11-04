@@ -62,7 +62,7 @@ function CompanyContent() {
 
 	return (
 		<div className="flex h-full w-full justify-center">
-			<div className="flex flex-wrap w-full h-460 items-start justify-start mt-8 px-8">
+			<div className="flex flex-wrap w-full h-480 items-start justify-start mt-8 px-8">
 				<Draggable
 					handle=".draggable"
 					onStart={() => handleStart('A')}

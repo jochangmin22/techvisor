@@ -5,7 +5,6 @@ import { CSVLink } from 'react-csv';
 import { withRouter } from 'react-router-dom';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithFilter';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
@@ -135,6 +134,7 @@ const colsList = Object.keys(columnName).map((key, index) => ({
 
 const useStyles = makeStyles(theme => ({
 	root: { backgroundColor: theme.palette.primary.dark },
+	paper: { backgroundColor: theme.palette.background.paper },
 	backdrop: {
 		zIndex: theme.zIndex.drawer + 1
 	},
@@ -219,14 +219,14 @@ function MainTable() {
 
 	if (!!(searchText && !searchLoading && entities && entities.length === 0)) {
 		return (
-			<Paper className="rounded-8 shadow h-full w-full">
+			<div className={clsx(classes.paper, 'rounded-8 shadow h-full w-full')}>
 				<NoResultMsg className="h-384" />
-			</Paper>
+			</div>
 		);
 	}
 
 	return (
-		<Paper className="rounded-8 shadow h-full w-full">
+		<div className={clsx(classes.paper, 'rounded-8 shadow h-full w-full')}>
 			<div className="p-12 pb-0 flex items-center justify-between">
 				<div className="px-12 flex flex-row items-center justify-end mb-8">
 					<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4 mr-8')}>
@@ -266,7 +266,7 @@ function MainTable() {
 			<SpinLoading
 				className={clsx(searchLoading ? 'visible' : 'hidden', classes.backdrop, 'absolute h-384 inset-0')}
 			/>
-		</Paper>
+		</div>
 	);
 }
 
