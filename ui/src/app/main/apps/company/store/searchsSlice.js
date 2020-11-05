@@ -5,8 +5,8 @@ const URL = `${process.env.REACT_APP_API_URL}/api/company-app/searchs/`;
 const URL_OTHER = `${process.env.REACT_APP_API_URL}/api/search-app/searchs/`;
 const NAME = 'companyApp/searchs/';
 
-export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async (params, subParams) => {
-	const response = await axios.get(URL, { params: params, subParams: subParams });
+export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async ({ params, subParams }) => {
+	const response = await axios.post(URL, { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -53,22 +53,22 @@ export const getClinicTest = createAsyncThunk(NAME + 'getClinicTest', async para
 	return data;
 });
 
-export const getNews = createAsyncThunk(NAME + 'getNews', async (params, subParams) => {
-	const response = await axios.get(URL_OTHER + 'news', { params: params, subParams: subParams });
+export const getNews = createAsyncThunk(NAME + 'getNews', async ({ params, subParams }) => {
+	const response = await axios.post(URL_OTHER + 'news', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async (params, subParams) => {
-	const response = await axios.get(URL_OTHER + 'newssa', { params: params, subParams: subParams });
+export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async ({ params, subParams }) => {
+	const response = await axios.post(URL_OTHER + 'newssa', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async (params, subParams) => {
-	const response = await axios.get(URL_OTHER + 'relatedcompany', { params: params, subParams: subParams });
+export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async ({ params, subParams }) => {
+	const response = await axios.post(URL_OTHER + 'relatedcompany', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -88,15 +88,15 @@ export const getOwnedPatent = createAsyncThunk(NAME + 'getOwnedPatent', async ({
 	return data;
 });
 
-export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async (params, subParams) => {
-	const response = await axios.get(URL + 'matrix', { params: params, subParams: subParams });
+export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'matrix', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async (params, subParams) => {
-	const response = await axios.get(URL + 'matrixdialog', { params: params, subParams: subParams });
+export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'matrixdialog', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -109,8 +109,8 @@ export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async ({ par
 	return data;
 });
 
-export const getKeywords = createAsyncThunk(NAME + 'getKeywords', async (params, subParams) => {
-	const response = await axios.get(URL + 'vec', { params: params, subParams: subParams });
+export const getKeywords = createAsyncThunk(NAME + 'getKeywords', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'vec', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -123,8 +123,8 @@ export const getKeywordsVec = createAsyncThunk(NAME + 'getKeywordsVec', async (p
 	return data;
 });
 
-export const getIndicator = createAsyncThunk(NAME + 'getIndicator', async (params, subParams) => {
-	const response = await axios.get(URL + 'indicator', { params: params, subParams: subParams });
+export const getIndicator = createAsyncThunk(NAME + 'getIndicator', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'indicator', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;

@@ -5,108 +5,84 @@ const URL = `${process.env.REACT_APP_API_URL}/api/search-app/search/`;
 const NAME = 'searchApp/search/';
 
 export const getSearch = createAsyncThunk(NAME + 'getSearch', async params => {
-	const response = await axios.get(URL, {
-		params: params
-	});
+	const response = await axios.post(URL, params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getQuote = createAsyncThunk(NAME + 'getQuote', async params => {
-	const response = await axios.get(URL + 'quote', {
-		params: params
-	});
+	const response = await axios.post(URL + 'quote', params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getFamily = createAsyncThunk(NAME + 'getFamily', async params => {
-	const response = await axios.get(URL + 'family', {
-		params: params
-	});
+	const response = await axios.post(URL + 'family', params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getIpcCpc = createAsyncThunk(NAME + 'getIpcCpc', async params => {
-	const response = await axios.get(URL + 'ipccpc', {
-		params: params
-	});
+	const response = await axios.post(URL + 'ipccpc', params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getRnd = createAsyncThunk(NAME + 'getRnd', async params => {
-	const response = await axios.get(URL + 'rnd', {
-		params: params
-	});
+	const response = await axios.post(URL + 'rnd', params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getLegal = createAsyncThunk(NAME + 'getLegal', async params => {
-	const response = await axios.get(URL + 'legal', {
-		params: params
-	});
+	const response = await axios.post(URL + 'legal', params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getRegisterFee = createAsyncThunk(NAME + 'getRegisterFee', async params => {
-	const response = await axios.get(URL + 'registerfee', {
-		params: params
-	});
+	const response = await axios.post(URL + 'registerfee', params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getRightfullOrder = createAsyncThunk(NAME + 'getRightfullOrder', async params => {
-	const response = await axios.get(URL + 'rightfullorder', {
-		params: params
-	});
+	const response = await axios.post(URL + 'rightfullorder', params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getRightHolder = createAsyncThunk(NAME + 'getRightHolder', async params => {
-	const response = await axios.get(URL + 'rightholder', {
-		params: params
-	});
+	const response = await axios.post(URL + 'rightholder', params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getApplicant = createAsyncThunk(NAME + 'getApplicant', async params => {
-	const response = await axios.get(URL + 'applicant', {
-		params: params
-	});
+	const response = await axios.post(URL + 'applicant', params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getApplicantTrend = createAsyncThunk(NAME + 'getApplicantTrend', async params => {
-	const response = await axios.get(URL + 'applicanttrend', {
-		params: params
-	});
+	const response = await axios.post(URL + 'applicanttrend', params);
 	const data = await response.data;
 
 	return data;
 });
 
 export const getApplicantIpc = createAsyncThunk(NAME + 'getApplicantIpc', async params => {
-	const response = await axios.get(URL + 'applicantipc', {
-		params: params
-	});
+	const response = await axios.post(URL + 'applicantipc', params);
 	const data = await response.data;
 
 	return data;

@@ -51,8 +51,8 @@ def get_search_applicant_trend(request):
 def get_search_applicant_ipc(request):
     return search.parse_search_applicant_ipc(request)
 
-def get_search_similar(request):
-    return search.parse_search_similar(request)
+def get_similar(request):
+    return search.similar(request)
 
 def get_associate_corp(request):
     return search.associate_corp(request)

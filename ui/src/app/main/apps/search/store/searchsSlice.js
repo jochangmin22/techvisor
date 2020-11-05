@@ -4,56 +4,56 @@ import axios from 'axios';
 const URL = `${process.env.REACT_APP_API_URL}/api/search-app/searchs/`;
 const NAME = 'searchApp/search/';
 
-export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async (params, subParams) => {
-	const response = await axios.get(URL, { params: params, subParams: subParams });
+export const getSearchs = createAsyncThunk(NAME + 'getSearchs', async ({ params, subParams }) => {
+	const response = await axios.post(URL, { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getNews = createAsyncThunk(NAME + 'getNews', async (params, subParams) => {
-	const response = await axios.get(URL + 'news', { params: params, subParams: subParams });
+export const getNews = createAsyncThunk(NAME + 'getNews', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'news', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async (params, subParams) => {
-	const response = await axios.get(URL + 'newssa', { params: params, subParams: subParams });
+export const getNewsSA = createAsyncThunk(NAME + 'getNewsSA', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'newssa', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async (params, subParams) => {
-	const response = await axios.get(URL + 'relatedcompany', { params: params, subParams: subParams });
+export const getRelatedCompany = createAsyncThunk(NAME + 'getRelatedCompany', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'relatedcompany', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
-export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async (params, subParams) => {
-	const response = await axios.get(URL + 'matrix', { params: params, subParams: subParams });
-	const data = await response.data;
-
-	return data;
-});
-
-export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async (params, subParams) => {
-	const response = await axios.get(URL + 'matrixdialog', { params: params, subParams: subParams });
+export const getMatrix = createAsyncThunk(NAME + 'getMatrix', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'matrix', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async (params, subParams) => {
-	const response = await axios.get(URL + 'wordcloud', { params: params, subParams: subParams });
+export const getMatrixDialog = createAsyncThunk(NAME + 'getMatrixDialog', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'matrixdialog', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
 });
 
-export const getKeywords = createAsyncThunk(NAME + 'getKeywords', async (params, subParams) => {
-	const response = await axios.get(URL + 'vec', { params: params, subParams: subParams });
+export const getWordCloud = createAsyncThunk(NAME + 'getWordCloud', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'wordcloud', { params: params, subParams: subParams });
+	const data = await response.data;
+
+	return data;
+});
+
+export const getKeywords = createAsyncThunk(NAME + 'getKeywords', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'vec', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -66,8 +66,8 @@ export const getKeywordsVec = createAsyncThunk(NAME + 'getKeywordsVec', async (p
 	return data;
 });
 
-export const getIndicator = createAsyncThunk(NAME + 'getIndicator', async (params, subParams) => {
-	const response = await axios.get(URL + 'indicator', { params: params, subParams: subParams });
+export const getIndicator = createAsyncThunk(NAME + 'getIndicator', async ({ params, subParams }) => {
+	const response = await axios.post(URL + 'indicator', { params: params, subParams: subParams });
 	const data = await response.data;
 
 	return data;
@@ -99,7 +99,7 @@ export const initialState = {
 	},
 	searchLoading: null,
 	searchSubmit: null,
-	clickedSearchId: null,
+	selectedAppNo: null,
 	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
 	analysisOptions: {
 		tableOptions: {
@@ -143,6 +143,11 @@ export const initialState = {
 		},
 		data: null
 	},
+	searchPageDialog: {
+		props: {
+			open: false
+		}
+	},
 	wordCloud: [],
 	keywords: {
 		topic: [],
@@ -177,8 +182,11 @@ const searchsSlice = createSlice({
 		setSearchLoading: (state, action) => {
 			state.searchLoading = action.payload;
 		},
-		setClickedSearchId: (state, action) => {
-			state.clickedSearchId = action.payload;
+		setSelectedAppNo: (state, action) => {
+			state.selectedAppNo = action.payload;
+		},
+		resetSelectedAppNo: (state, action) => {
+			state.selectedAppNo = initialState;
 		},
 		setSearchParams: (state, action) => {
 			state.searchParams = action.payload;
@@ -212,6 +220,12 @@ const searchsSlice = createSlice({
 		},
 		closeMatrixDialog: (state, action) => {
 			state.matrixDialog = initialState.matrixDialog;
+		},
+		openSearchPageDialog: (state, action) => {
+			state.searchPageDialog.props.open = true;
+		},
+		closeSearchPageDialog: (state, action) => {
+			state.searchPageDialog = initialState.searchPageDialog;
 		},
 		updateCols: (state, action) => {
 			state.cols = action.payload;
@@ -271,7 +285,8 @@ export const {
 	clearSearchs,
 	clearSearchText,
 	setSearchLoading,
-	setClickedSearchId,
+	setSelectedAppNo,
+	resetSelectedAppNo,
 	setSearchParams,
 	setSearchNum,
 	setSearchVolume,
@@ -283,6 +298,8 @@ export const {
 	updateMatrixCategory,
 	openMatrixDialog,
 	closeMatrixDialog,
+	openSearchPageDialog,
+	closeSearchPageDialog,
 	updateCols,
 	resetKeywordsVec
 } = searchsSlice.actions;

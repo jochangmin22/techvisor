@@ -34,9 +34,9 @@ KIPRIS = settings.KIPRIS
 # for api }
 
 def parse_search(request):
-    """ searchDetails용 검색 """
-    appNo = request.GET.get('appNo', '')
-    appNo = appNo.replace("-", "")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        appNo = data["appNo"]    
 
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
@@ -123,9 +123,10 @@ def parse_search(request):
 
 
 def parse_search_quote(request):
-    """ searchDetails용 인용 검색 """
-    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
-    appNo = appNo.replace("-", "")
+    """ 인용 검색 """
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        appNo = data["appNo"]    
 
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
@@ -266,8 +267,9 @@ def get_citing_info(appNo):
 
 def parse_search_rnd(request):
     """ searchDetails RND """
-    appNo = request.GET.get('appNo') if request.GET.get("appNo") else ''
-    appNo = appNo.replace("-","")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+    appNo = data["appNo"]    
     redisKey = appNo + "¶"
     handleRedis(redisKey, 'rnd')
 
@@ -284,8 +286,9 @@ def parse_search_rnd(request):
 
 def parse_search_family(request):
     """ searchDetails용 패밀리 검색 """
-    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
-    appNo = appNo.replace("-", "")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        appNo = data["appNo"]    
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'family')
@@ -308,8 +311,9 @@ def parse_search_family(request):
 
 def parse_search_ipc_cpc(request):
     """ searchDetails IPC, CPC """
-    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
-    appNo = appNo.replace("-","")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        appNo = data["appNo"]    
     redisKey = appNo + "¶"
 
     handleRedis(redisKey, 'ipccpc')
@@ -333,8 +337,9 @@ def parse_search_ipc_cpc(request):
 
 def parse_search_legal(request):
     """ searchDetails용 법적상태이력 검색 """
-    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
-    appNo = appNo.replace("-", "")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        appNo = data["appNo"]    
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'legal')
@@ -359,8 +364,9 @@ def parse_search_legal(request):
 
 def parse_search_registerfee(request):
     """ searchDetails용 등록료 검색 """
-    rgNo = request.GET.get('rgNo') if request.GET.get('rgNo') else ''
-    rgNo = rgNo.replace("-", "")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        rgNo = data["rgNo"]    
     redisKey = rgNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'registerfee')
@@ -383,8 +389,9 @@ def parse_search_registerfee(request):
 
 def parse_search_rightfullorder(request):
     """ searchDetails용 권리순위 검색 """
-    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
-    appNo = appNo.replace("-", "")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        appNo = data["appNo"]    
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'rightfullorder')
@@ -407,8 +414,9 @@ def parse_search_rightfullorder(request):
 
 def parse_search_rightholder(request):
     """ searchDetails용 권리권자변동 검색 """
-    rgNo = request.GET.get('rgNo') if request.GET.get('rgNo') else ''
-    rgNo = rgNo.replace("-", "")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        rgNo = data["rgNo"]    
     redisKey = rgNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'rightholder')
@@ -431,8 +439,10 @@ def parse_search_rightholder(request):
 
 def parse_search_applicant(request):
     """ searchDetails용 출원인 법인, 출원동향, 보유기술 검색 """
-    cusNo = request.GET.get('cusNo') if request.GET.get('cusNo') else ''
-    cusNo = cusNo.replace("-", "")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        cusNo = data["cusNo"]       
+
     serviceParam = 'CorpBsApplicantService/'
     operationKey = 'corpBsApplicantInfo'
     url = KIPRIS['rest_url'] + serviceParam + operationKey + '?ApplicantNumber=' + cusNo + '&accessKey=' + KIPRIS['service_key']
@@ -537,10 +547,12 @@ def parse_search_applicant_ipc(request):
     #
     return JsonResponse(row, safe=False)
 
-def parse_search_similar(request):
+def similar(request):
     """ 유사 문서 목록 """
-    appNo = request.GET.get('appNo') if request.GET.get('appNo') else ''
-    modelType = request.GET.get('modelType') if request.GET.get('modelType') else 'doc2vec'
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+    appNo = data["appNo"]    
+    modelType = data["modelType"] or 'doc2vec'   
 
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {

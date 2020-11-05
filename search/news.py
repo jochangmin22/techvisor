@@ -39,7 +39,7 @@ display = 100 # 각 키워드 당 검색해서 저장할 기사 수
 
 def clean_keyword(keyword):
     """ 불필요한 단어 제거 """
-    res = re.sub(' and| or| adj[0-9]| near[0-9]|[()]|["]| \(@.*?\)|.AP|.INV|.CTRY|.LANG| \(.*?\).STAT| \(.*?\).TYPE', '', keyword, flags=re.IGNORECASE)
+    res = re.sub(' and| or| adj[0-9]| near[0-9]|[()]|["]| \\(@.*?\)|.AP|.INV|.CTRY|.LANG| \\(.*?\).STAT| \\(.*?\).TYPE', '', keyword, flags=re.IGNORECASE)
     return res 
 
 def parse_news(request, mode="needJson"): # mode : needJson, noJson
