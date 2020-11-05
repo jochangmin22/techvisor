@@ -83,6 +83,7 @@ def connect():
 
 def get_kind_stock_code():
     ''' kind 상장법인목록 crawling '''
+    # stock_code = pd.read_html('http://dev-kind.krx.co.kr/corpgeneral/corpList.do?method=download&orderMode=5&orderStat=A&searchType=13', header=0)[0] 
     stock_code = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&orderMode=5&orderStat=A&searchType=13', header=0)[0] 
     
     # stock_code.sort_values(['상장일'], ascending=True)
@@ -252,13 +253,22 @@ import math
 def fundamental(df):
     ''' df[5] :  'PER', 'PBR', 'EPS', 'BPS', '현금배당수익률' '''
     r = {}
-    df.columns = ['A','B','C']
+
+    # C 컬럼이 안읽힐경우 C 포기
+    df.columns = ['A','B','C'][:len(df.columns)]
 
     # 가장 최근으로 선택
     for name in ['PER', 'PBR', 'EPS', 'BPS', '현금배당수익률']:
         bVal = df.loc[df['A'] == name, 'B']
-        cVal = df.loc[df['A'] == name, 'C']
-        r[name] = bVal if cVal.isnull().values.any() else cVal
+        try:
+            cVal = df.loc[df['A'] == name, 'C']
+        except:
+            pass
+        try:            
+            r[name] = bVal if cVal.isnull().values.any() else cVal
+        except:
+            r[name] = bVal
+
 
     for name in ['PER','PBR']:
         r[name] = r[name].fillna(0).astype(float).to_list()[0]
@@ -380,22 +390,24 @@ def financialSummary(df):
 def employee_listingdate_research(df):
     ''' 기업개요 - df[1] : 종업원수,상장일, df[4]: 연구개발비 '''
     r = {}
-    # columns이 종종 안읽히는 경우
-    try:
-        df[1].columns = ['A','B','C','D']
-    except:
-        df[1].columns = ['A','B']
-        print('===종업원수 제대로 안읽혀짐=== retry required')
 
-    r['상장일'] = df[1].loc[df[1]['A'] =='설립일', 'B'].str.split('상장일: ').str[1].str.replace('/','.').str.replace(')','').to_list()[0]  
+    # C,D 컬럼이 안읽힐경우 C, D 포기
+    df[1].columns = ['A','B','C','D'][:len(df[1].columns)]
+    try:
+        r['상장일'] = df[1].loc[df[1]['A'] =='설립일', 'B'].str.split('상장일: ').str[1].str.replace('/','.').str.replace(')','').to_list()[0]
+    except:
+        r['상장일']  = ''
+        print('상장일', df[1].columns)
     try:
         r['종업원수'] = df[1].loc[df[1]['C'] =='종업원수', 'D'].str.strip().str.split(r' \(').str[0].str.replace(',','').fillna(0).astype(int).to_list()[0]
     except: # 종업원수 null
         r['종업원수'] = 0
+        print('종업원수', df[1].columns)
     try:       
         r['연구개발비(연)'] = df[4]['연구개발비용지출총액'].fillna(0).astype(int).to_list()[0]
     except:        
         r['연구개발비(연)'] = 0
+        print('연구개발비', df[4].columns)
 
     return r
 
@@ -668,7 +680,7 @@ def main_def():
             print(kiscode)
         except:
             print('----------------------')
-            print(i + "번에 대한 종목코드가 없어서 종료합니다.")            
+            print(str(i) + "번에 대한 종목코드가 없어서 종료합니다.")            
             print('done')
             break
         info, financial_res = financial_crawler(kiscode)

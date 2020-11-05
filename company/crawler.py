@@ -118,6 +118,7 @@ def crawl_disclosure_report(**kwargs):
 def update_today_crawl_mdcline():
     today = datetime.today().strftime('%Y%m%d')
     totalCount, df = crawl_mdcline(today)
+
     if totalCount == 0:
         return
     if not df.empty:
@@ -135,10 +136,10 @@ def update_today_crawl_mdcline():
 
 def crawl_mdcline(singleDate):
     ''' 임상정보 크롤링'''
-    try:
-        html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=100&pageNo=1&approval_time=" + singleDate, timeout=10)
-    except requests.exceptions.Timeout: # 결과 없는 경우나 시간이 길어지면 stop
-        return 0, {}
+    # try:
+    html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=100&pageNo=1&approval_time=" + singleDate, timeout=10)
+    # except requests.exceptions.Timeout: # 결과 없는 경우나 시간이 길어지면 stop
+        # return 0, {}
 
     soup = BeautifulSoup(html.content, 'lxml')
     totalCount = soup.find("totalcount").get_text()
@@ -298,13 +299,21 @@ def fundamental(df):
     ''' df[5] :  'PER', 'PBR', 'EPS', 'BPS', '현금배당수익률' '''
 
     r = {}
-    df.columns = ['A','B','C']
+
+    # C 컬럼이 안읽힐경우 C 포기
+    df.columns = ['A','B','C'][:len(df.columns)]
 
     # 가장 최근으로 선택
     for name in ['PER', 'PBR', 'EPS', 'BPS', '현금배당수익률']:
         bVal = df.loc[df['A'] == name, 'B']
-        cVal = df.loc[df['A'] == name, 'C']
-        r[name] = bVal if cVal.isnull().values.any() else cVal
+        try:
+            cVal = df.loc[df['A'] == name, 'C']
+        except:
+            pass
+        try:            
+            r[name] = bVal if cVal.isnull().values.any() else cVal
+        except:
+            r[name] = bVal
 
     for name in ['PER','PBR']:
         r[name] = r[name].fillna(0).astype(float).to_list()[0]
@@ -426,11 +435,9 @@ def financialSummary(df):
 def employee_listingdate_research(df):
     ''' 기업개요 - df[1] : 종업원수,상장일, df[4]: 연구개발비 '''
     r = {}
-    # columns이 종종 안읽히는 경우
-    try:
-        df[1].columns = ['A','B','C','D']
-    except:
-        df[1].columns = ['A','B']
+    
+    # C,D 컬럼이 안읽힐경우 C, D 포기
+    df[1].columns = ['A','B','C','D'][:len(df[1].columns)]
         
     r['상장일'] = df[1].loc[df[1]['A'] =='설립일', 'B'].str.split('상장일: ').str[1].str.replace('/','.').str.replace(')','').to_list()[0]  
     try:

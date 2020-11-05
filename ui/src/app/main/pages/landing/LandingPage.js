@@ -65,20 +65,20 @@ const useStyles = makeStyles(theme => ({
 					marginBottom: '20px',
 					fontSize: 16
 				}
-			},
-			'&::hover': {
-				background: 'url("../../assets/images/icons/pattern.png")',
-				position: 'absolute',
-				top: 0,
-				left: 0,
-				content: '""',
-				width: '100%',
-				height: '100%',
-				transform: 'translate(20px,20px)',
-				opacity: 0,
-				zIndex: -1,
-				transition: 'all .6s ease'
 			}
+			// '&::before': {
+			// 	background: 'url("../../assets/images/icons/pattern.png")',
+			// 	position: 'absolute',
+			// 	top: 0,
+			// 	left: 0,
+			// 	content: '""',
+			// 	width: '100%',
+			// 	height: '100%',
+			// 	transform: 'translate(20px,20px)',
+			// 	opacity: 0,
+			// 	zIndex: -1,
+			// 	transition: 'all .6s ease'
+			// }
 		},
 		'& [data-aos=text-reveal]': {
 			clipPath: 'inset(0 100% 0 0)',
@@ -201,16 +201,18 @@ function LandingPage() {
 						<div className="w-full h-auto">
 							<div className="section-title">
 								<h6 className="sm">
-									<span data-aos="text-reveal" data-aos-once="true" className="aos-init aos-animate">
-										What We Do
-									</span>
+									<FuseAnimate animation="transition.slideUpIn" delay={1500}>
+										<div>What We Do</div>
+									</FuseAnimate>
 								</h6>
 								<h1>
-									<span data-aos="text-reveal" data-aos-once="true" className="aos-init aos-animate">
-										기업, 기술에 대해
-										<br />
-										다양한 분석정보를 제공
-									</span>
+									<FuseAnimate animation="transition.slideUpIn" delay={2000}>
+										<div>
+											기업, 기술에 대해
+											<br />
+											다양한 분석정보를 제공
+										</div>
+									</FuseAnimate>
 								</h1>
 							</div>
 						</div>
