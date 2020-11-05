@@ -2,16 +2,19 @@ import React, { useRef, useEffect, useState } from 'react';
 import echarts from 'echarts';
 import debounce from 'lodash/debounce';
 import _ from '@lodash';
+import { useSelector } from 'react-redux';
 
 function QuoteMap(props) {
 	const chartRef = useRef(null);
+	const appNo = useSelector(({ searchApp }) => searchApp.searchs.selectedAppNo);
+	const 출원인1 = useSelector(({ searchApp }) => searchApp.search.search.출원인1);
 	const [echart, setEchart] = useState(null);
 	// const [series, setSeries] = useState(null);
 
 	const bColor = '#00B050';
 	const fColor = '#F45000';
 
-	let data = [{ name: props.appNo + '\n' + props.applicant, x: 0, y: 0, itemStyle: { borderColor: '#3CB2EF' } }];
+	let data = [{ name: appNo + '\n' + 출원인1, x: 0, y: 0, itemStyle: { borderColor: '#3CB2EF' } }];
 	let links = [];
 	let bCnt = 0;
 	let fCnt = 0;

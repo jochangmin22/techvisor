@@ -176,7 +176,7 @@ function Quotation(props) {
 			<Paper className="w-full h-288 rounded-8 shadow mb-16">
 				<Typography className="p-16 pl-28 text-14 font-bold">인용도 맵</Typography>
 				<FuseScrollbars className="w-full h-216 px-6">
-					<QuoteMap appNo={props.appNo} applicant={props.applicant} data={dataB} />
+					<QuoteMap data={dataB} />
 				</FuseScrollbars>
 			</Paper>
 		</>

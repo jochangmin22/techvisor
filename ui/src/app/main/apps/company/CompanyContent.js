@@ -15,6 +15,7 @@ import RelatedInfoContainer from './searchs/RelatedInfo/RelatedInfoContainer';
 import VisualContainer from './searchs/Visual/VisualContainer';
 import Draggable from 'react-draggable';
 import StockSearchTop from './searchs/StockSearchTop';
+import SearchPageDialog from 'app/main/apps/search/search/SearchPageDialog';
 
 const useStyles = makeStyles(theme => ({
 	paper: {
@@ -129,6 +130,7 @@ function CompanyContent() {
 						<StockSearchTop />
 					</div>
 				</Draggable>
+				<SearchPageDialog />
 			</div>
 		</div>
 	);

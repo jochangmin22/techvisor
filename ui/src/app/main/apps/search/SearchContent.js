@@ -14,6 +14,7 @@ import KeywordsContainer from './searchs/Keywords/KeywordsContainer';
 import MatrixAnalysis from './searchs/Matrix/MatrixAnalysis';
 import NewsContainer from './searchs/News/NewsContainer';
 import Draggable from 'react-draggable';
+import SearchPageDialog from './search/SearchPageDialog';
 
 const useStyles = makeStyles(theme => ({
 	paper: {
@@ -114,6 +115,7 @@ function SearchContent() {
 						<MainTable />
 					</div>
 				</Draggable>
+				<SearchPageDialog />
 			</div>
 		</div>
 	);

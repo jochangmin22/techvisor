@@ -14,15 +14,15 @@ import SimilarTable from '../SimilarTable';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
 const useStyles = makeStyles(theme => ({
-	root: { backgroundColor: theme.palette.background.paper },
+	paper: { backgroundColor: theme.palette.background.paper },
 	label: { backgroundColor: theme.palette.primary.dark }
 }));
 
-function SimilarContainer(props) {
-	const { appNo } = props;
+function SimilarContainer() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const entities = useSelector(({ searchApp }) => searchApp.search.similar.entities);
+	const appNo = useSelector(({ searchApp }) => searchApp.searchs.selectedAppNo);
 	const data = useMemo(() => (entities ? entities : []), [entities]);
 	const [modelType, setModelType] = useState('');
 	const [showLoading, setShowLoading] = useState(false);
@@ -52,7 +52,7 @@ function SimilarContainer(props) {
 				animation: 'transition.slideUpBigIn'
 			}}
 		>
-			<div className={clsx(classes.root, 'h-full w-full rounded-8 shadow py-8')}>
+			<div className={clsx(classes.paper, 'h-full w-full rounded-8 shadow py-8')}>
 				<div className="flex flex-col w-full sm:flex-row justify-between sm:px-12">
 					<div className="flex flex-row items-center p-8 pb-0">
 						<PopoverMsg

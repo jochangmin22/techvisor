@@ -95,7 +95,7 @@ const colsList = Object.keys(columnName).map((key, index) => ({
 }));
 
 const useStyles = makeStyles(theme => ({
-	root: { backgroundColor: theme.palette.background.paper },
+	paper: { backgroundColor: theme.palette.background.paper },
 	label: { backgroundColor: theme.palette.primary.dark }
 }));
 
@@ -166,7 +166,7 @@ function AssociateCompany(props) {
 	const isEmpty = !!(entities.length === 0 && !showLoading);
 
 	return (
-		<div className={clsx(classes.root, 'w-full h-auto shadow rounded-8 py-8')}>
+		<div className={clsx(classes.paper, 'w-full h-auto shadow rounded-8 py-8')}>
 			<div className="flex items-center justify-between">
 				<div className="px-12 flex flex-row items-center justify-end mb-8">
 					<Typography className={clsx(classes.label, 'text-13 font-400 rounded-4 text-white px-8 py-4 mr-8')}>

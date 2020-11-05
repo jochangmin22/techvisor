@@ -1,4 +1,3 @@
-// import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
@@ -7,6 +6,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import React, { useState, useRef } from 'react';
 import InfoIcon from '@material-ui/icons/Info';
 import FiguresDialog from '../FiguresDialog';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -57,10 +57,9 @@ const tileData = [
 	// }
 ];
 
-function Figures(props, ref) {
-	// const [data, setData] = useState(null);
+function Figures() {
 	const classes = useStyles();
-	const { appNo } = props;
+	const appNo = useSelector(({ searchApp }) => searchApp.searchs.selectedAppNo);
 	const [data] = useState(tileData);
 
 	const openDialogRef = useRef();

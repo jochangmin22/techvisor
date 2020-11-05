@@ -113,9 +113,7 @@ export const getApplicantIpc = createAsyncThunk(NAME + 'getApplicantIpc', async 
 });
 
 export const getSimilar = createAsyncThunk(NAME + 'getSimilar', async params => {
-	const response = await axios.get(URL + 'similar', {
-		params: params
-	});
+	const response = await axios.post(URL + 'similar', params);
 	const data = await response.data;
 
 	return data;
@@ -131,7 +129,36 @@ export const getAssociateCorp = createAsyncThunk(NAME + 'getAssociateCorp', asyn
 const searchAdapter = createEntityAdapter({});
 
 const initialState = {
-	search: null,
+	search: {
+		등록사항: '',
+		명칭: '',
+		영문명칭: '',
+		출원인1: '',
+		출원인코드1: '',
+		출원인주소1: '',
+		출원인국가코드1: '',
+		전문소token: '',
+		등록번호: '',
+		초록: '',
+		청구항종류: [],
+		청구항들: [],
+		기술분야: '',
+		배경기술: '',
+		'발명의 내용': '',
+		'해결 하고자하는 과제': '',
+		'과제 해결수단': '',
+		효과: '',
+		'발명의 실시를 위한 구체적인 내용': '',
+		'부호의 설명': '',
+		'도면의 간단한 설명': '',
+		'발명의 상세한 설명': '',
+		'발명의 목적': '',
+		'발명이 속하는 기술 및 그 분야의 종래기술': '',
+		'발명이 이루고자 하는 기술적 과제': '',
+		'발명의 구성 및 작동': '',
+		'발명의 효과': '',
+		descPart: []
+	},
 	quote: null,
 	family: null,
 	ipcCpc: [],
@@ -148,7 +175,8 @@ const initialState = {
 		modelType: 'doc2vec' // ['doc2vec', 'cosine similarity'],
 	},
 	associateCorp: [],
-	cols: ['1', '2', '3', '4', '5', '6', '7', '8']
+	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
+	selectedAppNo: null
 };
 
 const searchSlice = createSlice({

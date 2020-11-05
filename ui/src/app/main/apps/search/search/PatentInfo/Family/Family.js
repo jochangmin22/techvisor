@@ -55,7 +55,7 @@ const columns = [
 	}
 ];
 
-function Family(props) {
+function Family() {
 	const entities = useSelector(({ searchApp }) => searchApp.search.family);
 
 	const data = useMemo(() => (entities ? entities : []), [entities]);

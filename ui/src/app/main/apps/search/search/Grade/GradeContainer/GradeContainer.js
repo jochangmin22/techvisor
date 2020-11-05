@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import Paper from '@material-ui/core/Paper';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
@@ -11,13 +10,14 @@ import RightHolder from '../RightHolder';
 import RegisterFee from '../RegisterFee';
 
 const useStyles = makeStyles(theme => ({
+	paper: { backgroundColor: theme.palette.background.paper },
 	primaryColor: {
 		color: theme.palette.primary.main
 	}
 }));
 
 function GradeContainer(props) {
-	const classes = useStyles(props);
+	const classes = useStyles();
 	const dispatch = useDispatch();
 
 	const { rgNo } = props;
@@ -38,7 +38,7 @@ function GradeContainer(props) {
 			}}
 		>
 			<>
-				<Paper className="w-full rounded-8 shadow mb-16">
+				<div className={clsx(classes.paper, 'w-full rounded-8 shadow mb-16')}>
 					<div className="flex flex-col items-start p-12">
 						<h6 className="font-600 text-14 p-16" color="secondary">
 							유망성 평가
@@ -50,8 +50,8 @@ function GradeContainer(props) {
 							</Typography>
 						</FuseAnimate>
 					</div>
-				</Paper>
-				<Paper className="w-full rounded-8 shadow mb-16">
+				</div>
+				<div className={clsx(classes.paper, 'w-full rounded-8 shadow mb-16')}>
 					<div className="flex flex-col items-start p-12">
 						<Typography className="text-14 px-16 py-8 font-bold" color="textSecondary">
 							특허권자 란
@@ -66,8 +66,8 @@ function GradeContainer(props) {
 							</FuseAnimate>
 						)}
 					</div>
-				</Paper>
-				<Paper className="w-full rounded-8 shadow mb-16">
+				</div>
+				<div className={clsx(classes.paper, 'w-full rounded-8 shadow mb-16')}>
 					<div className="flex flex-col items-start p-12">
 						<Typography className="text-14 px-16 py-8 font-bold" color="textSecondary">
 							연차등록정보
@@ -82,7 +82,7 @@ function GradeContainer(props) {
 							</FuseAnimate>
 						)}
 					</div>
-				</Paper>
+				</div>
 			</>
 		</FuseAnimateGroup>
 	);

@@ -10,7 +10,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function KeywordAnalysis(props) {
-	const classes = useStyles(props);
+	const classes = useStyles();
 	const { keywordInfo } = props;
 
 	return (

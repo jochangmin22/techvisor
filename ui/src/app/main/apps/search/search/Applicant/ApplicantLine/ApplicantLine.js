@@ -268,17 +268,17 @@ function ApplicantLine(props) {
 		};
 	}, [handleResize]);
 
-	if (!entities || entities.length === 0) {
-		return <SpinLoading />;
-	}
-
 	return (
-		<Paper className="w-full rounded-8 shadow mb-16">
-			<div className="flex flex-col items-start p-12">
+		<Paper className="w-full h-full rounded-8 shadow mb-16">
+			<div className="flex flex-col w-full h-full items-start p-12">
 				<h6 className="font-600 text-14 p-16" color="secondary">
 					출원인 출원 동향
 				</h6>
-				<div id="main" className="w-full h-360" ref={chartRef} />
+				{!entities || entities.length === 0 ? (
+					<SpinLoading className="w-full h-400" delay={15000} />
+				) : (
+					<div id="main" className="w-full h-360" ref={chartRef} />
+				)}
 			</div>
 		</Paper>
 	);

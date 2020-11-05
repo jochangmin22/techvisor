@@ -2,6 +2,7 @@ import React, { useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
+import SpinLoading from 'app/main/apps/lib/SpinLoading';
 
 const columns = [
 	{
@@ -55,30 +56,30 @@ const columns = [
 	// }
 ];
 
-function GradeTableRightHolder(props) {
+function RegisterFee() {
 	const registerFee = useSelector(({ searchApp }) => searchApp.search.registerFee);
 	const data = useMemo(() => (registerFee ? registerFee : []), [registerFee]);
 	useEffect(() => {}, [data]);
 
-	if (!registerFee) {
-		return '';
-	}
-
 	return (
 		<FuseScrollbars className="max-h-512 mx-8">
-			<EnhancedTable
-				columns={columns}
-				data={data}
-				size="small"
-				showFooter={false}
-				onRowClick={(ev, row) => {
-					if (row) {
-						// props.history.push(`/apps/search/${row.original.출원번호}`);
-					}
-				}}
-			/>
+			{!data ? (
+				<SpinLoading delay={20000} className="h-full" />
+			) : (
+				<EnhancedTable
+					columns={columns}
+					data={data}
+					size="small"
+					showFooter={false}
+					onRowClick={(ev, row) => {
+						if (row) {
+							// props.history.push(`/apps/search/${row.original.출원번호}`);
+						}
+					}}
+				/>
+			)}
 		</FuseScrollbars>
 	);
 }
 
-export default GradeTableRightHolder;
+export default RegisterFee;

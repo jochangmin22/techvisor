@@ -7,10 +7,8 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import React, { useEffect, useRef, useState } from 'react';
-
 import FuseAnimate from '@fuse/core/FuseAnimate';
 import Highlighter from 'react-highlight-words';
-
 import reducer from '../store';
 import {
 	getSearch,
@@ -21,14 +19,11 @@ import {
 	getLegal,
 	resetSearch
 } from 'app/main/apps/search/store/searchSlice';
-
 import FusePageSimple from '@fuse/core/FusePageSimple/FusePageSimple';
 import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
-
 import SearchNavigation from './SearchNavigation';
 // import SearchPageBreadcrumb from './SearchPageBreadcrumb';
-
 import PatentInfoContainer from './PatentInfo/PatentInfoContainer';
 import SpecContainer from './Specification/SpecContainer';
 import KeywordContainer from './Keyword/KeywordContainer';
@@ -36,17 +31,25 @@ import ApplicantContainer from './Applicant/ApplicantContainer';
 import SimilarContainer from './Similar/SimilarContainer';
 import GradeContainer from './Grade/GradeContainer';
 import AssociateCompany from './AssociateCompany';
-import SpinLoading from '../../lib/SpinLoading';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles(theme => ({
+	root: {
+		minHeight: '82vh',
+		maxHeight: '82vh'
+	}
+}));
 
 const TurnOffHightlight = true;
 
-function SearchPageLayout(props) {
+function SearchPage() {
 	const dispatch = useDispatch();
+	const classes = useStyles();
 	const search = useSelector(({ searchApp }) => searchApp.search.search);
 	const searchParams = useSelector(({ searchApp }) => searchApp.searchs.searchParams);
-	const { searchText } = searchParams;
+	const appNo = useSelector(({ searchApp }) => searchApp.searchs.selectedAppNo);
 	const terms = [].concat(...searchParams.terms.flatMap(x => x.toString().split(' ').join(',').split(',')));
-	const appNo = String(props.match.params.appNo).replace(/-/gi, '');
+
 	const rgNo = search && search.등록번호 ? search.등록번호 : null;
 	const applicant = search && search['출원인1'] ? search['출원인1'] : null;
 	const [tabValue, setTabValue] = useState(0);
@@ -61,7 +64,7 @@ function SearchPageLayout(props) {
 		dispatch(getIpcCpc(params));
 		dispatch(getRnd(params));
 		// eslint-disable-next-line
-	}, [dispatch, props.match.params]);
+	}, [dispatch, appNo]);
 
 	const pageLayout = useRef(null);
 
@@ -79,17 +82,13 @@ function SearchPageLayout(props) {
 		}, 100);
 	}
 
-	if (!search) {
-		return <SpinLoading />;
-	}
-
 	return (
 		<FusePageSimple
 			classes={{
-				root: 'h-full',
+				root: classes.root,
 				// contentWrapper: 'p-16 md:p-24',
 				toolbar: 'p-0 border-b-0',
-				content: 'flex flex-col h-full p-16 md:p-24',
+				content: 'flex flex-col p-16 md:p-24',
 				leftSidebar: 'w-200 pt-8',
 				header: 'h-64 min-h-64',
 				wrapper: 'min-h-0'
@@ -171,18 +170,14 @@ function SearchPageLayout(props) {
 				</div>
 			}
 			content={
-				<div className="max-w-5xl min-h-full flex flex-auto flex-col">
-					<div className="flex flex-col flex-1 relative">
-						{tabValue === 0 && (
-							<PatentInfoContainer search={search} searchText={searchText} terms={terms} />
-						)}
-						{tabValue === 1 && <SpecContainer search={search} searchText={searchText} terms={terms} />}
-						{tabValue === 2 && <KeywordContainer search={search} />}
-						{tabValue === 3 && <ApplicantContainer search={search} />}
-						{tabValue === 4 && <SimilarContainer appNo={appNo} />}
-						{tabValue === 5 && <GradeContainer rgNo={rgNo} />}
-						{tabValue === 6 && <AssociateCompany applicant={applicant} />}
-					</div>
+				<div className="flex flex-col flex-1 relative">
+					{tabValue === 0 && <PatentInfoContainer />}
+					{tabValue === 1 && <SpecContainer />}
+					{tabValue === 2 && <KeywordContainer />}
+					{tabValue === 3 && <ApplicantContainer />}
+					{tabValue === 4 && <SimilarContainer />}
+					{tabValue === 5 && <GradeContainer rgNo={rgNo} />}
+					{tabValue === 6 && <AssociateCompany applicant={applicant} />}
 				</div>
 			}
 			leftSidebarContent={<SearchNavigation appNo={appNo} />}
@@ -193,4 +188,4 @@ function SearchPageLayout(props) {
 	);
 }
 
-export default withReducer('searchApp', reducer)(SearchPageLayout);
+export default withReducer('searchApp', reducer)(SearchPage);

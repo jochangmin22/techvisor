@@ -1,41 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import { useSelector, useDispatch } from 'react-redux';
 import { getApplicant, getApplicantTrend, getApplicantIpc } from 'app/main/apps/search/store/searchSlice';
-import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import ApplicantPie from '../ApplicantPie';
 import ApplicantLine from '../ApplicantLine';
 
 const useStyles = makeStyles(theme => ({
+	paper: { backgroundColor: theme.palette.background.paper },
 	primaryColor: {
 		color: theme.palette.primary.main
 	}
 }));
 
-function ApplicantContainer(props) {
-	const classes = useStyles(props);
+function ApplicantContainer() {
+	const classes = useStyles();
 	const dispatch = useDispatch();
-	const { 출원인코드1, 출원인1, 출원인주소1, 출원인국가코드1 } = props.search;
+	const search = useSelector(({ searchApp }) => searchApp.search.search);
+	const { 출원인코드1, 출원인1, 출원인주소1, 출원인국가코드1 } = search;
 
 	const applicant = useSelector(({ searchApp }) => searchApp.search.applicant);
 	const entities = useSelector(({ searchApp }) => searchApp.search.applicantTrend);
 	const ipc = useSelector(({ searchApp }) => searchApp.search.applicantIpc);
-	const [showLoading, setShowLoading] = useState(false);
 
 	useEffect(() => {
-		setShowLoading(true);
-		const params = { cusNo: 출원인코드1 };
+		const params = { cusNo: search.출원인코드1 };
 		dispatch(getApplicantTrend(params));
 		dispatch(getApplicantIpc(params));
-		dispatch(getApplicant(params)).then(() => {
-			setShowLoading(false);
-		});
-	}, [dispatch, 출원인코드1]);
+		dispatch(getApplicant(params));
+	}, [dispatch, search]);
 
 	const applicantInfo = {
 		출원인명: 출원인1 + ' (' + (/^\d+$/.test(출원인국가코드1) ? 'KR' : 출원인국가코드1) + ')',
@@ -56,7 +52,7 @@ function ApplicantContainer(props) {
 			}}
 		>
 			<>
-				<Paper className="w-full rounded-8 shadow mb-16">
+				<div className={clsx(classes.paper, 'w-full h-192 rounded-8 shadow mb-16')}>
 					<div className="flex flex-col items-start p-12">
 						<Typography className="text-14 p-12 text-bold">출원인 정보</Typography>
 						{Object.entries(applicantInfo)
@@ -72,12 +68,12 @@ function ApplicantContainer(props) {
 								</Grid>
 							))}
 					</div>
-				</Paper>
-				<div className="w-full md:w-2/3 md:pr-8 items-center justify-center">
-					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantLine entities={entities} />}
 				</div>
-				<div className="w-full md:w-1/3 md:pl-8 items-center justify-center">
-					{showLoading ? <SpinLoading delay={15000} /> : <ApplicantPie entities={ipc} />}
+				<div className="w-full h-400 md:w-2/3 md:pr-8 items-center justify-center">
+					<ApplicantLine entities={entities} />
+				</div>
+				<div className="w-full h-400 md:w-1/3 md:pl-8 items-center justify-center">
+					<ApplicantPie entities={ipc} />
 				</div>
 			</>
 		</FuseAnimateGroup>

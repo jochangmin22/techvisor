@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
@@ -7,6 +7,7 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Check from '@material-ui/icons/Check';
 import Typography from '@material-ui/core/Typography';
+import { useSelector } from 'react-redux';
 
 const useQontoStepIconStyles = makeStyles(theme => ({
 	root: {
@@ -51,15 +52,21 @@ QontoStepIcon.propTypes = {
 	completed: PropTypes.bool
 };
 
-function HistoryStepper(props) {
-	const { 출원일자, 공개일자, 등록일자, 소멸일자, 존속기간만료일자 } = props.search;
-	const historyInfo = {
-		출원: 출원일자,
-		공개: 공개일자,
-		등록: 등록일자,
-		소멸: 소멸일자,
-		존속기간만료: 소멸일자 === null ? 존속기간만료일자 : ''
-	};
+function HistoryStepper() {
+	const search = useSelector(({ searchApp }) => searchApp.search.search);
+	const historyInfo = useMemo(
+		() =>
+			search
+				? {
+						출원: search.출원일자,
+						공개: search.공개일자,
+						등록: search.등록일자,
+						소멸: search.소멸일자,
+						존속기간만료: search.소멸일자 === null ? search.존속기간만료일자 : ''
+				  }
+				: {},
+		[search]
+	);
 	return (
 		<Stepper activeStep={3}>
 			{Object.entries(historyInfo)

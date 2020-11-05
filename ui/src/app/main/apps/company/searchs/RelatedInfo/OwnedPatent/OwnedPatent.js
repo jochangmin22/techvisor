@@ -12,6 +12,7 @@ import DownloadFilterMenu from '../DownloadFilterMenu';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
 import { getOwnedPatent, updateCols } from 'app/main/apps/company/store/searchsSlice';
+import { setTableOptions, setSelectedAppNo, openSearchPageDialog } from 'app/main/apps/search/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 
@@ -116,7 +117,7 @@ const colsList = [
 ];
 
 const useStyles = makeStyles(theme => ({
-	root: { backgroundColor: theme.palette.primary.dark }
+	dark: { backgroundColor: theme.palette.primary.dark }
 }));
 
 function OwnedPatent(props) {
@@ -188,10 +189,13 @@ function OwnedPatent(props) {
 							출원인코드1: '=""' + row.출원인코드1 + '""'
 						}))
 					);
+					dispatch(
+						setTableOptions({ totalPosts: entities.length, pageIndex: pageIndex, pageSize: pageSize })
+					);
 				}
 			}
-			// eslint-disable-next-line
 		},
+		// eslint-disable-next-line
 		[entities]
 	);
 
@@ -209,7 +213,7 @@ function OwnedPatent(props) {
 		<div className="w-full h-full pb-8">
 			<div className="p-12 flex items-center justify-between">
 				<div className="px-12 flex items-center justify-end mb-8">
-					<Typography className={clsx(classes.root, 'text-13 font-400 rounded-4 text-white px-8 py-4')}>
+					<Typography className={clsx(classes.dark, 'text-13 font-400 rounded-4 text-white px-8 py-4')}>
 						검색 결과 {Number(entities.length).toLocaleString()} 건
 					</Typography>
 				</div>
@@ -246,7 +250,9 @@ function OwnedPatent(props) {
 							size="small"
 							onRowClick={(ev, row) => {
 								if (row) {
-									props.history.push(`/apps/search/${row.original.출원번호}`);
+									dispatch(setSelectedAppNo(row.original.출원번호));
+									dispatch(openSearchPageDialog());
+									// props.history.push(`/apps/search/${row.original.출원번호}`);
 								}
 							}}
 						/>

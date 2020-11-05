@@ -27,30 +27,30 @@ const columns = [
 	}
 ];
 
-function GradeTableRightHolder(props) {
+function RightHolder() {
 	const rightHolder = useSelector(({ searchApp }) => searchApp.search.rightHolder);
 	const data = useMemo(() => (rightHolder ? rightHolder : []), [rightHolder]);
 	useEffect(() => {}, [data]);
 
-	if (!data) {
-		return <SpinLoading delay={20000} className="h-full" />;
-	}
-
 	return (
 		<FuseScrollbars className="max-h-512 mx-8">
-			<EnhancedTable
-				columns={columns}
-				data={data}
-				size="small"
-				showFooter={false}
-				onRowClick={(ev, row) => {
-					if (row) {
-						// props.history.push(`/apps/search/${row.original.출원번호}`);
-					}
-				}}
-			/>
+			{!data ? (
+				<SpinLoading delay={20000} className="h-full" />
+			) : (
+				<EnhancedTable
+					columns={columns}
+					data={data}
+					size="small"
+					showFooter={false}
+					onRowClick={(ev, row) => {
+						if (row) {
+							// props.history.push(`/apps/search/${row.original.출원번호}`);
+						}
+					}}
+				/>
+			)}
 		</FuseScrollbars>
 	);
 }
 
-export default GradeTableRightHolder;
+export default RightHolder;

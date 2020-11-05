@@ -13,14 +13,14 @@ function WordCloudChart(props) {
 	const [echart, setEchart] = useState(null);
 
 	useEffect(() => {
-		if (wordCloud) {
+		if (wordCloud.length > 0) {
 			drawChart();
 		}
 		// eslint-disable-next-line
 	}, [wordCloud]);
 
 	const drawChart = () => {
-		if (!wordCloud) return;
+		if (!wordCloud || wordCloud.length === 0) return;
 
 		if (echart) {
 			echart.dispose();
@@ -96,13 +96,13 @@ function WordCloudChart(props) {
 		};
 	}, [handleResize]);
 
-	if (!wordCloud || wordCloud.length === 0) {
-		return <SpinLoading />;
-	}
-
 	return (
 		<Paper className="w-full h-full rounded-8 shadow-none">
-			<div id="main" className="w-full h-360" ref={chartRef} />
+			{!wordCloud || wordCloud.length === 0 ? (
+				<SpinLoading className="h-360" />
+			) : (
+				<div id="main" className="w-full h-360" ref={chartRef} />
+			)}
 		</Paper>
 	);
 }
