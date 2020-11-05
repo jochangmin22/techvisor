@@ -233,7 +233,7 @@ function OwnedPatent(props) {
 				</div>
 			</div>
 			{isEmpty ? (
-				<EmptyMsg icon="wb_incandescent" msg="특허" text={emptyText} className="h-320" />
+				<EmptyMsg icon="wb_incandescent" msg="특허" text={emptyText} />
 			) : (
 				<FuseScrollbars className="max-h-320 mx-8">
 					{showLoading ? (

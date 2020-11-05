@@ -6,7 +6,12 @@ import clsx from 'clsx';
 
 function EmptyMsg(props) {
 	return (
-		<div className={clsx(props.className, 'flex flex-col flex-1 h-full items-center justify-center p-24')}>
+		<div
+			className={clsx(
+				props.className ? props.className : 'h-288',
+				'flex flex-col flex-1 items-center justify-center p-24'
+			)}
+		>
 			<Paper className="rounded-full p-48">
 				<Icon className="block text-64" color="secondary">
 					{props.icon}
