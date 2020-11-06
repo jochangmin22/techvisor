@@ -1,14 +1,13 @@
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getSearchs } from './store/searchsSlice';
-// import { setMockData, getSearchs } from './store/searchsSlice';
 // import searchData from 'app/main/apps/lib/mockDataCompanyApp';
 // import { authRoles } from "app/auth";
 import { useForm } from '@fuse/hooks';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-// import SearchListContainer from './searchs/SearchList/SearchListContainer';
 import MainTable from './searchs/SearchList/MainTable';
+import CompanyContentTitle from './CompanyContentTitle';
 import FinancialInfo from './searchs/FinancialInfo';
 import StockInfoContainer from './searchs/StockInfo/StockInfoContainer';
 import RelatedInfoContainer from './searchs/RelatedInfo/RelatedInfoContainer';
@@ -27,8 +26,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function CompanyContent() {
-	const dispatch = useDispatch();
 	const classes = useStyles();
+	const dispatch = useDispatch();
 	const selectedCorp = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp);
 	const { form, setForm, resetForm } = useForm({
 		A: 100,
@@ -74,8 +73,10 @@ function CompanyContent() {
 						<MainTable />
 					</div>
 				</Draggable>
+
 				{selectOne && (
 					<>
+						<CompanyContentTitle selectedCorp={selectedCorp} />
 						<Draggable
 							handle=".draggable"
 							onStart={() => handleStart('B')}
