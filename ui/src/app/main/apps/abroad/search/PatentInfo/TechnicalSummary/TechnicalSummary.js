@@ -7,7 +7,7 @@ import clsx from 'clsx';
 
 const useStyles = makeStyles(theme => ({
 	primaryColor: {
-		color: theme.palette.primary.main
+		color: theme.palette.text.primary
 	}
 }));
 

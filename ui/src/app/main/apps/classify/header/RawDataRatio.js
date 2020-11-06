@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
 	},
 	primaryHeading: {
 		fontSize: theme.typography.pxToRem(15),
-		color: theme.palette.primary.main
+		color: theme.palette.text.primary
 	},
 	icon: {
 		verticalAlign: 'bottom',
@@ -44,7 +44,7 @@ const useStyles = makeStyles(theme => ({
 		padding: theme.spacing(1, 2)
 	},
 	link: {
-		color: theme.palette.primary.main,
+		color: theme.palette.text.primary,
 		textDecoration: 'none',
 		'&:hover': {
 			textDecoration: 'underline'

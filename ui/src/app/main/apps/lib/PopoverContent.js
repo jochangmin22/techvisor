@@ -11,7 +11,7 @@ const useStyles = makeStyles(theme => ({
 		paddingTop: theme.spacing(2)
 	},
 	subTitle: {
-		color: theme.palette.primary.main,
+		color: theme.palette.text.primary,
 		marginTop: 4,
 		marginBottom: 4,
 		paddingTop: theme.spacing(0.5),

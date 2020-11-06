@@ -12,7 +12,7 @@ import RegisterFee from '../RegisterFee';
 const useStyles = makeStyles(theme => ({
 	paper: { backgroundColor: theme.palette.background.paper },
 	primaryColor: {
-		color: theme.palette.primary.main
+		color: theme.palette.text.primary
 	}
 }));
 

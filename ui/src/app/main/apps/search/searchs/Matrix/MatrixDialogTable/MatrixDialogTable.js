@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithPagination';
+import { setSelectedAppNo, openSearchPageDialog } from 'app/main/apps/search/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 
 const columns = [
@@ -57,7 +57,8 @@ const columns = [
 	}
 ];
 
-function MatrixDialogTable(props) {
+function MatrixDialogTable() {
+	const dispatch = useDispatch();
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.matrixDialog.data);
 	const data = useMemo(() => (entities ? entities : []), [entities]);
 	useEffect(() => {}, [data]);
@@ -74,7 +75,8 @@ function MatrixDialogTable(props) {
 				size="small"
 				onRowClick={(ev, row) => {
 					if (row) {
-						props.history.push(`/apps/search/${row.original.출원번호}`);
+						dispatch(setSelectedAppNo(row.original.출원번호));
+						dispatch(openSearchPageDialog());
 					}
 				}}
 			/>
@@ -82,4 +84,4 @@ function MatrixDialogTable(props) {
 	);
 }
 
-export default withRouter(MatrixDialogTable);
+export default MatrixDialogTable;

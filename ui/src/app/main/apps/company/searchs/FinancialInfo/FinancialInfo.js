@@ -146,10 +146,7 @@ function FinancialInfo() {
 													<TableCell
 														key={index}
 														align="right"
-														className={clsx(
-															val < 0 ? 'text-red' : 'text-black',
-															'text-12 truncate'
-														)}
+														className={clsx(val < 0 ? 'text-red' : '', 'text-12 truncate')}
 													>
 														{index < 3 ? numberToWon(val) : val}
 													</TableCell>

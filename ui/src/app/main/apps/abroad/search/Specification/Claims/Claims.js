@@ -35,15 +35,15 @@ const useStyles = makeStyles(theme => ({
 	table: {
 		'& th': {
 			padding: '4px 0',
-			color: theme.palette.primary.main,
+			color: theme.palette.text.primary,
 			fontWeight: 500
 		}
 	},
 	primaryColor: {
-		color: theme.palette.primary.main
+		color: theme.palette.text.primary
 	},
 	dok: {
-		color: theme.palette.primary.main
+		color: theme.palette.text.primary
 	},
 	jong: {
 		color: theme.palette.secondary.main

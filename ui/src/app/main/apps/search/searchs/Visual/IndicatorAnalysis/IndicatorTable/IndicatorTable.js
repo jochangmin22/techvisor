@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import Paper from '@material-ui/core/Paper';
+import clsx from 'clsx';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';
 
 const useStyles = makeStyles(theme => ({
+	paper: { backgroundColor: theme.palette.background.paper },
 	table: {
 		'&.sticky': {
 			overflow: 'scroll',
@@ -21,11 +22,14 @@ const useStyles = makeStyles(theme => ({
 			},
 			'& [data-sticky-td]': {
 				position: 'sticky',
-				backgroundColor: 'white'
-			},
-			'& [data-sticky-last-left-td]': {
-				boxShadow: '1px 0px 0px #ccc'
+				backgroundColor: theme.palette.background.default,
+				'&:hover': {
+					backgroundColor: theme.palette.type === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0,0,0,.04)'
+				}
 			}
+			// '& [data-sticky-last-left-td]': {
+			// 	boxShadow: '1px 0px 0px #ccc'
+			// }
 		}
 	}
 }));
@@ -85,7 +89,7 @@ function IndicatorTable(props) {
 					<span>
 						<span
 							style={{
-								color: theme.palette.primary.main,
+								color: theme.palette.text.primary,
 								transition: 'all .3s ease'
 							}}
 						>
@@ -115,14 +119,14 @@ function IndicatorTable(props) {
 				}
 			}))
 		);
-	}, [maxValue, theme.palette.primary.main]);
+	}, [maxValue, theme.palette.text.primary]);
 
 	if (!entities || entities.length === 0) {
 		return <SpinLoading />;
 	}
 
 	return (
-		<Paper className="w-full h-full shadow-none px-8">
+		<div className={clsx(classes.paper, 'w-full h-full shadow-none px-8')}>
 			{/* <FuseScrollbars className="max-h-360 w-256 sm:w-400 md:w-320 lg:w-620 xl:w-620 px-8"> */}
 			<FuseScrollbars className="mx-8">
 				<EnhancedTable
@@ -139,7 +143,7 @@ function IndicatorTable(props) {
 					}}
 				/>
 			</FuseScrollbars>
-		</Paper>
+		</div>
 	);
 }
 

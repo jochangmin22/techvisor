@@ -1,4 +1,5 @@
 import React from 'react';
+// import Checkbox from '@material-ui/core/Checkbox';
 import MaUTable from '@material-ui/core/Table';
 import PropTypes from 'prop-types';
 import TableBody from '@material-ui/core/TableBody';
@@ -124,7 +125,7 @@ const EnhancedTable = ({
 		<MaUTable {...getTableProps()} size="small" className={clsx(className, showFooter ? '' : 'mb-20', 'sticky')}>
 			<TableHead className={showHeader ? '' : 'hidden'}>
 				{headerGroups.map(headerGroup => (
-					<TableRow {...headerGroup.getHeaderGroupProps()}>
+					<TableRow hover {...headerGroup.getHeaderGroupProps()}>
 						{headerGroup.headers.map(column => (
 							<TableCell className="whitespace-no-wrap px-12" {...column.getHeaderProps()}>
 								<span {...(column.sortable && column.getSortByToggleProps())}>
@@ -156,6 +157,7 @@ const EnhancedTable = ({
 					return (
 						<TableRow
 							{...row.getRowProps()}
+							hover
 							onClick={ev => onRowClick(ev, row)}
 							className={clsx(rowClick ? 'cursor-pointer' : 'cursor-default')}
 						>

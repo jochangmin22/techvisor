@@ -60,7 +60,7 @@ function IndicatorTable(props) {
 					<span>
 						<span
 							style={{
-								color: theme.palette.primary.main,
+								color: theme.palette.text.primary,
 								transition: 'all .3s ease'
 							}}
 						>
@@ -89,7 +89,7 @@ function IndicatorTable(props) {
 				}
 			}))
 		);
-	}, [maxValue, theme.palette.primary.main]);
+	}, [maxValue, theme.palette.text.primary]);
 
 	if (!entities || entities.length === 0) {
 		return <SpinLoading />;

@@ -9,7 +9,7 @@ const useStyles = makeStyles(theme => ({
 		color: theme.palette.primary.dark,
 		marginBottom: 4
 	},
-	subTitle: { color: theme.palette.primary.main, marginTop: 4, marginBottom: 4 },
+	subTitle: { color: theme.palette.text.primary, marginTop: 4, marginBottom: 4 },
 	popover: {
 		pointerEvents: 'none'
 	},

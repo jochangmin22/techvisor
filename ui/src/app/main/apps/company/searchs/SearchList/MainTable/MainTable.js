@@ -17,6 +17,40 @@ import { updateCols, resetSelectedCorp, setSelectedCorp } from 'app/main/apps/co
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { DefaultColumnFilter, NumberRangeColumnFilter } from 'app/main/apps/lib/EnhancedFilters';
 import NoResultMsg from 'app/main/apps/lib/NoResultMsg';
+import { showMessage } from 'app/store/fuse/messageSlice';
+
+const useStyles = makeStyles(theme => ({
+	root: { backgroundColor: theme.palette.primary.dark },
+	paper: { backgroundColor: theme.palette.background.paper },
+	textColor: { color: theme.palette.secondary.main },
+	backdrop: {
+		zIndex: theme.zIndex.drawer + 1
+	},
+	table: {
+		'&.sticky': {
+			overflow: 'scroll',
+			'& thead, & .tfooter': {
+				position: 'sticky',
+				zIndex: 1,
+				width: 'fit-content'
+			},
+			'& tbody': {
+				position: 'relative',
+				zIndex: 0
+			},
+			'& [data-sticky-td]': {
+				position: 'sticky',
+				backgroundColor: theme.palette.background.default,
+				'&:hover': {
+					backgroundColor: theme.palette.type === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0,0,0,.04)'
+				}
+			}
+			// '& [data-sticky-last-left-td]': {
+			// 	boxShadow: '1px 0px 0px #ccc'
+			// }
+		}
+	}
+}));
 
 const columnName = {
 	종목코드: '110',
@@ -115,7 +149,7 @@ const columns = Object.entries(columnName).map(([key, value]) => {
 								? 'text-blue'
 								: colorizeColumns.includes(cell.column.id) && cell.value > 0
 								? 'text-red'
-								: 'text-black'
+								: ''
 						)}
 						title={cell.value}
 					>
@@ -126,39 +160,11 @@ const columns = Object.entries(columnName).map(([key, value]) => {
 		}
 	};
 });
+
 const colsList = Object.keys(columnName).map((key, index) => ({
 	id: key + 1,
 	name: key,
 	field: key
-}));
-
-const useStyles = makeStyles(theme => ({
-	root: { backgroundColor: theme.palette.primary.dark },
-	paper: { backgroundColor: theme.palette.background.paper },
-	backdrop: {
-		zIndex: theme.zIndex.drawer + 1
-	},
-	table: {
-		'&.sticky': {
-			overflow: 'scroll',
-			'& thead, & .tfooter': {
-				position: 'sticky',
-				zIndex: 1,
-				width: 'fit-content'
-			},
-			'& tbody': {
-				position: 'relative',
-				zIndex: 0
-			},
-			'& [data-sticky-td]': {
-				position: 'sticky',
-				backgroundColor: 'white'
-			},
-			'& [data-sticky-last-left-td]': {
-				boxShadow: '1px 0px 0px #ccc'
-			}
-		}
-	}
 }));
 
 function addZeroes(num) {
@@ -209,8 +215,33 @@ function MainTable() {
 	const [rowsCount, setRowsCount] = useState(null);
 
 	const handleClick = (name, stockCode, corpNo) => {
-		dispatch(resetSelectedCorp());
-		dispatch(setSelectedCorp({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
+		if (stockCode === null) {
+			dispatch(
+				showMessage({
+					message: '현재 코스피 상장 종목만 지원합니다.',
+					autoHideDuration: 2000,
+					anchorOrigin: {
+						vertical: 'top',
+						horizontal: 'right'
+					},
+					variant: 'info' //success error info warning null
+				})
+			);
+		} else {
+			dispatch(
+				showMessage({
+					message: `${name} 을 불러오는 중입니다.`,
+					autoHideDuration: 2000,
+					anchorOrigin: {
+						vertical: 'top',
+						horizontal: 'right'
+					},
+					variant: 'success' //success error info warning null
+				})
+			);
+			dispatch(resetSelectedCorp());
+			dispatch(setSelectedCorp({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
+		}
 	};
 
 	const handleOnChange = useDebounce(cols => {

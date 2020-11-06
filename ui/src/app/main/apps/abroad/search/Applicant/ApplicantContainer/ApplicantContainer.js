@@ -13,7 +13,7 @@ import ApplicantLine from '../ApplicantLine';
 
 const useStyles = makeStyles(theme => ({
 	primaryColor: {
-		color: theme.palette.primary.main
+		color: theme.palette.text.primary
 	}
 }));
 

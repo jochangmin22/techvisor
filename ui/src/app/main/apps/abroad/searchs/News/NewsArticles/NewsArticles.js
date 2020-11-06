@@ -30,7 +30,7 @@ function NewsArticles() {
 					<span>
 						<span
 							style={{
-								color: theme.palette.primary.main,
+								color: theme.palette.text.primary,
 								transition: 'all .3s ease'
 							}}
 						>
@@ -42,7 +42,7 @@ function NewsArticles() {
 				className: 'text-15'
 			}
 		],
-		[theme.palette.primary.main]
+		[theme.palette.text.primary]
 	);
 
 	if (!data || data.length === 0) {

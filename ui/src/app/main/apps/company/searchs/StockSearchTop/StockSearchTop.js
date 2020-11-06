@@ -2,12 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import {
-	getStockSearchTop,
-	resetSelectedCorp,
-	setSelectedCorp,
-	setSearchSubmit
-} from 'app/main/apps/company/store/searchsSlice';
+import { getStockSearchTop, resetSelectedCorp, setSelectedCorp } from 'app/main/apps/company/store/searchsSlice';
 import EnhancedTable from 'app/main/apps/lib/EnhancedTableWithBlockLayout';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import PopoverMsg from 'app/main/apps/lib/PopoverMsg';
@@ -15,9 +10,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
+import { showMessage } from 'app/store/fuse/messageSlice';
 
 const useStyles = makeStyles(theme => ({
-	root: { backgroundColor: theme.palette.background.paper },
+	paper: { backgroundColor: theme.palette.background.paper },
 	label: { backgroundColor: theme.palette.primary.dark },
 	table: {
 		'&.sticky': {
@@ -33,11 +29,14 @@ const useStyles = makeStyles(theme => ({
 			},
 			'& [data-sticky-td]': {
 				position: 'sticky',
-				backgroundColor: 'white'
-			},
-			'& [data-sticky-last-left-td]': {
-				boxShadow: '1px 0px 0px #ccc'
+				backgroundColor: theme.palette.background.default,
+				'&:hover': {
+					backgroundColor: theme.palette.type === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0,0,0,.04)'
+				}
 			}
+			// '& [data-sticky-last-left-td]': {
+			// 	boxShadow: '1px 0px 0px #ccc'
+			// }
 		}
 	}
 }));
@@ -76,7 +75,7 @@ const columns = Object.entries(columnName).map(([key, value]) => {
 								? 'text-blue'
 								: cell.column.id === '등락률' && cell.value > 0
 								? 'text-red'
-								: 'text-black'
+								: ''
 						)}
 						title={cell.value}
 					>
@@ -121,15 +120,39 @@ function StockSearchTop() {
 	}, []);
 
 	const handleClick = (name, stockCode, corpNo) => {
-		dispatch(resetSelectedCorp());
-		dispatch(setSelectedCorp({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
-		dispatch(setSearchSubmit(true));
+		if (stockCode === null) {
+			dispatch(
+				showMessage({
+					message: '현재 코스피 상장 종목만 지원합니다.',
+					autoHideDuration: 2000,
+					anchorOrigin: {
+						vertical: 'top',
+						horizontal: 'right'
+					},
+					variant: 'info' //success error info warning null
+				})
+			);
+		} else {
+			dispatch(
+				showMessage({
+					message: `${name} 을 불러오는 중입니다.`,
+					autoHideDuration: 2000,
+					anchorOrigin: {
+						vertical: 'top',
+						horizontal: 'right'
+					},
+					variant: 'success' //success error info warning null
+				})
+			);
+			dispatch(resetSelectedCorp());
+			dispatch(setSelectedCorp({ stockCode: stockCode, corpNo: corpNo, corpName: name }));
+		}
 	};
 
 	const isEmpty = !!(stockSearchTop.length === 0 && !showLoading);
 
 	return (
-		<div className={clsx(classes.root, 'h-full w-full rounded-8 shadow py-8')}>
+		<div className={clsx(classes.paper, 'h-full w-full rounded-8 shadow py-8')}>
 			<div className="flex flex-col w-full sm:flex-row justify-between sm:px-12">
 				<div className="flex flex-row items-center p-8 pb-0">
 					<PopoverMsg title="검색상위 종목" msg="국내증시의 네이버 검색상위 종목을 표시합니다." />
@@ -155,7 +178,7 @@ function StockSearchTop() {
 							className={classes.table}
 							onRowClick={(ev, row) => {
 								if (row) {
-									handleClick(row.original.회사명, row.original.종목코드);
+									handleClick(row.original.종목명, row.original.종목코드);
 								}
 							}}
 						/>

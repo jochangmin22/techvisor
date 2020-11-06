@@ -125,7 +125,7 @@ const EnhancedTable = ({
 		<MaUTable {...getTableProps()} size="small" className={showFooter ? '' : 'mb-20'}>
 			<TableHead className={showHeader ? '' : 'hidden'}>
 				{headerGroups.map(headerGroup => (
-					<TableRow {...headerGroup.getHeaderGroupProps()}>
+					<TableRow hover {...headerGroup.getHeaderGroupProps()}>
 						{headerGroup.headers.map(column => (
 							<TableCell
 								className="whitespace-no-wrap px-12"
@@ -156,6 +156,7 @@ const EnhancedTable = ({
 					return (
 						<TableRow
 							{...row.getRowProps()}
+							hover
 							onClick={ev => onRowClick(ev, row)}
 							className={clsx('truncate', rowClick ? 'cursor-pointer' : 'cursor-default')}
 						>

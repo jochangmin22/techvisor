@@ -8,8 +8,8 @@ import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
 	paper: { backgroundColor: theme.palette.background.paper },
-	primaryColor: {
-		color: theme.palette.primary.main
+	color: {
+		color: theme.palette.text.primary
 	}
 }));
 
@@ -95,7 +95,7 @@ function BiblioInfo() {
 					.map(([key, value]) => (
 						<Grid container key={key} spacing={2}>
 							<Grid item xs={4} md={3}>
-								<div className={clsx(classes.primaryColor, 'p-4 md:p-8')}>{key}</div>
+								<div className={clsx(classes.color, 'font-medium p-4 md:p-8')}>{key}</div>
 							</Grid>
 							<Grid item xs={8} md={9}>
 								{addSpanStyle(value)}
