@@ -10,7 +10,7 @@ from konlpy.tag import Mecab
 from django.http import JsonResponse
 from django.http import HttpResponse
 
-from .models import disclosure
+from .models import listed_corp
 
 from .utils import get_redis_key
 
@@ -166,6 +166,72 @@ def parse_news_nlp(request, mode="needJson"):
     elif mode == "noJson":
         return news_nlp        
 
+# def parse_related_company(request, mode="needJson"):
+#     ''' search news_nlp list in discloure db '''
+
+#     # redis key
+#     mainKey, _, _, _ = get_redis_key(request)
+
+#     mainKey += "news"
+#     # is there data in Redis
+#     context = cache.get(mainKey)     
+
+#     # yes
+#     try:
+#         if context['company']:
+#             if mode == "needJson":
+#                 return JsonResponse(context['company'], safe=False)
+#             else:
+#                 return context['company']            
+#     except:
+#         pass        
+    
+#     # no
+#     news = parse_news(request, mode="noJson")
+#     news_nlp = parse_news_nlp(request, mode="noJson")
+
+#     # redis save {
+#     new_context = {}
+#     new_context['news'] = news
+#     new_context['news_nlp'] = news_nlp
+#     cache.set(mainKey, new_context, CACHE_TTL)
+#     # redis save }       
+    
+#     unique_news_nlp= remove_duplicate(news_nlp)
+    
+#     try:
+#         isExist = disclosure.objects.filter(corp_name__in=unique_news_nlp).exists()
+#         if not isExist:
+#             return HttpResponse('Not Found', status=404)
+#         EXCLUDE_COMPANY_NAME = getattr(settings, 'EXCLUDE_COMPANY_NAME', DEFAULT_TIMEOUT)
+
+#         disClosure = disclosure.objects.filter(corp_name__in=unique_news_nlp).exclude(corp_name__in=EXCLUDE_COMPANY_NAME)
+#         myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('-stock_code','corp_name'))[:10]
+#         myCorpCode = list(disClosure.values_list('corp_code', flat=True).order_by('-stock_code','corp_name'))[:10]
+#         myStockCode = list(disClosure.values_list('stock_code', flat=True).order_by('-stock_code','corp_name'))[:10]
+
+#         response = { 'corpName': myCorpName, 'corpCode' : myCorpCode, 'stockCode': myStockCode}
+
+#         # redis update before leave {
+#         new_context['company'] = response
+#         cache.set(mainKey, new_context, CACHE_TTL)
+#         # redis update before leave }  
+
+#         return JsonResponse(response, status=200, safe=False)
+#     except:
+#         return HttpResponse() # 500        
+#     # select * from table where value ~* 'foo|bar|baz';
+
+#     # ob_list = data.objects.filter(name__in=my_list)
+
+#     # # redis save {
+#     # new_context = {}
+#     # new_context['news'] = news
+#     # new_context['news_nlp'] = news_nlp
+#     # cache.set(mainKey, new_context, CACHE_TTL)
+#     # # redis save }            
+#     # return JsonResponse(news_nlp, safe=False)   
+#  
 def parse_related_company(request, mode="needJson"):
     ''' search news_nlp list in discloure db '''
 
@@ -200,17 +266,17 @@ def parse_related_company(request, mode="needJson"):
     unique_news_nlp= remove_duplicate(news_nlp)
     
     try:
-        isExist = disclosure.objects.filter(corp_name__in=unique_news_nlp).exists()
+        isExist = listed_corp.objects.filter(회사명__in=unique_news_nlp).exists()
         if not isExist:
             return HttpResponse('Not Found', status=404)
         EXCLUDE_COMPANY_NAME = getattr(settings, 'EXCLUDE_COMPANY_NAME', DEFAULT_TIMEOUT)
 
-        disClosure = disclosure.objects.filter(corp_name__in=unique_news_nlp).exclude(corp_name__in=EXCLUDE_COMPANY_NAME)
-        myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('-stock_code','corp_name'))[:10]
-        myCorpCode = list(disClosure.values_list('corp_code', flat=True).order_by('-stock_code','corp_name'))[:10]
-        myStockCode = list(disClosure.values_list('stock_code', flat=True).order_by('-stock_code','corp_name'))[:10]
+        listedCorp = listed_corp.objects.filter(회사명__in=unique_news_nlp).exclude(회사명__in=EXCLUDE_COMPANY_NAME)
+        myCorpName = list(listedCorp.values_list('회사명', flat=True).order_by('-종목코드','회사명'))[:10]
+        # myCorpCode = list(listedCorp.values_list('corp_code', flat=True).order_by('-종목코드','회사명'))[:10]
+        myStockCode = list(listedCorp.values_list('종목코드', flat=True).order_by('-종목코드','회사명'))[:10]
 
-        response = { 'corpName': myCorpName, 'corpCode' : myCorpCode, 'stockCode': myStockCode}
+        response = { 'corpName': myCorpName, 'stockCode': myStockCode}
 
         # redis update before leave {
         new_context['company'] = response

@@ -2,19 +2,21 @@ import React, { useMemo } from 'react';
 import Typography from '@material-ui/core/Typography';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import Chip from '@material-ui/core/Chip';
-import { withRouter } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { resetSearch } from 'app/main/apps/company/store/searchSlice';
+import { resetSelectedCorp, setSelectedCorp } from 'app/main/apps/company/store/searchsSlice';
+// import { resetSearch } from 'app/main/apps/company/store/searchSlice';
 
-function NewsArticles(props) {
+function NewsArticles() {
 	const dispatch = useDispatch();
 	const relatedCompany = useSelector(({ searchApp }) => searchApp.searchs.relatedCompany);
-	const { corpName, corpCode } = relatedCompany;
+	const { corpName, stockCode } = relatedCompany;
 
-	function handleClick(e, corp_code) {
+	function handleClick(e, corpName, stockCode) {
 		e.preventDefault();
-		dispatch(resetSearch());
-		props.history.push(`/apps/company/${corp_code}`);
+		// dispatch(resetSearch());
+		dispatch(resetSelectedCorp());
+		dispatch(setSelectedCorp({ stockCode: stockCode, corpName: corpName }));
+		// props.history.push(`/apps/company/${stockCode}`);
 	}
 
 	const data = useMemo(() => corpName, [corpName]);
@@ -24,7 +26,7 @@ function NewsArticles(props) {
 			<div className="flex flex-row flex-wrap h-full items-center py-4">
 				<Typography className="text-14 font-bold mr-8">관련기업</Typography>
 				{/* <Chip
-					key={defaultChipData.corpCode}
+					key={defaultChipData.stockCode}
 					label={defaultChipData.corpName}
 					size="small"
 					className="mx-4"
@@ -35,11 +37,11 @@ function NewsArticles(props) {
 					data.map((_, i) => {
 						return (
 							<Chip
-								key={corpCode[i]}
+								key={stockCode[i]}
 								label={corpName[i]}
 								size="small"
 								className="m-4"
-								onClick={e => handleClick(e, corpCode[i])}
+								onClick={e => handleClick(e, corpName[i], stockCode[i])}
 							/>
 						);
 					})}
@@ -48,4 +50,4 @@ function NewsArticles(props) {
 	);
 }
 
-export default withRouter(NewsArticles);
+export default NewsArticles;
