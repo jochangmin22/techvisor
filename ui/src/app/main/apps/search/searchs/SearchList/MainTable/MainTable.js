@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CSVLink } from 'react-csv';
 import { withRouter } from 'react-router-dom';
@@ -9,7 +9,7 @@ import Button from '@material-ui/core/Button';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import DownloadFilterMenu from '../DownloadFilterMenu';
+import ColumnMenu from '../ColumnMenu';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
 import { useDebounce } from '@fuse/hooks';
 import {
@@ -20,122 +20,42 @@ import {
 } from 'app/main/apps/search/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 
-const columns = [
-	{
-		Header: '출원번호',
-		accessor: '출원번호',
-		className: 'text-14 text-left truncate',
-		sortable: true,
-		width: 140
-	},
-	{
-		Header: '출원일',
-		accessor: '출원일자',
-		className: 'text-14 text-left truncate',
-		sortable: true,
-		width: 110
-	},
-	{
-		Header: '상태',
-		accessor: '등록사항',
-		className: 'text-14 text-left truncate',
-		sortable: true,
-		width: 80
-	},
-	{
-		Header: '발명의명칭(국문)',
-		accessor: '발명의명칭(국문)',
-		className: 'text-14 text-left truncate',
-		sortable: true,
-		width: 700
-	},
-	{
-		Header: '출원인',
-		accessor: '출원인1',
-		className: 'text-14 text-left truncate',
-		sortable: true,
-		width: 250
-	},
-	{
-		Header: '발명자',
-		accessor: '발명자1',
-		className: 'text-14 text-left truncate',
-		sortable: true,
-		width: 150
-	},
-	{
-		Header: 'IPC',
-		accessor: 'ipc요약',
-		className: 'text-14 text-left truncate',
-		sortable: true,
-		width: 75
-	}
-];
-
-const colsList = [
-	{
-		id: '1',
-		name: '출원번호',
-		field: '출원번호'
-	},
-	{
-		id: '2',
-		name: '출원일',
-		field: '출원일자'
-	},
-	{
-		id: '3',
-		name: '상태',
-		field: '등록사항'
-	},
-	{
-		id: '4',
-		name: '국문명칭',
-		field: '발명의명칭(국문)'
-	},
-	{
-		id: '5',
-		name: '영문명칭',
-		field: '발명의명칭(영문)'
-	},
-	{
-		id: '6',
-		name: '출원인',
-		field: '출원인1'
-	},
-	{
-		id: '7',
-		name: '발명자',
-		field: '발명자1'
-	},
-	{
-		id: '8',
-		name: 'IPC',
-		field: 'ipc요약'
-	}
-	// {
-	// 	id: '9',
-	// 	name: '유사도',
-	// 	field: '유사도'
-	// }
-];
-
 const useStyles = makeStyles(theme => ({
 	dark: { backgroundColor: theme.palette.primary.dark },
-	paper: { backgroundColor: theme.palette.background.paper }
+	paper: { backgroundColor: theme.palette.background.paper },
+	table: {
+		'&.sticky': {
+			overflow: 'scroll',
+			'& thead, & .tfooter': {
+				position: 'sticky',
+				zIndex: 1,
+				width: 'fit-content'
+			},
+			'& tbody': {
+				position: 'relative',
+				zIndex: 0
+			},
+			'& [data-sticky-td]': {
+				position: 'sticky',
+				backgroundColor: theme.palette.background.default,
+				'&:hover': {
+					backgroundColor: theme.palette.type === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0,0,0,.04)'
+				}
+			}
+		}
+	}
 }));
 
 function MainTable(props) {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.entities);
-
+	const cols = useSelector(({ searchApp }) => searchApp.searchs.cols);
 	const [data, setData] = useState(entities);
 	const [csvData, setCsvData] = useState(entities);
 	const [loading, setLoading] = useState(false);
 	const [pageCount, setPageCount] = useState(0);
 
-	const cols = useSelector(({ searchApp }) => searchApp.searchs.cols);
 	// const data = useMemo(() => (entities ? entities : []), [entities]);
 
 	const fetchIdRef = useRef(0);
@@ -186,9 +106,42 @@ function MainTable(props) {
 		[entities]
 	);
 
+	const columns = useMemo(
+		() =>
+			Object.entries(cols)
+				.filter(([n, it]) => it.visible)
+				.map(([n, it]) => {
+					return {
+						Header: cols[n]['header'],
+						accessor: cols[n]['accessor'],
+						className: 'text-left text-14 font-400 truncate',
+						sortable: true,
+						width: cols[n]['width'],
+						Cell: ({ cell }) => {
+							return (
+								<div>
+									<span title={cell.value}>{cell.value}</span>
+								</div>
+							);
+						}
+					};
+				}),
+		[cols]
+	);
+
+	const csvHeaders = cols
+		.filter(item => item.visible)
+		.map(item => {
+			const obj = {
+				key: item.accessor,
+				label: item.header
+			};
+			return obj;
+		});
+
 	const handleOnChange = useDebounce(cols => {
 		dispatch(updateCols(cols));
-	}, 300);
+	}, 100);
 
 	// function onBtExport() {}
 
@@ -209,11 +162,11 @@ function MainTable(props) {
 						className="shadow-none px-16"
 						startIcon={<SaveAltIcon />}
 					>
-						<CSVLink data={csvData} filename={'patent-list.csv'}>
+						<CSVLink data={csvData} headers={csvHeaders} filename={'patent-list.csv'}>
 							Export to CSV
 						</CSVLink>
 					</Button>
-					<DownloadFilterMenu cols={cols} colsList={colsList} onChange={handleOnChange} />
+					<ColumnMenu cols={cols} onChange={handleOnChange} />
 				</div>
 			</div>
 			<FuseScrollbars className="max-h-460 mx-8">

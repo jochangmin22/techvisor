@@ -1699,7 +1699,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/is-prop-valid@npm:^0.8.8":
+"@emotion/is-prop-valid@npm:^0.8.2, @emotion/is-prop-valid@npm:^0.8.8":
   version: 0.8.8
   resolution: "@emotion/is-prop-valid@npm:0.8.8"
   dependencies:
@@ -8956,6 +8956,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"framer-motion@npm:^2.9.4":
+  version: 2.9.4
+  resolution: "framer-motion@npm:2.9.4"
+  dependencies:
+    "@emotion/is-prop-valid": ^0.8.2
+    framesync: ^4.1.0
+    hey-listen: ^1.0.8
+    popmotion: 9.0.0-rc.20
+    style-value-types: ^3.1.9
+    tslib: ^1.10.0
+  peerDependencies:
+    react: ^16.8
+    react-dom: ^16.8
+  dependenciesMeta:
+    "@emotion/is-prop-valid":
+      optional: true
+  checksum: 881506fc35b66b7f55aab957982e93cfe8d0e803f833c2af946722aaabd35f54ff37b0247489d85c709b8c7c59e74f2f49e79dc3866691734bf82fab2d1672ef
+  languageName: node
+  linkType: hard
+
+"framesync@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "framesync@npm:4.1.0"
+  dependencies:
+    hey-listen: ^1.0.5
+  checksum: b2a2a06e28a4323848fd48f7c36b4bc01c203a282ec351955d931d440befdbe88dd29e6bb13b36f064e8b62986daeb6be59609ee5ab55114f711677755d5210e
+  languageName: node
+  linkType: hard
+
 "fresh@npm:0.5.2":
   version: 0.5.2
   resolution: "fresh@npm:0.5.2"
@@ -9195,6 +9224,7 @@ fsevents@~2.1.2:
     eslint-plugin-react-hooks: ^1.7.0
     firebase: 7.19.1
     formsy-react: 2.2.1
+    framer-motion: ^2.9.4
     google-map-react: 1.1.7
     handsontable: ^8.1.0
     history: 4.10.1
@@ -9255,7 +9285,7 @@ fsevents@~2.1.2:
     react-router-dom: 5.2.0
     react-scripts: ^3.4.3
     react-select: 3.1.0
-    react-slick: ^0.27.12
+    react-slick: ^0.27.13
     react-sortable-hoc: ^1.11.0
     react-spring: 8.0.27
     react-swipeable-views: 0.13.9
@@ -9826,6 +9856,13 @@ fsevents@~2.1.2:
   version: 1.1.0
   resolution: "hex-color-regex@npm:1.1.0"
   checksum: 89899f5f74cdef884e352fe8791018f2f112c338b97f3b486f7d5f4760a9c58181f688eb147937f9f2dd69c976a7296b53d1509c9a0871903eeb26a8382e486c
+  languageName: node
+  linkType: hard
+
+"hey-listen@npm:^1.0.5, hey-listen@npm:^1.0.8":
+  version: 1.0.8
+  resolution: "hey-listen@npm:1.0.8"
+  checksum: b9a3ed8d4851735d221a8c2ecf06fba598b0240d18e7ad46780e00af1d62471a40c65d5c6ec48b004fc86d96056cf7e3599d3ef8ee77a31df3cb9f4ce69721ce
   languageName: node
   linkType: hard
 
@@ -15312,6 +15349,18 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"popmotion@npm:9.0.0-rc.20":
+  version: 9.0.0-rc.20
+  resolution: "popmotion@npm:9.0.0-rc.20"
+  dependencies:
+    framesync: ^4.1.0
+    hey-listen: ^1.0.8
+    style-value-types: ^3.1.9
+    tslib: ^1.10.0
+  checksum: 06839ddc16eb995bc5327aee5cd624d09db9d19effe1abb7078adc5c417965adea580bc73ff5bd512a6949a97fb98c4e3b1e9fda9dd8bc1df96cb0e4f0680c3b
+  languageName: node
+  linkType: hard
+
 "popper.js@npm:1.16.1-lts":
   version: 1.16.1-lts
   resolution: "popper.js@npm:1.16.1-lts"
@@ -17321,9 +17370,9 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-slick@npm:^0.27.12":
-  version: 0.27.12
-  resolution: "react-slick@npm:0.27.12"
+"react-slick@npm:^0.27.13":
+  version: 0.27.13
+  resolution: "react-slick@npm:0.27.13"
   dependencies:
     classnames: ^2.2.5
     enquire.js: ^2.1.6
@@ -17331,9 +17380,9 @@ fsevents@~2.1.2:
     lodash.debounce: ^4.0.8
     resize-observer-polyfill: ^1.5.0
   peerDependencies:
-    react: ^0.14.0 || ^15.0.1 || ^16.0.0
-    react-dom: ^0.14.0 || ^15.0.1 || ^16.0.0
-  checksum: 74163c58debd7c17d2e443b957eb2c93fb96c2fe6f149d3a92bd471ba6baf7f945c117636576aada6eb560993f96a5e3215def240098d18997934767216b2b3a
+    react: ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0
+    react-dom: ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0
+  checksum: b58aba1c79c2037e3dca874c7d0c4e273b3934c880a6759d9f1e92eece78cc55269c9f0881835cc80ece106189d97ef483d415989890e7bc85d3f1ed39ca8fa7
   languageName: node
   linkType: hard
 
@@ -19658,6 +19707,16 @@ resolve@1.15.0:
     loader-utils: ^1.1.0
     schema-utils: ^1.0.0
   checksum: 9d8f17677bcc9a6b0dc3f23909dcb3c9976e3e37d53768ff5ffe915a62e50c6ed347b79d4f5613670289547bbfa0e1be968ac89ecffb600553e1931c761b1167
+  languageName: node
+  linkType: hard
+
+"style-value-types@npm:^3.1.9":
+  version: 3.1.9
+  resolution: "style-value-types@npm:3.1.9"
+  dependencies:
+    hey-listen: ^1.0.8
+    tslib: ^1.10.0
+  checksum: d49e6447576690fc6d8337c554c4d4b26b765e62bf91975494069db1320166e146fa255f1c6c0a7580e085db3dd42c43a2983405345eece57a1ffb1c6c3e39e0
   languageName: node
   linkType: hard
 

@@ -1,45 +1,16 @@
-// import Typography from '@material-ui/core/Typography';
-// import Icon from '@material-ui/core/Icon';
-// import IconButton from '@material-ui/core/IconButton';
-import Paper from '@material-ui/core/Paper';
-// import { useTheme } from '@material-ui/core/styles';
-import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
-import NoResultMsg from 'app/main/apps/lib/NoResultMsg';
-import React, { useCallback } from 'react';
-// import { useSelector } from 'react-redux';
+import React from 'react';
 import MainTable from '../MainTable';
+import CorpTitleBar from '../CorpTitleBar';
 
-function SearchListContainer(props) {
-	const { status } = props;
-
-	const WhatMsgToShow = useCallback(() => {
-		if (status === 'noResults') {
-			return (
-				<Paper className="rounded-8 shadow h-full w-full">
-					<NoResultMsg className="h-360" />
-				</Paper>
-			);
-		} else if (status === 'notStarted') {
-			return (
-				<Paper className="rounded-8 shadow h-full w-full">
-					<EmptyMsg icon="chat" msg="검색결과" className="h-360" />
-				</Paper>
-			);
-		} else {
-			return (
-				<Paper className="rounded-8 shadow h-full w-full">
-					<MainTable />
-				</Paper>
-			);
-		}
-	}, [status]);
+const SearchListContainer = React.forwardRef(function (props, ref) {
+	const { selectedCorp } = props;
 
 	return (
-		<div className="flex flex-col w-full h-full md:pt-0">
-			{WhatMsgToShow()}
-			{/* {notSelectedYet && <WaitMsg />} */}
-		</div>
+		<>
+			<MainTable />
+			<CorpTitleBar selectedCorp={selectedCorp} ref={ref} />
+		</>
 	);
-}
+});
 
 export default SearchListContainer;

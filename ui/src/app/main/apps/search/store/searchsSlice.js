@@ -100,7 +100,30 @@ export const initialState = {
 	searchLoading: null,
 	searchSubmit: null,
 	selectedAppNo: null,
-	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
+	cols: [
+		{ header: '출원번호', accessor: '출원번호', width: 140, sortIndex: 0, colorize: false, visible: true },
+		{ header: '출원일', accessor: '출원일자', width: 110, sortIndex: 1, colorize: false, visible: true },
+		{ header: '상태', accessor: '등록사항', width: 80, sortIndex: 2, colorize: false, visible: true },
+		{
+			header: '국문명칭',
+			accessor: '발명의명칭(국문)',
+			width: 700,
+			sortIndex: 3,
+			colorize: false,
+			visible: true
+		},
+		{
+			header: '영문명칭',
+			accessor: '발명의명칭(영문)',
+			width: 700,
+			sortIndex: 4,
+			colorize: false,
+			visible: false
+		},
+		{ header: '출원인', accessor: '출원인1', width: 250, sortIndex: 5, colorize: false, visible: true },
+		{ header: '발명자', accessor: '발명자1', width: 150, sortIndex: 6, colorize: false, visible: true },
+		{ header: 'IPC', accessor: 'ipc요약', width: 75, sortIndex: 7, colorize: false, visible: true }
+	],
 	analysisOptions: {
 		tableOptions: {
 			totalPosts: 0,
@@ -230,6 +253,9 @@ const searchsSlice = createSlice({
 		updateCols: (state, action) => {
 			state.cols = action.payload;
 		},
+		resetCols: (state, action) => {
+			state.cols = initialState.cols;
+		},
 		resetKeywordsVec: (state, action) => {
 			state.keywords = { ...initialState.keywords, vec: initialState.keywords.vec };
 		}
@@ -301,6 +327,7 @@ export const {
 	openSearchPageDialog,
 	closeSearchPageDialog,
 	updateCols,
+	resetCols,
 	resetKeywordsVec
 } = searchsSlice.actions;
 

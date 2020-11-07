@@ -194,7 +194,78 @@ export const initialState = {
 		corpNo: '',
 		corpName: ''
 	},
-	cols: ['1', '2', '3', '4', '5', '6', '7', '8'],
+	cols: [
+		{ header: '종목코드', accessor: '종목코드', width: 110, sortIndex: 0, colorize: false, visible: true },
+		{ header: '회사명', accessor: '회사명', width: 180, sortIndex: 1, colorize: false, visible: true },
+		{ header: '업종', accessor: '업종', width: 200, sortIndex: 2, colorize: false, visible: true },
+		{ header: '주요제품', accessor: '주요제품', width: 400, sortIndex: 3, colorize: false, visible: true },
+		{ header: '대표자명', accessor: '대표자명', width: 150, sortIndex: 4, colorize: false, visible: true },
+		{ header: '시가총액', accessor: '시가총액', width: 100, sortIndex: 5, colorize: false, visible: true },
+		{ header: '업종PER(배)', accessor: '업종PER(배)', width: 100, sortIndex: 6, colorize: false, visible: true },
+		{ header: 'PER(배)', accessor: 'PER(배)', width: 100, sortIndex: 7, colorize: false, visible: true },
+		{ header: 'PER갭(%)', accessor: 'PER갭(%)', width: 100, sortIndex: 8, colorize: false, visible: true },
+		{ header: 'PRR(배)', accessor: 'PRR(배)', width: 100, sortIndex: 9, colorize: false, visible: true },
+		{ header: 'PGF(%)', accessor: 'PGF(%)', width: 100, sortIndex: 10, colorize: true, visible: true },
+		{ header: 'PBR(배)', accessor: 'PBR(배)', width: 100, sortIndex: 11, colorize: false, visible: true },
+		{ header: 'EPS(원)', accessor: 'EPS(원)', width: 100, sortIndex: 12, colorize: true, visible: true },
+		{ header: 'ROE(%)', accessor: 'ROE(%)', width: 100, sortIndex: 13, colorize: true, visible: true },
+		{ header: 'ROA(%)', accessor: 'ROA(%)', width: 100, sortIndex: 14, colorize: true, visible: true },
+		{ header: '현재가', accessor: '현재가', width: 100, sortIndex: 15, colorize: false, visible: true },
+		{ header: '적정가', accessor: '적정가', width: 100, sortIndex: 16, colorize: false, visible: true },
+		{
+			header: '영업이익증감(전전)',
+			accessor: '영업이익증감(전전)',
+			width: 130,
+			sortIndex: 17,
+			colorize: true,
+			visible: true
+		},
+		{
+			header: '순이익증감(전전)',
+			accessor: '순이익증감(전전)',
+			width: 130,
+			sortIndex: 18,
+			colorize: true,
+			visible: true
+		},
+		{
+			header: '영업이익증감(직전)',
+			accessor: '영업이익증감(직전)',
+			width: 130,
+			sortIndex: 19,
+			colorize: true,
+			visible: true
+		},
+		{
+			header: '순이익증감(직전)',
+			accessor: '순이익증감(직전)',
+			width: 130,
+			sortIndex: 20,
+			colorize: true,
+			visible: true
+		},
+		{ header: '부채비율', accessor: '부채비율', width: 130, sortIndex: 21, colorize: false, visible: true },
+		{
+			header: '현금배당수익률',
+			accessor: '현금배당수익률',
+			width: 100,
+			sortIndex: 22,
+			colorize: false,
+			visible: true
+		},
+		{ header: '적정가(1)', accessor: '적(1)PER*EPS', width: 100, sortIndex: 23, colorize: false, visible: false },
+		{ header: '적정가(2)', accessor: '적(2)ROE*EPS', width: 100, sortIndex: 24, colorize: false, visible: false },
+		{ header: '적정가(3)', accessor: '적(3)EPS*10', width: 100, sortIndex: 25, colorize: false, visible: false },
+		{ header: '적정가(4)', accessor: '적(4)s-lim', width: 100, sortIndex: 26, colorize: false, visible: false },
+		{
+			header: '적정가(5)',
+			accessor: '적(5)당기순이익*PER',
+			width: 100,
+			sortIndex: 27,
+			colorize: false,
+			visible: false
+		}
+	],
 	stock: {
 		entities: [],
 		chartType: 'year',
@@ -209,7 +280,10 @@ export const initialState = {
 	wordCloud: [],
 	news: [],
 	newsSA: null,
-	relatedCompany: []
+	relatedCompany: {
+		stockCode: '',
+		corpName: ''
+	}
 };
 
 const searchsSlice = createSlice({
@@ -290,6 +364,9 @@ const searchsSlice = createSlice({
 		},
 		updateCols: (state, action) => {
 			state.cols = action.payload;
+		},
+		resetCols: (state, action) => {
+			state.cols = initialState.cols;
 		},
 		resetKeywordsVec: (state, action) => {
 			state.keywords = { ...initialState.keywords, vec: initialState.keywords.vec };
@@ -381,6 +458,7 @@ export const {
 	openMatrixDialog,
 	closeMatrixDialog,
 	updateCols,
+	resetCols,
 	resetKeywordsVec,
 	updateKeywordsModelType
 } = searchsSlice.actions;

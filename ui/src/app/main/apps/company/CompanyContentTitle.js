@@ -46,13 +46,9 @@ function CompanyContentTitle(props) {
 				<div
 					className={clsx(
 						classes.paper,
-						'flex flex-row justify-between items-center w-full h-auto p-8 rounded-8 shadow'
+						'flex flex-row justify-start items-center w-full h-auto p-8 rounded-8 shadow'
 					)}
 				>
-					<Typography className={clsx(classes.default, 'text-13 font-400 rounded-4 px-8 py-4 mx-8 my-4')}>
-						종목코드 {stockCode} <span className="font-extrabold text-14 ml-8">{corpName}</span>
-					</Typography>
-
 					<IconButton
 						aria-label="close"
 						color="inherit"
@@ -63,6 +59,9 @@ function CompanyContentTitle(props) {
 					>
 						<CloseIcon fontSize="inherit" />
 					</IconButton>
+					<Typography className={clsx(classes.default, 'text-13 font-400 rounded-4 px-8 py-4 mx-8 my-4')}>
+						종목코드 {stockCode} <span className="font-extrabold text-14 ml-8">{corpName}</span>
+					</Typography>
 				</div>
 			</Collapse>
 		</div>
