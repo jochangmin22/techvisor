@@ -284,7 +284,7 @@ def crawl_stock(request):
                 isCrawlBreak = True                      
     return
 
-### financial_crawler start
+### financial_crawler start - 현재사용안함 (사용하려면 return 값 수정필요)
 
 def sectorPer(df):
     ''' df[0] : '업종PER' '''

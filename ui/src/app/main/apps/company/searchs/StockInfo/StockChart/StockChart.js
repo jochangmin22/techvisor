@@ -36,9 +36,10 @@ function calculateMA(dayCount, data) {
 
 function StockChart() {
 	const chartRef = useRef(null);
+	const corpName = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp.corpName);
 	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp.stockCode);
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.stock.entities);
-	const corpName = useSelector(({ companyApp }) => companyApp.searchs.companyInfo.회사명);
+
 	const [today, setToday] = useState(null);
 	// const [series, setSeries] = useState(null);
 	// const [xAxis, setXAxis] = useState(null);

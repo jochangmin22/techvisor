@@ -13,7 +13,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
-import { getCompanyInfo, getFinancialInfo } from 'app/main/apps/company/store/searchsSlice';
+import { getStock, getFinancialInfo } from 'app/main/apps/company/store/searchsSlice';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
 import { numberToWon } from 'app/main/apps/lib/utils';
 import SpinLoading from 'app/main/apps/lib/SpinLoading';
@@ -26,14 +26,13 @@ function FinancialInfo() {
 	const dispatch = useDispatch();
 	const entities = useSelector(({ companyApp }) => companyApp.searchs.financialInfo);
 	const selectedCorp = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp);
-	const { corpName } = selectedCorp;
 	const [showLoading, setShowLoading] = useState(false);
 
 	useEffect(() => {
 		const isEmpty = Object.values(selectedCorp).every(x => x === null || x === '');
 		if (!isEmpty) {
 			setShowLoading(true);
-			dispatch(getCompanyInfo(selectedCorp));
+			dispatch(getStock(selectedCorp));
 			dispatch(getFinancialInfo(selectedCorp)).then(() => {
 				setShowLoading(false);
 			});
@@ -92,7 +91,7 @@ function FinancialInfo() {
 							</Typography>
 							<DraggableIcon />
 							<Typography className="font-medium text-gray-600 ml-8" color="inherit">
-								{corpName}
+								{selectedCorp.corpName}
 							</Typography>
 							<span className="flex flex-row items-center mx-8">
 								{selectedCorp.stockCode && (

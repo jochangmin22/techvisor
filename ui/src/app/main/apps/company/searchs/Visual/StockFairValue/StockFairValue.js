@@ -56,21 +56,21 @@ function StockFairValue(props) {
 	const chartRef = useRef(null);
 	const [echart, setEchart] = useState(null);
 
-	const companyInfo = useSelector(({ companyApp }) => companyApp.searchs.companyInfo);
-
-	const { 회사명: corpName, 종목코드: stockCode, FV1, FV2, FV3, FV4, FV5, FV, CV } = companyInfo;
+	const stockFairValue = useSelector(({ companyApp }) => companyApp.searchs.financialInfo.stockFairValue);
+	const corpName = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp.corpName);
+	const stockCode = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp.stockCode);
 
 	// const [data, setData] = useState(initialState);
 
 	useEffect(() => {
-		if (companyInfo && Object.keys(companyInfo).length > 0) {
+		if (stockFairValue && Object.keys(stockFairValue).length > 0) {
 			drawChart();
 		}
 		// eslint-disable-next-line
-	}, [companyInfo]);
+	}, [stockFairValue]);
 
 	const drawChart = () => {
-		if (!companyInfo || Object.keys(companyInfo).length === 0) return;
+		if (!stockFairValue || Object.keys(stockFairValue).length === 0) return;
 
 		if (echart) {
 			echart.dispose();
@@ -91,13 +91,13 @@ function StockFairValue(props) {
 			series: [
 				{
 					data: [
-						{ value: FV1, itemStyle: { normal: { color: theme.palette.primary.dark } } },
-						{ value: FV2, itemStyle: { normal: { color: theme.palette.primary.main } } },
-						{ value: FV3, itemStyle: { normal: { color: theme.palette.primary.light } } },
-						{ value: FV4, itemStyle: { normal: { color: theme.palette.secondary.dark } } },
-						{ value: FV5, itemStyle: { normal: { color: theme.palette.secondary.main } } },
-						{ value: FV, itemStyle: { normal: { color: theme.palette.secondary.light } } },
-						{ value: CV, itemStyle: { normal: { color: theme.palette.primary.dark } } }
+						{ value: stockFairValue[0], itemStyle: { normal: { color: theme.palette.primary.dark } } },
+						{ value: stockFairValue[1], itemStyle: { normal: { color: theme.palette.primary.main } } },
+						{ value: stockFairValue[2], itemStyle: { normal: { color: theme.palette.primary.light } } },
+						{ value: stockFairValue[3], itemStyle: { normal: { color: theme.palette.secondary.dark } } },
+						{ value: stockFairValue[4], itemStyle: { normal: { color: theme.palette.secondary.main } } },
+						{ value: stockFairValue[5], itemStyle: { normal: { color: theme.palette.secondary.light } } },
+						{ value: stockFairValue[6], itemStyle: { normal: { color: theme.palette.primary.dark } } }
 					],
 					type: 'bar',
 					label: {
@@ -150,11 +150,11 @@ function StockFairValue(props) {
 		};
 	}, [handleResize]);
 
-	if (!companyInfo || Object.keys(companyInfo).length === 0) {
+	if (!stockFairValue || Object.keys(stockFairValue).length === 0) {
 		return <SpinLoading />;
 	}
 
-	const isEmpty = !!(!companyInfo || Object.keys(companyInfo).length === 0);
+	const isEmpty = !!(!stockFairValue || Object.keys(stockFairValue).length === 0);
 
 	return (
 		<Paper className="w-full h-full shadow-none">

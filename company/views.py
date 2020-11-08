@@ -19,18 +19,11 @@ def get_companies(request):
 def get_query(request):
     return companies.parse_query(request)
 
-def get_company_info(request):
-    return companies.parse_company_info(request)
-
 def get_financial_info(request):
     return companies.parse_financial_info(request)
 
 def get_stock(request):
     return companies.parse_stock(request)
-
-def get_stock_info(request):
-    # return companies.crawl_stock_info(request)
-    return crawler.financial_crawler(request)
 
 def get_crawl(request):
     return companies.crawl_stock(request)    
@@ -43,9 +36,6 @@ def get_disclosure_report(request):
 
 def get_owned_patent(request):
     return related_info.get_owned_patent(request)    
-
-def get_stock_fair(request):
-    return companies.stock_fair(request)
 
 def get_wordcloud(request):
     return related_info.wordcloud(request)        

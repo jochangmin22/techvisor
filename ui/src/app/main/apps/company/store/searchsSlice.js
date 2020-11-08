@@ -19,26 +19,6 @@ export const getStock = createAsyncThunk(NAME + 'getStock', async params => {
 	return data;
 });
 
-export const getStockInfo = createAsyncThunk(NAME + 'getStockInfo', async (params, { dispatch }) => {
-	const response = await axios.post(URL + 'stockinfo', params);
-	const data = await response.data;
-
-	return data;
-});
-
-export const getCompanyInfo = createAsyncThunk(NAME + 'getCompanyInfo', async (params, { dispatch }) => {
-	const response = await axios.post(URL + 'companyinfo', params);
-	const data = await response.data;
-
-	const { 종목코드 } = data;
-	if (종목코드) {
-		dispatch(getStock({ stockCode: 종목코드 }));
-		dispatch(getStockInfo({ stockCode: 종목코드 }));
-	}
-
-	return data;
-});
-
 export const getFinancialInfo = createAsyncThunk(NAME + 'getFinancialInfo', async (params, { dispatch }) => {
 	const response = await axios.post(URL + 'financialinfo', params);
 	const data = await response.data;
@@ -272,8 +252,7 @@ export const initialState = {
 		stockInfo: []
 	},
 	stockSearchTop: [],
-	companyInfo: {},
-	financialInfo: {},
+	financialInfo: { date: [], dataset: [], stockFairValue: [] },
 	clinicTest: [],
 	disclosureReport: [],
 	ownedPatent: [],
@@ -378,12 +357,6 @@ const searchsSlice = createSlice({
 		},
 		[getStock.fulfilled]: (state, action) => {
 			state.stock.entities = action.payload;
-		},
-		[getStockInfo.fulfilled]: (state, action) => {
-			state.stock.stockInfo = action.payload;
-		},
-		[getCompanyInfo.fulfilled]: (state, action) => {
-			state.companyInfo = action.payload;
 		},
 		[getFinancialInfo.fulfilled]: (state, action) => {
 			state.financialInfo = action.payload;
