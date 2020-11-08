@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import clsx from 'clsx';
 import StockNewsContainer from '../StockNews/StockNewsContainer';
 import CorpReport from '../CorpReport';
@@ -16,10 +17,14 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
+const tabArray = ['뉴스', '공시', '임상', '특허'];
+
 function RelatedInfoContainer(props) {
 	const classes = useStyles();
+	const theme = useTheme();
 	const { selectedCorp } = props;
 	const [currentRange, setCurrentRange] = useState(0);
+	const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
 
 	function handleChangeRange(range) {
 		setCurrentRange(range);
@@ -30,7 +35,7 @@ function RelatedInfoContainer(props) {
 			<div className="flex flex-col w-full sm:flex-row justify-between sm:px-12">
 				<div className="flex flex-row items-center p-8 pb-0">
 					<PopoverMsg
-						title="뉴스·공시·임상·특허"
+						title={isMobile ? tabArray[currentRange] : tabArray.join('·')}
 						msg="선택한 기업이 있으면 관련 정보를, 선택한 기업이 없으면 최근 정보를 표시합니다."
 					/>
 					<DraggableIcon />
@@ -41,7 +46,7 @@ function RelatedInfoContainer(props) {
 					)}
 				</div>
 				<div className="flex w-full sm:w-288 mx-16 px-12 items-center">
-					{['뉴스', '공시', '임상', '특허'].map((key, index) => {
+					{tabArray.map((key, index) => {
 						return (
 							<Button
 								key={index}

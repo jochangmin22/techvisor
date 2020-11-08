@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Button from '@material-ui/core/Button';
-import { makeStyles } from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import StockChart from '../StockChart';
 import DraggableIcon from 'app/main/apps/lib/DraggableIcon';
@@ -18,12 +19,14 @@ const useStyles = makeStyles(theme => ({
 function StockInfoContainer() {
 	const dispatch = useDispatch();
 	const classes = useStyles();
+	const theme = useTheme();
 	const selectedCorp = useSelector(({ companyApp }) => companyApp.searchs.selectedCorp);
 	const [currentRange, setCurrentRange] = useState({
 		name: 'day',
 		text: '일봉',
 		unit: '5분'
 	});
+	const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
 
 	function handleChangeRange(range) {
 		setCurrentRange(range);
@@ -34,8 +37,8 @@ function StockInfoContainer() {
 		<div className={clsx(classes.root, 'w-full h-full rounded-8 shadow py-8')}>
 			<div className="flex w-full justify-between">
 				<div className="flex flex-row items-center p-12 pb-0">
-					<Typography variant="h6" color="inherit" className="min-w-96 px-12" edge="start">
-						시황 정보
+					<Typography variant="h6" color="inherit" className="px-12" edge="start">
+						{isMobile ? '시황' : '시황정보'}
 					</Typography>
 					<DraggableIcon />
 					<Typography className="font-medium text-gray-600 ml-8" color="inherit">
@@ -54,7 +57,7 @@ function StockInfoContainer() {
 						)}
 					</span>
 				</div>
-				<div className="flex w-full sm:w-320 mx-16 px-12 items-center">
+				<div className="flex w-full sm:w-224 pt-12 items-center">
 					{chartTypes.map(({ name, text }) => {
 						return (
 							<Button
