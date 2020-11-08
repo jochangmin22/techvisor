@@ -85,8 +85,8 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
         # link_description = {}
         for i in range(0, len(response_body['items'])):
             # strip b tag
-            response_body['items'][i]['title'] = re.sub('<[^<]+?>', '', response_body['items'][i]['title'].replace('&quot;', '\"'))
-            response_body['items'][i]['description'] = re.sub('<[^<]+?>', '', response_body['items'][i]['description'].replace('&quot;', '\"'))
+            response_body['items'][i]['title'] = re.sub('<[^<]+?>', '', response_body['items'][i]['title'].replace('&quot;', '\"').replace('&amp;', '&'))
+            response_body['items'][i]['description'] = re.sub('<[^<]+?>', '', response_body['items'][i]['description'].replace('&quot;', '\"').replace('&amp;', '&'))
 
             pDate = datetime.strptime(response_body['items'][i]['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
             # pDate = pDate.strftime('%Y-%m-%d %H:%M:%S')
