@@ -257,10 +257,13 @@ def parse_indicator(request):
     # 전체 등록특허의 피인용수
     try:
         with connection.cursor() as cursor: 
-            query= 'SELECT count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (' + appNoList + ')'
+            # query= 'SELECT count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (' + appNoList + ')'
+            query= 'SELECT sum(피인용수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNoList + ')'
             cursor.execute(query)
             row = dictfetchall(cursor)
         total_citing = row[0]['cnt']
+        if not total_citing:
+            total_citing = 0        
     except:
         total_citing = 0        
 
@@ -291,11 +294,14 @@ def parse_indicator(request):
 
             # citing count (using appNo)
             try:
-                query= 'SELECT count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (' + appNos + ')'
+                # query= 'SELECT count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (' + appNos + ')'
+                query= 'SELECT sum(피인용수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'
                 # query = 'SELECT Count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (SELECT 출원번호 from 공개공보 where 등록일자 is not null and 출원인코드1 = $$' + code + '$$)'
                 cursor.execute(query)
                 row = dictfetchall(cursor)
                 citing = row[0]['cnt']
+                if not citing:
+                    citing = 0
             except:
                 citing = 0                
 
@@ -327,19 +333,25 @@ def parse_indicator(request):
 
             # family count (using appNo)
             try:
-                query= 'SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호 IN (' + appNos + ')'
+                # query= 'SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호 IN (' + appNos + ')'
+                query= 'SELECT sum(패밀리수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'                
                 cursor.execute(query)
                 row = dictfetchall(cursor)
                 family = row[0]['cnt']
+                if not family:
+                    family = 0                 
             except:
                 family = 0
 
             # family count total (using appNoList)
             try:
-                query= 'SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호 IN (' + appNoList + ')'
+                # query= 'SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호 IN (' + appNoList + ')'
+                query= 'SELECT sum(패밀리수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNoList + ')'                                
                 cursor.execute(query)
                 row = dictfetchall(cursor)
                 total_family = row[0]['cnt']
+                if not total_family:
+                    total_family = 0                 
             except:
                 total_family = 0                
 
@@ -349,11 +361,17 @@ def parse_indicator(request):
             except:
                 pfs = 0
 
-            cpp = "{:.2f}".format(cpp)
-            pii = "{:.2f}".format(pii)
-            ts = "{:.2f}".format(ts)
-            pfs = "{:.2f}".format(pfs)
-                                
+            # cpp = "{:.2f}".format(cpp)
+            # pii = "{:.2f}".format(pii)
+            # ts = "{:.2f}".format(ts)
+            # pfs = "{:.2f}".format(pfs)
+
+            cpp = round(cpp,2)
+            pii = round(pii,2)
+            ts = round(ts,2)
+            pfs = round(pfs,2)
+            # citing = int(citing)
+                            
             l.append({ 'name': name, 'citing' : citing, 'cnt': granted, 'cpp' : cpp, 'pii' : pii, 'ts' : ts, 'pfs' : pfs })
 
     res = sorted(l, key=itemgetter('cnt'), reverse=True)
@@ -366,7 +384,9 @@ def parse_indicator(request):
         pass        
     # Redis }
 
-    return HttpResponse(json.dumps(res, ensure_ascii=False))
+    # return HttpResponse(json.dumps(res, ensure_ascii=False))
+    return JsonResponse(res, safe=False)
+
 
 def get_citingInfo(appNo):
     ''' kipris api에서 출원번호에 대한 피인용수 가져오기 '''
