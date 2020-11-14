@@ -22,9 +22,17 @@ const themesConfig = {
 		},
 		typography: {
 			fontFamily: [
-				'Apple SD Gothic Neo', 'AppleSDGothicNeo', 'Noto Sans KR', 'NanumGothic', 'Nalgun Gothic', '맑은 고딕',
-				'돋움', 'dotum', 'Arial', 'sans-serif'
-			].join(','),
+				'Apple SD Gothic Neo',
+				'AppleSDGothicNeo',
+				'Noto Sans KR',
+				'NanumGothic',
+				'Nalgun Gothic',
+				'맑은 고딕',
+				'돋움',
+				'dotum',
+				'Arial',
+				'sans-serif'
+			].join(',')
 		}
 	},
 	defaultDark: {
@@ -787,6 +795,25 @@ const themesConfig = {
 			background: {
 				paper: '#FFFFFF',
 				default: '#F7F7F7'
+			},
+			error: red
+		},
+		status: {
+			danger: 'orange'
+		}
+	},
+	transparentDark: {
+		palette: {
+			type: 'dark',
+			primary: fuseDark,
+			secondary: {
+				light: skyBlue[100],
+				main: skyBlue[500],
+				dark: skyBlue[900]
+			},
+			background: {
+				paper: 'rgba(0, 0, 0, 0.1)',
+				default: 'rgba(0, 0, 0, 0.1)'
 			},
 			error: red
 		},

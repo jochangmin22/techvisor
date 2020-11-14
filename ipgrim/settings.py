@@ -76,7 +76,12 @@ CORS_ORIGIN_WHITELIST = [
     "http://14.32.114.185",  # company
     "https://14.32.114.185",
     "http://ipgrim.com",
+    "http://www.ipgrim.com",
     "https://ipgrim.com",
+    "http://techvisor.co.kr",
+    "http://www.techvisor.co.kr",
+    "https://techvisor.co.kr",
+
     "http://52.79.161.225",  # aws
     "https://52.79.161.225",
 ]
@@ -348,7 +353,7 @@ STOPWORDS = [
     '포함',
     '필요',
     '하나',
-    '하다'
+    '하다',
     '하부',
     '한',
     '함유',

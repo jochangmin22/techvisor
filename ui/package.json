@@ -127,7 +127,7 @@
 		"prettier": "^2.1.2",
 		"promise": "8.1.0",
 		"purgecss": "1.4.2",
-		"sass-loader": "^10.0.5",
+		"sass-loader": "^10.1.0",
 		"source-map-explorer": "2.5.0",
 		"tailwindcss": "1.9.6",
 		"tailwindcss-dir": "4.0.0"
@@ -145,6 +145,7 @@
 		"lint": "eslint",
 		"upload:s3": "aws s3 sync ./build s3://$S3_BUCKET --delete",
 		"deploy": "aws s3 sync ./build s3://ipgrim.com --profile=ipgrim --delete",
+		"deploy:tv": "aws s3 sync ./build s3://techvisor.co.kr --profile=techvisor --delete",
 		"invalidate": "aws cloudfront create-invalidation --profile=ipgrim --distribution-id E2SGQS64SVBGI --paths / /index.html /error.html /service-worker.js /manifest.json /favicon.ico"
 	},
 	"browserslist": {

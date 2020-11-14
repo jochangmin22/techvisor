@@ -117,7 +117,8 @@ def crawl_disclosure_report(**kwargs):
 
 def update_today_crawl_mdcline():
     today = datetime.today().strftime('%Y%m%d')
-    totalCount, df = crawl_mdcline(today)
+    totalCount, df = crawl_mdcline(str(today))
+    # totalCount, df = crawl_mdcline('20201110')
 
     if totalCount == 0:
         return
@@ -137,7 +138,7 @@ def update_today_crawl_mdcline():
 def crawl_mdcline(singleDate):
     ''' 임상정보 크롤링'''
     # try:
-    html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=100&pageNo=1&approval_time=" + singleDate, timeout=10)
+    html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=100&pageNo=1&approval_time=" + str(singleDate), timeout=10)
     # except requests.exceptions.Timeout: # 결과 없는 경우나 시간이 길어지면 stop
         # return 0, {}
 

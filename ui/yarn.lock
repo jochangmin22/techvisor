@@ -9297,7 +9297,7 @@ fsevents@~2.1.2:
     react-window: 1.8.6
     redux: 4.0.5
     redux-logger: 4.0.0
-    sass-loader: ^10.0.5
+    sass-loader: ^10.1.0
     slick-carousel: ^1.8.1
     source-map-explorer: 2.5.0
     styled-components: 5.2.1
@@ -18505,9 +18505,9 @@ resolve@1.15.0:
   languageName: node
   linkType: hard
 
-"sass-loader@npm:^10.0.5":
-  version: 10.0.5
-  resolution: "sass-loader@npm:10.0.5"
+"sass-loader@npm:^10.1.0":
+  version: 10.1.0
+  resolution: "sass-loader@npm:10.1.0"
   dependencies:
     klona: ^2.0.4
     loader-utils: ^2.0.0
@@ -18526,7 +18526,7 @@ resolve@1.15.0:
       optional: true
     sass:
       optional: true
-  checksum: 6ff9bafd127a33aae35850433d9bb7d6b2b2cf50f44fa02ea189436700d4c20a66d5d33f93b3e693712589eed72f67f6e7dee893e2835d663c4fe72bb58422b0
+  checksum: f443dad79ba982462ff69a860207324c9f19e122c59f03b0608557a4aa7ec2158e6172059c6d8ae4fe5bad0182c3b0434904571b3a36e8ec5e0c44a7610bcebb
   languageName: node
   linkType: hard
 

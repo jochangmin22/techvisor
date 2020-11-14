@@ -59,7 +59,7 @@ def remove_tags(text):
 
 
 def remove_brackets(text):
-    return re.sub("[\(\[].*?[\)\]]", "", text)
+    return re.sub("[\\(\\[].*?[\\)\\]]", "", text)
 
 
 def remove_punc(text):

@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { setMockData } from './store/searchsSlice';
+import React from 'react';
+import { useSelector } from 'react-redux';
+// import { setMockData } from './store/searchsSlice';
+// import searchData from 'app/main/apps/lib/mockDataSearchApp';
 // import { authRoles } from "app/auth";
 import EmptyMsg from 'app/main/apps/lib/EmptyMsg';
 import NoResultMsg from 'app/main/apps/lib/NoResultMsg';
-import searchData from 'app/main/apps/lib/mockDataSearchApp';
 import { useForm } from '@fuse/hooks';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
@@ -27,7 +27,6 @@ const useStyles = makeStyles(theme => ({
 
 function SearchContent() {
 	const classes = useStyles();
-	const dispatch = useDispatch();
 	const searchText = useSelector(({ searchApp }) => searchApp.searchs.searchParams.searchText);
 	const entities = useSelector(({ searchApp }) => searchApp.searchs.entities);
 	const searchLoading = useSelector(({ searchApp }) => searchApp.searchs.searchLoading);
@@ -46,10 +45,10 @@ function SearchContent() {
 	}
 
 	// 개발용 mock data 넣기
-	useEffect(() => {
-		dispatch(setMockData(searchData));
-		// eslint-disable-next-line
-	}, []);
+	// useEffect(() => {
+	// 	dispatch(setMockData(searchData));
+	// 	// eslint-disable-next-line
+	// }, []);
 
 	const noResult = !!(searchText && searchLoading === false && entities && entities.length === 0);
 	const isEmpty = !!(!searchText && searchLoading === null && entities && entities.length === 0);
@@ -59,7 +58,14 @@ function SearchContent() {
 	}
 
 	if (isEmpty) {
-		return <EmptyMsg icon="chat" msg="검색결과" />;
+		return (
+			<EmptyMsg
+				icon="wb_incandescent"
+				msg="원하는 주제의 기술트렌드를 간편하게 확인할 수 있습니다"
+				text="원하시는 검색 키워드를 입력하세요."
+				className="h-512"
+			/>
+		);
 	}
 
 	return (

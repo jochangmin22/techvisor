@@ -1,4 +1,5 @@
 import LandingPageConfig from './landing/LandingPageConfig';
+import HomePageConfig from './home/HomePageConfig';
 import PolicyPageConfig from './policy/PolicyPageConfig';
 import ServicePageConfig from './service/ServicePageConfig';
 // import ForgotPassword2PageConfig from './auth/forgot-password-2/ForgotPassword2PageConfig';
@@ -30,6 +31,7 @@ import ServicePageConfig from './service/ServicePageConfig';
 
 const pagesConfigs = [
 	LandingPageConfig,
+	HomePageConfig,
 	PolicyPageConfig,
 	ServicePageConfig
 	// LoginPageConfig,

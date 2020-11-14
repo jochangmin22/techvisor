@@ -8,7 +8,7 @@ const LandingPageConfig = {
 					display: false
 				},
 				footer: {
-					display: true,
+					display: false,
 					style: 'static',
 					position: 'below'
 				}
