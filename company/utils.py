@@ -194,7 +194,7 @@ def like_parse(keyword=""):
 
         res = ""
         for k in temp:
-           res += '"' + fieldName + "\" like '%" + k + "%' or "
+           res += '"' + fieldName + "\" ilike '%" + k + "%' or "
 
         if res.endswith(" or "):
             res = res[:-4]
@@ -205,7 +205,7 @@ def like_parse(keyword=""):
         temp2 = list(map("%".join, permutations(notItems, mylength)))
 
         for k in temp2:
-            res2 += '"' + fieldName + "\" not like '%" + k + "%' and "
+            res2 += '"' + fieldName + "\" not ilike '%" + k + "%' and "
 
         if res2.endswith(" and "):
             res2 = res2[:-5]
