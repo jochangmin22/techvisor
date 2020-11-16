@@ -7383,6 +7383,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dompurify@npm:^2.1.1":
+  version: 2.2.2
+  resolution: "dompurify@npm:2.2.2"
+  checksum: eab7b8763c56256bb4fb009e59b814f750fe0a4be40f996f037f136a40dbe8107820989c7b548b92263076fce7023ee31c58a11ad479cba16b4626b8d91559f1
+  languageName: node
+  linkType: hard
+
 "domutils@npm:1.5.1":
   version: 1.5.1
   resolution: "domutils@npm:1.5.1"
@@ -9226,7 +9233,7 @@ fsevents@~2.1.2:
     formsy-react: 2.2.1
     framer-motion: ^2.9.4
     google-map-react: 1.1.7
-    handsontable: ^8.1.0
+    handsontable: ^8.2.0
     history: 4.10.1
     i18next: 19.7.0
     include-media: ^1.4.9
@@ -9290,7 +9297,7 @@ fsevents@~2.1.2:
     react-spring: 8.0.27
     react-swipeable-views: 0.13.9
     react-swipeable-views-utils: 0.14.0-alpha.0
-    react-table: 7.6.1
+    react-table: 7.6.2
     react-table-sticky: ^1.1.3
     react-text-mask: 5.4.3
     react-virtualized: 9.22.2
@@ -9701,17 +9708,18 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"handsontable@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "handsontable@npm:8.1.0"
+"handsontable@npm:^8.2.0":
+  version: 8.2.0
+  resolution: "handsontable@npm:8.2.0"
   dependencies:
     "@types/pikaday": 1.7.4
     core-js: ^3.0.0
+    dompurify: ^2.1.1
     hot-formula-parser: ^3.0.1
     moment: 2.24.0
     numbro: 2.1.2
     pikaday: 1.8.0
-  checksum: c2b86936a258ce6d9ed220bcdc3da2111acf8c06f24b45f4a872182ef704cd438d14ffc13461ce18268202d93afb57600b0d81e8dd7e1493615e391b9dcebd78
+  checksum: 74e10cb6e3ef845378d11b414b1542b9c785da5ba261d7bcb264b907413e2b50c4a0e43c92d457d72585405d3b578a23e3d3003a25a32e7a47140e2cf890b8bb
   languageName: node
   linkType: hard
 
@@ -17484,12 +17492,12 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-table@npm:7.6.1":
-  version: 7.6.1
-  resolution: "react-table@npm:7.6.1"
+"react-table@npm:7.6.2":
+  version: 7.6.2
+  resolution: "react-table@npm:7.6.2"
   peerDependencies:
-    react: ^16.8.3
-  checksum: 9e0d6c6785e392a877b475ac2d303ed6c5b20230b2538b9c1ccce2966c070fa70dd27e9a0b7dd23fc53015e386afba743e0623af9b831fc03818461db848489f
+    react: ^16.8.3 || ^17.0.0-0
+  checksum: ed9b485c3ab31e771f9dd1b5559a5d7713cff2fa541cc404be5fdf1fa7c76817d500d0ca807c46446a5a199c5226f4f3b00529d7d38eee396cb04d90fe9a9b4e
   languageName: node
   linkType: hard
 
