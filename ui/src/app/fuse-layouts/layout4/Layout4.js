@@ -96,8 +96,7 @@ function Layout4(props) {
 						</FuseScrollbars>
 
 						{config.footer.display && config.footer.style === 'fixed' && <FooterLayout4 />}
-
-						<SettingsPanel />
+						{process.env.NODE_ENV === 'development' && <SettingsPanel />}
 					</div>
 
 					{config.rightSidePanel.display && <RightSideLayout4 />}

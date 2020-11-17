@@ -12,8 +12,8 @@ import { RiFacebookCircleLine, RiTwitterLine, RiGoogleLine, RiKakaoTalkLine } fr
 
 const useStyles = makeStyles(theme => ({
 	logoIcon: {
-		width: 100, // 24,
-		height: 32, // 24,
+		width: '60%',
+		height: '60%',
 
 		transition: theme.transitions.create(['width', 'height'], {
 			duration: theme.transitions.duration.shortest,
@@ -54,7 +54,7 @@ function FooterLayout4(props) {
 								서비스
 							</Typography>
 							<ul className="leading-loose">
-								<li>
+								{/* <li>
 									<a
 										role="button"
 										href="https://www.notion.so/462f98867d2b479f9ccc31142d0129bb"
@@ -63,7 +63,7 @@ function FooterLayout4(props) {
 									>
 										이용요금
 									</a>
-								</li>
+								</li> */}
 
 								<li>
 									<a
@@ -98,7 +98,7 @@ function FooterLayout4(props) {
 							<Link className="justify-left cursor-pointer mb-8" to="/landing" role="button">
 								<img
 									className={classes.logoIcon}
-									src="assets/images/logos/logo_ipgrim_shadow.svg"
+									src="assets/images/logos/logo_techvisor.svg"
 									alt="logo"
 								/>
 							</Link>
@@ -145,13 +145,13 @@ function FooterLayout4(props) {
 							</ul>
 						</div>
 					</Container>
-					<Container className="flex w-full border-t border-gray-400 border-opacity-25 p-32">
+					<Container className="flex w-full border-t border-gray-400 border-opacity-25 p-16">
 						{/* <div className="flex m-auto p-12"> */}
 						<div className="flex flex-row w-full justify-center">
 							<p className="font-light text-gray-200 mr-16 text-12">
-								Copyright ⓒ <strong>Btowin Partners</strong>, all rights reserved.
+								ⓒ <strong>Btowin Partners</strong>, all rights reserved.
 							</p>
-							<Link className="font-medium text-14 mr-16 cursor-pointer" to="/policy/terms" role="button">
+							<Link className="font-medium text-14 cursor-pointer" to="/policy/terms" role="button">
 								서비스 정책
 							</Link>
 						</div>

@@ -62,7 +62,11 @@ function MessageBox() {
 			<Slider {...settings}>
 				{tutorialSteps.map((step, index) => (
 					<div key={index} className="flex w-full flex-col items-center justify-center">
-						<Typography variant="h5" color="inherit" className="text-center leading-loose">
+						<Typography
+							variant="h5"
+							color="inherit"
+							className="text-center leading-loose text-14 md:text-16"
+						>
 							<p>{step.textA}</p>
 							<p>{step.textB}</p>
 							<p>{step.textC}</p>

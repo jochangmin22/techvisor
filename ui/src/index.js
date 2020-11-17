@@ -10,6 +10,9 @@ import './styles/index.css';
 import './scss/main.scss';
 import App from 'app/App';
 import * as serviceWorker from './serviceWorker';
+import ReactGA from 'react-ga';
+
+ReactGA.initialize('G-TL8W7DJPJV');
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

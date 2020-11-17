@@ -3,7 +3,7 @@ import requests
 import json
 import pandas as pd
 from sqlalchemy import create_engine
-from datetime import datetime
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from django.http import JsonResponse, HttpResponse
 from urllib.request import urlopen
@@ -117,8 +117,11 @@ def crawl_disclosure_report(**kwargs):
 
 def update_today_crawl_mdcline():
     today = datetime.today().strftime('%Y%m%d')
-    totalCount, df = crawl_mdcline(str(today))
-    # totalCount, df = crawl_mdcline('20201110')
+    # today = today + timedelta(days=-1)
+    # today = today.strftime('%Y%m%d')
+
+    totalCount, df = crawl_mdcline(singleDate=today)
+
 
     if totalCount == 0:
         return

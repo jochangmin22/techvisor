@@ -306,7 +306,7 @@ const LeftSiderTerms = React.forwardRef(function (props, ref) {
 	// }
 
 	return (
-		<FuseScrollbars className="flex flex-auto flex-col min-h-2xl">
+		<FuseScrollbars className="flex flex-auto flex-col h-auto">
 			<div className="px-24 py-8">
 				<div>
 					<Typography variant="subtitle1" className="mb-8">

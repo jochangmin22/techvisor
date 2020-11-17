@@ -1,19 +1,20 @@
 import NavbarFoldedToggleButton from 'app/fuse-layouts/shared-components/NavbarFoldedToggleButton';
 import LanguageSwitcher from 'app/fuse-layouts/shared-components/LanguageSwitcher';
 import Hidden from '@material-ui/core/Hidden';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Icon from '@material-ui/core/Icon';
 import clsx from 'clsx';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MessageBox from './message-box';
 import ClientLogoSlider from './client-logo-slider';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { Link } from 'react-router-dom';
-import { BiVector, BiPalette, BiLayout, BiWorld, BiServer } from 'react-icons/bi';
+// import { BiVector, BiPalette, BiLayout, BiWorld, BiServer } from 'react-icons/bi';
+import { BiVector, BiPalette, BiLayout } from 'react-icons/bi';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -145,8 +146,8 @@ const useStyles = makeStyles(theme => ({
 
 function LandingPage() {
 	const classes = useStyles();
-	const theme = useTheme();
-	const videoSource = 'assets/videos/main_bg_video.mp4';
+	// const theme = useTheme();
+	// const videoSource = 'assets/videos/main_bg_video.mp4';
 
 	AOS.init();
 
@@ -232,7 +233,7 @@ function LandingPage() {
 					<Container className="flex justify-center">
 						<div className="flex flex-wrap -mx-12">
 							<div className="w-5/6 mx-auto text-center">
-								<Typography color="inherit" className="text-32 md:text-60 font-800 leading-tight mb-32">
+								<Typography color="inherit" className="text-40 md:text-72 font-800 leading-tight mb-32">
 									Tech Visor
 								</Typography>
 								<Typography color="inherit" className="text-20 md:text-32 font-500 leading-tight mb-32">
@@ -567,27 +568,27 @@ function LandingPage() {
 									<h5 className="text-white mb-4">Connect With Us</h5>
 									<ul className="list-inline">
 										<li className="list-inline-item mx-2 text-white">
-											<a href="#">
+											<a href="#none">
 												<i className="ti-facebook"></i>
 											</a>
 										</li>
 										<li className="list-inline-item mx-2 text-white">
-											<a href="#">
+											<a href="#none">
 												<i className="ti-twitter-alt"></i>
 											</a>
 										</li>
 										<li className="list-inline-item mx-2 text-white">
-											<a href="#">
+											<a href="#none">
 												<i className="ti-linkedin"></i>
 											</a>
 										</li>
 										<li className="list-inline-item mx-2 text-white">
-											<a href="#">
+											<a href="#none">
 												<i className="ti-github"></i>
 											</a>
 										</li>
 										<li className="list-inline-item mx-2 text-white">
-											<a href="#">
+											<a href="#none">
 												<i className="ti-instagram"></i>
 											</a>
 										</li>

@@ -4,8 +4,8 @@ import React from 'react';
 
 const useStyles = makeStyles(theme => ({
 	logoIcon: {
-		width: 100,
-		height: 32,
+		width: '65%',
+		height: '65%',
 		transition: theme.transitions.create(['width', 'height'], {
 			duration: theme.transitions.duration.shortest,
 			easing: theme.transitions.easing.easeInOut
@@ -19,7 +19,7 @@ function Logo() {
 	return (
 		<div className="flex items-center">
 			<Link className="cursor-pointer" to="/landing" role="button">
-				<img className={classes.logoIcon} src="assets/images/logos/logo_ipgrim_shadow.svg" alt="logo" />
+				<img className={classes.logoIcon} src="assets/images/logos/logo_techvisor.svg" alt="logo" />
 			</Link>
 		</div>
 	);

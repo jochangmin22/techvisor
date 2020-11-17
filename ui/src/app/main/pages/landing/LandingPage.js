@@ -1,141 +1,118 @@
 import FuseAnimate from '@fuse/core/FuseAnimate';
 import { makeStyles } from '@material-ui/core/styles';
-import { darken } from '@material-ui/core/styles/colorManipulator';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Icon from '@material-ui/core/Icon';
-import clsx from 'clsx';
 import React from 'react';
 import MessageBox from './message-box';
-import AOS from 'aos';
+// import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
 	root: {
-		background: 'black',
-		color: theme.palette.primary.contrastText
-	},
-	leftSection: {
-		background: 'transparent'
-	},
-	rightSection: {
-		background: `linear-gradient(to right, ${theme.palette.primary.dark} 0%, ${darken(
-			theme.palette.primary.dark,
-			0.5
-		)} 100%)`,
-		color: theme.palette.primary.contrastText
-	},
-	section: {
-		paddingTop: 70,
-		paddingBottom: 70,
-		'& .section-title': {
-			marginBottom: '52',
-			'& h6': {
-				color: '#ffae47',
-				letterSpacing: '1.2rem',
-				fontSize: 16
-			},
-			'& h1': {
-				fontWeight: 700,
-				color: '#000',
-				fontSize: 42
-			}
-		},
-		'& .section-title h6': {
-			color: theme.palette.primary.light
-		},
-		'& .service-item': {
-			padding: '48px 28px',
+		background: 'transparent',
+		'& .hero-section': {
+			minHeight: '100vh',
 			position: 'relative',
-			overflow: 'visible',
-			transition: 'all .3s ease',
-			'& img': {
-				width: 55,
-				height: 55,
-				verticalAlign: 'middle'
-			},
-			'& .content h6': {
-				fontSize: 16,
-				fontWeight: 700,
-				color: '#000',
-				marginBottom: '20px',
-				'& p': {
-					lineHeight: '30px',
-					marginBottom: '20px',
-					fontSize: 16
-				}
-			}
-			// '&::before': {
-			// 	background: 'url("../../assets/images/icons/pattern.png")',
-			// 	position: 'absolute',
-			// 	top: 0,
-			// 	left: 0,
-			// 	content: '""',
-			// 	width: '100%',
-			// 	height: '100%',
-			// 	transform: 'translate(20px,20px)',
-			// 	opacity: 0,
-			// 	zIndex: -1,
-			// 	transition: 'all .6s ease'
-			// }
-		},
-		'& [data-aos=text-reveal]': {
-			clipPath: 'inset(0 100% 0 0)',
-			'&.aos-animate': {
-				position: 'relative',
-				whiteSpace: 'nowrap',
-				animationName: 'reveal-text',
-				animationDuration: '1s',
-				animationFillMode: 'both',
-				animationTimingFunction: 'cubic-bezier(1, 0.01, 0, 1)',
-				clipPath: 'inset(0 100% 0 0)',
-				'&::after': {
-					content: '""',
+			'&.overlay': {
+				'&::before': {
 					position: 'absolute',
-					zIndex: 999,
+					content: '""',
+					height: '100%',
+					width: '100%',
 					top: 0,
 					left: 0,
-					right: 0,
-					bottom: 0,
-					backgroundColor: '#ffc275',
-					transform: 'scaleX(0)',
-					transformOrigin: '0 50%',
-					animationDuration: '1s',
-					animationFillMode: 'both',
-					animationTimingFunction: 'cubic-bezier(1, 0.01, 0, 1)',
-					animationName: 'revealer-text'
+					background: '#1f2749',
+					opacity: '.8'
+				}
+			},
+			'& .hero-content': {
+				width: '100%',
+				padding: '50px 0',
+				position: 'absolute',
+				left: 0,
+				right: 0,
+				top: '50%',
+				transform: 'translateY(-50%)',
+				color: theme.palette.primary.contrastText
+			}
+		},
+		'& .section': {
+			paddingTop: '100px',
+			paddingBottom: '100px',
+			[theme.breakpoints.down('md')]: {
+				paddingTop: '24px',
+				paddingBottom: '24px',
+				display: 'block'
+			},
+			'& .section-title': {
+				marginBottom: '80',
+				[theme.breakpoints.down('md')]: {
+					marginBottom: '24'
+				},
+				'& .h6': {
+					color: '#ffae47',
+					letterSpacing: '1.2rem',
+					fontSize: '16px',
+					[theme.breakpoints.down('md')]: {
+						fontSize: '12px'
+					}
+				},
+				'& .h1': {
+					fontWeight: 700,
+					color: '#000',
+					fontSize: '36px',
+					[theme.breakpoints.down('md')]: {
+						fontSize: '24px'
+					}
+				}
+			},
+			'& .card': {
+				position: 'relative',
+				display: 'flex',
+				flexDirection: 'column',
+				minWidth: 0,
+				wordWrap: 'break-word',
+				// backgroundColor: 'rgb(34, 36, 37)',
+				borderColor: 'rgba(139, 130, 116, 0.13)',
+				// backgroundColor: '#fff',
+				backgroundClip: 'border-box',
+				border: '1px solid rgba(0,0,0,.125)',
+				borderRadius: '.25rem',
+				'& .card-body': {
+					flex: '1 1 auto',
+					// padding: '1.25rem',
+					'& .card-title': {
+						marginBottom: '.75rem'
+					},
+					'& .icon-rounded': {
+						width: '80px',
+						height: '80px',
+						lineHeight: '80px',
+						display: 'inline-block',
+						// borderRadius: '50%',
+						borderRadius: '9999px',
+						fontSize: '30px'
+					}
 				}
 			}
-		}
-	},
-	'@global': {
-		'@keyframes reveal-text': {
-			from: { clipPath: 'inset(0 100% 0 0)' },
-			to: { clipPath: 'inset(0 0 0 0)' }
-		},
-		'@keyframes revealer-text': {
-			'0%,50%': { transformOrigin: '0 50%' },
-			'51%,100%': { transformOrigin: '100% 50%' },
-			'50%': { transform: 'scaleX(1)' },
-			'100%': { transform: 'scaleX(0)' }
 		}
 	}
 }));
 
 function LandingPage() {
 	const classes = useStyles();
-	const videoSource = 'assets/videos/main_bg_video.mp4';
-
-	AOS.init();
+	// const videoSource = 'assets/videos/main_bg_video.mp4';
+	const videoSource = 'http://btowin.synology.me:1111/assets/videos/main_bg_video.mp4';
 
 	return (
-		<>
-			<div
-				className={clsx(
-					classes.root,
-					'flex flex-col flex-auto items-center justify-center flex-shrink-0 w-full h-screen'
-				)}
+		<div className={classes.root}>
+			<section
+				className="hero-section overlay bg-cover"
+				style={{
+					backgroundImage: 'url(http://demo.themefisher.com/redlab-hugo/images/backgrounds/banner.jpg)'
+				}}
 			>
 				<video
 					className="absolute w-full h-screen top-0 left-0 object-cover opacity-50"
@@ -147,76 +124,128 @@ function LandingPage() {
 					<source src={videoSource} type="video/mp4" />
 					Your browser does not support the video tag.
 				</video>
-
-				<div className="absolute top-0 flex w-full max-w-2xl md:max-w-3xl overflow-hidden">
-					<div
-						className={clsx(classes.leftSection, 'hidden md:flex flex-1 items-center justify-center p-64')}
-					>
-						<div className="max-w-lg">
-							<FuseAnimate animation="transition.slideUpIn" delay={1000}>
-								<div className="flex w-full flex-col items-center justify-center mb-136">
-									<Typography variant="h1" color="inherit" className="font-800 leading-tight">
-										Tech Visor
-									</Typography>
-									<Typography variant="h3" color="inherit" className="font-800 leading-tight">
-										AI 기반 IP-비지니스 분석 플랫폼
-									</Typography>
+				<div className="hero-content">
+					<Container className="flex justify-center">
+						<div className="flex flex-wrap -mx-12">
+							<div className="w-5/6 mx-auto text-center">
+								<Typography color="inherit" className="text-40 md:text-96 font-800 leading-tight mb-32">
+									Tech Visor
+								</Typography>
+								<Typography
+									color="inherit"
+									className="text-20 md:text-24 font-500 leading-tight mb-128"
+								>
+									AI 기반 IP-비지니스 분석 플랫폼
+								</Typography>
+								<div className="max-w-lg mb-128">
+									<MessageBox />
 								</div>
-							</FuseAnimate>
 
-							<MessageBox />
-							<div className="flex flex-row m-auto items-center justify-center mt-192">
-								<Link
-									role="button"
-									to="/login"
-									className="flex p-24 mr-24 w-288 rounded-lg cursor-pointer items-center justify-center bg-blue-600 hover:bg-blue-500 text-20"
-								>
-									시작하기 <Icon>arrow_forward</Icon>
-								</Link>
-								<a
-									role="button"
-									href="https://www.notion.so/jingu0705/060138803fe046d4a4d4eaab641ca06a"
-									target="_blank"
-									rel="noreferrer noopener"
-								>
-									<div className="flex p-24 w-288 rounded-lg cursor-pointer items-center justify-center hover:bg-blue-500 active:bg-blue-600 transition duration-300 ease-in-out border border-blue-400 hover:text-white text-20">
-										더 알아보기 <Icon>arrow_forward</Icon>
-									</div>
-								</a>
+								<div className="flex flex-row mx-auto items-center justify-center">
+									<Link
+										role="button"
+										to="/login"
+										className="flex p-12 md:p-24 mr-24 w-136 md:w-192 rounded-lg items-center justify-center bg-blue-600 hover:bg-blue-500 text-14 md:text-20"
+									>
+										시작하기 <Icon>arrow_forward</Icon>
+									</Link>
+									<a
+										role="button"
+										href="https://www.notion.so/jingu0705/060138803fe046d4a4d4eaab641ca06a"
+										target="_blank"
+										rel="noreferrer noopener"
+									>
+										<div className="flex p-12 md:p-24 w-136 md:w-192 rounded-lg items-center justify-center hover:bg-blue-500 active:bg-blue-600 transition duration-300 ease-in-out border border-blue-400 hover:text-white text-14 md:text-20">
+											더 알아보기 <Icon>arrow_forward</Icon>
+										</div>
+									</a>
+								</div>
 							</div>
 						</div>
-					</div>
+					</Container>
 				</div>
-			</div>
-			<section className={clsx(classes.section)}>
-				<div className="absolute inset-0 -z-1">
-					<img
-						src="http://demo.themefisher.com/icelab-hugo/images/shape-big.png"
-						className="max-w-full h-auto align-middle"
-						alt="big-shape"
-					/>
-				</div>
+			</section>
+			<section
+				className="section overlay bg-cover"
+				style={{
+					backgroundImage: 'url(http://demo.themefisher.com/icelab-hugo/images/shape-big.png)'
+				}}
+			>
 				<Container className="flex">
 					<div className="flex flex-col">
-						<div className="w-full h-auto">
-							<div className="section-title">
-								<h6 className="sm">
-									<FuseAnimate animation="transition.slideUpIn" delay={1500}>
-										<div>What We Do</div>
-									</FuseAnimate>
-								</h6>
-								<h1>
-									<FuseAnimate animation="transition.slideUpIn" delay={2000}>
-										<div>
-											기업, 기술에 대해
-											<br />
-											다양한 분석정보를 제공
-										</div>
-									</FuseAnimate>
-								</h1>
-							</div>
+						<div className="section-title w-full h-auto">
+							<FuseAnimate animation="transition.slideUpIn" delay={1500}>
+								<Typography className="h6 mb-24">WHAT WE DO</Typography>
+							</FuseAnimate>
+							<FuseAnimate animation="transition.slideUpIn" delay={2000}>
+								<Typography className="h1">
+									기업, 기술에 대해
+									<br />
+									다양한 분석정보를 제공
+								</Typography>
+							</FuseAnimate>
 						</div>
-						<div className="flex flex-row w-full">
+						<div className="section">
+							<Container className="flex justify-center">
+								<div className="flex flex-wrap">
+									<div className="w-full sm:w-1/2 md:w-1/3 px-16 mb-16">
+										<div className="card rounded-0 text-center hover:bg-gray-200">
+											<div className="card-body p-16">
+												<div className="mb-48">
+													<img
+														className="w-32 h-32 sm:w-48 sm:h-48 mr-8 sm:mr-16 rounded inline-block"
+														src="assets/images/icons/icon-1.svg"
+														alt=""
+													/>
+												</div>
+												<Typography className="card-title text-20">유망한 기업 찾기</Typography>
+												<p className="card-text content">
+													관심 키워드, 주제어 검색을 통해 유망 기술 & R&D기업 찾기
+												</p>
+											</div>
+										</div>
+									</div>
+									<div className="w-full sm:w-1/2 md:w-1/3 px-16 mb-16">
+										<div className="card rounded-0 text-center hover:bg-gray-200">
+											<div className="card-body p-16">
+												<div className="mb-48">
+													<img
+														className="w-32 h-32 sm:w-48 sm:h-48 mr-8 sm:mr-16 rounded inline-block"
+														src="assets/images/icons/icon-2.svg"
+														alt=""
+													/>
+												</div>
+												<Typography className="card-title text-20">
+													관심기업의 다양한 분석정보
+												</Typography>
+												<p className="card-text content">
+													관심 기업의 실시간 시세, 재무, 공시, 임상, 특허, 적정주가 분석하기
+												</p>
+											</div>
+										</div>
+									</div>
+									<div className="w-full sm:w-1/2 md:w-1/3 px-16 mb-16">
+										<div className="card rounded-0 text-center hover:bg-gray-200">
+											<div className="card-body p-16">
+												<div className="mb-48">
+													<img
+														className="w-32 h-32 sm:w-48 sm:h-48 mr-8 sm:mr-16 rounded inline-block"
+														src="assets/images/icons/icon-3.svg"
+														alt=""
+													/>
+												</div>
+												<Typography className="card-title text-20">시각화 자료 제공</Typography>
+												<p className="card-text content">
+													다양한 시각화를 통해 여러분의 콘텐츠를 화려하게 만들어 드립니다
+												</p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</Container>
+						</div>
+
+						{/* <div className="flex flex-row w-full">
 							<div className="flex w-1/2 md:w-1/3">
 								<div className="service-item hover">
 									<div className="mb-48">
@@ -250,11 +279,11 @@ function LandingPage() {
 									</div>
 								</div>
 							</div>
-						</div>
+						</div> */}
 					</div>
 				</Container>
 			</section>
-		</>
+		</div>
 	);
 }
 
