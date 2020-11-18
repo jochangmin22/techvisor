@@ -63,7 +63,7 @@ class JwtService extends FuseUtils.EventEmitter {
 	signInWithEmailAndPassword = (email, password) => {
 		return new Promise((resolve, reject) => {
 			axios
-				.post(URL, {
+				.post(URL + 'verify-password', {
 					data: {
 						email,
 						password
@@ -83,7 +83,7 @@ class JwtService extends FuseUtils.EventEmitter {
 	signInWithEmail = email => {
 		return new Promise((resolve, reject) => {
 			axios
-				.post(URL + 'start', {
+				.post(URL + 'verify-email', {
 					data: {
 						email
 					}

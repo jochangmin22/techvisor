@@ -85,6 +85,8 @@ const loginSlice = createSlice({
 			state.success = false;
 			state.error = action.payload;
 		},
+		resetLogin: (state, action) => initialState,
+
 		setSignedIn: (state, action) => {
 			state.signedIn = action.payload;
 		}
@@ -92,6 +94,6 @@ const loginSlice = createSlice({
 	extraReducers: {}
 });
 
-export const { loginSuccess, loginError, setSignedIn } = loginSlice.actions;
+export const { loginSuccess, loginError, resetLogin, setSignedIn } = loginSlice.actions;
 
 export default loginSlice.reducer;

@@ -1,16 +1,13 @@
 from . import users
 
-def do_auth(request):
-    return users.auth(request)
+def verify_password(request):
+    return users.verify_password(request)
 
-def do_auth_start(request):
-    return users.auth_start(request)
+def verify_email(request):
+    return users.verify_email(request)
 
-# def do_verify(request, code):
-#     return users.auth_verify(request, code)
-
-def do_auth_password(request):
-    return users.auth_password(request)
+# def do_auth_password(request):
+#     return users.auth_password(request)
 
 def do_access_token(request):
     return users.access_token(request)

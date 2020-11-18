@@ -41,7 +41,7 @@
 		"keycode": "2.2.0",
 		"lodash": "4.17.20",
 		"marked": "0.8.2",
-		"material-table": "1.69.1",
+		"material-table": "1.69.2",
 		"material-ui-chip-input": "^2.0.0-beta.2",
 		"material-ui-popup-state": "1.7.0",
 		"mobile-detect": "1.4.4",

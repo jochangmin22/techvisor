@@ -34,34 +34,19 @@ verifyExpiresIn = settings.JWT_AUTH['JWT_EMAIL_CODE_EXPIRATION_DELTA']
 now = datetime.datetime.utcnow()
 # now = timezone.now()
 
-def auth_start(request):
+def verify_email(request):
     ''' 
-    Check if the email is in db and if not,
-    send a confirmation email.
+    1. Check if the email is in db or not and return boolean
+    2. add new row in [email_auth] db
     '''
-    # try:
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_email = data["data"].get('email')
 
         signedAlready = users.objects.filter(data__email=received_email).exists()
 
-        if signedAlready:
-            keywords = {
-                'type': 'email-login',
-                'text': '로그인'
-            }
-        else:
-            keywords = {
-                'type': 'register',
-                'text': '회원가입'
-            }
-        shortid = shortuuid.ShortUUID().random(length=8)
-
-        # sendmail
-        sendmail(shortid, received_email, keywords)
-
         # save database with orm
+        shortid = shortuuid.ShortUUID().random(length=8)
         newVerify = {
             'id': str(uuid.uuid4()),
             'code': shortid,
@@ -70,12 +55,77 @@ def auth_start(request):
         email_auth.objects.create(**newVerify)
 
         return JsonResponse({'signedIn' : signedAlready}, status=200, safe=False)
-    # except:
-        # return HttpResponse() # 500            
+
+def verify_password(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        received_email = data["data"].get('email')
+        received_password = data["data"].get('password')
+
+
+        row = users.objects.filter(data__email=received_email).values()
+        row = list(row)
+
+        userData = row[0] if row else {}#dict
+        password = userData.get('password')
+
+        error = {}
+        error['password'] = None if userData and received_password == password else '암호가 잘못되었습니다'
+
+        if not error['password']:
+            del userData['password'] # deleted for security
+
+            payload = {
+                'id': str(userData['id']),
+                'iat': now.timestamp(), 
+                'exp': int(now.timestamp()) + expiresIn
+            }
+
+            access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
+
+            response = { "user" : userData, "access_token" : access_token.decode('utf-8') }
+
+            return JsonResponse(response, status=200, safe=False)
+
+        return JsonResponse({"error": error}, status=202, safe=False)
+
+
+
+def auth(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        received_email = data["data"].get('email')
+        received_password = data["data"].get('password')
+
+        row = users.objects.filter(data__email=received_email).values()
+        row = list(row)
+
+        userData = row[0] if row else {}#dict
+        password = userData.get('password')
+
+        error = {}
+        error['password'] = None if userData and received_password == password else '암호가 잘못되었습니다'
+
+        if not error['password']:
+            del userData['password'] # deleted for security
+
+            payload = {
+                'id': str(userData['id']),
+                'iat': now.timestamp(),
+                'exp': int(now.timestamp()) + expiresIn
+            }
+
+            access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
+            
+            response = { "user" : userData, "access_token" : access_token.decode('utf-8') }
+
+            return JsonResponse(response, status=200, safe=False)
+
+        return JsonResponse({"error": error}, status=200, safe=False)
 
 def sendmail(shortid, received_email, keywords):
     # aws ses : ep026
-    subject = 'ipgrim ' + keywords['text']
+    subject = 'techvisor ' + keywords['text']
     html_message = render_to_string('mailTemplate.html', {'code': shortid, 'keywords': keywords, 'url': 'http://btowin.synology.me:4000'})
     plain_message = strip_tags(html_message)
     from_email = settings.DEFAULT_FROM_EMAIL 
@@ -244,37 +294,7 @@ def email_code_now_expired(code):
 #         return HttpResponse() # 500
 #         # return JsonResponse({},status='500', safe=False)
 
-def auth(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        received_email = data["data"].get('email')
-        received_password = data["data"].get('password')
 
-        row = users.objects.filter(data__email=received_email).values()
-        row = list(row)
-
-        userData = row[0] if row else {}#dict
-        password = userData.get('password')
-
-        error = {}
-        error['password'] = None if userData and received_password == password else '암호가 잘못되었습니다'
-
-        if not error['password']:
-            del userData['password'] # deleted for security
-
-            payload = {
-                'id': str(userData['id']),
-                'iat': now.timestamp(),
-                'exp': int(now.timestamp()) + expiresIn
-            }
-
-            access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
-            
-            response = { "user" : userData, "access_token" : access_token.decode('utf-8') }
-
-            return JsonResponse(response, status=200, safe=False)
-
-        return JsonResponse({"error": error}, status=200, safe=False)
 
 def access_token(request):
     if request.method == 'POST':
@@ -309,38 +329,6 @@ def access_token(request):
             return JsonResponse({ "error" :"Invalid access token detected"}, status=500, safe=False)        
 
       
-def auth_password(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        received_email = data["data"].get('email')
-        received_password = data["data"].get('password')
-
-        row = users.objects.filter(data__email=received_email)
-
-        userData = row[0] if row else {}
-        password = userData.get('password')
-
-        error = {}
-        error['password'] = None if userData and received_password == password else '암호가 잘못되었습니다'
-
-        if not error['password']:
-            del userData['password'] # deleted for security
-
-            payload = {
-                'id': str(userData['id']),
-                'iat': now.timestamp(),
-                'exp': int(now.timestamp()) + expiresIn
-            }
-
-            access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
-
-            response = { "user" : userData, "access_token" : access_token.decode('utf-8') }
-
-            return JsonResponse(response, status=200, safe=False)
-
-        return JsonResponse({"error": error}, status=400, safe=False)
-
-
 def update_user_data(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))

@@ -16,7 +16,6 @@ import { updateCols, resetSelectedCorp, setSelectedCorp } from 'app/main/apps/co
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { DefaultColumnFilter, NumberRangeColumnFilter } from 'app/main/apps/lib/EnhancedFilters';
 import NoResultMsg from 'app/main/apps/lib/NoResultMsg';
-import ReactGA from 'react-ga';
 
 const useStyles = makeStyles(theme => ({
 	dark: { backgroundColor: theme.palette.primary.dark },
@@ -178,11 +177,10 @@ function MainTable() {
 						className="shadow-none px-16"
 						startIcon={<SaveAltIcon />}
 					>
-						<ReactGA.OutboundLink eventLabel="CompanyCsv" to="/" target="_ self">
-							<CSVLink data={csvData} headers={csvHeaders} filename={'company-list.csv'}>
-								Export to CSV
-							</CSVLink>
-						</ReactGA.OutboundLink>
+						<CSVLink data={csvData} headers={csvHeaders} filename={'company-list.csv'}>
+							Export to CSV
+						</CSVLink>
+						\{' '}
 					</Button>
 					<ColumnMenu cols={cols} onChange={handleOnChange} />
 				</div>

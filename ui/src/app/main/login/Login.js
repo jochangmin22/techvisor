@@ -5,17 +5,18 @@ import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
 import Avatar from '@material-ui/core/Avatar';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import { darken } from '@material-ui/core/styles/colorManipulator';
+import Collapse from '@material-ui/core/Collapse';
 import Formsy from 'formsy-react';
 import TextFieldFormsy from '@fuse/core/formsy/TextFieldFormsy';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
-import { submitPassword, submitEmail } from 'app/auth/store/loginSlice';
-import React, { useState, useEffect, useRef } from 'react';
+import { submitPassword, submitEmail, resetLogin } from 'app/auth/store/loginSlice';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from '@material-ui/lab/Alert';
 import GoogleLogin from 'react-google-login';
@@ -23,8 +24,39 @@ import NaverLogin from 'react-naver-login';
 
 const useStyles = makeStyles(theme => ({
 	root: {
-		background: `radial-gradient(${darken(theme.palette.primary.dark, 0.5)} 0%, ${theme.palette.primary.dark} 80%)`,
-		color: theme.palette.primary.contrastText
+		background: 'transparent',
+		backgroundImage: "url('/assets/images/backgrounds/banner.jpg')",
+		backgroundSize: 'cover',
+		backgroundPosition: '0 50%',
+		backgroundRepeat: 'no-repeat',
+		minHeight: '100vh',
+		position: 'relative',
+		'&.overlay': {
+			'&::before': {
+				position: 'absolute',
+				content: '""',
+				height: '100%',
+				width: '100%',
+				top: 0,
+				left: 0,
+				background: '#1f2749',
+				opacity: '.8'
+			}
+		}
+	},
+	inputed: {
+		boxSizing: 'border-box',
+		cursor: 'pointer',
+		// height: '39px',
+		borderWidth: '0',
+		borderStyle: 'solid',
+		borderColor: 'rgba(255, 255, 255, 0)',
+		borderImage: 'initial',
+		borderRadius: '5px',
+		outline: 'none !important',
+		// padding: '9px 32px 9px 8px',
+		marginBottom: '16px',
+		transition: 'background-color 0.2s ease-in-out 0s, border-color 0.2s ease-in-out 0s'
 	},
 	buttonProgress: {
 		color: theme.palette.primary.light,
@@ -33,38 +65,39 @@ const useStyles = makeStyles(theme => ({
 		left: '50%',
 		marginTop: -58,
 		marginLeft: -48
-	},
-	pointBackground: { color: theme.palette.primary.contrastText, backgroundColor: theme.palette.primary.light }
+	}
 }));
+
+const callbackUrl = `${process.env.REACT_APP_API_URL}/login`;
+
+/* signedIn = null (시작), false (없어서 발송), true (있어서 암호) */
 
 function Login() {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const login = useSelector(({ auth }) => auth.login);
-
 	const [isFormValid, setIsFormValid] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
 	const [start, setStart] = useState(true);
 	const [signedIn, setSigned] = useState(null);
+	const [isError, setIsError] = useState(false);
 	const [mode, setMode] = useState('LOGIN');
 	const [showLoading, setShowLoading] = useState(false);
-
+	const [email, setEmail] = useState(null);
 	const formRef = useRef(null);
 
-	useEffect(() => {
-		// if (login.error && (login.error.email || login.error.password)) {
-		if (login.error && login.error.password) {
-			formRef.current.updateInputsWithError({
-				...login.error
-			});
+	useLayoutEffect(() => {
+		if (Object.values(login.error).every(k => k !== null && k !== '')) {
+			setIsError(true);
+			// formRef.current.updateInputsWithError({
+			// 	...login.error
+			// });
 			disableButton();
 		}
 	}, [login.error]);
 
 	useEffect(() => {
-		// if (login.signedIn !== null) {
-		// 	setStart(false);
-		// }
-		if (login.signedIn === true || login.signedIn === false) {
+		if (login.signedIn !== null) {
 			setStart(false);
 			setSigned(login.signedIn);
 			disableButton();
@@ -82,6 +115,7 @@ function Login() {
 	}
 
 	function handleSubmit(model) {
+		setEmail(model.email);
 		setShowLoading(true);
 		if (start) {
 			dispatch(submitEmail(model)).then(() => {
@@ -89,6 +123,7 @@ function Login() {
 			});
 			disableButton();
 		} else {
+			setIsError(false);
 			disableButton();
 			dispatch(submitPassword(model));
 			setShowLoading(false);
@@ -101,19 +136,32 @@ function Login() {
 	const text = mode === 'REGISTER' ? '회원가입' : '로그인';
 
 	return (
-		<div className={clsx(classes.root, 'flex flex-col flex-auto flex-shrink-0 items-center justify-center p-32')}>
+		<div
+			className={clsx(
+				classes.root,
+				'flex flex-col flex-auto flex-shrink-0 items-center justify-center p-32 overlay'
+			)}
+		>
 			<div className="flex flex-col items-center justify-center w-full">
 				<FuseAnimate animation="transition.expandIn">
 					<Card className="w-full max-w-384">
 						<CardContent className="flex flex-col items-center justify-center p-32">
-							{/* <img className="w-128 m-32" src="assets/images/logos/logo_line.svg" alt="logo" /> */}
-							{/* <img className="w-128 m-32" src="assets/images/logos/logo_temp.png" alt="logo" />*/}
 							<Typography variant="h6" className="my-16">
 								{text}
 							</Typography>
-							{/* <Typography variant="subtitle1" className="flex items-left my-4">
-								이메일로 로그인
-							</Typography> */}
+							<Collapse in={isError}>
+								<div className={clsx(isError ? 'flex' : 'hidden', 'shadow-8 rounded-8 mb-24 p-16')}>
+									<ul>
+										<li>잘못된 이메일 주소 및/또는 비밀번호입니다.</li>
+										<li>
+											<Link to={`/login/reset-password/${email}`} target="_blank">
+												{text}
+											</Link>
+											하는 데 도움이 필요하세요?
+										</li>
+									</ul>
+								</div>
+							</Collapse>
 							<Formsy
 								onValidSubmit={handleSubmit}
 								onValid={enableButton}
@@ -122,7 +170,7 @@ function Login() {
 								className="flex flex-col justify-center w-full"
 							>
 								<TextFieldFormsy
-									className={start ? '' : 'hidden'}
+									className="mb-16"
 									type="text"
 									name="email"
 									label={'이메일로 ' + text}
@@ -135,13 +183,21 @@ function Login() {
 									InputProps={{
 										endAdornment: (
 											<InputAdornment position="end">
-												<Icon className="text-20" color="action">
-													email
-												</Icon>
+												{signedIn !== null && (
+													<Icon className="text-20" color="action">
+														create
+													</Icon>
+												)}
 											</InputAdornment>
 										)
 									}}
-									variant="outlined"
+									onFocus={() => {
+										setStart(true);
+										setSigned(null);
+										setIsError(false);
+										dispatch(resetLogin());
+									}}
+									variant={signedIn === null ? 'outlined' : 'standard'}
 									// required={isEmailExists ? false : true}
 									required={start}
 								/>
@@ -151,34 +207,36 @@ function Login() {
 									<br />
 									이메일의 링크를 통하여 {signedIn ? '로그인' : '회원가입'}을 계속하세요.
 								</Alert>
-								{/* TODO : need to preventFirstValidation*/}
-								<TextFieldFormsy
-									className={signedIn === true ? '' : 'hidden'}
-									type="password"
-									name="password"
-									label="비밀번호"
-									validations={{
-										minLength: 4
-									}}
-									validationErrors={{
-										minLength: '길이가 4글자 이상이여야 합니다'
-									}}
-									InputProps={{
-										endAdornment: (
-											<InputAdornment position="end">
-												<Icon className="text-20" color="action">
-													vpn_key
-												</Icon>
-											</InputAdornment>
-										)
-									}}
-									variant="outlined"
-									// required={isEmailExists ? true : false}
-									required={signedIn === true}
-								/>
-								<Alert className={clsx(signedIn === true ? 'flex' : 'hidden')} severity="success">
-									비밀번호를 입력하세요.
-								</Alert>
+								<Collapse in={signedIn}>
+									<TextFieldFormsy
+										className={signedIn === true ? 'flex' : 'hidden'}
+										type="password"
+										name="password"
+										label="비밀번호"
+										validations={{
+											minLength: 4
+										}}
+										validationErrors={{
+											minLength: '길이가 4글자 이상이여야 합니다'
+										}}
+										InputProps={{
+											className: 'pr-2',
+											type: showPassword ? 'text' : 'password',
+											endAdornment: (
+												<InputAdornment position="end">
+													<IconButton onClick={() => setShowPassword(!showPassword)}>
+														<Icon className="text-20" color="action">
+															{showPassword ? 'visibility' : 'visibility_off'}
+														</Icon>
+													</IconButton>
+												</InputAdornment>
+											)
+										}}
+										variant="outlined"
+										// required={isEmailExists ? true : false}
+										required={signedIn === true}
+									/>
+								</Collapse>
 								<Button
 									type="submit"
 									variant="contained"
@@ -192,16 +250,6 @@ function Login() {
 								</Button>
 								{showLoading && <CircularProgress size={24} className={classes.buttonProgress} />}
 							</Formsy>
-							<div
-								className={clsx(
-									'flex flex-col items-center justify-center pt-16 hidden',
-									signedIn === true ? '' : 'hidden'
-								)}
-							>
-								<Link className="font-medium text-12" to="/forgot-password">
-									비밀번호 찾기
-								</Link>
-							</div>
 							<div className="my-32 flex items-center justify-center">
 								<Divider className="w-32" />
 								<span className="mx-8 font-medium">또는</span>
@@ -235,7 +283,7 @@ function Login() {
 							/>
 							<NaverLogin
 								clientId={process.env.REACT_APP_NAVER_ID}
-								callbackUrl="http://192.168.0.40:3000/login"
+								callbackUrl={callbackUrl}
 								// render={props => <div onClick={props.onClick}>Naver Login</div>}
 								render={props => (
 									<Button

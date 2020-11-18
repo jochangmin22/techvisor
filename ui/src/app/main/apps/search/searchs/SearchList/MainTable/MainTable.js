@@ -19,7 +19,6 @@ import {
 	openSearchPageDialog
 } from 'app/main/apps/search/store/searchsSlice';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import ReactGA from 'react-ga';
 
 const useStyles = makeStyles(theme => ({
 	dark: { backgroundColor: theme.palette.primary.dark },
@@ -163,11 +162,9 @@ function MainTable(props) {
 						className="shadow-none px-16"
 						startIcon={<SaveAltIcon />}
 					>
-						<ReactGA.OutboundLink eventLabel="PatentCsv" to="/" target="_ self">
-							<CSVLink data={csvData} headers={csvHeaders} filename={'patent-list.csv'}>
-								Export to CSV
-							</CSVLink>
-						</ReactGA.OutboundLink>
+						<CSVLink data={csvData} headers={csvHeaders} filename={'patent-list.csv'}>
+							Export to CSV
+						</CSVLink>
 					</Button>
 					<ColumnMenu cols={cols} onChange={handleOnChange} />
 				</div>

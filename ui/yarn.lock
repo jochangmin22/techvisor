@@ -1624,14 +1624,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@date-io/core@npm:1.3.13, @date-io/core@npm:1.x, @date-io/core@npm:^1.3.13":
+"@date-io/core@npm:1.3.13, @date-io/core@npm:1.x, @date-io/core@npm:^1.1.0, @date-io/core@npm:^1.3.13":
   version: 1.3.13
   resolution: "@date-io/core@npm:1.3.13"
   checksum: a9bd45041e9a52037121bc90889e93dfd351c25f31f8f547785dff2ddad14baba28b44d3838521db4cfca33b2c4be9651dc6d4c0d472c1860308346fd32f603f
   languageName: node
   linkType: hard
 
-"@date-io/date-fns@npm:1.3.13, @date-io/date-fns@npm:^1.1.0":
+"@date-io/date-fns@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@date-io/date-fns@npm:1.1.0"
+  dependencies:
+    "@date-io/core": ^1.1.0
+  peerDependencies:
+    date-fns: 2.0.0-alpha.27
+  checksum: 9f3a986d7d724848c4f2ff815f2455740c20fac28607d72c64fbcbb13dde4a11fc2d8151d65ec3ed0612864121ea4bd6bf79a0e4807ea08e10b02c392d2704da
+  languageName: node
+  linkType: hard
+
+"@date-io/date-fns@npm:1.3.13":
   version: 1.3.13
   resolution: "@date-io/date-fns@npm:1.3.13"
   dependencies:
@@ -2427,7 +2438,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@material-ui/pickers@npm:3.2.10, @material-ui/pickers@npm:^3.2.2":
+"@material-ui/pickers@npm:3.2.10":
   version: 3.2.10
   resolution: "@material-ui/pickers@npm:3.2.10"
   dependencies:
@@ -2444,6 +2455,26 @@ __metadata:
     react: ^16.8.4
     react-dom: ^16.8.4
   checksum: d3486559670a9cd740d8985557c166825a7692a173dc8810c06f3fb225ecad2cf7bd7bcffe3a0ac7c894f89e163abf38f9c4de82d56244419a9d24342f598afa
+  languageName: node
+  linkType: hard
+
+"@material-ui/pickers@npm:3.2.2":
+  version: 3.2.2
+  resolution: "@material-ui/pickers@npm:3.2.2"
+  dependencies:
+    "@babel/runtime": ^7.2.0
+    "@types/styled-jsx": ^2.2.8
+    clsx: ^1.0.2
+    react-transition-group: ^4.0.0
+    rifm: ^0.7.0
+    tslib: ^1.9.3
+  peerDependencies:
+    "@date-io/core": ^1.3.6
+    "@material-ui/core": ^4.0.0
+    prop-types: ^15.6.0
+    react: ^16.8.4
+    react-dom: ^16.8.4
+  checksum: bf6db8f0ff6508039f42e179ccc19dc2e20257212ac4b2f86821e01d620db71317ea4966b65e5168a38a8cbdd515f1479388ad6b06a0f516bb0d70c3dd091e2f
   languageName: node
   linkType: hard
 
@@ -5678,7 +5709,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:^2.2.5, classnames@npm:^2.2.6":
+"classnames@npm:2.2.6, classnames@npm:^2.2.5, classnames@npm:^2.2.6":
   version: 2.2.6
   resolution: "classnames@npm:2.2.6"
   checksum: 490eaeca5931846737ffd33e472a701d268d5b8bc5717dd4cf108a127b06e86e05350e06799abbbe763a0e4c945b4217f6700b7ae00ddc703505682c370e5cf2
@@ -6868,6 +6899,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"date-fns@npm:2.0.0-alpha.27":
+  version: 2.0.0-alpha.27
+  resolution: "date-fns@npm:2.0.0-alpha.27"
+  checksum: 1db9a4db704f6402abc44ce7b9ef05de102af3fea97444be5b0f247c74e4915d244646c533bce7825943d5ca96475af31d1e399c57715fd33d5fe965d26ac8ba
+  languageName: node
+  linkType: hard
+
 "date-fns@npm:2.16.1":
   version: 2.16.1
   resolution: "date-fns@npm:2.16.1"
@@ -6875,14 +6913,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^2.0.0-alpha.27":
-  version: 2.14.0
-  resolution: "date-fns@npm:2.14.0"
-  checksum: 93fcb999dcad1dced7c7e658f6769032783760b3989f0035186d7134858a21faeb242c31c250db66037de312007c3a562b501b9880fc707421149070a4785bcd
-  languageName: node
-  linkType: hard
-
-"debounce@npm:^1.2.0":
+"debounce@npm:1.2.0":
   version: 1.2.0
   resolution: "debounce@npm:1.2.0"
   checksum: 3eb07f76c54f3563d9183aff9a28c61864aa65c3f5f17acc227ce28dc55fb96faa680aebe3c898af17d3e4dfb6cfb92df6179fa9d5566111b129e1de19cfc7e0
@@ -9247,7 +9278,7 @@ fsevents@~2.1.2:
     keycode: 2.2.0
     lodash: 4.17.20
     marked: 0.8.2
-    material-table: 1.69.1
+    material-table: 1.69.2
     material-ui-chip-input: ^2.0.0-beta.2
     material-ui-popup-state: 1.7.0
     mobile-detect: 1.4.4
@@ -13152,28 +13183,28 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"material-table@npm:1.69.1":
-  version: 1.69.1
-  resolution: "material-table@npm:1.69.1"
+"material-table@npm:1.69.2":
+  version: 1.69.2
+  resolution: "material-table@npm:1.69.2"
   dependencies:
-    "@date-io/date-fns": ^1.1.0
-    "@material-ui/pickers": ^3.2.2
-    classnames: ^2.2.6
-    date-fns: ^2.0.0-alpha.27
-    debounce: ^1.2.0
+    "@date-io/date-fns": 1.1.0
+    "@material-ui/pickers": 3.2.2
+    classnames: 2.2.6
+    date-fns: 2.0.0-alpha.27
+    debounce: 1.2.0
     fast-deep-equal: 2.0.1
     filefy: 0.1.10
     jspdf: 2.1.0
     jspdf-autotable: 3.5.9
-    prop-types: ^15.6.2
-    react-beautiful-dnd: ^13.0.0
+    prop-types: 15.6.2
+    react-beautiful-dnd: 13.0.0
     react-double-scrollbar: 0.0.15
   peerDependencies:
-    "@date-io/core": ^1.3.6
-    "@material-ui/core": ^4.0.1
-    react: ^16.8.4
-    react-dom: ^16.8.4
-  checksum: 58df33e422a4ed61a43dd1a421c83e9a082136dcb27a80c9a90d734e7f328e2d92860be237a0f5165aff4a3935eaa99f6d5ee277d0ace7eab1ef5a590be3e898
+    "@date-io/core": 1.3.6
+    "@material-ui/core": 4.0.1
+    react: 16.8.4
+    react-dom: 16.8.4
+  checksum: 85fdb998d3fa57449597ba66d8b440b55cb78e3df15a45375553494600841afc3e567d82f3ab9a5b3d72815088784c2e2581ba4d85451e1cd78d43a7d22af970
   languageName: node
   linkType: hard
 
@@ -16450,6 +16481,16 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"prop-types@npm:15.6.2":
+  version: 15.6.2
+  resolution: "prop-types@npm:15.6.2"
+  dependencies:
+    loose-envify: ^1.3.1
+    object-assign: ^4.1.1
+  checksum: fdb02604468d97ccf9b068363f400f9228e96c0dbae3696ca63b1816a4459951bbde2e8e1133532866e490c9c946b1d26f76fff112797ca34e5ab83c14c54e55
+  languageName: node
+  linkType: hard
+
 "proto-list@npm:~1.2.1":
   version: 1.2.4
   resolution: "proto-list@npm:1.2.4"
@@ -16856,7 +16897,7 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"react-beautiful-dnd@npm:13.0.0, react-beautiful-dnd@npm:^13.0.0":
+"react-beautiful-dnd@npm:13.0.0":
   version: 13.0.0
   resolution: "react-beautiful-dnd@npm:13.0.0"
   dependencies:
@@ -20325,7 +20366,7 @@ resolve@1.15.0:
   languageName: node
   linkType: hard
 
-"tslib@npm:^1.10.0, tslib@npm:^1.11.1, tslib@npm:^1.13.0, tslib@npm:^1.8.1, tslib@npm:^1.9.0":
+"tslib@npm:^1.10.0, tslib@npm:^1.11.1, tslib@npm:^1.13.0, tslib@npm:^1.8.1, tslib@npm:^1.9.0, tslib@npm:^1.9.3":
   version: 1.13.0
   resolution: "tslib@npm:1.13.0"
   checksum: 5dc3bdaea3b67c76ef4a14c28fcb2171da7bcf292fd9c59a260098729626b1ce766c52b588f08e324ed9a0c52ea8a93a815920f980d75981abc9d850fbf310fb
