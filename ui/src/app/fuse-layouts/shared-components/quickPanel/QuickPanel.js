@@ -1,5 +1,5 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import Drawer from '@material-ui/core/Drawer';
+import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import withReducer from 'app/store/withReducer';
@@ -21,16 +21,18 @@ function QuickPanel(props) {
 	const classes = useStyles();
 
 	return (
-		<Drawer
+		<SwipeableDrawer
 			classes={{ paper: classes.root }}
 			open={state}
 			anchor="right"
+			onOpen={ev => {}}
 			onClose={ev => dispatch(toggleQuickPanel())}
+			disableSwipeToOpen
 		>
 			<FuseScrollbars>
 				<Typography>Quick Panel</Typography>
 			</FuseScrollbars>
-		</Drawer>
+		</SwipeableDrawer>
 	);
 }
 

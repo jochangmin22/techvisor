@@ -180,7 +180,6 @@ function MainTable() {
 						<CSVLink data={csvData} headers={csvHeaders} filename={'company-list.csv'}>
 							Export to CSV
 						</CSVLink>
-						\{' '}
 					</Button>
 					<ColumnMenu cols={cols} onChange={handleOnChange} />
 				</div>

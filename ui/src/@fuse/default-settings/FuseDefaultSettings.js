@@ -43,13 +43,13 @@ export const defaultThemeOptions = {
 		fontFamily: [
 			'"Apple SD Gothic Neo"',
 			'AppleSDGothicNeo',
-			'"Noto Sans KR"',
+			'"Noto Sans CJK KR"',
 			'NanumGothic',
-			'"Nalgun Gothic"',
+			'"Malgun Gothic"',
 			'"맑은 고딕"',
 			'돋움',
 			'dotum',
-			'Arial',
+			'arial',
 			'sans-serif'
 		].join(','),
 		fontWeightLight: 300,

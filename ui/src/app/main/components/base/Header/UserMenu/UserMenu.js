@@ -11,7 +11,7 @@ const UserMenu = ({ onClick, onLogout, username }) => {
 				<div className="rotated-square" />
 				<div className="user-menu" onClick={onClick}>
 					<div className="menu-items">
-						<UserMenuItem to={`/@${username}`}>내 벨로그</UserMenuItem>
+						<UserMenuItem to={`/@${username}`}>내 테크바이저</UserMenuItem>
 						<div className="separator" />
 						<UserMenuItem to="/write">새 글 작성</UserMenuItem>
 						<UserMenuItem to="/saves">임시 글</UserMenuItem>
