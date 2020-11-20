@@ -1,12 +1,11 @@
 import FuseAnimate from '@fuse/core/FuseAnimate';
-import Icon from '@material-ui/core/Icon';
-import Input from '@material-ui/core/Input';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function Error404Page() {
+	const { t } = useTranslation('Error404Page');
 	return (
 		<div className="flex flex-col flex-1 items-center justify-center p-16">
 			<div className="max-w-512 text-center">
@@ -18,11 +17,11 @@ function Error404Page() {
 
 				<FuseAnimate delay={500}>
 					<Typography variant="h5" color="textSecondary" className="mb-16">
-						Sorry but we could not find the page you are looking for
+						{t('ERROR404')}
 					</Typography>
 				</FuseAnimate>
 
-				<Paper className="flex items-center w-full h-56 p-16 mt-48 mb-16" elevation={1}>
+				{/* <Paper className="flex items-center w-full h-56 p-16 mt-48 mb-16" elevation={1}>
 					<Icon color="action">search</Icon>
 					<Input
 						placeholder="Search for anything"
@@ -33,10 +32,10 @@ function Error404Page() {
 							'aria-label': 'Search'
 						}}
 					/>
-				</Paper>
+				</Paper> */}
 
-				<Link className="font-medium" to="/apps/dashboards/project">
-					Go back to dashboard
+				<Link className="font-medium" to="/landing">
+					{t('GO_BACK_TO_HOME')}
 				</Link>
 			</div>
 		</div>
