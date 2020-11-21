@@ -6,19 +6,23 @@ from rest_framework.response import Response
 import json
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-base_url = "http://ipgrim.com/"
-google_id, google_secret, google_json = settings.GOOGLE_ID, settings.GOOGLE_SECRET, settings.GOOGLE_JSON
+base_url = settings.GOOGLE['base_url']
+redirect_url = settings.GOOGLE['redirect_url']
+client_id = settings.GOOGLE['client_id']
+client_secret = settings.GOOGLE['client_secret']
+client_json = settings.GOOGLE['client_json']
+
 
 # Create your views here.
 def redirect_google_login(request):
-    if not google_id or not google_secret:
+    if not client_id or not client_secret:
         content = { "please check ENVVAR" : "Google ENVVAR is missing"}
         return Response(content, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     flow = InstalledAppFlow.from_client_secrets_file(
-        google_json,
+        client_json,
         scopes=['profile', 'email'])
-    flow.redirect_uri = 'http://v.ipgrim.com:8001/auth/google'
+    flow.redirect_uri = redirect_url + 'auth/google'
     auth_uri, _ = flow.authorization_url(prompt='consent')
     # flow.run_local_server()
     return redirect(auth_uri)
@@ -31,14 +35,14 @@ def google_callback(request):
         if not code:
             return redirect(base_url + '/?callback?error=1')
 
-        if not google_id or not google_secret:
+        if not client_id or not client_secret:
             content = { "please check ENVVAR" : "Google ENVVAR is missing"}
             return Response(content, status=status.HTTP_500_INTERNAL_SERVER_ERROR)            
 
         flow = InstalledAppFlow.from_client_secrets_file(
-            google_json,
+            client_json,
             scopes=['profile', 'email'])
-        flow.redirect_uri = 'http://v.ipgrim.com:8001/auth/google'
+        flow.redirect_uri = redirect_url + 'auth/google'
 
         flow.fetch_token(code=code)
         auth_uri, _ = flow.authorization_url(prompt='consent')            

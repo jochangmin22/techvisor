@@ -996,7 +996,7 @@ def dictfetchall(cursor):
 # NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
 def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     mecab = Mecab()
-    STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
+    STOPWORDS = settings.TERMS['STOPWORDS']
     return [
         word
         for word, tag in mecab.pos(raw) if len(word) > 1 and tag in pos and word not in STOPWORDS

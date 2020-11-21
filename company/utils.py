@@ -101,7 +101,7 @@ def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     '''    
     raw = remove_punc(remove_brackets(remove_tags(raw)))    
     mecab = Mecab()
-    STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
+    STOPWORDS = settings.TERMS['STOPWORDS']
     try:
         return [
             word
@@ -120,8 +120,10 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     '''
     raw = remove_punc(remove_brackets(remove_tags(raw)))
     mecab = Mecab()
-    STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
-    STOPWORDS_PHRASE = getattr(settings, 'STOPWORDS_PHRASE', DEFAULT_TIMEOUT)
+    
+    STOPWORDS = settings.TERMS['STOPWORDS']
+    STOPWORDS_PHRASE = settings.TERMS['STOPWORDS_PHRASE']
+
     saving = ''
     close = None
     raw_list = []

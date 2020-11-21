@@ -505,7 +505,8 @@ def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     ''' raw token화 (raw_len_limit 단어 길이로 제한; 넘으면 mecab error)'''    
     raw = remove_punc(remove_brackets(remove_tags(raw)))    
     mecab = Mecab()
-    STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
+    
+    STOPWORDS = settings.TERMS['STOPWORDS']
     try:
         return [
             word
@@ -522,8 +523,10 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     ''' raw token화 (raw_len_limit 단어 길이로 제한; 넘으면 mecab error)'''
     raw = remove_punc(remove_brackets(remove_tags(raw)))
     mecab = Mecab()
-    STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
-    STOPWORDS_PHRASE = getattr(settings, 'STOPWORDS_PHRASE', DEFAULT_TIMEOUT)
+
+    STOPWORDS = settings.TERMS['STOPWORDS']
+    STOPWORDS_PHRASE = settings.TERMS['STOPWORDS_PHRASE']
+
     saving = ''
     close = None
     raw_list = []
@@ -542,7 +545,8 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
 
 def tokenizer_pos(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     mecab = Mecab()
-    STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
+    
+    STOPWORDS = settings.TERMS['STOPWORDS']
     try:
         return [
             word

@@ -247,7 +247,7 @@ def parse_company_applicant(request, cusNo=""):
     cusNo = cusNo.replace("-", "")    
     operationKey = 'corpBsApplicantInfo'
     
-    source = requests.get(settings.KIPRIS_REST_URL + '/' + operationKey + '?ApplicantNumber=' + cusNo + '&accessKey=' + settings.KIPRIS_SERVICE_KEY).text
+    source = requests.get(settings.KIPRIS['rest_url'] + '/' + operationKey + '?ApplicantNumber=' + cusNo + '&accessKey=' + settings.KIPRIS['service_key']).text
     soup = BeautifulSoup(source, "lxml")
 
     # faliure msg ;
@@ -670,8 +670,8 @@ def dictfetchall(cursor):
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 def tokenizer( raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]): # NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
-    mecab = Mecab()    
-    STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
+    mecab = Mecab()
+    STOPWORDS = settings.TERMS['STOPWORDS']    
     return [
         word
         for word, tag in mecab.pos(raw) if len(word) > 1 and tag in pos and word not in STOPWORDS

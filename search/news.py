@@ -39,7 +39,7 @@ display = 100 # 각 키워드 당 검색해서 저장할 기사 수
 
 def clean_keyword(keyword):
     """ 불필요한 단어 제거 """
-    res = re.sub(' and| or| adj[0-9]| near[0-9]|[()]|["]| \\(@.*?\)|.AP|.INV|.CTRY|.LANG| \\(.*?\).STAT| \\(.*?\).TYPE', '', keyword, flags=re.IGNORECASE)
+    res = re.sub(' and| or| adj[0-9]| near[0-9]|[\(\)]|["]| \\(@.*?\)|.AP|.INV|.CTRY|.LANG| \\(.*?\).STAT| \\(.*?\).TYPE', '', keyword, flags=re.IGNORECASE)
     return res 
 
 def parse_news(request, mode="needJson"): # mode : needJson, noJson
@@ -137,7 +137,6 @@ def parse_news_nlp(request, mode="needJson"):
     
     # no
     news = parse_news(request, mode="noJson")    
-
     news_nlp = ""
     if news:
         for i in range(len(news)):
@@ -203,7 +202,7 @@ def parse_news_nlp(request, mode="needJson"):
 #         isExist = disclosure.objects.filter(corp_name__in=unique_news_nlp).exists()
 #         if not isExist:
 #             return HttpResponse('Not Found', status=404)
-#         EXCLUDE_COMPANY_NAME = getattr(settings, 'EXCLUDE_COMPANY_NAME', DEFAULT_TIMEOUT)
+#         EXCLUDE_COMPANY_NAME = getattr(settings, 'EXCLUDE_COMPANY_NAME')
 
 #         disClosure = disclosure.objects.filter(corp_name__in=unique_news_nlp).exclude(corp_name__in=EXCLUDE_COMPANY_NAME)
 #         myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('-stock_code','corp_name'))[:10]
@@ -269,7 +268,8 @@ def parse_related_company(request, mode="needJson"):
         isExist = listed_corp.objects.filter(회사명__in=unique_news_nlp).exists()
         if not isExist:
             return HttpResponse('Not Found', status=404)
-        EXCLUDE_COMPANY_NAME = getattr(settings, 'EXCLUDE_COMPANY_NAME', DEFAULT_TIMEOUT)
+
+        EXCLUDE_COMPANY_NAME = settings.TERMS['EXCLUDE_COMPANY_NAME']
 
         listedCorp = listed_corp.objects.filter(회사명__in=unique_news_nlp).exclude(회사명__in=EXCLUDE_COMPANY_NAME)
         myCorpName = list(listedCorp.values_list('회사명', flat=True).order_by('-종목코드','회사명'))[:10]
@@ -431,7 +431,7 @@ def _sensitive_analysis(news_token):
 # def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
 def tokenizer(raw, pos=["NNP","UNKNOWN"]):
     mecab = Mecab()
-    STOPWORDS = getattr(settings, 'STOPWORDS', DEFAULT_TIMEOUT)
+    STOPWORDS = settings.TERMS['STOPWORDS']
     try:
         return [
             word

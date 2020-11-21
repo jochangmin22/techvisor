@@ -34,7 +34,7 @@ lam = lambda x: ['/'.join(t) for t in mecab.pos(x)
 #     return [token for token, tag in mecab.pos(text) if tag[:2] == 'NN' or tag[:2] == 'NP' or tag[:2] == 'SL']
 
 def pos(text):
-    STOPWORDS = getattr(settings, 'STOPWORDS')
+    STOPWORDS = settings.TERMS['STOPWORDS']
     return [token for token, tag in mecab.pos(text) if tag[:2] == 'NN' or tag[:2] == 'NP' or tag[:2] == 'SL' or tag[:2] == 'SH' and token not in STOPWORDS]
 
 

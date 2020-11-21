@@ -15,10 +15,6 @@ urlpatterns = [
     re_path(r"^api/search-app/searchs/matrix$", csrf_exempt(views.get_matrix), name='get_matrix'),
     re_path(r"^api/search-app/searchs/matrixdialog$", csrf_exempt(views.get_matrix_dialog), name='get_matrix_dialog'),
     re_path(r"^api/search-app/searchs/indicator$", csrf_exempt(views.get_indicator), name='get_indicator'),
-    # path("api/search-app/thsrs/<str:keyword>/", get_thsrs, name='do_auth'),
-    # path("api/search-app/applicant", get_applicant, name='do_auth'),
-    # path("api/search-app/applicant/<str:keyword>/", get_applicant, name='do_auth'),
-    # path("api/search-app/test/<str:keyword>/", test, name='do_auth'),
 
     re_path(r"^api/search-app/search/$", csrf_exempt(views.get_search), name='get_search'),
     re_path(r"^api/search-app/search/quote$", csrf_exempt(views.get_search_quote), name='get_search_quote'),
