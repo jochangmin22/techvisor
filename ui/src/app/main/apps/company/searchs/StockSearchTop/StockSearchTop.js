@@ -62,7 +62,7 @@ const columns = Object.entries(columnName).map(([key, value]) => {
 	return {
 		Header: key,
 		accessor: key,
-		className: clsx(align, 'text-12 font-400 truncate'),
+		className: clsx(align, 'text-14 font-400 truncate'),
 		sortable: true,
 		width: value,
 		sticky: clsx(stickyColumns ? 'left' : ''),

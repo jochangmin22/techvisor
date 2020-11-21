@@ -126,7 +126,7 @@ export function NumberRangeColumnFilter({ column: { filterValue = [], preFiltere
 	return (
 		<div className="flex flex-col mt-8">
 			<TextField
-				value={filterValue[0] || ''}
+				value={typeof filterValue[0] === 'number' ? filterValue[0] : ''}
 				type="number"
 				onChange={e => {
 					const val = e.target.value;
@@ -137,7 +137,7 @@ export function NumberRangeColumnFilter({ column: { filterValue = [], preFiltere
 				size="small"
 			/>
 			<TextField
-				value={filterValue[1] || ''}
+				value={typeof filterValue[1] === 'number' ? filterValue[1] : ''}
 				type="number"
 				onChange={e => {
 					const val = e.target.value;

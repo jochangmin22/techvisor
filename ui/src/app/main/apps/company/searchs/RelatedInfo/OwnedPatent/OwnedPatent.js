@@ -235,9 +235,9 @@ function OwnedPatent(props) {
 			{isEmpty ? (
 				<EmptyMsg icon="wb_incandescent" msg="특허" text={emptyText} />
 			) : (
-				<FuseScrollbars className="max-h-320 mx-8">
+				<FuseScrollbars className="max-h-288 mx-8">
 					{showLoading ? (
-						<SpinLoading className="h-320" />
+						<SpinLoading className="h-288" />
 					) : (
 						<EnhancedTable
 							columns={columns}

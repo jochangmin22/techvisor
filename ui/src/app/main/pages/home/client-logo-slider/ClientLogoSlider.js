@@ -67,7 +67,7 @@ function ClientLogoSlider() {
 				enableMouseEvents
 			>
 				{clientLogos.map((step, index) => (
-					<div key={step.name}>
+					<div key={index}>
 						{Math.abs(activeStep - index) <= 2 ? (
 							<img className={classes.img} src={step.src} alt={step.name} />
 						) : null}

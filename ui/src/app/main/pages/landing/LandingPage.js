@@ -8,6 +8,7 @@ import MessageBox from './message-box';
 // import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -103,6 +104,7 @@ const useStyles = makeStyles(theme => ({
 
 function LandingPage() {
 	const classes = useStyles();
+	const user = useSelector(({ auth }) => auth.user);
 	// const videoSource = 'assets/videos/main_bg_video.mp4';
 	const videoSource = 'http://btowin.synology.me:1111/assets/videos/main_bg_video.mp4';
 
@@ -111,7 +113,7 @@ function LandingPage() {
 			<section
 				className="hero-section overlay bg-cover"
 				style={{
-					backgroundImage: 'url(http://demo.themefisher.com/redlab-hugo/images/backgrounds/banner.jpg)'
+					backgroundImage: 'url(assets/images/backgrounds/banner.jpg)'
 				}}
 			>
 				<video
@@ -142,13 +144,32 @@ function LandingPage() {
 								</div>
 
 								<div className="flex flex-row mx-auto items-center justify-center">
-									<Link
-										role="button"
-										to="/login"
-										className="flex p-12 md:p-24 mr-24 w-136 md:w-192 rounded-lg items-center justify-center bg-blue-600 hover:bg-blue-500 text-14 md:text-20"
-									>
-										시작하기 <Icon>arrow_forward</Icon>
-									</Link>
+									{!user.role || user.role.length === 0 ? (
+										<Link
+											role="button"
+											to="/login"
+											className="flex p-12 md:p-24 mr-24 w-136 md:w-192 rounded-lg items-center justify-center bg-blue-600 hover:bg-blue-500 text-14 md:text-20"
+										>
+											시작하기 <Icon>arrow_forward</Icon>
+										</Link>
+									) : (
+										<>
+											<Link
+												role="button"
+												to="/apps/searchs"
+												className="flex p-12 md:p-24 mr-24 w-136 md:w-192 rounded-lg items-center justify-center bg-blue-600 hover:bg-blue-500 text-14 md:text-20"
+											>
+												기술검색<Icon>arrow_forward</Icon>
+											</Link>
+											<Link
+												role="button"
+												to="/apps/companies"
+												className="flex p-12 md:p-24 mr-24 w-136 md:w-192 rounded-lg items-center justify-center bg-blue-600 hover:bg-blue-500 text-14 md:text-20"
+											>
+												기업검색<Icon>arrow_forward</Icon>
+											</Link>
+										</>
+									)}
 									<a
 										role="button"
 										href="https://www.notion.so/jingu0705/060138803fe046d4a4d4eaab641ca06a"

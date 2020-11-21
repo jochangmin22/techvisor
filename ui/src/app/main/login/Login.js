@@ -14,11 +14,11 @@ import Collapse from '@material-ui/core/Collapse';
 import Formsy from 'formsy-react';
 import TextFieldFormsy from '@fuse/core/formsy/TextFieldFormsy';
 import clsx from 'clsx';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { showMessage } from 'app/store/fuse/messageSlice';
 import { submitPassword, submitEmail, resetLogin } from 'app/auth/store/loginSlice';
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Alert from '@material-ui/lab/Alert';
 import GoogleLogin from 'react-google-login';
 import NaverLogin from 'react-naver-login';
 
@@ -70,11 +70,12 @@ const useStyles = makeStyles(theme => ({
 
 const callbackUrl = `${process.env.REACT_APP_API_URL}/login`;
 
-/* signedIn = null (시작), false (없어서 발송), true (있어서 암호) */
+/* signedIn = null (시작), false (db 없음), true (db 있음) */
 
 function Login() {
 	const classes = useStyles();
 	const dispatch = useDispatch();
+	const routeParams = useParams();
 	const login = useSelector(({ auth }) => auth.login);
 	const [isFormValid, setIsFormValid] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
@@ -83,15 +84,15 @@ function Login() {
 	const [isError, setIsError] = useState(false);
 	const [mode, setMode] = useState('LOGIN');
 	const [showLoading, setShowLoading] = useState(false);
-	const [email, setEmail] = useState(null);
+	const [email, setEmail] = useState(routeParams.email ? routeParams.email : null);
 	const formRef = useRef(null);
 
 	useLayoutEffect(() => {
-		if (Object.values(login.error).every(k => k !== null && k !== '')) {
+		if (Object.values(login.error).some(k => k !== null && k !== '')) {
 			setIsError(true);
-			// formRef.current.updateInputsWithError({
-			// 	...login.error
-			// });
+			formRef.current.updateInputsWithError({
+				...login.error
+			});
 			disableButton();
 		}
 	}, [login.error]);
@@ -114,19 +115,43 @@ function Login() {
 		setIsFormValid(true);
 	}
 
+	function handleReset() {
+		setStart(true);
+		setSigned(null);
+		setIsError(false);
+		dispatch(resetLogin());
+		setShowLoading(false);
+	}
+
 	function handleSubmit(model) {
 		setEmail(model.email);
 		setShowLoading(true);
 		if (start) {
-			dispatch(submitEmail(model)).then(() => {
+			dispatch(submitEmail(model)).then(res => {
+				console.log('handleSubmit -> res', res);
+				if (res.payload === false) {
+					dispatch(
+						showMessage({
+							message: '이메일을 보냈습니다. 확인 이메일이 곧 도착할 것입니다.',
+							anchorOrigin: {
+								vertical: 'bottom',
+								horizontal: 'left'
+							},
+							variant: 'success'
+						})
+					);
+				}
 				setShowLoading(false);
 			});
 			disableButton();
 		} else {
 			setIsError(false);
+			dispatch(submitPassword(model)).then(res => {
+				if (res.payload) {
+					setShowLoading(false);
+				}
+			});
 			disableButton();
-			dispatch(submitPassword(model));
-			setShowLoading(false);
 		}
 	}
 	const responseGoogle = response => {
@@ -154,11 +179,23 @@ function Login() {
 									<ul>
 										<li>잘못된 이메일 주소 및/또는 비밀번호입니다.</li>
 										<li>
-											<Link to={`/login/reset-password/${email}`} target="_blank">
-												{text}
-											</Link>
+											<Link to={`/reset-password/${email}`}>{text}</Link>
 											하는 데 도움이 필요하세요?
 										</li>
+									</ul>
+								</div>
+							</Collapse>
+							<Collapse in={signedIn === false}>
+								<div
+									className={clsx(
+										signedIn === false ? 'flex' : 'hidden',
+										'shadow-8 rounded-8 mb-24 p-16'
+									)}
+								>
+									<ul className="mb-8">
+										<li>아직 계정이 없으시군요?</li>
+										<li>가입 링크를 아래의 메일주소로 보냈습니다.</li>
+										<li className="text-14 font-medium mb-8">{email}</li>
 									</ul>
 								</div>
 							</Collapse>
@@ -173,6 +210,7 @@ function Login() {
 									className="mb-16"
 									type="text"
 									name="email"
+									value={email}
 									label={'이메일로 ' + text}
 									validations={{
 										isEmail: true
@@ -191,22 +229,12 @@ function Login() {
 											</InputAdornment>
 										)
 									}}
-									onFocus={() => {
-										setStart(true);
-										setSigned(null);
-										setIsError(false);
-										dispatch(resetLogin());
-									}}
+									onFocus={handleReset}
 									variant={signedIn === null ? 'outlined' : 'standard'}
 									// required={isEmailExists ? false : true}
 									required={start}
 								/>
 								{/* signedIn = null (시작), false (없어서 발송), true (있어서 암호) */}
-								<Alert className={clsx(signedIn === false ? 'flex' : 'hidden')} severity="success">
-									{signedIn ? '로그인' : '회원가입'} 링크가 이메일로 전송되었습니다.
-									<br />
-									이메일의 링크를 통하여 {signedIn ? '로그인' : '회원가입'}을 계속하세요.
-								</Alert>
 								<Collapse in={signedIn}>
 									<TextFieldFormsy
 										className={signedIn === true ? 'flex' : 'hidden'}
@@ -323,7 +351,7 @@ function Login() {
 							>
 								네이버 계정으로 {text}
 							</Button> */}
-							<Link className="font-medium mb-32" to="/">
+							<Link className="font-medium mb-32" onClick={() => dispatch(resetLogin())} to="/">
 								취소
 							</Link>
 						</CardContent>

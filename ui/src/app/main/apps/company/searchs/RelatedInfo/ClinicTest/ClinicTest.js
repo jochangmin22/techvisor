@@ -23,7 +23,7 @@ const columnName = {
 };
 
 const columns = Object.entries(columnName).map(([key, value]) => {
-	const bold = key === '신청자' || key === '임상단계' ? 'text-14 font-500' : 'text-12 font-400';
+	const bold = key === '신청자' || key === '임상단계' ? 'text-14 font-500' : 'text-14 font-400';
 	return {
 		Header: key,
 		accessor: key,
@@ -74,12 +74,12 @@ function ClinicTest() {
 					icon="local_pharmacy"
 					msg="임상실험"
 					text="선택하신 기업명으로 검색된 임상실험 내역이 없습니다."
-					className="h-360"
+					className="h-330"
 				/>
 			) : (
-				<FuseScrollbars className="max-h-360 mx-8">
+				<FuseScrollbars className="max-h-330 mx-8">
 					{showLoading ? (
-						<SpinLoading className="h-360" />
+						<SpinLoading className="h-330" />
 					) : (
 						<EnhancedTable
 							columns={columns}

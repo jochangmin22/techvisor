@@ -1,21 +1,21 @@
-import { TextFieldFormsy } from '@fuse/core/formsy';
 import FuseAnimate from '@fuse/core/FuseAnimate';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
-import Icon from '@material-ui/core/Icon';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import Typography from '@material-ui/core/Typography';
-import Alert from '@material-ui/lab/Alert';
+import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
+import Collapse from '@material-ui/core/Collapse';
+import Formsy from 'formsy-react';
+import TextFieldFormsy from '@fuse/core/formsy/TextFieldFormsy';
 import clsx from 'clsx';
 import { Link, useParams } from 'react-router-dom';
-import { getRegisterToken, submitRegister } from 'app/auth/store/registerSlice';
-import Formsy from 'formsy-react';
-import React, { useState, useRef, useEffect } from 'react';
+import { resetRegister, submitRegister } from 'app/auth/store/registerSlice';
+import React, { useState, useLayoutEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useDeepCompareEffect } from '@fuse/hooks';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -63,32 +63,20 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function Register() {
+function Invite() {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const routeParams = useParams();
 	const register = useSelector(({ auth }) => auth.register);
-
 	const [isFormValid, setIsFormValid] = useState(false);
-	// eslint-disable-next-line
-	const [fixedEmail, setFixedEmail] = useState(false);
-	const formRef = useRef(null);
+	const [showPassword, setShowPassword] = useState(false);
+	const [isError, setIsError] = useState(false);
+	const [showLoading, setShowLoading] = useState(false);
+	const [email, setEmail] = useState(routeParams.email ? routeParams.email : null);
 
-	useDeepCompareEffect(() => {
-		/**
-		 * Get refreshToken
-		 */
-		dispatch(getRegisterToken(routeParams.code));
-	}, [dispatch, routeParams.code]);
-
-	useEffect(() => {
-		if (
-			register.error &&
-			(register.error.username || register.error.password || register.error.email || register.error.code)
-		) {
-			// code is not a formsy element, so delete it
-			const { code: _, ..._error } = register.error;
-			formRef.current.updateInputsWithError({ ..._error });
+	useLayoutEffect(() => {
+		if (Object.values(register.error).some(k => k !== null && k !== '')) {
+			setIsError(true);
 			disableButton();
 		}
 	}, [register.error]);
@@ -101,8 +89,24 @@ function Register() {
 		setIsFormValid(true);
 	}
 
+	function handleReset() {
+		setIsError(false);
+		dispatch(resetRegister());
+		setShowLoading(false);
+	}
+
 	function handleSubmit(model) {
-		dispatch(submitRegister(model, routeParams.code));
+		setEmail(model.email);
+		setShowLoading(true);
+		setIsError(false);
+		dispatch(submitRegister({ ...model, ...routeParams })).then(res => {
+			if (res === 'success') {
+				setShowLoading(false);
+			} else {
+				setShowLoading(false);
+			}
+		});
+		disableButton();
 	}
 
 	return (
@@ -116,39 +120,34 @@ function Register() {
 				<FuseAnimate animation="transition.expandIn">
 					<Card className="w-full max-w-384">
 						<CardContent className="flex flex-col items-center justify-center p-32">
-							<Typography variant="h6" className="mt-16 mb-32">
-								가입하여 계정 만들기
-							</Typography>
+							<div className="my-16 font-medium text-base">팀에 참가하려면 가입하세요.</div>
+							<Collapse in={isError}>
+								<div className={clsx(isError ? 'flex' : 'hidden', 'shadow-8 rounded-8 mb-24 p-16')}>
+									<ul>
+										<li>가입을 시도하는 중에 오류가 발생했습니다. 다시 시도하세요.</li>
+										{register.error.email !== '' || register.error.email.length !== 0 ? (
+											<>
+												<li className="font-semibold">{register.error.email}</li>
+												<li>
+													<Link to="/login">로그인 화면에서 다시 시도해보세요.</Link>
+												</li>
+											</>
+										) : (
+											''
+										)}
+									</ul>
+								</div>
+							</Collapse>
+							<ul className="mb-16">
+								<li className="font-semibold">{email}</li>
+								<li>주소로 계정을 만들려면 몇 가지 세부 정보가 필요합니다.</li>
+							</ul>
 							<Formsy
 								onValidSubmit={handleSubmit}
 								onValid={enableButton}
 								onInvalid={disableButton}
-								ref={formRef}
 								className="flex flex-col justify-center w-full"
 							>
-								<TextFieldFormsy
-									className="mb-16"
-									type="text"
-									name="email"
-									label="이메일"
-									// value={fixedEmail ? false : true}
-									validations="isEmail"
-									validationErrors={{
-										isEmail: '이메일 형식이 맞지 않습니다'
-									}}
-									InputProps={{
-										endAdornment: (
-											<InputAdornment position="end">
-												<Icon className="text-20" color="action">
-													email
-												</Icon>
-											</InputAdornment>
-										)
-									}}
-									variant="outlined"
-									required={fixedEmail ? false : true}
-									disabled={fixedEmail ? true : false}
-								/>
 								<TextFieldFormsy
 									className="mb-16"
 									type="text"
@@ -169,6 +168,7 @@ function Register() {
 											</InputAdornment>
 										)
 									}}
+									onFocus={() => handleReset}
 									variant="outlined"
 									required
 								/>
@@ -188,14 +188,19 @@ function Register() {
 									// 	equalsField: '비밀번호가 일치하지 않습니다'
 									// }}
 									InputProps={{
+										className: 'pr-2',
+										type: showPassword ? 'text' : 'password',
 										endAdornment: (
 											<InputAdornment position="end">
-												<Icon className="text-20" color="action">
-													vpn_key
-												</Icon>
+												<IconButton onClick={() => setShowPassword(!showPassword)}>
+													<Icon className="text-20" color="action">
+														{showPassword ? 'visibility' : 'visibility_off'}
+													</Icon>
+												</IconButton>
 											</InputAdornment>
 										)
 									}}
+									onFocus={() => handleReset}
 									variant="outlined"
 									required
 								/>
@@ -209,14 +214,19 @@ function Register() {
 										equalsField: '비밀번호가 일치하지 않습니다'
 									}}
 									InputProps={{
+										className: 'pr-2',
+										type: showPassword ? 'text' : 'password',
 										endAdornment: (
 											<InputAdornment position="end">
-												<Icon className="text-20" color="action">
-													vpn_key
-												</Icon>
+												<IconButton onClick={() => setShowPassword(!showPassword)}>
+													<Icon className="text-20" color="action">
+														{showPassword ? 'visibility' : 'visibility_off'}
+													</Icon>
+												</IconButton>
 											</InputAdornment>
 										)
 									}}
+									onFocus={() => handleReset}
 									variant="outlined"
 									required
 								/>
@@ -231,50 +241,27 @@ function Register() {
 									</Link>
 									을 인정한 것으로 간주됩니다.
 								</div>
-								<Alert
-									className={clsx(register.error && register.error.code ? 'flex' : 'hidden')}
-									severity="error"
-								>
-									잘못된 인증메일 입니다. 인증메일을 다시 받으십시오
-								</Alert>
 								<Button
 									type="submit"
 									variant="contained"
 									color="primary"
-									className="w-full mx-auto mb-32 normal-case"
-									aria-label="가입"
+									className="w-full mx-auto mt-16 normal-case"
+									aria-label="LOG IN"
 									disabled={!isFormValid}
 									value="legacy"
 								>
 									다음
 								</Button>
+								{showLoading && <CircularProgress size={24} className={classes.buttonProgress} />}
 							</Formsy>
-							<div className="my-32 flex items-center justify-center">
-								<Divider className="w-32" />
-								<span className="mx-8 font-medium">또는</span>
-								<Divider className="w-32" />
-							</div>
-							{/* <div className="flex flex-col items-center justify-center pt-32 pb-24">
-								<span className="font-medium text-12 pb-8">이미 계정이 있나요?</span>
-								<Link className="font-medium text-12 mb-8" to="/login">
-									로그인
-								</Link>
-							</div> */}
-							<Link className="font-medium mb-32" to="/">
-								취소
-							</Link>
+							<Divider className="card-divider w-full my-32" />
+							<Link to="/login">이미 TechVisor 계정이 있으신가요? 로그인</Link>
 						</CardContent>
 					</Card>
 				</FuseAnimate>
-				<div className="flex flex-row items-center justify-center pt-32 pb-24">
-					<span className="font-light text-12 pr-8">이미 계정이 있나요?</span>
-					<Link className="font-medium text-12" to="/login">
-						로그인
-					</Link>
-				</div>
 			</div>
 		</div>
 	);
 }
 
-export default Register;
+export default Invite;

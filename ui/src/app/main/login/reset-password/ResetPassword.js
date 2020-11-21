@@ -5,14 +5,13 @@ import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
-import Collapse from '@material-ui/core/Collapse';
 import Formsy from 'formsy-react';
 import TextFieldFormsy from '@fuse/core/formsy/TextFieldFormsy';
 import clsx from 'clsx';
-import { Link } from 'react-router-dom';
-import { submitEmail } from 'app/auth/store/loginSlice';
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { Link, useParams } from 'react-router-dom';
+import { resetLogin, submitEmail } from 'app/auth/store/loginSlice';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -56,33 +55,18 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function ResetPassword(props) {
+function ResetPassword() {
 	const classes = useStyles();
 	const dispatch = useDispatch();
-	const login = useSelector(({ auth }) => auth.login);
+	const routeParams = useParams();
 	const [isFormValid, setIsFormValid] = useState(false);
-	const [email, setEmail] = useState(String(props.match.params.email));
-	const [signedIn, setSigned] = useState(null);
+	const [email, setEmail] = useState(routeParams.email);
+	const [isSent, setIsSent] = useState(false);
 	const [showLoading, setShowLoading] = useState(false);
-	const [isError, setIsError] = useState(false);
-	const formRef = useRef(null);
-
-	useLayoutEffect(() => {
-		if (Object.values(login.error).every(k => k !== null && k !== '')) {
-			setIsError(true);
-			// formRef.current.updateInputsWithError({
-			// 	...login.error
-			// });
-			disableButton();
-		}
-	}, [login.error]);
 
 	useEffect(() => {
-		if (login.signedIn !== null) {
-			setSigned(login.signedIn);
-			disableButton();
-		}
-	}, [login.signedIn]);
+		dispatch(resetLogin());
+	}, [dispatch]);
 
 	function disableButton() {
 		setIsFormValid(false);
@@ -94,12 +78,13 @@ function ResetPassword(props) {
 
 	function handleClick(event) {
 		event.preventDefault();
-		setSigned(null);
+		setIsSent(false);
 	}
 
 	function handleSubmit(model) {
 		setShowLoading(true);
 		setEmail(model.email);
+		setIsSent(true);
 		dispatch(submitEmail(model)).then(() => {
 			setShowLoading(false);
 		});
@@ -118,39 +103,23 @@ function ResetPassword(props) {
 					<Card className="w-full max-w-384">
 						<CardContent className="flex flex-col items-center justify-center p-32">
 							<div className="text-16 font-medium mb-24">로그인할 수 없습니까?</div>
-							{signedIn ? (
+							{isSent ? (
 								<>
 									<img
 										src="assets/images/illustrations/mail_sent.svg"
 										className="w-1/2 h-1/2 p-4 mb-16"
 										alt="mail sent"
 									/>
-									<div className="text-14 mb-16">복구 링크를 다음 이메일 주소로 보냈습니다.</div>
+									<div className="text-14 mb-16">복구 링크를 아래 이메일 주소로 보냈습니다.</div>
 									<div className="text-14 font-medium mb-16">{email}</div>
 								</>
 							) : (
 								<>
-									<div className="text-14 mb-16">복구 링크가 다음 이메일 주소로 전송됩니다.</div>
-									<Collapse in={isError}>
-										<div
-											className={clsx(
-												isError ? 'flex' : 'hidden',
-												'shadow-8 rounded-8 mb-24 p-16'
-											)}
-										>
-											<ul>
-												<li>잘못된 이메일 주소 및/또는 비밀번호입니다.</li>
-												<li>
-													<Link to="/resetpassword">로그인</Link>하는 데 도움이 필요하세요?
-												</li>
-											</ul>
-										</div>
-									</Collapse>
+									<div className="text-14 mb-16">복구 링크가 아래 이메일 주소로 전송됩니다.</div>
 									<Formsy
 										onValidSubmit={handleSubmit}
 										onValid={enableButton}
 										onInvalid={disableButton}
-										ref={formRef}
 										className="flex flex-col justify-center w-full"
 									>
 										<TextFieldFormsy
@@ -174,7 +143,7 @@ function ResetPassword(props) {
 											color="primary"
 											className="w-full mx-auto mt-16 normal-case"
 											aria-label="LOG IN"
-											disabled={!isFormValid || signedIn === false}
+											disabled={!isFormValid}
 											value="legacy"
 										>
 											복구 링크 보내기
@@ -187,13 +156,13 @@ function ResetPassword(props) {
 							<div className="footer">
 								<ul className="flex flex-1 justify-center">
 									<li>
-										<Link className="font-medium mb-32 mr-16" to="/login">
+										<Link className="font-medium mb-32 mr-16" to={`/login/${email}`}>
 											로그인으로 돌아기기
 										</Link>
 									</li>
-									{signedIn && (
+									{isSent && (
 										<li>
-											<Link to={`/login/reset-password/${email}`} onClick={handleClick}>
+											<Link to={`/reset-password/${email}`} onClick={handleClick}>
 												복구 링크 다시 보내기
 											</Link>
 										</li>

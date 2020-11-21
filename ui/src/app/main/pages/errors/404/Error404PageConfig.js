@@ -9,7 +9,13 @@ i18next.addResourceBundle('ko', 'Error404Page', ko);
 const Error404PageConfig = {
 	settings: {
 		layout: {
-			config: {}
+			config: {
+				footer: {
+					display: true,
+					style: 'static',
+					position: 'below'
+				}
+			}
 		}
 	},
 	routes: [

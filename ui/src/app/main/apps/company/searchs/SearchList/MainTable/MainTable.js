@@ -184,7 +184,7 @@ function MainTable() {
 					<ColumnMenu cols={cols} onChange={handleOnChange} />
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-460 mx-8">
+			<FuseScrollbars className="max-h-384 mx-8">
 				<EnhancedTable
 					columns={columns}
 					data={data}

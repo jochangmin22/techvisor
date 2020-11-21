@@ -26,15 +26,16 @@ from django.utils.html import strip_tags
 # from django.utils.translation import ugettext_lazy as _
 # from rest_framework import status
 
-secret_key = settings.JWT_AUTH['JWT_SECRET_KEY']
+secret_key = settings.SECRET_KEY
 expiresIn = settings.JWT_AUTH['JWT_EXPIRATION_DELTA']
 algorithm = settings.JWT_AUTH['JWT_ALGORITHM']
 verifyExpiresIn = settings.JWT_AUTH['JWT_EMAIL_CODE_EXPIRATION_DELTA']
+verifyExpiresInSecs = settings.JWT_AUTH['JWT_EMAIL_CODE_EXPIRATION_SECS']
 
 now = datetime.datetime.utcnow()
 # now = timezone.now()
 
-def verify_email(request):
+def email(request):
     ''' 
     1. Check if the email is in db or not and return boolean
     2. add new row in [email_auth] db
@@ -45,8 +46,17 @@ def verify_email(request):
 
         signedAlready = users.objects.filter(data__email=received_email).exists()
 
-        # save database with orm
         shortid = shortuuid.ShortUUID().random(length=8)
+
+        if not signedAlready:
+            # sendmail
+            keywords = {
+                'type': 'invite',
+                'text': '회원가입'
+            }
+            sendmail(shortid, received_email, keywords)
+
+        # save database with orm
         newVerify = {
             'id': str(uuid.uuid4()),
             'code': shortid,
@@ -56,7 +66,7 @@ def verify_email(request):
 
         return JsonResponse({'signedIn' : signedAlready}, status=200, safe=False)
 
-def verify_password(request):
+def password(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_email = data["data"].get('email')
@@ -77,11 +87,11 @@ def verify_password(request):
 
             payload = {
                 'id': str(userData['id']),
-                'iat': now.timestamp(), 
-                'exp': int(now.timestamp()) + expiresIn
+                'iat': now,
+                'exp': now + datetime.timedelta(days=expiresIn)
             }
 
-            access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
+            access_token = jwt.encode(payload, secret_key, algorithm=algorithm)
 
             response = { "user" : userData, "access_token" : access_token.decode('utf-8') }
 
@@ -90,43 +100,10 @@ def verify_password(request):
         return JsonResponse({"error": error}, status=202, safe=False)
 
 
-
-def auth(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        received_email = data["data"].get('email')
-        received_password = data["data"].get('password')
-
-        row = users.objects.filter(data__email=received_email).values()
-        row = list(row)
-
-        userData = row[0] if row else {}#dict
-        password = userData.get('password')
-
-        error = {}
-        error['password'] = None if userData and received_password == password else '암호가 잘못되었습니다'
-
-        if not error['password']:
-            del userData['password'] # deleted for security
-
-            payload = {
-                'id': str(userData['id']),
-                'iat': now.timestamp(),
-                'exp': int(now.timestamp()) + expiresIn
-            }
-
-            access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
-            
-            response = { "user" : userData, "access_token" : access_token.decode('utf-8') }
-
-            return JsonResponse(response, status=200, safe=False)
-
-        return JsonResponse({"error": error}, status=200, safe=False)
-
 def sendmail(shortid, received_email, keywords):
     # aws ses : ep026
     subject = 'techvisor ' + keywords['text']
-    html_message = render_to_string('mailTemplate.html', {'code': shortid, 'keywords': keywords, 'url': 'http://btowin.synology.me:4000'})
+    html_message = render_to_string('mailTemplate.html', {'code': shortid, 'keywords': keywords, 'received_email': received_email, 'url': 'http://btowin.synology.me:4000'})
     plain_message = strip_tags(html_message)
     from_email = settings.DEFAULT_FROM_EMAIL 
     to = received_email
@@ -156,7 +133,7 @@ def register(request):
                 'id': newUid,
                 'my_from': 'custom-db',
                 'password': received_password,
-                'role': 'admin',
+                'role': 'user',
                 'data': {
                     'displayName': received_displayName,
                     'photoURL': 'assets/images/avatars/profile.jpg',
@@ -174,8 +151,8 @@ def register(request):
 
             payload = {
                 'id': newUid,
-                'iat': now.timestamp(),
-                'exp': int(now.timestamp()) + expiresIn
+                'iat': now,
+                'exp': now + datetime.timedelta(days=expiresIn)
             }
             access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
         
@@ -200,7 +177,7 @@ def email_code_verify(code, email):
         timestamp = emailAuthData['created_at'].timestamp()
         # valid_period_secs = verifyExpiresIn.total_seconds()
         # if time.time() - timestamp > valid_period_secs:
-        if time.time() - timestamp > verifyExpiresIn:
+        if time.time() - timestamp > verifyExpiresInSecs:
             return False
         # # new user?
         # row = users.objects.filter(data__email=emailAuthData['email'])
@@ -298,34 +275,32 @@ def email_code_now_expired(code):
 
 def access_token(request):
     if request.method == 'POST':
-        token_value = request.META.get('HTTP_JWTTOKEN')
-
+        data = json.loads(request.body.decode('utf-8'))
+        access_token = data["data"].get('access_token')
         try:
-            payload = jwt.decode(token_value, secret_key, algorithms=[algorithm])
+            payload = jwt.decode(access_token, secret_key, algorithms=[algorithm])
             # jwt.decode('JWT_STRING', 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             return JsonResponse({ "error" :"Token Expired"}, status=401, safe=False)
             # Signature has expired
-       
         received_id = payload.get("id")
         try:
             # Loading user data
-            row = users.objects.filter(id=received_id)
+            row = users.objects.filter(id=received_id).values()
+            row = list(row)
             userData = row[0] if row else {}
-
             del userData['password'] # deleted for security
 
             # update user token
             payload = {
                 'id': str(userData['id']),
-                'iat': now.timestamp(),
-                'exp': int(now.timestamp()) + expiresIn
+                'iat': now,
+                'exp': now + datetime.timedelta(days=expiresIn)
             }
             updated_access_token = jwt.encode(payload, secret_key, algorithm=algorithm)
 
             return JsonResponse({ "user" : userData, "access_token" : updated_access_token.decode('utf-8')}, status=200, safe=False)            
-        except:            
-            # return JsonResponse({ "error" :"Not verified"}, status=401, safe=False)        
+        except:
             return JsonResponse({ "error" :"Invalid access token detected"}, status=500, safe=False)        
 
       
@@ -363,16 +338,16 @@ def generate_user_token(id):
         'user_id': str(id),
         'token_id': str(authTokens.id),
         'sub': 'refresh_token',
-        'iat': now.timestamp(),
-        'exp': int(now.timestamp()) + expiresIn
+        'iat': now,
+        'exp': now + datetime.timedelta(days=expiresIn)
     }
     refreshToken = jwt.encode(payload, secret_key , algorithm=algorithm)
 
     payload = {
         'user_id': str(id),
         'sub': 'access_token',
-        'iat': now.timestamp(),
-        'exp': int(now.timestamp()) + verifyExpiresIn
+        'iat': now,
+        'exp': now + datetime.timedelta(days=verifyExpiresIn)        
     }    
     accessToken = jwt.encode(payload, secret_key , algorithm=algorithm)
     # return JsonResponse({ refreshToken, accessToken},safe=False)

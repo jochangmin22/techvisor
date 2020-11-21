@@ -40,7 +40,7 @@ const content = (
 			적정가4
 		</Typography>
 		<Typography variant="caption" className="font-300">
-			S-LIM
+			S-RIM
 		</Typography>
 		<Typography variant="body1" className="my-4">
 			적정가5

@@ -39,7 +39,7 @@ function NewsArticles() {
 						{row.value}
 					</span>
 				),
-				className: 'text-15'
+				className: 'text-14'
 			},
 			{
 				Header: '일자',
@@ -57,7 +57,7 @@ function NewsArticles() {
 						{row.value}
 					</span>
 				),
-				className: 'text-12'
+				className: 'text-14'
 			}
 		],
 		[theme.palette.text.primary, theme.palette.text.secondary]
@@ -100,7 +100,7 @@ function NewsArticles() {
 					</div>
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-360 mx-8">
+			<FuseScrollbars className="max-h-340 mx-8">
 				<EnhancedTable
 					columns={columns}
 					data={data}

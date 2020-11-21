@@ -63,7 +63,7 @@ class JwtService extends FuseUtils.EventEmitter {
 	signInWithEmailAndPassword = (email, password) => {
 		return new Promise((resolve, reject) => {
 			axios
-				.post(URL + 'verify-password', {
+				.post(URL + 'password', {
 					data: {
 						email,
 						password
@@ -83,7 +83,7 @@ class JwtService extends FuseUtils.EventEmitter {
 	signInWithEmail = email => {
 		return new Promise((resolve, reject) => {
 			axios
-				.post(URL + 'verify-email', {
+				.post(URL + 'email', {
 					data: {
 						email
 					}
@@ -158,42 +158,6 @@ class JwtService extends FuseUtils.EventEmitter {
 
 	getAccessToken = () => {
 		return window.localStorage.getItem('jwt_access_token');
-	};
-
-	// 404 : 코드없음 -> null
-	// 403 : 코드사용 -> name
-	// 410 : 코드만료 -> error
-	// 200 : 사용자 없음 -> email, register_token
-	// 201 : 사용자 (users, user_profiles) 에 있음 -> 인증메일 -> email_auth ㅣlogged 갱신 -> user, profile, token
-	getToken = code => {
-		return new Promise((resolve, reject) => {
-			axios
-				.get(URL + `verify/${code}`) // users.py > auth_verify
-				.then(response => {
-					// console.log('response', response.data);
-					// 200 : {email, register_token}
-					// 201 : users, user_profiles 에 있음 -> { user:,profile:,token }
-					// if (response.status === 200) {
-					// 	resolve(response.data);
-					// }
-					resolve(response.data);
-				})
-				.catch(error => {
-					// console.log('error', error.response.code);
-					reject(error);
-					// Promise.reject(new Error('Not Found'));
-					// console.log('error', 'fdf');
-					// if (response.status === 404) {
-					// 	reject(response.status);
-					// } else if (response.status === 403) {
-					// 	reject(response.name);
-					// } else if (response.status === 410) {
-					// 	reject(response.error);
-					// } else {
-					// 	reject(response.error);
-					// }
-				});
-		});
 	};
 }
 

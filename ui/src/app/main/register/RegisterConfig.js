@@ -33,6 +33,14 @@ const RegisterConfig = {
 		{
 			path: '/register',
 			component: Register
+		},
+		{
+			path: '/invite/:email/:code',
+			component: React.lazy(() => import('./invite/Invite'))
+		},
+		{
+			path: '/invite',
+			component: React.lazy(() => import('./invite/Invite'))
 		}
 	]
 };
