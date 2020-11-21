@@ -5,12 +5,15 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 import json
 import operator
+from datetime import datetime
 
 from .utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase
 from .crawler import update_today_disclosure_report, update_today_crawl_mdcline
 
 from .models import mdcin_clinc_test_info, disclosure_report
 from search.models import listed_corp, disclosure
+
+
 
 # caching with redis
 from django.core.cache import cache
@@ -25,7 +28,9 @@ def clinic_test(request):
         corpName = data['corpName']
 
          # crawl today report
-        update_today_crawl_mdcline()
+        weekno = datetime.today().weekday()
+        if weekno<5: # On weekends, the clinical server does not work, so the crawl passes
+            update_today_crawl_mdcline()
 
         if corpName:
             isExist = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()
@@ -55,7 +60,9 @@ def get_disclosure_report(request):
         corpName = data['corpName']
 
         # crawl today report
-        update_today_disclosure_report()
+        weekno = datetime.today().weekday()
+        if weekno<5: # On weekends, the opendart server does not work, so the crawl passes        
+            update_today_disclosure_report()
 
         if corpName:
             isExist = disclosure_report.objects.filter(종목명__contains=corpName).exists()

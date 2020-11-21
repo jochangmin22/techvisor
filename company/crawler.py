@@ -47,7 +47,7 @@ DART = settings.DART
 MFDS = settings.MFDS
 NAVER = settings.NAVER
 
-DATABASES =settings.DATABASES
+DATABASES = settings.DATABASES
 
 db_connection_url = "postgresql://{}:{}@{}:{}/{}".format(
     DATABASES['default']['USER'],
@@ -116,12 +116,12 @@ def crawl_disclosure_report(**kwargs):
 
 
 def update_today_crawl_mdcline():
-    today = datetime.today().strftime('%Y%m%d')
-    # today = today + timedelta(days=-1)
-    # today = today.strftime('%Y%m%d')
+    # today = datetime.today().strftime('%Y%m%d')
+    today = datetime.today()
+    today = today + timedelta(days=-1)
+    today = today.strftime('%Y%m%d')
 
     totalCount, df = crawl_mdcline(singleDate=today)
-
 
     if totalCount == 0:
         return
