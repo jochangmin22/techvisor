@@ -643,6 +643,8 @@ module.exports = {
 			full: '100%',
 			screen: '100vh',
 			330: '33rem',
+			340: '34rem',
+			440: '44rem',
 			460: '46rem',
 			480: '48rem'
 		}),
@@ -704,7 +706,12 @@ module.exports = {
 			...theme('spacing'),
 			full: '100%',
 			screen: '100vh',
-			auto: 'auto'
+			auto: 'auto',
+			330: '33rem',
+			340: '34rem',
+			440: '44rem',
+			460: '46rem',
+			480: '48rem'
 		}),
 		maxWidth: (theme, { breakpoints }) => ({
 			none: 'none',

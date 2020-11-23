@@ -169,9 +169,9 @@ function MainTable(props) {
 					<ColumnMenu cols={cols} onChange={handleOnChange} />
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-460 mx-8">
+			<FuseScrollbars className="max-h-440 mx-8">
 				{!entities || entities.length === 0 ? (
-					<SpinLoading className="h-460" />
+					<SpinLoading className="h-440" />
 				) : (
 					<EnhancedTable
 						columns={columns}

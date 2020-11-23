@@ -128,7 +128,6 @@ function Login() {
 		setShowLoading(true);
 		if (start) {
 			dispatch(submitEmail(model)).then(res => {
-				console.log('handleSubmit -> res', res);
 				if (res.payload === false) {
 					dispatch(
 						showMessage({

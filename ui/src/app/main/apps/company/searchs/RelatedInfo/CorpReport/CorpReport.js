@@ -82,12 +82,12 @@ function CorpReport() {
 					icon="camera"
 					msg="전자공시"
 					text="선택하신 기업명으로 검색된 전자공시 내역이 없습니다."
-					className="h-320"
+					className="h-340"
 				/>
 			) : (
-				<FuseScrollbars className="max-h-360 mx-8">
+				<FuseScrollbars className="max-h-340 mx-8">
 					{showLoading ? (
-						<SpinLoading className="h-360" />
+						<SpinLoading className="h-340" />
 					) : (
 						<EnhancedTable
 							columns={columns}

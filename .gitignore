@@ -10,12 +10,13 @@ __pycache__/
 
 migrations
 .env
+.env.development
+.env.production
 
 
 build
 node_modules
 yarn-error.log*
-tailwind.css
 
 secrets.json
 client_secrets.json

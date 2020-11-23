@@ -221,10 +221,10 @@ function MatrixAnalysis() {
 						</div>
 					</FuseScrollbars>
 					{showLoading ? (
-						<SpinLoading />
+						<SpinLoading className="h-340" />
 					) : (
 						<>
-							<FuseScrollbars className="max-h-360 mx-8">
+							<FuseScrollbars className="max-h-340 mx-8">
 								<EnhancedTable
 									columns={columns}
 									// defaultColumn={defaultColumn}

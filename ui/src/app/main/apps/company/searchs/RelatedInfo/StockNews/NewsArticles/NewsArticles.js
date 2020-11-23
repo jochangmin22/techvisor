@@ -100,7 +100,7 @@ function NewsArticles() {
 					</div>
 				</div>
 			</div>
-			<FuseScrollbars className="max-h-340 mx-8">
+			<FuseScrollbars className="max-h-288 mx-8">
 				<EnhancedTable
 					columns={columns}
 					data={data}
