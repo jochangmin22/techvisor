@@ -1,0 +1,65 @@
+<a href="http://techvisor.co.kr"
+    ><img
+        src="http://techvisor.co.kr/assets/images/logos/logo_techvisor.svg"
+        style="display: block; width: 128px; margin: 0 auto"
+/></a>
+<div
+    style="
+        max-width: 100%;
+        width: 60%;
+        margin: 0 auto;
+        padding: 1rem;
+        text-align: justify;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        box-sizing: border-box;
+        border-radius: 4px;
+        color: #868e96;
+        margin-top: 0.5rem;
+        box-sizing: border-box;
+        text-align: center;
+    "
+>
+    안녕하세요! TechVisor 이메일 인증을 진행하시려면 <br />다음 버튼을
+    눌러주세요.
+</div>
+
+<a
+    href="{{ url }}/{{ keywords.type }}/{{ received_email }}/{{ code }}"
+    style="
+        text-decoration: none;
+        width: 60%;
+        text-align: center;
+        display: block;
+        margin: 0 auto;
+        margin-top: 1rem;
+        background: #1a75bc;
+        padding-top: 1rem;
+        color: white;
+        font-size: 1.25rem;
+        padding-bottom: 1rem;
+        font-weight: 600;
+        border-radius: 4px;
+    "
+    >이메일 인증</a
+>
+
+<div
+    style="
+        text-align: center;
+        margin-top: 1rem;
+        color: #1a75bc;
+        font-size: 0.85rem;
+    "
+>
+    <div>
+        혹은, 다음 링크를 열어주세요:<br />
+        <a
+            style="color: #b197fc"
+            href="{{ url }}/{{ keywords.type }}/{{ received_email }}/{{ code }}"
+            >{{ url }}/{{ keywords.type }}/{{ received_email }}/{{ code }}</a
+        >
+    </div>
+    <br />
+    <div>이 링크는 24시간동안 유효합니다.</div>
+</div>

@@ -10,6 +10,7 @@ import datetime
 import time
 import uuid
 import shortuuid
+import bcrypt
 
 # import datetime
 from psycopg2.extensions import AsIs
@@ -70,8 +71,7 @@ def password(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_email = data["data"].get('email')
-        received_password = data["data"].get('password')
-
+        received_password = data["data"].get('password')           
 
         row = users.objects.filter(data__email=received_email).values()
         row = list(row)
@@ -80,7 +80,7 @@ def password(request):
         password = userData.get('password')
 
         error = {}
-        error['password'] = None if userData and received_password == password else '암호가 잘못되었습니다'
+        error['password'] = None if userData and bcrypt.checkpw(received_password.encode('utf-8'), password.encode('utf-8')) else '암호가 잘못되었습니다'
 
         if not error['password']:
             del userData['password'] # deleted for security
@@ -91,19 +91,20 @@ def password(request):
                 'exp': now + datetime.timedelta(days=expiresIn)
             }
 
-            access_token = jwt.encode(payload, secret_key, algorithm=algorithm)
+            access_token = jwt.encode(payload, secret_key, algorithm=algorithm).decode('utf-8')
 
-            response = { "user" : userData, "access_token" : access_token.decode('utf-8') }
+            response = { "user" : userData, "access_token" : access_token }
+            res = JsonResponse(response, status=200, safe=False)
+            res.set_cookie('access_token', access_token)
 
-            return JsonResponse(response, status=200, safe=False)
+            return res
 
         return JsonResponse({"error": error}, status=202, safe=False)
 
-
 def sendmail(shortid, received_email, keywords):
     # aws ses : ep026
-    subject = 'techvisor ' + keywords['text']
-    html_message = render_to_string('mailTemplate.html', {'code': shortid, 'keywords': keywords, 'received_email': received_email, 'url': 'http://btowin.synology.me:4000'})
+    subject = 'TechVisor ' + keywords['text']
+    html_message = render_to_string('mailTemplate.html', {'code': shortid, 'keywords': keywords, 'received_email': received_email, 'url': 'http://techvisor.co.kr'})
     plain_message = strip_tags(html_message)
     from_email = settings.DEFAULT_FROM_EMAIL 
     to = received_email
@@ -113,9 +114,13 @@ def register(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_displayName = data.get('displayName')
-        received_password = data.get('password')
         received_email = data.get('email')
         received_code = data.get('code')
+
+        
+        password = data.get('password').encode('utf-8')           
+        received_password = bcrypt.hashpw(password, bcrypt.gensalt())
+        received_password = received_password.decode('utf-8')         
 
         isEmailExists = users.objects.filter(data__email=received_email).count()
 
@@ -203,7 +208,40 @@ def email_code_now_expired(code):
     except:
         return False      
 
-# def auth_verify(request, code):
+def access_token(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        access_token = data["data"].get('access_token')
+        try:
+            payload = jwt.decode(access_token, secret_key, algorithms=[algorithm])
+            # jwt.decode('JWT_STRING', 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({ "error" :"Token Expired"}, status=401, safe=False)
+        except jwt.exceptions.InvalidTokenError:
+            return JsonResponse({ "error" "Invalid Token Error"}, status=401, safe=False)
+
+        received_id = payload.get("id")
+        # decoded = json.loads(json.dumps(jwt.decode(token, JWT_SECRET, JWT_ALGORITHM)))
+        try:
+            # Loading user data
+            row = users.objects.filter(id=received_id).values()
+            row = list(row)
+            userData = row[0] if row else {}
+            del userData['password'] # deleted for security
+
+            # update user token
+            payload = {
+                'id': str(userData['id']),
+                'iat': now,
+                'exp': now + datetime.timedelta(days=expiresIn)
+            }
+            updated_access_token = jwt.encode(payload, secret_key, algorithm=algorithm)
+
+            return JsonResponse({ "user" : userData, "access_token" : updated_access_token.decode('utf-8')}, status=200, safe=False)            
+        except:
+            return JsonResponse({ "error" :"Invalid access token detected"}, status=500, safe=False)        
+
+# def verify_token(request, code):
 #     # 404 : 코드없음
 #     # 403 : 코드사용
 #     # 410 : 코드만료
@@ -270,40 +308,7 @@ def email_code_now_expired(code):
 #     except:
 #         return HttpResponse() # 500
 #         # return JsonResponse({},status='500', safe=False)
-
-
-
-def access_token(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        access_token = data["data"].get('access_token')
-        try:
-            payload = jwt.decode(access_token, secret_key, algorithms=[algorithm])
-            # jwt.decode('JWT_STRING', 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            return JsonResponse({ "error" :"Token Expired"}, status=401, safe=False)
-            # Signature has expired
-        received_id = payload.get("id")
-        try:
-            # Loading user data
-            row = users.objects.filter(id=received_id).values()
-            row = list(row)
-            userData = row[0] if row else {}
-            del userData['password'] # deleted for security
-
-            # update user token
-            payload = {
-                'id': str(userData['id']),
-                'iat': now,
-                'exp': now + datetime.timedelta(days=expiresIn)
-            }
-            updated_access_token = jwt.encode(payload, secret_key, algorithm=algorithm)
-
-            return JsonResponse({ "user" : userData, "access_token" : updated_access_token.decode('utf-8')}, status=200, safe=False)            
-        except:
-            return JsonResponse({ "error" :"Invalid access token detected"}, status=500, safe=False)        
-
-      
+  
 def update_user_data(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -315,44 +320,44 @@ def update_user_data(request):
         users.objects.filter(id=received_id).update(**newData)
         return JsonResponse({ "user": data}, status=200, safe=False)
 
-def generate_user_token(id):
-    # save db
-    newData = {
-        'fk_user_id' : id
-    }
-    authTokens = auth_tokens.objects.create(**newData)
-    # authTokens=auth_tokens.objects.filter(fk_user_id=id)
-    # authTokens.update(**newData)
-    # row = list(authTokens.values())
-    # authTokensData = row[0] if row else {}
+# def generate_user_token(id):
+#     # save db
+#     newData = {
+#         'fk_user_id' : id
+#     }
+#     authTokens = auth_tokens.objects.create(**newData)
+#     # authTokens=auth_tokens.objects.filter(fk_user_id=id)
+#     # authTokens.update(**newData)
+#     # row = list(authTokens.values())
+#     # authTokensData = row[0] if row else {}
 
-    # newUid = str(uuid.uuid4())
-    # newToken = {
-    #     'id': newUid,
-    #     'fk_user_id': id,
-    # }
-    # return JsonResponse(newToken,safe=False)
-    # auth_tokens.objects.create(**newToken)
+#     # newUid = str(uuid.uuid4())
+#     # newToken = {
+#     #     'id': newUid,
+#     #     'fk_user_id': id,
+#     # }
+#     # return JsonResponse(newToken,safe=False)
+#     # auth_tokens.objects.create(**newToken)
 
-    payload = {
-        'user_id': str(id),
-        'token_id': str(authTokens.id),
-        'sub': 'refresh_token',
-        'iat': now,
-        'exp': now + datetime.timedelta(days=expiresIn)
-    }
-    refreshToken = jwt.encode(payload, secret_key , algorithm=algorithm)
+#     payload = {
+#         'user_id': str(id),
+#         'token_id': str(authTokens.id),
+#         'sub': 'refresh_token',
+#         'iat': now,
+#         'exp': now + datetime.timedelta(days=expiresIn)
+#     }
+#     refreshToken = jwt.encode(payload, secret_key , algorithm=algorithm)
 
-    payload = {
-        'user_id': str(id),
-        'sub': 'access_token',
-        'iat': now,
-        'exp': now + datetime.timedelta(days=verifyExpiresIn)        
-    }    
-    accessToken = jwt.encode(payload, secret_key , algorithm=algorithm)
-    # return JsonResponse({ refreshToken, accessToken},safe=False)
-    return { 'accessToken' : accessToken.decode('UTF-8'), 'refreshToken' : refreshToken.decode('UTF-8') }
-    # return refreshToken
+#     payload = {
+#         'user_id': str(id),
+#         'sub': 'access_token',
+#         'iat': now,
+#         'exp': now + datetime.timedelta(days=verifyExpiresIn)        
+#     }    
+#     accessToken = jwt.encode(payload, secret_key , algorithm=algorithm)
+#     # return JsonResponse({ refreshToken, accessToken},safe=False)
+#     return { 'accessToken' : accessToken.decode('UTF-8'), 'refreshToken' : refreshToken.decode('UTF-8') }
+#     # return refreshToken
 
 # def refresh_user_token(tokenId: string, refreshTokenExp: number, originalRefreshToken: string):
 #     return { refreshToken, accessToken}
