@@ -62,8 +62,9 @@ def connect():
         host="localhost", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"
     )
     return connection 
-
+# 전체검색 
 count_url = "http://plus.kipris.or.kr/kipo-api/kipi/patUtiModInfoSearchSevice/getAdvancedSearch"
+# 서지
 biblo_url = "http://plus.kipris.or.kr/kipo-api/kipi/patUtiModInfoSearchSevice/getBibliographyDetailInfoSearch"
 service_key = "aPmTnAjtr4j82WWmpgi=DrmRSiJXXaxHZs1W34pssBQ="
 
@@ -79,14 +80,20 @@ def get_public_application(date, count):
 
 
     # url = count_url + '?applicationDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&numOfRows=1&ServiceKey=' + service_key
+    # count 228 / 20
+    totalPage = (count / 20)
+
     url = count_url + '?openDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&numOfRows=1&ServiceKey=' + service_key
     html = requests.get(url)
     soup = BeautifulSoup(html.content, 'xml')
-    totalCount = soup.find('totalCount').get_text()
+
+    items = ['applicationNumber','applicationDate','openNumber','openDate','registerDate','registerNumber','publicationDate','publicationNumber','inventionTitle']
+    item_names = ['출원번호','출원일자','공개번호','공개일자','등록번호','등록일자','공고번호','공고일자','발명의명칭(국문)']    
+    # totalCount = soup.find('totalCount').get_text()
     # print(totalCount)
     return
 
-def crawl_public(date, count):
+# def crawl_public(date, count):
 def crawl_public(**kwargs):
     keys = ['date','count']
     for key in kwargs.keys():
@@ -181,8 +188,8 @@ def main_def():
         if int(db_count) >= int(api_count): # db의 출원일자 cnt와 api의 출원일자 cnt가 같으면 pass
             print(str(my_date) + ".",  text, " : 자료 일치 통과")
             continue
-
-        # get_public_application(my_date, api_count)
+        # 2019-08-13
+        get_public_application(my_date, api_count)
         time.sleep(1)
         # memory usage check
         memoryUse = psutil.virtual_memory()[2] 
