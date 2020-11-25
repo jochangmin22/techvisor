@@ -30,6 +30,10 @@ const LoginConfig = {
 			component: React.lazy(() => import('./reset-password/ResetPassword'))
 		},
 		{
+			path: '/change-password/:email/:code',
+			component: React.lazy(() => import('./change-password/ChangePassword'))
+		},
+		{
 			path: '/login/:email',
 			component: React.lazy(() => import('./Login'))
 		},

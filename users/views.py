@@ -9,6 +9,9 @@ def email(request):
 def access_token(request):
     return users.access_token(request)
 
+def verify_email_code(request):
+    return users.verify_email_code(request)
+    
 def register(request):
     return users.register(request)
 

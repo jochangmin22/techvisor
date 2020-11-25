@@ -12,9 +12,9 @@ import Collapse from '@material-ui/core/Collapse';
 import Formsy from 'formsy-react';
 import TextFieldFormsy from '@fuse/core/formsy/TextFieldFormsy';
 import clsx from 'clsx';
-import { Link, useParams } from 'react-router-dom';
-import { resetRegister, submitRegister } from 'app/auth/store/registerSlice';
-import React, { useState, useLayoutEffect } from 'react';
+import { withRouter, Link, useParams } from 'react-router-dom';
+import { verifyCode, resetRegister, submitRegister } from 'app/auth/store/registerSlice';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
@@ -63,16 +63,27 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function Invite() {
+function Invite(props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const routeParams = useParams();
 	const register = useSelector(({ auth }) => auth.register);
+	// const verify = useSelector(({ auth }) => auth.verify);
 	const [isFormValid, setIsFormValid] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [showLoading, setShowLoading] = useState(false);
 	const [email, setEmail] = useState(routeParams.email ? routeParams.email : null);
+
+	// useEffect(() => {
+	// 	dispatch(verifyCode(routeParams.code));
+	// }, [dispatch, routeParams.code]);
+
+	// useEffect(() => {
+	// 	if (verify === false) {
+	// 		props.history.push(`/login/${routeParams.email}`);
+	// 	}
+	// });
 
 	useLayoutEffect(() => {
 		if (Object.values(register.error).some(k => k !== null && k !== '')) {
@@ -125,16 +136,16 @@ function Invite() {
 								<div className={clsx(isError ? 'flex' : 'hidden', 'shadow-8 rounded-8 mb-24 p-16')}>
 									<ul>
 										<li>가입을 시도하는 중에 오류가 발생했습니다. 다시 시도하세요.</li>
-										{register.error.email !== '' || register.error.email.length !== 0 ? (
-											<>
-												<li className="font-semibold">{register.error.email}</li>
-												<li>
-													<Link to="/login">로그인 화면에서 다시 시도해보세요.</Link>
-												</li>
-											</>
+										{register.error.email !== null ? (
+											<li className="font-semibold">{register.error.email}</li>
+										) : register.error.code !== null ? (
+											<li className="font-semibold">{register.error.code}</li>
 										) : (
 											''
 										)}
+										<li>
+											<Link to="/login">로그인 화면에서 다시 시도해보세요.</Link>
+										</li>
 									</ul>
 								</div>
 							</Collapse>
@@ -264,4 +275,4 @@ function Invite() {
 	);
 }
 
-export default Invite;
+export default withRouter(Invite);

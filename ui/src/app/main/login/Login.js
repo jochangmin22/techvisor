@@ -132,6 +132,7 @@ function Login() {
 					dispatch(
 						showMessage({
 							message: '이메일을 보냈습니다. 확인 이메일이 곧 도착할 것입니다.',
+							autoHideDuration: 10000,
 							anchorOrigin: {
 								vertical: 'bottom',
 								horizontal: 'left'
@@ -302,6 +303,7 @@ function Login() {
 											/>
 										}
 										onClick={renderProps.onClick}
+										disabled
 									>
 										구글 계정으로 {text}
 									</Button>
@@ -326,6 +328,7 @@ function Login() {
 											/>
 										}
 										onClick={props.onClick}
+										disabled
 									>
 										네이버 계정으로 {text}
 									</Button>

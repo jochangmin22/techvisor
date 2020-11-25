@@ -2,6 +2,17 @@ import { createSlice } from '@reduxjs/toolkit';
 import jwtService from 'app/services/jwtService';
 import { setUserData } from './userSlice';
 
+export const verifyCode = code => async dispatch => {
+	return jwtService
+		.verifyEmailCode(code)
+		.then(() => {
+			return dispatch(verifySuccess());
+		})
+		.catch(error => {
+			return dispatch(verifyError(error));
+		});
+};
+
 export const submitRegister = params => async dispatch => {
 	return jwtService
 		.createUser(params)
@@ -27,6 +38,7 @@ export const getRegisterToken = code => async dispatch => {
 
 const initialState = {
 	success: false,
+	verify: null,
 	error: {
 		email: null,
 		displayName: null,
@@ -48,6 +60,14 @@ const registerSlice = createSlice({
 			state.error = action.payload;
 		},
 		resetRegister: (state, action) => initialState,
+		verifySuccess: (state, action) => {
+			state.verify = true;
+		},
+		verifyError: (state, action) => {
+			state.verify = false;
+			state.error.code = action.payload;
+		},
+		resetVerify: (state, action) => initialState,
 		setRegisterToken: (state, action) => {
 			state.registerToken = action.payload;
 		}
@@ -55,6 +75,14 @@ const registerSlice = createSlice({
 	extraReducers: {}
 });
 
-export const { registerSuccess, registerError, resetRegister, setRegisterToken } = registerSlice.actions;
+export const {
+	registerSuccess,
+	registerError,
+	resetRegister,
+	verifySuccess,
+	verifyError,
+	resetVerify,
+	setRegisterToken
+} = registerSlice.actions;
 
 export default registerSlice.reducer;

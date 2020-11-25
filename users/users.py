@@ -38,14 +38,19 @@ now = datetime.datetime.utcnow()
 
 def email(request):
     ''' 
-    1. Check if the email is in db or not and return boolean
-    2. add new row in [email_auth] db
+    Check if the email is in db :
+        send [signed-in] mail and create new row in [email_auth] db and return false 
+        : call from Login.js
+    or not :
+        send [change-password] mail and create new row and return true
+        : called from ResetPassword.js
     '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_email = data["data"].get('email')
 
-        signedAlready = users.objects.filter(data__email=received_email).exists()
+        userData = users.objects.filter(data__email=received_email)
+        signedAlready = userData.exists()
 
         shortid = shortuuid.ShortUUID().random(length=8)
 
@@ -55,6 +60,19 @@ def email(request):
                 'type': 'invite',
                 'text': '회원가입'
             }
+            sendmail(shortid, received_email, keywords)
+        else:
+            # extracted nested displayName from users db
+            row = userData.values()
+            row = list(row)
+            data = row[0] if row else {}
+            displayName = data["data"].get('displayName')
+
+            keywords = {
+                'type': 'change-password',
+                'text': '비밀번호 재설정',
+                'displayName' : displayName,
+            }            
             sendmail(shortid, received_email, keywords)
 
         # save database with orm
@@ -104,7 +122,7 @@ def password(request):
 def sendmail(shortid, received_email, keywords):
     # aws ses : ep026
     subject = 'TechVisor ' + keywords['text']
-    html_message = render_to_string('mailTemplate.html', {'code': shortid, 'keywords': keywords, 'received_email': received_email, 'url': 'http://techvisor.co.kr'})
+    html_message = render_to_string('mailTemplate-' + keywords['type'] + '.html', {'code': shortid, 'keywords': keywords, 'received_email': received_email, 'url': 'http://techvisor.co.kr'})
     plain_message = strip_tags(html_message)
     from_email = settings.DEFAULT_FROM_EMAIL 
     to = received_email
@@ -126,13 +144,21 @@ def register(request):
 
         isCodeValidate = email_code_verify(received_code, received_email)
 
+        errMsg = {
+            'INVAILED_CODE': '존재하지 않은 토큰입니다.',
+            'EXPIRED_CODE': '인증토큰이 만료되었습니다.',
+            'USED_CODE': '이미 처리되었거나 비활성화된 인증토큰입니다.',
+            'ERROR': '잘못된 요청입니다.',
+            'OK': ''
+        }
+
         error = {}
         error['email'] = '이 이메일은 이미 사용중입니다' if isEmailExists else None
         error['displayName'] = '이름을 입력하세요' if not received_displayName else None
-        error['code'] = '잘못된 인증메일 입니다' if not isCodeValidate else None
+        error['code'] = errMsg[isCodeValidate]
         error['password'] = None
 
-        if not error['displayName'] and not error['password'] and not error['email'] and not error['code']:
+        if not error['displayName'] and not error['password'] and not error['email'] and error['code'] == '':
             newUid = str(uuid.uuid4())
             newUser = {
                 'id': newUid,
@@ -160,30 +186,38 @@ def register(request):
                 'exp': now + datetime.timedelta(days=expiresIn)
             }
             access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
-        
+
+            # send welcome email
+            keywords = {
+                'type': 'welcome',
+                'text': '가입을 환영합니다.',
+                'displayName' : received_displayName,
+            }            
+            # sendmail('', received_email, keywords)            
+
             return JsonResponse({ "user": newUser, "access_token" : access_token.decode('utf-8')}, status=200, safe=False)
         return JsonResponse({'error': error}, status=200, safe=False)
-
+    
 def email_code_verify(code, email):
     '''email code validate check'''
     try:
         # code not exist?
         emailAuth = email_auth.objects.filter(code=code)
         if not emailAuth.exists():
-            return False
+            return 'INVAILED_CODE'
 
         row = list(emailAuth.values())
         emailAuthData = row[0]
         # used?
         if emailAuthData['logged']:
-            return False
+            return 'USED_CODE'
 
         # expried? 
         timestamp = emailAuthData['created_at'].timestamp()
         # valid_period_secs = verifyExpiresIn.total_seconds()
         # if time.time() - timestamp > valid_period_secs:
         if time.time() - timestamp > verifyExpiresInSecs:
-            return False
+            return 'EXPIRED_CODE'
         # # new user?
         # row = users.objects.filter(data__email=emailAuthData['email'])
         # if not row.exists():
@@ -191,9 +225,42 @@ def email_code_verify(code, email):
         #         'is_certified' : True
         #     }
         #     row.update(**newData) 
-        return True
+        return 'OK'
     except:
-        return False
+        return 'ERROR'
+
+def verify_email_code(request):
+    '''email code validate check'''
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        code = data['data'].get('code')
+        try:
+            # code not exist?
+            emailAuth = email_auth.objects.filter(code=code)
+            if not emailAuth.exists():
+                return HttpResponse('INVAILED_CODE', status=404)
+
+            row = list(emailAuth.values())
+            emailAuthData = row[0]
+            # used?
+            if emailAuthData['logged']:
+                return HttpResponse('USED_CODE', status=409)
+
+            # expried? 
+            timestamp = emailAuthData['created_at'].timestamp()
+            if time.time() - timestamp > verifyExpiresInSecs:
+                return HttpResponse('EXPIRED_CODE', status=409)
+
+            # # new user?
+            # row = users.objects.filter(data__email=emailAuthData['email'])
+            # if not row.exists():
+            #     newData = {
+            #         'is_certified' : True
+            #     }
+            #     row.update(**newData) 
+            return HttpResponse('OK', status=204)
+        except:
+            return HttpResponse()
 
 def email_code_now_expired(code):
     ''' update that the email code was used once in the DB '''

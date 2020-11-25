@@ -101,11 +101,15 @@ class JwtService extends FuseUtils.EventEmitter {
 	signInWithToken = () => {
 		return new Promise((resolve, reject) => {
 			axios
-				.post(URL + 'access-token', {
-					data: {
-						access_token: this.getAccessToken()
-					}
-				})
+				.post(
+					URL + 'access-token',
+					{
+						data: {
+							access_token: this.getAccessToken()
+						}
+					},
+					{ withCredentials: true }
+				)
 				.then(response => {
 					if (response.data.user) {
 						this.setSession(response.data.access_token);
@@ -118,6 +122,33 @@ class JwtService extends FuseUtils.EventEmitter {
 				.catch(error => {
 					this.logout();
 					reject(new Error('Failed to login with token.'));
+				});
+		});
+	};
+
+	verifyEmailCode = code => {
+		return new Promise((resolve, reject) => {
+			axios
+				.post(URL + 'verify-email-code', {
+					data: {
+						code
+					}
+				})
+				.then(response => {
+					console.log(response);
+					//data: "", status: 204,
+					if (response.status === 204) {
+						resolve(true);
+					} else {
+						// this.logout();
+						// reject(new Error('Failed to login with token.'));
+						reject(response.data);
+					}
+				})
+				.catch(error => {
+					// this.logout();
+					// reject(new Error('Failed to login with token.'));
+					reject(error.response.status);
 				});
 		});
 	};

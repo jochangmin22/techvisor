@@ -64,7 +64,7 @@ ALLOWED_HOSTS = [
     "52.79.161.225"
 ]
 
-CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_ALLOW_ALL = True # Credential true
 # frontend
 CORS_ORIGIN_WHITELIST = [
     "http://192.168.0.40",
