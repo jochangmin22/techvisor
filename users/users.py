@@ -41,9 +41,6 @@ def email(request):
     Check if the email is in db :
         send [signed-in] mail and create new row in [email_auth] db and return false 
         : call from Login.js
-    or not :
-        send [change-password] mail and create new row and return true
-        : called from ResetPassword.js
     '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -52,36 +49,23 @@ def email(request):
         userData = users.objects.filter(data__email=received_email)
         signedAlready = userData.exists()
 
-        shortid = shortuuid.ShortUUID().random(length=8)
+        if received_email:
+            shortid = shortuuid.ShortUUID().random(length=8)
+            if not signedAlready:
+                # sendmail
+                keywords = {
+                    'type': 'invite',
+                    'text': '회원가입'
+                }
+                sendmail(shortid, received_email, keywords)
 
-        if not signedAlready:
-            # sendmail
-            keywords = {
-                'type': 'invite',
-                'text': '회원가입'
+            # save database with orm
+            newVerify = {
+                'id': str(uuid.uuid4()),
+                'code': shortid,
+                'email': received_email,
             }
-            sendmail(shortid, received_email, keywords)
-        else:
-            # extracted nested displayName from users db
-            row = userData.values()
-            row = list(row)
-            data = row[0] if row else {}
-            displayName = data["data"].get('displayName')
-
-            keywords = {
-                'type': 'change-password',
-                'text': '비밀번호 재설정',
-                'displayName' : displayName,
-            }            
-            sendmail(shortid, received_email, keywords)
-
-        # save database with orm
-        newVerify = {
-            'id': str(uuid.uuid4()),
-            'code': shortid,
-            'email': received_email,
-        }
-        email_auth.objects.create(**newVerify)
+            email_auth.objects.create(**newVerify)
 
         return JsonResponse({'signedIn' : signedAlready}, status=200, safe=False)
 
@@ -119,6 +103,105 @@ def password(request):
 
         return JsonResponse({"error": error}, status=202, safe=False)
 
+def reset_email(request):
+    ''' 
+        send [change-password] mail and create new row and return true
+        : called from ResetPassword.js
+    '''
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        received_email = data["data"].get('email')
+
+        userData = users.objects.filter(data__email=received_email)
+        signedUser = userData.exists()
+
+        shortid = shortuuid.ShortUUID().random(length=8)
+
+        if signedUser:
+            # extracted nested displayName from users db
+            row = userData.values()
+            row = list(row)
+            data = row[0] if row else {}
+            displayName = data["data"].get('displayName')
+
+            keywords = {
+                'type': 'change-password',
+                'text': '비밀번호 재설정',
+                'displayName' : displayName,
+            }            
+            sendmail(shortid, received_email, keywords)
+        else:
+            # not exist user in db
+            keywords = {
+                'type': 'invite',
+                'text': '회원가입'
+            }
+            sendmail(shortid, received_email, keywords)            
+
+        # save database with orm
+        newVerify = {
+            'id': str(uuid.uuid4()),
+            'code': shortid,
+            'email': received_email,
+        }
+        email_auth.objects.create(**newVerify)
+
+        return JsonResponse({'signedIn' : signedUser}, status=200, safe=False)
+
+def change_password(request):
+    ''' 
+        check if the password to be changed is valid
+            1. matches the old password
+            2. the code has expired
+    '''
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        received_email = data.get('email')
+        received_code = data.get('code')
+        received_password = data.get('password').encode('utf-8')
+
+        userData = users.objects.filter(data__email=received_email)
+        row = userData.values()
+        row = list(row)
+
+        userData = row[0] if row else {}
+        password = userData.get('password').encode('utf-8')
+
+        isCodeValidate = email_code_verify(received_code, received_email)
+
+        error = {}
+        error['password'] ='passwordUsedBefore' if userData and bcrypt.checkpw(received_password, password) else None
+
+        error['code'] = None if isCodeValidate == 'OK' else isCodeValidate
+
+        if not error['password'] and not error['code']:
+
+            # update password in db
+            userData['password'] = received_password
+            userData['updated_at'] = now
+            userData.update(**userData)
+
+            # expired emailAuth code
+            email_code_now_expired(received_code)
+
+            del userData['password'] # deleted for security
+
+            payload = {
+                'id': str(userData['id']),
+                'iat': now,
+                'exp': now + datetime.timedelta(days=expiresIn)
+            }
+
+            access_token = jwt.encode(payload, secret_key, algorithm=algorithm).decode('utf-8')
+
+            response = { "user" : userData, "access_token" : access_token }
+            res = JsonResponse(response, status=200, safe=False)
+            res.set_cookie('access_token', access_token)
+
+            return res
+
+        return JsonResponse({"error": error}, status=202, safe=False)                        
+
 def sendmail(shortid, received_email, keywords):
     # aws ses : ep026
     subject = 'TechVisor ' + keywords['text']
@@ -150,7 +233,7 @@ def register(request):
             'USED_CODE': '이미 처리되었거나 비활성화된 인증토큰입니다.',
             'ERROR': '잘못된 요청입니다.',
             'OK': ''
-        }
+        }  
 
         error = {}
         error['email'] = '이 이메일은 이미 사용중입니다' if isEmailExists else None

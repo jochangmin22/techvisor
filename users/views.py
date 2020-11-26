@@ -6,6 +6,12 @@ def password(request):
 def email(request):
     return users.email(request)
 
+def reset_email(request):
+    return users.reset_email(request)
+
+def change_password(request):
+    return users.change_password(request)
+
 def access_token(request):
     return users.access_token(request)
 
