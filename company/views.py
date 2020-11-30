@@ -43,6 +43,9 @@ def get_wordcloud(request):
 def get_stock_search_top(request):
     return crawler.crawl_stock_search_top()
 
+def get_stock_upper(request):
+    return crawler.crawl_stock_upper()
+
 # company
 # def get_company(request, companyId=""):
 #     return company.parse_company(request, companyId)

@@ -54,6 +54,7 @@ db_connection_url = "postgresql://{}:{}@{}:{}/{}".format(
     DATABASES['default']['PASSWORD'],
     DATABASES['default']['HOST'],
     DATABASES['default']['PORT'],
+    
     DATABASES['default']['NAME'],
 )
 
@@ -163,7 +164,7 @@ def crawl_mdcline(singleDate):
 
 def crawl_stock_search_top():
     ''' 네이버 금융 > 국내증시 > 검색상위 종목'''
-    df = pd.read_html(NAVER['stock_search_top_url'], match = '종목명', header=0, encoding = 'euc-kr')[0]
+    df = pd.read_html(NAVER['stock_search_top_url'], header=0, encoding = 'euc-kr')[0]
 
     # remove null row
     df = df.iloc[1:]
@@ -183,6 +184,30 @@ def crawl_stock_search_top():
     res = df.to_dict('records')
 
     return JsonResponse(res, safe=False)
+
+def crawl_stock_upper():
+    ''' 네이버 금융 > 국내증시 > 상한가  + 상승'''
+    df = pd.read_html(NAVER['stock_upper_url'], match = '종목명', header=0, encoding = 'euc-kr')[0]
+    return JsonResponse(df, safe=False)
+    # remove null row
+    df = df.iloc[1:]
+    
+    # convert values to numeric
+    # df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']] = df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    df[['순위','현재가', '전일비', '거래량']] = df[['순위','현재가', '전일비', '거래량']].fillna("0").astype(int)
+    df[['PER', 'ROE']] = df[['PER', 'ROE']].fillna("0").astype(float).round(2)
+    df['검색비율'] = df['검색비율'].str.replace('%', '').fillna("0").astype(float).round(2)
+    df['등락률'] = df['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
+
+    #remove null row
+    df = df[df.순위 != 0]
+
+    # add stockCode from model
+    df['종목코드'] = [get_stockCode(corpName) for corpName in df['종목명']]
+      
+    res = df.to_dict('records')
+
+    return JsonResponse(res, safe=False)    
 
 def get_stockCode(corpName):
     listed = listed_corp.objects.filter(회사명=corpName)

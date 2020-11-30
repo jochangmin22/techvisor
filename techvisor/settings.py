@@ -59,8 +59,8 @@ ALLOWED_HOSTS = [
     "192.168.0.40",
     "btowin.synology.me",
     "14.32.114.185",
-    "ipgrim.com",
-    "v.ipgrim.com",
+    "techvisor.co.kr",
+    "v.techvisor.co.kr",
     "52.79.161.225"
 ]
 
@@ -85,15 +85,15 @@ CORS_ORIGIN_WHITELIST = [
     "http://btowin.synology.me:3000",
     "http://btowin.synology.me:4000",
     "http://btowin.synology.me:8000",
-    "http://v.ipgrim.com:8000",
-    "http://v.ipgrim.com:8001",
-    "https://v.ipgrim.com",
+    "http://v.techvisor.co.kr:8000",
+    "http://v.techvisor.co.kr:8001",
+    "https://v.techvisor.co.kr",
     
     "http://14.32.114.185",  # company
     "https://14.32.114.185",
-    "http://ipgrim.com",
-    "http://www.ipgrim.com",
-    "https://ipgrim.com",
+    "http://techvisor.co.kr",
+    "http://www.techvisor.co.kr",
+    "https://techvisor.co.kr",
     "http://techvisor.co.kr",
     "http://www.techvisor.co.kr",
     "https://techvisor.co.kr",
