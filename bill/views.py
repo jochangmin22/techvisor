@@ -14,37 +14,30 @@ from .models import *
 
 
 def order_create(request):
+    data = json.loads(request.body)
+    
     if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            # form = OrderCreateForm(request.POST)
-            # form = OrderCreateForm()
-            print('data is : ', data)
-            order_id = data['order']
-            order = Order.objects.get(id = order_id)
-            print('order is : ', order)
-            # if form.is_valid():
-            #     order = form.save()
-            #     print('data is : ', order)
+        form = OrderCreateForm(request.POST)
 
-                # OrderItem.objects.create(
-                #     order = order,
-                #     product = data['product'],
-                #     price = data['price'],
-                #     quantity = data['quantity']
-                # )
-            # return render(request, 'bill/created.html', {'order' : order})
-            return render(request, 'bill/create.html', {'form' : data})
-        except Exception as e:
-            print('Error', e)
-    return HttpResponse(status = 400)
-    # else:
-    #     return render(request, 'bill/create.html', {'form' : data})
+        if form.is_valid():
+            order = form.save()
+
+            OrderItem.objects.create(
+                order_id = order.id,
+                product_id = data['product'],
+                price = data['price'],
+                quantity = data['quantity']
+            )
+            return render(request, 'bill/created.html', {'order' : order})
+    else:
+        form = OrderCreateForm()
+    return render(request, 'bill/create.html', {'data' : data, 'form' : form})
 
 @staff_member_required
 def admin_order_detail(request, order_id):
     order = get_object_or_404(Order, id = order_id)
-    return render(request, 'bill/admin/detail.html', {'order' : order})
+    return JsonResponse({ 'Order' : order }, status = 200)
+    # return render(request, 'bill/admin/detail.html', {'order' : order})
 
 @staff_member_required
 def admin_order_pdf(request, order_id):
@@ -60,34 +53,36 @@ def admin_order_pdf(request, order_id):
 
 def order_complete(request):
     order_id = request.Get.get('order_id')
-    # order = Order.objects.get(id = order_id)
-    # return render(request, 'bill/created.html', {'order' : order})
+    order = Order.objects.get(id = order_id)
+    # return JsonResponse({ 'Order' : order }, status = 200)
+    return render(request, 'bill/created.html', {'order' : order})
 
 class OrderCreateAjaxView(View):
     def post(self, request, *args, **kwargs):
         # if not request.user.is_authenticated:
         #     return JsonResponse({"authenticated" : False}, status = 403)
         
-        form = OrderCreateForm(request.POST)
-        # print('request data : ', request.POST)
-        print('request data : ', form)
-
-        if form.is_valid():
-            order = form.save()
+        if request.method == "POST":
+            body_data = json.loads(request.body)
+            form = OrderCreateForm(body_data)
             print("form date : ", form)
 
-            OrderItem.objects.create(
-                    order = order,
-                    product = data['product'],
-                    price = data['price'],
-                    quantity = data['quantity']
-                )
-            data = {
-                "order_id" : order.id
-            }
-            return JsonResponse(data)
-        else:
-            return JsonResponse({}, status = 401)
+            if form.is_valid():
+                order = form.save()
+            
+                OrderItem.objects.create(
+                        order_id = order.id,
+                        product_id = body_data['product'],
+                        price = body_data['price'],
+                        quantity = body_data['quantity']
+                    )
+                data = {
+                    "order_id" : order.id
+                }
+                return JsonResponse(data)
+            
+            else:
+                return JsonResponse({}, status = 401)
 
 class OrderCheckoutAjaxView(View):
     def post(self, request, *args, **kwargs):
@@ -98,11 +93,15 @@ class OrderCheckoutAjaxView(View):
         order = Order.objects.get(id = order_id)
         amount = request.POST.get('amount')
 
+        # print('order_id : ', order)
+        # print('amount : ', amount)
+
         try:
-            merchant_order_id = OrderTransaction.objects.create_new(
+            merchant_order_id = OrderTransaction.trans_objects.create_new(
                 order = order,
                 amount = amount
             )
+            print('merchantID : ', merchant_order_id)
         except:
             merchant_order_id = None
 
@@ -114,6 +113,7 @@ class OrderCheckoutAjaxView(View):
             return JsonResponse(data)
         
         else:
+            # print('amount : ', merchant_order_id)
             return JsonResponse({}, status = 401)
 
 class OrderImpAjaxView(View):
@@ -128,13 +128,15 @@ class OrderImpAjaxView(View):
         amount = request.POST.get('amount')
 
         try:
-            trans = OrderTransaction.objects.get(
+            trans = OrderTransaction.trans_objects.get(
                 order = order,
                 merchant_order_id = merchant_id,
                 amount = amount
             )
         except:
             trans = None
+
+        print('Trans : ' ,trans)
 
         if trans is not None:
             trans.transaction_id = imp_id

@@ -7,12 +7,19 @@ urlpatterns = [
     re_path(r"^api/company-app/query/$", views.get_query, name='get_query'),
     re_path(r"^api/company-app/searchs/$", csrf_exempt(views.get_companies), name='get_companies'),
     re_path(r"^api/company-app/searchs/stock$", csrf_exempt(views.get_stock), name='get_stock'),
-     re_path(r"^api/company-app/searchs/financialinfo$", csrf_exempt(views.get_financial_info), name='get_financial_info'),    
+    re_path(r"^api/company-app/searchs/financialinfo$", csrf_exempt(views.get_financial_info), name='get_financial_info'),    
     re_path(r"^api/company-app/searchs/clinic$", csrf_exempt(views.get_clinic_test), name='get_clinic_test'),
     re_path(r"^api/company-app/searchs/disclosurereport$", csrf_exempt(views.get_disclosure_report), name='get_disclosure_report'),
     re_path(r"^api/company-app/searchs/ownedpatent$", csrf_exempt(views.get_owned_patent), name='get_owned_patent'),
     re_path(r"^api/company-app/searchs/wordcloud$", csrf_exempt(views.get_wordcloud), name='get_wordcloud'),
     re_path(r"^api/company-app/searchs/stocksearchtop$", csrf_exempt(views.get_stock_search_top), name='get_stock_search_top'),
+    re_path(r"^api/company-app/searchs/stockupper$", csrf_exempt(views.get_stock_upper), name='get_stock_upper'),
+    re_path(r"^api/company-app/searchs/stocklower$", csrf_exempt(views.get_stock_lower), name='get_stock_lower'),
+
+    re_path(r"^api/company-app/searchs/labels$", csrf_exempt(views.get_labels), name='get_labels'),
+    re_path(r"^api/company-app/searchs/update-labels$", csrf_exempt(views.update_labels), name='update_labels'),
+
+
     # re_path(r"^api/company-app/searchs/searchsnum$", get_companies_num, name='get_companies_num'),
     # re_path(r"^api/company-app/searchs/stock$", get_stock, name='get_stock'),
     # re_path(r"^api/company-app/searchs/vec$", get_vec, name='get_vec'),

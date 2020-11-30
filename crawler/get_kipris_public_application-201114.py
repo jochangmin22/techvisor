@@ -7,36 +7,41 @@ import sys
 from datetime import date, timedelta
 import psycopg2
 import psutil
+import pandas as pd
+from sqlalchemy import create_engine
+from colorama import Fore
+from colorama import Style
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "postgresql",
+#         "NAME": "ipgrim",
+#         "USER": "ipgrim",
+#         "PASSWORD": "btw*0302",
+#         "HOST": "localhost",
+#         "PORT": "5433"
+#     }
+# }
 
 DATABASES = {
     "default": {
         "ENGINE": "postgresql",
-        "NAME": "ipgrim",
-        "USER": "ipgrim",
+        "NAME": "techvisor",
+        "DATABASE": "techvisor",
+        "USER": "postgres",
         "PASSWORD": "btw*0302",
         "HOST": "localhost",
         "PORT": "5433"
     }
 }
-def get_db_date_count(date):
-    try:
-        with connect() as connection:
-            with connection.cursor() as cursor:      
-                query ="select count(출원번호) cnt from 공개공보 where 공개일자::int = " + str(date) + ";"  
-                cursor.execute(query)
-                connection.commit()
-                row = dictfetchall(cursor)
-                return row[0]['cnt']
 
-    except (Exception, psycopg2.Error) as error :
-        if(connection):
-            print("Failed", error)
-
-    finally:
-        if(connection):
-            cursor.close()
-            connection.close()
-    return                     
+db_connection_url = "postgresql://{}:{}@{}:{}/{}".format(
+    DATABASES['default']['USER'],
+    DATABASES['default']['PASSWORD'],
+    DATABASES['default']['HOST'],
+    DATABASES['default']['PORT'],
+    DATABASES['default']['NAME'],
+)
 
 def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
@@ -52,125 +57,120 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+# def connect():
+#     connection = psycopg2.connect(
+#         host="localhost", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"
+#     )
+#     return connection    
+
+def connect():
+    connection = psycopg2.connect(
+        host="localhost", database="techvisor", user="postgres", password="btw*0302", port="5433"
+    )
+    return connection   
+
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
     columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]    
-      
-def connect():
-    connection = psycopg2.connect(
-        host="localhost", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"
-    )
-    return connection 
-# 전체검색 
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+def record_log(msg):
+    #######################
+    # file에 log 저장
+    #######################
+    f = open("/home/btowin/downloads/public_crawl_log.txt", "a")
+    f.write(str(msg)+'\n')
+    f.close()
+    return        
+
+# 전체검색 - 먼저 공개일자로 검색해야해서.
 count_url = "http://plus.kipris.or.kr/kipo-api/kipi/patUtiModInfoSearchSevice/getAdvancedSearch"
+# numOfRows 최대 99까지
+
 # 서지
 biblo_url = "http://plus.kipris.or.kr/kipo-api/kipi/patUtiModInfoSearchSevice/getBibliographyDetailInfoSearch"
 service_key = "aPmTnAjtr4j82WWmpgi=DrmRSiJXXaxHZs1W34pssBQ="
+operationKey = 'getAdvancedSearch'    
+
+def get_db_date_count(date, table = '공개공보'):
+    try:
+        with connect() as connection:
+            with connection.cursor() as cursor:      
+                query ="select count(출원번호) cnt from " + table + " where 공개일자::int = " + str(date) + ";"  
+                cursor.execute(query)
+                connection.commit()
+                row = dictfetchall(cursor)
+                return row[0]['cnt']
+
+    except (Exception, psycopg2.Error) as error :
+        if(connection):
+            print("Failed", error)
+
+    finally:
+        if(connection):
+            cursor.close()
+            connection.close()
+    return                     
+
 
 def get_api_date_count(date):
     # url = count_url + '?applicationDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&numOfRows=1&ServiceKey=' + service_key
-    url = count_url + '?openDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&numOfRows=1&ServiceKey=' + service_key
-    html = requests.get(url)
+    url = count_url + '?openDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&pageNo=1&numOfRows=1&ServiceKey=' + service_key
+    try:    
+        html = requests.get(url)
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+
     soup = BeautifulSoup(html.content, 'xml')
     totalCount = soup.find('totalCount').get_text()
     return totalCount
 
-def get_public_application(date, count):
+def get_public_application(date, page):
+    
+    items = ['applicationNumber','applicationDate','openNumber','openDate','registerDate','registerNumber','publicationDate','publicationNumber','inventionTitle','registerStatus']
+    item_names = ['출원번호','출원일자','공개번호','공개일자','등록번호','등록일자','공고번호','공고일자','발명의명칭국문','등록사항']        
+    
+    url = count_url + '?openDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&numOfRows=99&pageNo=' + str(page) + '&ServiceKey=' + service_key
+    try:
+        html = requests.get(url)
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+        
+    soup = BeautifulSoup(html.content, 'xml')        
+    data = soup.find_all('item')
+    rawdata = []
+    if data:
+        for d in data:
+            if d:
+                res = {}
+                for (idx, key) in enumerate(items):
+                    res[item_names[idx]] = d.find(key).get_text()
 
+                rawdata.append(res)
 
-    # url = count_url + '?applicationDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&numOfRows=1&ServiceKey=' + service_key
-    # count 228 / 20
-    totalPage = (count / 20)
-
-    url = count_url + '?openDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&numOfRows=1&ServiceKey=' + service_key
-    html = requests.get(url)
-    soup = BeautifulSoup(html.content, 'xml')
-
-    items = ['applicationNumber','applicationDate','openNumber','openDate','registerDate','registerNumber','publicationDate','publicationNumber','inventionTitle']
-    item_names = ['출원번호','출원일자','공개번호','공개일자','등록번호','등록일자','공고번호','공고일자','발명의명칭(국문)']    
-    # totalCount = soup.find('totalCount').get_text()
-    # print(totalCount)
-    return
-
-# def crawl_public(date, count):
-def crawl_public(**kwargs):
-    keys = ['date','count']
-    for key in kwargs.keys():
-        if not key in keys:
-            print("get_list() has no parameter \'"+key+"\'")
-            return False
-    # crtfc_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&bgn_de=20200816&end_de=20201016&corp_cls=Y&page_no=1&page_count=100
-    params = {**{'ServiceKey':service_key},**kwargs}
-    items = ['applicationNumber','applicationDate','openNumber','openDate','registerDate','registerNumber','publicationDate','publicationNumber','','','','','','','','inventionTitle','','','registerStatus','','','','','','','']
-    item_names = ['출원번호','출원일자','공개번호','공개일자','등록번호','등록일자','공고번호','공고일자','원출원번호','원출원일자','번역문제출일자','국제출원번호','국제출원일자','국제공개번호','국제공개일','발명의명칭(국문)','발명의명칭(영문)','최종처분내용','등록사항','심사청구여부','심사청구일자','청구항수','변경청구항수','출원구분','기술양도희망유무','기술지도희망유무']
-    url = DART['dart_url'] + DART['oper_gong']
-    res = requests.get(url,params=params)
-    # print(res.text)
-    json_dict = json.loads(res.text)
-
-    data = []
-    if json_dict['status'] == "000":
-        for line in json_dict['list']:
-            data.append([])
-            for itm in items:
-                if itm in line.keys():
-                    data[-1].append(line[itm])
-                else: data[-1].append("")
-        df = pd.DataFrame(data,columns=item_names)
-        return json_dict['total_page'], df
-    elif json_dict['status'] == "013": # {"status":"013","message":"조회된 데이타가 없습니다."}
-        return 0, None
+        df = pd.DataFrame(rawdata) 
+        return df
     else:
-        return 0, df # TODO
-
-def crawl_biblo(**kwargs):
-    keys = ['applicationNumber']
-    for key in kwargs.keys():
-        if not key in keys:
-            print("get_list() has no parameter \'"+key+"\'")
-            return False
-    # crtfc_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&bgn_de=20200816&end_de=20201016&corp_cls=Y&page_no=1&page_count=100
-    params = {**{'ServiceKey':service_key},**kwargs}
-    items = ['applicationNumber','applicationDate','openNumber','openDate','registerDate','registerNumber','publicationDate','publicationNumber','originalApplicationNumber','originalApplicationDate','translationSubmitDate','internationalApplicationNumber','internationalApplicationDate','internationOpenNumberer','internationOpenDate','inventionTitle','inventionTitleEng','finalDisposal','registerStatus','originalExaminationRequestFlag','originalExaminationRequestDate','claimCount','','applicationFlag','','']
-    item_names = ['출원번호','출원일자','공개번호','공개일자','등록번호','등록일자','공고번호','공고일자','원출원번호','원출원일자','번역문제출일자','국제출원번호','국제출원일자','국제공개번호','국제공개일','발명의명칭(국문)','발명의명칭(영문)','최종처분내용','등록사항','심사청구여부','심사청구일자','청구항수','변경청구항수','출원구분','기술양도희망유무','기술지도희망유무']
-
-    # http://plus.kipris.or.kr/kipo-api/kipi/patUtiModInfoSearchSevice/getBibliographyDetailInfoSearch?applicationNumber=1020050050026&ServiceKey=서비스키
-    url = DART['dart_url'] + DART['oper_gong']
-    res = requests.get(url,params=params)
-    # print(res.text)
-    json_dict = json.loads(res.text)
-
-    data = []
-    if json_dict['status'] == "000":
-        for line in json_dict['list']:
-            data.append([])
-            for itm in items:
-                if itm in line.keys():
-                    data[-1].append(line[itm])
-                else: data[-1].append("")
-        df = pd.DataFrame(data,columns=item_names)
-        return json_dict['total_page'], df
-    elif json_dict['status'] == "013": # {"status":"013","message":"조회된 데이타가 없습니다."}
-        return 0, None
-    else:
-        return 0, df # TODO
+        return pd.DataFrame([]) 
 
 def main_def():
     """ 메인 def """
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', type=int, default=0, help="What is the start number?")
     parser.add_argument('--end', type=int, default=0, help="What is the end number?")
-    parser.add_argument('--clear', type=str2bool, nargs='?', const=True, default=False, help='Should I truncate the Table before execution?')
-    parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=False, help='Do you want to crawl the entire company regardless of start, end number')          
+    parser.add_argument('--compare', type=str2bool, nargs='?', const=True, default=False, help='Do you check db and total number after crawling?')
+
+    # parser.add_argument('--clear', type=str2bool, nargs='?', const=True, default=False, help='Should I truncate the Table before execution?')
+    # parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=False, help='Do you want to crawl the entire company regardless of start, end number')          
 
                        
     args = parser.parse_args()
 
     start = args.start
     end = args.end
-    clear = args.clear
-    entire = args.entire
+    compare = args.compare
+    # clear = args.clear
+    # entire = args.entire
 
 
     data = str(start)
@@ -186,11 +186,41 @@ def main_def():
         api_count = get_api_date_count(my_date)
         text = 'db : ' + str(db_count) + ' api : ' + str(api_count)
         if int(db_count) >= int(api_count): # db의 출원일자 cnt와 api의 출원일자 cnt가 같으면 pass
-            print(str(my_date) + ".",  text, " : 자료 일치 통과")
+            print(f'{Fore.YELLOW}',str(my_date),".", text, f'{Style.RESET_ALL}')
             continue
         # 2019-08-13
-        get_public_application(my_date, api_count)
-        time.sleep(1)
+        # count 228 / 20
+        totalPage = int(int(api_count) / 99)
+
+        print(dt, '1 ~', totalPage+1, '- total:', f'{Fore.GREEN}' + api_count + f'{Style.RESET_ALL}')
+        for page in range(1, totalPage+1+1):
+            df = get_public_application(my_date, page)
+            if not df.empty:
+                engine = create_engine(db_connection_url)
+                df.to_sql(name='공개공보1_temp', con=engine, if_exists='replace')
+                # note : need CREATE EXTENSION pgcrypto; psql >=12 , when using gen_random_uuid (),
+                with engine.begin() as cn:
+                    sql = """INSERT INTO "공개공보1" (출원번호,출원일자,공개번호,공개일자,등록번호,등록일자,공고번호,공고일자,"발명의명칭(국문)",등록사항)
+                                SELECT t.출원번호, t.출원일자, t.공개번호, t.공개일자, t.등록번호, t.등록일자, t.공고번호, t.공고일자, t.발명의명칭국문, t.등록사항 
+                                FROM 공개공보1_temp t
+                                WHERE NOT EXISTS 
+                                    (SELECT 1 FROM "공개공보1" f
+                                    WHERE t.출원번호 = f.출원번호)"""
+                    cn.execute(sql)                 
+            else:
+                print(f'{Fore.BLUE}' + str(dt) + f'{Style.RESET_ALL}', page, f'{Fore.RED}error{Style.RESET_ALL}')
+                record_log(
+                    "{0}. {1} / {2} - total: {3} --- {4}".format(
+                    str(dt),
+                    str(page),
+                    str(totalPage+1), 
+                    str(api_count),
+                    time.strftime('%H:%M', time.localtime(time.time())), 
+                    )
+                )
+            time.sleep(1)
+            
+        time.sleep(3)
         # memory usage check
         memoryUse = psutil.virtual_memory()[2] 
 
@@ -207,6 +237,14 @@ def main_def():
     print('----------------------')
     print('done')
 
+    if compare:
+        msg = 'db : '
+        for dt in daterange(start_dt, end_dt):
+            my_date = dt.strftime("%Y%m%d")  
+            db_count = get_db_date_count(my_date, table="공개공보1")
+            if db_count > 0 :
+                msg += str(my_date) + ': ' + f'{Fore.GREEN}' + str(db_count) + f'{Style.RESET_ALL}' + ' , '
+    print(msg)
 
 if __name__ == "__main__":
     sys.setrecursionlimit(5000)
