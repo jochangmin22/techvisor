@@ -122,6 +122,7 @@ INSTALLED_APPS = [
     "abroad",
     "users",
     "company",
+    "bill",
     # "anymail",
     # "thsrs",
     # "applicant",
