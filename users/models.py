@@ -24,7 +24,7 @@ class users(models.Model):
         db_table = '"users"'
 
 #   @OneToOne(type => UserProfile, profile => profile.user)
-        
+
 class user_profiles(models.Model):
     objects = models.Manager()
     id = models.UUIDField(
@@ -111,5 +111,3 @@ class admin_users(models.Model):
 
     class Meta:
         db_table = '"admin_users"' 
-
- 
