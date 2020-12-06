@@ -212,7 +212,7 @@ empty_dict = {
     '적(1)PER*EPS': 0,
     '적(2)ROE*EPS': 0,
     '적(3)EPS*10': 0,
-    '적(4)s-lim': 0,
+    '적(4)s-rim': 0,
     '적(5)당기순이익*PER': 0,
     '적정가': 0,
     '종업원수': 0,
@@ -442,14 +442,14 @@ def calculate_stock_fair_value(r):
         sumCnt -= 1  
 
     try:
-        res['적(4)s-lim'] = res['기업가치(백만)']/ r['발행주식수(보통주)']*100000000 #100000000     #적정주가(4)s-lim
-        res['적(4)s-lim'] = int(res['적(4)s-lim'])
-        if res['적(4)s-lim'] < 0:
-            res['적(4)s-lim'] = 0
+        res['적(4)s-rim'] = res['기업가치(백만)']/ r['발행주식수(보통주)']*100000000 #100000000     #적정주가(4)s-rim
+        res['적(4)s-rim'] = int(res['적(4)s-rim'])
+        if res['적(4)s-rim'] < 0:
+            res['적(4)s-rim'] = 0
     except:
-         res['적(4)s-lim'] = 0
+         res['적(4)s-rim'] = 0
     finally:         
-        if res['적(4)s-lim'] == 0:
+        if res['적(4)s-rim'] == 0:
             sumCnt -= 1         
 
     try:
@@ -470,7 +470,7 @@ def calculate_stock_fair_value(r):
         res['추천매수가'] = 0
         
     try:
-        res['적정가'] = sum([res['적(1)PER*EPS'],res['적(2)ROE*EPS'],res['적(3)EPS*10'],res['적(4)s-lim'],res['적(5)당기순이익*PER']]) / sumCnt
+        res['적정가'] = sum([res['적(1)PER*EPS'],res['적(2)ROE*EPS'],res['적(3)EPS*10'],res['적(4)s-rim'],res['적(5)당기순이익*PER']]) / sumCnt
         res['적정가'] = int(res['적정가'])
         if res['적정가'] < 0:
             res['적정가'] = 0
@@ -496,7 +496,7 @@ def calculate_stock_fair_value(r):
         res['갭1'] = 0    
         
     try:
-        res['갭4'] = (1 - r['현재가'] / res['적(4)s-lim']) * 100    #1-현재가/적정가*100
+        res['갭4'] = (1 - r['현재가'] / res['적(4)s-rim']) * 100    #1-현재가/적정가*100
         res['갭4'] = str2round(res['갭4'],0)
     except:
         res['갭1'] = 0    

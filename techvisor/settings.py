@@ -61,6 +61,7 @@ ALLOWED_HOSTS = [
     "14.32.114.185",
     "techvisor.co.kr",
     "v.techvisor.co.kr",
+    "v2.techvisor.co.kr",
     "52.79.161.225"
 ]
 
