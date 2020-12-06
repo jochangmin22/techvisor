@@ -84,7 +84,7 @@ empty_fair = {
   '적(4)s-rim': 0,
   '적(5)당기순이익*PER': 0,
   '추천매수가': 0,
-  '적정가': 0,
+  '적정가평균': 0,
   '갭1': 0,
   '갭2': 0,
   '갭3': 0,
@@ -125,7 +125,7 @@ empty_dict = {
     '적(3)EPS*10': 0,
     '적(4)s-rim': 0,
     '적(5)당기순이익*PER': 0,
-    '적정가': 0,
+    '적정가평균': 0,
     '종업원수': 0,
     '추천매수가': 0,
     '현금배당수익률': 0,
@@ -153,7 +153,53 @@ empty_info_dart = {
     '주소':''
 }
 
+def get_companies(request, mode="begin"):
+    mainKey = '¶all'
+    if mode == "begin":
+        try:
+            if context['raw']:
+                return JsonResponse(context['raw'], safe=False)
+        except:
+            pass  
+
+    with connection.cursor() as cursor:
+
+        whereAll = "1=1)"
+
+        query = 'SELECT * FROM listed_corp WHERE (' + \
+            whereAll
+
+        if mode == "query": # mode가 query면 여기서 분기
+            return query
+
+        cursor.execute(
+            "SET work_mem to '100MB';"
+            + query
+        )
+        row = dictfetchall(cursor)
+
+    if row:
+        for i in range(len(row)):
+            data = json.loads(row[i]['정보']) # move position each fields of 정보 json to main fields
+            row[i]['id'] = row[i]['종목코드']
+            for key, value in data.items():
+                row[i].update({key: value})
+
+            del row[i]['정보']
+
+    # redis 저장 {
+    new_context = {}
+    new_context['raw'] = row
+
+    cache.set(mainKey, new_context, CACHE_TTL)
+    # redis 저장 }
+
+    if mode == "begin":
+        return JsonResponse(row, safe=False)
+   
+
 def parse_companies(request, mode="begin"): # mode : begin, nlp, query
+
 
     mainKey, _, params, _ = get_redis_key(request)
 
@@ -263,7 +309,7 @@ def parse_financial_info(request):
         row = list(row)
         res = row[0]['재무'] if row else {}
         if row:
-            res.update({ 'stockFairValue': [ row[0]['정보']['적(1)PER*EPS'], row[0]['정보']['적(2)ROE*EPS'], row[0]['정보']['적(3)EPS*10'], row[0]['정보']['적(4)s-rim'], row[0]['정보']['적(5)당기순이익*PER'], row[0]['정보']['적정가'], row[0]['정보']['현재가']]})
+            res.update({ 'stockFairValue': [ row[0]['정보']['적(1)PER*EPS'], row[0]['정보']['적(2)ROE*EPS'], row[0]['정보']['적(3)EPS*10'], row[0]['정보']['적(4)s-rim'], row[0]['정보']['적(5)당기순이익*PER'], row[0]['정보']['적정가평균'], row[0]['정보']['전일종가']]})
 
     return JsonResponse(res, safe=False)    
 

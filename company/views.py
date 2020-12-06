@@ -10,11 +10,13 @@ from . import related_info
 # from . import company
 from . import finance
 from . import crawler
+from . import label
 # from . import company_info
 
 # companies 
 def get_companies(request):
-    return companies.parse_companies(request)
+    # return companies.parse_companies(request)
+    return companies.get_companies(request)
 
 def get_query(request):
     return companies.parse_query(request)
@@ -45,6 +47,12 @@ def get_stock_search_top(request):
 
 def get_stock_upper(request):
     return crawler.crawl_stock_upper()
+
+def get_labels(request):
+    return label.get_labels()
+
+def update_labels(request):
+    return label.update_labels(request)
 
 # company
 # def get_company(request, companyId=""):

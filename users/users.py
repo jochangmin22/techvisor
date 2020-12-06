@@ -254,8 +254,8 @@ def register(request):
                     'email': received_email,
                     'settings': {},
                     'shortcuts': [],
-                    'interest' : [],  # 여기에서 미리 빈 배열을 만들어 놔야 할 것 같음
-                    'label' : []
+                    'interests' : [],  # 여기에서 미리 빈 배열을 만들어 놔야 할 것 같음
+                    'labels' : []
                 },
                 'is_certified': True
             }
@@ -480,12 +480,12 @@ def update_user_interested(request):
     
         user_query = users.objects.get(id = received_id)
         [
-            user_query.data['interest'].append(received_company)
+            user_query.data['interests'].append(received_company)
             for received_company in received_company_list
-            if received_company not in user_query.data['interest']
+            if received_company not in user_query.data['interests']
         ]
         user_query.save()
-        return JsonResponse({ "company_list" : user_query.data['interest']}, status = 200, safe = False)
+        return JsonResponse({ "company_list" : user_query.data['interests']}, status = 200, safe = False)
         
 def update_user_uninterested(request):
     if request.method == 'POST':
@@ -494,116 +494,69 @@ def update_user_uninterested(request):
         received_company_list = data["company"]
 
         user_query = users.objects.get(id = received_id)
-        if user_query.data['interest']:
+        if user_query.data['interests']:
             [
-                user_query.data['interest'].remove(received_company)
+                user_query.data['interests'].remove(received_company)
                 for received_company in received_company_list
-                if received_company in user_query.data['interest']
+                if received_company in user_query.data['interests']
             ]
             user_query.save()
-        return JsonResponse({ "company_list" : user_query.data['interest']}, status = 200, safe = False)
+        return JsonResponse({ "company_list" : user_query.data['interests']}, status = 200, safe = False)
 
 def create_label(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_id = data["user"]
-        received_label= data["label"]
+        received_label= data["labels"]
 
         user_query = users.objects.get(id = received_id)
-        if received_label not in user_query.data['label'].keys():
-            user_query.data['label'][received_label] = []
+        if received_label not in user_query.data['labels'].keys():
+            user_query.data['labels'][received_label] = []
         user_query.save()
-        return JsonResponse({ "users_label" : user_query.data['label']}, status = 200, safe = False)
+        return JsonResponse({ "users_label" : user_query.data['labels']}, status = 200, safe = False)
 
 def remove_label(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_id = data["user"]
-        received_label = data["label"]
+        received_label = data["labels"]
 
         user_query = users.objects.get(id = received_id)
-        if received_label in user_query.data['label'].keys():
-            del(user_query.data['label'][received_label])
+        if received_label in user_query.data['labels'].keys():
+            del(user_query.data['labels'][received_label])
         user_query.save()
-        return JsonResponse({ "users_label" : user_query.data['label']}, status = 200, safe = False)
+        return JsonResponse({ "users_label" : user_query.data['labels']}, status = 200, safe = False)
 
 def user_labeling(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_id = data["user"]
-        received_label = data["label"]
+        received_label = data["labels"]
         received_item_list = data["items"]
 
         user_query = users.objects.get(id = received_id)
         [
-            user_query.data["label"][received_label].append(received_item)
+            user_query.data["labels"][received_label].append(received_item)
             for received_item in received_item_list
-            if received_item not in user_query.data["label"][received_label]
+            if received_item not in user_query.data["labels"][received_label]
         ]
         user_query.save()
-        return JsonResponse({ "user_labeling_list" : user_query.data['label']}, status = 200, safe = False)
+        return JsonResponse({ "user_labeling_list" : user_query.data['labels']}, status = 200, safe = False)
         
 def user_remove_labeling(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_id = data["user"]
-        received_label = data["label"]
+        received_label = data["labels"]
         received_item_list = data["items"]
 
         user_query = users.objects.get(id = received_id)
-        if user_query.data['label'][received_label]:
+        if user_query.data['labels'][received_label]:
             [
-                user_query.data['label'][received_label].remove(received_item)
+                user_query.data['labels'][received_label].remove(received_item)
                 for received_item in received_item_list
-                if received_item in user_query.data['label'][received_label]
+                if received_item in user_query.data['labels'][received_label]
             ]
             user_query.save()
-        return JsonResponse({ "user_labeling_list" : user_query.data['label']}, status = 200, safe = False)
-
-# def generate_user_token(id):
-#     # save db
-#     newData = {
-#         'fk_user_id' : id
-#     }
-#     authTokens = auth_tokens.objects.create(**newData)
-#     # authTokens=auth_tokens.objects.filter(fk_user_id=id)
-#     # authTokens.update(**newData)
-#     # row = list(authTokens.values())
-#     # authTokensData = row[0] if row else {}
-
-#     # newUid = str(uuid.uuid4())
-#     # newToken = {
-#     #     'id': newUid,
-#     #     'fk_user_id': id,
-#     # }
-#     # return JsonResponse(newToken,safe=False)
-#     # auth_tokens.objects.create(**newToken)
-
-#     payload = {
-#         'user_id': str(id),
-#         'token_id': str(authTokens.id),
-#         'sub': 'refresh_token',
-#         'iat': now,
-#         'exp': now + datetime.timedelta(days=expiresIn)
-#     }
-#     refreshToken = jwt.encode(payload, secret_key , algorithm=algorithm)
-
-#     payload = {
-#         'user_id': str(id),
-#         'sub': 'access_token',
-#         'iat': now,
-#         'exp': now + datetime.timedelta(days=verifyExpiresIn)        
-#     }    
-#     accessToken = jwt.encode(payload, secret_key , algorithm=algorithm)
-#     # return JsonResponse({ refreshToken, accessToken},safe=False)
-#     return { 'accessToken' : accessToken.decode('UTF-8'), 'refreshToken' : refreshToken.decode('UTF-8') }
-#     # return refreshToken
-
-# def refresh_user_token(tokenId: string, refreshTokenExp: number, originalRefreshToken: string):
-#     return { refreshToken, accessToken}
-
-# def dictfetchall(cursor):
-#     "Return all rows from a cursor as a dict"
-#     columns = [col[0] for col in cursor.description]
-#     return [dict(zip(columns, row)) for row in cursor.fetchall()]
-  
+        return JsonResponse({ "user_labeling_list" : user_query.data['labels']}, status = 200, safe = False)
+        

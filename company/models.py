@@ -55,7 +55,6 @@ class mdcin_clinc_test_info(models.Model):
     class Meta:
         db_table = '"mdcin_clinc_test_info"'    
 
-
 class nice_corp(models.Model):
     objects = models.Manager()
     사업자등록번호 = models.CharField(max_length=12, primary_key = True)

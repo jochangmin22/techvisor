@@ -8,6 +8,8 @@ from datetime import date, timedelta
 import psycopg2
 import psutil
 
+
+
 DATABASES = {
     "default": {
         "ENGINE": "postgresql",
@@ -81,8 +83,8 @@ def get_public_application(date, count):
 
     # url = count_url + '?applicationDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&numOfRows=1&ServiceKey=' + service_key
     # count 228 / 20
-    totalPage = (count / 20)
-
+    totalPage = int(count / 20)
+    
     url = count_url + '?openDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&numOfRows=1&ServiceKey=' + service_key
     html = requests.get(url)
     soup = BeautifulSoup(html.content, 'xml')
