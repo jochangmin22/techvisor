@@ -1,9 +1,9 @@
 from django.contrib import admin
-from users.models import users, user_profiles, auth_tokens, email_auth, social_accounts, admin_users 
+from users.models import Users, User_profiles, Auth_tokens, Email_auth, Social_accounts, Admin_users 
 
-admin.site.register(users)
-admin.site.register(user_profiles)
-admin.site.register(auth_tokens)
-admin.site.register(email_auth)
-admin.site.register(social_accounts)
-admin.site.register(admin_users)
+admin.site.register(Users)
+admin.site.register(User_profiles)
+admin.site.register(Auth_tokens)
+admin.site.register(Email_auth)
+admin.site.register(Social_accounts)
+admin.site.register(Admin_users)

@@ -3,7 +3,7 @@ import uuid
 
 # Create your models here.
 
-class stock_quotes(models.Model):
+class Stock_quotes(models.Model):
     objects = models.Manager()
     # id = models.UUIDField(
     #     primary_key = True,
@@ -23,7 +23,7 @@ class stock_quotes(models.Model):
         db_table = '"stock_quotes"'
         indexes = [models.Index(fields=['stock_code', 'price_date'])]
 
-class financial_statements(models.Model):
+class Financial_statements(models.Model):
     objects = models.Manager()
     # id = models.UUIDField(
     #     primary_key = True,
@@ -37,7 +37,7 @@ class financial_statements(models.Model):
     class Meta:
         db_table = '"financial_statements"'  
 
-class mdcin_clinc_test_info(models.Model):
+class Mdcin_clinc_test_info(models.Model):
     objects = models.Manager()
     id = models.UUIDField(
         primary_key = True,
@@ -55,7 +55,7 @@ class mdcin_clinc_test_info(models.Model):
     class Meta:
         db_table = '"mdcin_clinc_test_info"'    
 
-class nice_corp(models.Model):
+class Nice_corp(models.Model):
     objects = models.Manager()
     사업자등록번호 = models.CharField(max_length=12, primary_key = True)
     업체명 = models.CharField(max_length=50)
@@ -89,7 +89,7 @@ class nice_corp(models.Model):
     class Meta:
         db_table = '"nice_corp"'
 
-class disclosure_report(models.Model):
+class Disclosure_report(models.Model):
     objects = models.Manager()
     법인구분 = models.CharField(max_length=10, null=True)
     종목명 = models.CharField(max_length=255)
@@ -102,6 +102,7 @@ class disclosure_report(models.Model):
     비고 = models.CharField(max_length=255, null=True)
 
     class Meta:
-        db_table = '"disclosure_report"'            
+        db_table = '"Disclosure_report"'            
+       
 
 # primary_key가 있어야 id가 생성안됨

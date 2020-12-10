@@ -2,7 +2,7 @@ from django.db import models
 import uuid
 
 # Create your models here.
-class users(models.Model):
+class Users(models.Model):
     objects = models.Manager()
     id = models.UUIDField(
         primary_key = True,
@@ -22,10 +22,11 @@ class users(models.Model):
 
     class Meta:
         db_table = '"users"'
-
+        verbose_name_plural = "users"
+        
 #   @OneToOne(type => UserProfile, profile => profile.user)
 
-class user_profiles(models.Model):
+class User_profiles(models.Model):
     objects = models.Manager()
     id = models.UUIDField(
         primary_key=True,
@@ -38,7 +39,7 @@ class user_profiles(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now_add=True)
     user = models.OneToOneField(
-        users,
+        Users,
         on_delete=models.CASCADE,
         null=True
     )    
@@ -48,8 +49,9 @@ class user_profiles(models.Model):
     
     class Meta:
         db_table = '"user_profiles"'
+        verbose_name_plural = "user_profiles"
 
-class auth_tokens(models.Model):
+class Auth_tokens(models.Model):
     objects = models.Manager()
     id = models.UUIDField(
         primary_key = True,
@@ -59,13 +61,13 @@ class auth_tokens(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now_add=True)
     diabled = models.BooleanField(default=False)
-    user = models.ForeignKey(users, on_delete=models.CASCADE,null=True)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE,null=True)
 
     class Meta:
         db_table = '"auth_tokens"'
-    
+        verbose_name_plural = "auth_tokens"
 
-class email_auth(models.Model):
+class Email_auth(models.Model):
     objects = models.Manager()
     id = models.UUIDField(
         primary_key = True,
@@ -80,8 +82,9 @@ class email_auth(models.Model):
 
     class Meta:
         db_table = '"email_auth"'    
+        verbose_name_plural = "email_auth"
 
-class social_accounts(models.Model):
+class Social_accounts(models.Model):
     objects = models.Manager()
     id = models.UUIDField(
         primary_key=True,
@@ -97,8 +100,9 @@ class social_accounts(models.Model):
 
     class Meta:
         db_table = '"social_accounts"'     
+        verbose_name_plural = "social_accounts"
 
-class admin_users(models.Model):
+class Admin_users(models.Model):
     objects = models.Manager()
     id = models.UUIDField(
         primary_key=True,
@@ -111,3 +115,4 @@ class admin_users(models.Model):
 
     class Meta:
         db_table = '"admin_users"' 
+        verbose_name_plural = "admin_users"

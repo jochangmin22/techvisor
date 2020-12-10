@@ -28,8 +28,8 @@ import json
 
 from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc, like_parse, str2int, str2round
 from .crawler import crawl_stock
-from .models import nice_corp, stock_quotes, mdcin_clinc_test_info, financial_statements
-from search.models import listed_corp, disclosure
+from .models import Nice_corp, Stock_quotes, Mdcin_clinc_test_info, Financial_statements
+from search.models import Listed_corp, Disclosure
 
 # caching with redis
 from django.core.cache import cache
@@ -155,6 +155,7 @@ empty_info_dart = {
 
 def get_companies(request, mode="begin"):
     mainKey = '¶all'
+    context = cache.get(mainKey)
     if mode == "begin":
         try:
             if context['raw']:
@@ -300,12 +301,12 @@ def parse_financial_info(request):
         # crawl current financial info
         # financial_crawler(stockCode)  # skip for faster page loading
 
-        isExist = listed_corp.objects.filter(종목코드=stockCode).exists()
+        isExist = Listed_corp.objects.filter(종목코드=stockCode).exists()
         if not isExist:
             return JsonResponse([], safe=False)
             # return HttpResponse('Not Found', status=404)
 
-        row = listed_corp.objects.filter(종목코드=stockCode).values()
+        row = Listed_corp.objects.filter(종목코드=stockCode).values()
         row = list(row)
         res = row[0]['재무'] if row else {}
         if row:
@@ -346,11 +347,11 @@ def parse_stock(request):
             range_from = temp.strftime('%Y-%m-%d')
 
     
-            isExist = stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today]).exists()
+            isExist = Stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today]).exists()
             if not isExist:
                 return HttpResponse('Not Found', status=404)
 
-            stockQuotes = stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today])
+            stockQuotes = Stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today])
 
             myDate = list(stockQuotes.values_list('price_date', flat=True).order_by('price_date'))
             myStock = list(stockQuotes.values_list('stock', flat=True).order_by('price_date'))
@@ -362,7 +363,7 @@ def parse_stock(request):
             return HttpResponse() # 500    
        
 def get_corpCode(stockCode):
-    disc = disclosure.objects.filter(stock_code=stockCode)
+    disc = Disclosure.objects.filter(stock_code=stockCode)
     if disc.exists():
         rows = list(disc.values())
         row = rows[0]
@@ -371,7 +372,7 @@ def get_corpCode(stockCode):
         return None  
              
 def crawl_dart(corpCode):
-    rows = financial_statements.objects.filter(corp_code=corpCode)
+    rows = Financial_statements.objects.filter(corp_code=corpCode)
     if rows.exists():
         row = rows.values()
         row = list(row)
@@ -426,9 +427,9 @@ def crawl_dart(corpCode):
     # isMatchToday = True if lastRecordDate and lastRecordDate_obj.date() == newDate_obj.date() else False
 
     # if not isMatchToday:
-    financial_statements.objects.create(**newDart)
+    Financial_statements.objects.create(**newDart)
     # else:                            
-        # financial_statements.objects.filter(corp_code=corpCode).update(**newDart)
+        # Financial_statements.objects.filter(corp_code=corpCode).update(**newDart)
 
 
 
@@ -507,7 +508,7 @@ def crawl_naver(stock_code):
     market_cap = td2.strip()
     
     # If there is data in db, fetch it or continue crawling
-    listedCorp = listed_corp.objects.get(종목코드=stock_code)
+    listedCorp = Listed_corp.objects.get(종목코드=stock_code)
     if listedCorp.정보['당기순이익'] != '':
         res = listedCorp.정보
         res.update({
@@ -600,7 +601,7 @@ def crawl_naver(stock_code):
     })
 
     # save data in db if necessary
-    # listedCorp = listed_corp.objects.get(종목코드=stock_code)
+    # listedCorp = Listed_corp.objects.get(종목코드=stock_code)
     listedCorp.정보 = res[0]
     listedCorp.save(update_fields=['정보'])
 

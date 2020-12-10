@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 
-class disclosure(models.Model):
+class Disclosure(models.Model):
     objects = models.Manager()
     corp_code = models.CharField(max_length=10, primary_key = True)
     corp_name = models.CharField(max_length=255)
@@ -12,7 +12,7 @@ class disclosure(models.Model):
     class Meta:
         db_table = '"disclosure"'
 
-class listed_corp(models.Model):
+class Listed_corp(models.Model):
     objects = models.Manager()
     회사명 = models.CharField(max_length=100, primary_key = True)
     종목코드 = models.CharField(max_length=10, null=True)
@@ -28,4 +28,3 @@ class listed_corp(models.Model):
     
     class Meta:
         db_table = '"listed_corp"'
-

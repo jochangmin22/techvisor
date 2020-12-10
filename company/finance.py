@@ -1,5 +1,5 @@
-from .models import stock_quotes, financial_statements
-from search.models import listed_corp
+from .models import Stock_quotes, Financial_statements
+from search.models import Listed_corp
 
 from django.db import connection
 from django.http import JsonResponse
@@ -87,11 +87,11 @@ def parse_stock(request):
             range_from = temp.strftime('%Y-%m-%d')
 
     
-            isExist = stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today]).exists()
+            isExist = Stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today]).exists()
             if not isExist:
                 return HttpResponse('Not Found', status=404)
 
-            stockQuotes = stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today])
+            stockQuotes = Stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today])
 
             myDate = list(stockQuotes.values_list('price_date', flat=True).order_by('price_date'))
             myStock = list(stockQuotes.values_list('stock', flat=True).order_by('price_date'))
@@ -106,7 +106,7 @@ def crawl_stock(request):
     ''' 
     page 1 부터 crawling -> if exist at db ? 
               yes -> return
-              no -> stock_quotes.objects.create(**newStock)
+              no -> Stock_quotes.objects.create(**newStock)
     '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -114,7 +114,7 @@ def crawl_stock(request):
 
         # exist ? {
         try:
-            stockQuotes = stock_quotes.objects.filter(stock_code=kiscode).latest('price_date')
+            stockQuotes = Stock_quotes.objects.filter(stock_code=kiscode).latest('price_date')
             lastRecordDate = stockQuotes.price_date if stockQuotes else None
         except:
             lastRecordDate = None
@@ -184,10 +184,10 @@ def crawl_stock(request):
                         isMatchToday = True if lastRecordDate and lastRecordDate_obj.date() == newDate_obj.date() else False
 
                         if not isMatchToday:
-                            stock_quotes.objects.create(**newStock)
+                            Stock_quotes.objects.create(**newStock)
                         else:                            
-                            stock_quotes.objects.filter(stock_code=kiscode, price_date=newDate).update(**newStock)
-                        # stock_quotes.objects.update_or_create(**newStock)
+                            Stock_quotes.objects.filter(stock_code=kiscode, price_date=newDate).update(**newStock)
+                        # Stock_quotes.objects.update_or_create(**newStock)
                     else:
                         isCrawlBreak = True    
     return
@@ -199,7 +199,7 @@ def crawl_dart(request):
         corp_code = data["corp_code"]
         # exist ? {
         try:
-            financial = financial_statements.objects.filter(stock_code=kiscode)
+            financial = Financial_statements.objects.filter(stock_code=kiscode)
             lastRecordDate = None
             if financial.exists():
                 rows = list(financial.values())
@@ -346,7 +346,7 @@ def crawl_naver(stock_code):
     market_cap = td2.strip()
     
     # If there is data in db, fetch it or continue crawling
-    listedCorp = listed_corp.objects.get(종목코드=stock_code)
+    listedCorp = Listed_corp.objects.get(종목코드=stock_code)
     if listedCorp.정보['당기순이익'] != '':
         res = listedCorp.정보
         res.update({
@@ -439,7 +439,7 @@ def crawl_naver(stock_code):
     })
 
     # save data in db if necessary
-    # listedCorp = listed_corp.objects.get(종목코드=stock_code)
+    # listedCorp = Listed_corp.objects.get(종목코드=stock_code)
     listedCorp.정보 = res[0]
     listedCorp.save(update_fields=['정보'])
 

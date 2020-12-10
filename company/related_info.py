@@ -10,8 +10,8 @@ from datetime import datetime
 from .utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase
 from .crawler import update_today_disclosure_report, update_today_crawl_mdcline
 
-from .models import mdcin_clinc_test_info, disclosure_report
-from search.models import listed_corp, disclosure
+from .models import Mdcin_clinc_test_info, Disclosure_report
+from search.models import Listed_corp, Disclosure
 
 
 
@@ -33,13 +33,13 @@ def clinic_test(request):
             update_today_crawl_mdcline()
 
         if corpName:
-            isExist = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()
+            isExist = Mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()
             if not isExist:
                 return JsonResponse([], safe=False)
 
-            rows = mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).order_by('-승인일').values()
+            rows = Mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).order_by('-승인일').values()
         else:
-            rows = mdcin_clinc_test_info.objects.all().order_by('-승인일')[:100].values()            
+            rows = Mdcin_clinc_test_info.objects.all().order_by('-승인일')[:100].values()            
 
         rows = list(rows)
         res = [dict(row, **{
@@ -65,14 +65,14 @@ def get_disclosure_report(request):
             update_today_disclosure_report()
 
         if corpName:
-            isExist = disclosure_report.objects.filter(종목명__contains=corpName).exists()
+            isExist = Disclosure_report.objects.filter(종목명__contains=corpName).exists()
             if not isExist:
                 return JsonResponse([], safe=False)
 
-            rows = disclosure_report.objects.filter(종목명__contains=corpName).order_by('-접수번호').values()
+            rows = Disclosure_report.objects.filter(종목명__contains=corpName).order_by('-접수번호').values()
         else:
-            # rows = disclosure_report.objects.all().order_by('-접수일자')[:100].values()            
-            rows = disclosure_report.objects.exclude(종목코드__exact='').order_by('-접수번호')[:100].values()            
+            # rows = Disclosure_report.objects.all().order_by('-접수일자')[:100].values()            
+            rows = Disclosure_report.objects.exclude(종목코드__exact='').order_by('-접수번호')[:100].values()            
 
         rows = list(rows)
         res = [dict(row, **{

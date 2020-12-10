@@ -202,7 +202,7 @@ def crawl_stock(no, stockCode):
         # exist ? {
 
         # try:
-        #     stockQuotes = stock_quotes.objects.filter(stock_code=stockCode).latest('price_date')
+        #     stockQuotes = Stock_quotes.objects.filter(stock_code=stockCode).latest('price_date')
         #     maxRecordDate = stockQuotes.price_date if stockQuotes else None
         # except:
         #     maxRecordDate = None

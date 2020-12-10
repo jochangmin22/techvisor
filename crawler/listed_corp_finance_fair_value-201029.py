@@ -310,7 +310,7 @@ def qPrice(df):
     # 최근분기만 사용
     jbun = df[jcols[3]].fillna(0).to_list() # 4번째 cols
   
-    return {'영업이익(Y/Y)' : str2round(jbun[3]),'당기순이익(Y/Y)' : str2round(jbun[8])}
+    return {'영업이익(Y/Y)' : str2round(jbun[3]),'당기순이익(Y/Y)' : str2round(jbun[8]), '영업이익(Q/Q)' : str2round(jbun[4]),'당기순이익(Q/Q)' : str2round(jbun[9])}
 
 def stockVolume(df):
     ''' df[1] : '거래량','시가총액(억)' '''
@@ -464,22 +464,10 @@ def current_assets_Total_liabilities(df):
     ''' 유동자산, 부채총계 '''
     r = {}
 
-    # I 컬럼이 안읽힐경우 차례대로 포기
-    try:
-        df.columns = ['A','B','C','D','E','F'][:len(df.columns)]
-    except:
-        pass
-    try:
-        df.columns = ['A','B','C','D','E','F','G'][:len(df.columns)]
-    except:
-        pass
-    try:
-        df.columns = ['A','B','C','D','E','F','G','H'][:len(df.columns)]
-    except:
-        pass
     try:        
         df.columns = ['A','B','C','D','E','F','G','H','I'][:len(df.columns)]
     except:
+        print(len(df.columns))
         pass        
 
     r['유동자산'] = 0
@@ -650,10 +638,7 @@ def calculate_stock_fair_value(r):
         res['NCAV(%)'] = round(res['NCAV(%)'],2)
     except:        
         res['NCAV(%)'] = 0
-    print('유동자산',r['유동자산'])        
-    print('부채총계',r['부채총계'])        
-    print('NCAV(억)', res['NCAV(억)'])
-    print('NCAV(%)', res['NCAV(%)'])
+
     return res
 
 def financial_crawler(code):
@@ -720,14 +705,30 @@ def financial_crawler(code):
     temp_res, second_res = financialSummary(df[12], res['PER'])
     res.update(temp_res)
 
-    browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[2]')[0].click() # "기업개요" 클릭하기
+    wait = WebDriverWait(browser, 10)
+
+    parentTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="header-menu"]/div[1]/dl/dt[2]')))
+    parentTab.click()
+    # browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[2]')[0].click() # "기업개요" 클릭하기
+    wait.until(EC.presence_of_element_located((By.XPATH,'//*[@id="cTB201"]')))
     df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
     res.update(employee_listingdate_research(df))
 
-    browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[3]')[0].click() # "재무분석" 클릭하기
-    browser.find_elements_by_xpath('//*[@id="rpt_tab2"]')[0].click() # "재무분석" > "재무상태표" 클릭
+    parentTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="header-menu"]/div[1]/dl/dt[3]')))
+    parentTab.click()
+    # browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[3]')[0].click() # "재무분석" 클릭하기
+    # browser.find_elements_by_xpath('//*[@id="rpt_tab2"]')[0].click() # "재무분석" > "재무상태표" 클릭
+    childTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="rpt_tab2"]'))) # "재무분석" > "재무상태표" 클릭
+    childTab.click()
+    # wait.until(EC.visibility_of_element_located((By.XPATH,'//*[@summary="IFRS연결 연간 재무 정보를 제공합니다."]')))
+    # wait.until(EC.presence_of_element_located((By.XPATH,'//*[@id="chart2"]')))
+    # wait.until(EC.visibility_of_element_located(By.xpath("//input[@id='text3']")));
     df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
-    res.update(current_assets_Total_liabilities(df[5]))
+    try:
+        res.update(current_assets_Total_liabilities(df[5]))
+    except:
+        print('table length',len(df))
+        print(df)
 
     res.update(calculate_stock_fair_value(res))
 
