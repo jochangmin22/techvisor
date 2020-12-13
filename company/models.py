@@ -102,7 +102,7 @@ class Disclosure_report(models.Model):
     비고 = models.CharField(max_length=255, null=True)
 
     class Meta:
-        db_table = '"Disclosure_report"'            
+        db_table = '"disclosure_report"'            
        
 
 # primary_key가 있어야 id가 생성안됨

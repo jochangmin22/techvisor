@@ -152,6 +152,7 @@ def parse_searchs(request, mode="begin"):
 
         # npl and mtx parse
         for i in range(len(row)):
+            row[i]['id'] = row[i]['출원번호'] # add id for FE's ids
             raw_abstract += row[i]["요약token"] if row[i]["요약token"] else "" + " "
             raw_claims += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
 

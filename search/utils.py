@@ -13,8 +13,11 @@ def get_redis_key(request):
         subParams = request.GET.get('subParams','')
         params = json.loads(params)
         subParams = json.loads(subParams)
-
-    searchNum = params['searchNum'] if hasattr(params, 'searchNum') else ''
+    try:
+        searchNum = params['searchNum']
+    except:
+        searchNum = ''        
+    # searchNum = params['searchNum'] if hasattr(params, 'searchNum') else ''
     mainKey = "¶".join(params.values()) if searchNum == '' else searchNum
 
     # one more key to be used for a separated from searchParams
@@ -41,7 +44,7 @@ def remove_tags(text):
 
 
 def remove_brackets(text):
-    return re.sub("[\(\[].*?[\)\]]", "", text)
+    return re.sub(r"[\(\[].*?[\)\]]", "", text)
 
 
 def remove_punc(text):

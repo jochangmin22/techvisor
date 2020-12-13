@@ -219,7 +219,7 @@ def crawl_stock_upper():
         # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
         mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
         mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
-        mydf['등락률'] = mydf['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
+        mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
 
         #remove null row
         # mydf = mydf[mydf.N != 0]
@@ -229,7 +229,7 @@ def crawl_stock_upper():
         mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
         
         res += mydf.to_dict('records')
-    # 상승
+    # 상승 - 기본탭 코스피
     df = pd.read_html(NAVER['stock_rise_url'], header=0, encoding = 'euc-kr')
     mydf = df[1]
     # 필요한 row, column만
@@ -239,7 +239,7 @@ def crawl_stock_upper():
     # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
     mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
     mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
-    mydf['등락률'] = mydf['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
+    mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
 
     #remove null row
     # mydf = mydf[mydf.N != 0]
@@ -248,7 +248,102 @@ def crawl_stock_upper():
     # add stockCode from model
     mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
     
-    res += mydf.to_dict('records')    
+    res += mydf.to_dict('records')
+
+    # 상승 - 코스닥
+    df = pd.read_html(NAVER['stock_rise_url']+ '?sosok=1', header=0, encoding = 'euc-kr')
+    mydf = df[1]
+    # 필요한 row, column만
+    mydf = mydf.iloc[0:30,[1,2,3,4,5,10]]
+
+    # convert values to numeric
+    # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+    mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
+    mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
+
+    #remove null row
+    # mydf = mydf[mydf.N != 0]
+    mydf = mydf[mydf.현재가 != 0]
+
+    # add stockCode from model
+    mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    res += mydf.to_dict('records')
+
+    res = sorted(res, key=lambda k : k["등락률"], reverse=True)
+
+
+    return JsonResponse(res, safe=False)    
+
+def crawl_stock_lower():
+    ''' 네이버 금융 > 국내증시 > 하한가  + 하락'''
+    res = []
+    # 하한가
+    df = pd.read_html(NAVER['stock_lower_url'], header=0, encoding = 'euc-kr')
+    for i in [1,2]: # 2dn,3rd table
+        mydf = df[i]
+        # 필요한 row, column만
+        # mydf = mydf.iloc[1:,0:11]
+        mydf = mydf.iloc[1:,[3,4,5,6,7,11]]
+
+        # convert values to numeric
+        # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+        mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+        mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
+        mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
+
+        #remove null row
+        # mydf = mydf[mydf.N != 0]
+        mydf = mydf[mydf.현재가 != 0]
+
+        # add stockCode from model
+        mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+        
+        res += mydf.to_dict('records')
+    # 하락 - 기본탭 코스피 
+    df = pd.read_html(NAVER['stock_fall_url'], header=0, encoding = 'euc-kr')
+    mydf = df[1]
+    # 필요한 row, column만
+    mydf = mydf.iloc[0:30,[1,2,3,4,5,10]]
+
+    # convert values to numeric
+    # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+    mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
+    mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
+
+    #remove null row
+    # mydf = mydf[mydf.N != 0]
+    mydf = mydf[mydf.현재가 != 0]
+
+    # add stockCode from model
+    mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    
+    res += mydf.to_dict('records')
+
+    # 하락 - 코스닥 
+    df = pd.read_html(NAVER['stock_fall_url'] + '?sosok=1', header=0, encoding = 'euc-kr')
+    mydf = df[1]
+    # 필요한 row, column만
+    mydf = mydf.iloc[0:30,[1,2,3,4,5,10]]
+
+    # convert values to numeric
+    # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+    mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
+    mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
+
+    #remove null row
+    # mydf = mydf[mydf.N != 0]
+    mydf = mydf[mydf.현재가 != 0]
+
+    # add stockCode from model
+    mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    mydf = mydf.sort_values(by='등락률', ascending=False)
+
+    res += mydf.to_dict('records') 
+    res = sorted(res, key=lambda k : k["등락률"])
+
     return JsonResponse(res, safe=False)    
 
 
@@ -395,7 +490,10 @@ def fundamental(df):
             r[name] = r[name].str.replace('원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
         except: # 원 없고 null
             r[name] = 0
-
+    # change name        
+    r['현금DPS(원)'] = r['현금DPS']
+    del r['현금DPS']
+    
     try:
         r['현금배당수익률'] = r['현금배당수익률'].str.replace('%', '').fillna(0).astype(float).to_list()[0]
     except:
@@ -537,7 +635,10 @@ def financialSummary(df, PER):
     # 재무 field
     # 형태 { "date" : ['2017/12','2018/12','2019/12','2019/12','2020/03','2020/06'], "dataset": [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]]}
 
-    financial_res = { "date" : cols, "dataset": []}
+    financial_res = { "dateY" : cols[:4], "dateQ": cols[4:], "valueY": [], "valueQ": []}
+    my_list = [[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0]]
+    y_list = [[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]
+    q_list = [[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]
     my_list = [[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0]]
 
     for (idx, name) in enumerate(['매출액','영업이익','당기순이익','부채비율','자본유보율','현금배당성향(%)']):
@@ -546,7 +647,13 @@ def financialSummary(df, PER):
         if name in ['부채비율','현금배당성향(%)']:
             my_list[idx] = df.loc[name,:].fillna(0).astype(float).to_list()
 
-    financial_res['dataset'] = my_list
+    # split half
+    for (idx, d) in enumerate(my_list):
+        y_list[idx] = d[:4]
+        q_list[idx] = d[4:]
+
+    financial_res['valueY'] = y_list
+    financial_res['valueQ'] = q_list
 
     return r, financial_res
 
@@ -888,7 +995,7 @@ empty_dict = {
     '적정가평균': 0,
     '종업원수': 0,
     '추천매수가': 0,
-    '현금DPS': 0,
+    '현금DPS(원)': 0,
     '현금배당수익률': 0,
     '전일종가': 0,    
     'BPS(원)': 0,    

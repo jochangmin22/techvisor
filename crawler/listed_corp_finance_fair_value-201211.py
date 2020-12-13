@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*- 
+
 from __future__ import print_function
 import argparse 
 
@@ -109,6 +111,25 @@ def backupAndEmptyTable():
             cursor.close()
             connection.close()
 
+
+def missingCrawlCheck():
+    try:
+        with connect() as connection:
+            with connection.cursor() as cursor:      
+                query ="select 종목코드 from listed_corp;"  
+                cursor.execute(query)
+                connection.commit()
+                row = dictfetchall(cursor)
+                return [d['종목코드']for d in row]
+    except (Exception, psycopg2.Error) as error :
+        if(connection):
+            print("Failed to backup and empty listed_corp table", error)
+
+    finally:
+        if(connection):
+            cursor.close()
+            connection.close()            
+
 def insertTable(no, kiscode, info, financial_res, name, upjong, product, listed_date, settlemonth, representive, homepage, area):
     # table = 'listed_corp'    
     info = json.dumps(info)
@@ -215,7 +236,7 @@ empty_dict = {
     '적정가평균': 0,
     '종업원수': 0,
     '추천매수가': 0,
-    '현금DPS': 0,
+    '현금DPS(원)': 0,
     '현금배당수익률': 0,
     '전일종가': 0,    
     'BPS(원)': 0,    
@@ -280,11 +301,15 @@ def fundamental(df):
             r[name] = r[name].str.replace('원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
         except: # 원 없고 null
             r[name] = 0
+    # change name        
+    r['현금DPS(원)'] = r['현금DPS']
+    del r['현금DPS']
+
     try:
         r['현금배당수익률'] = r['현금배당수익률'].str.replace('%', '').fillna(0).astype(float).to_list()[0]
     except:
         r['현금배당수익률'] = 0 # 숫자없고 %만 있는 경우
-
+    
     return r
 
 # def qPrice(df):
@@ -420,18 +445,26 @@ def financialSummary(df, PER):
 
 
     # 재무 field
-    # 형태 { "date" : ['2017/12','2018/12','2019/12','2019/12','2020/03','2020/06'], "dataset": [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]]}
+    # 형태 { "dateY" : ["2017/12", "2018/12", "2019/12", "2020/12"], "dateQ" : ["2020/03", "2020/06", "2020/09", "2020/12"], "valueY": [[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0]], "valueQ" : [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]]}
 
-    financial_res = { "date" : cols, "dataset": []}
+    financial_res = { "dateY" : cols[:4], "dateQ": cols[4:], "valueY": [], "valueQ": []}
     my_list = [[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0]]
-
+    y_list = [[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]
+    q_list = [[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]
+    
     for (idx, name) in enumerate(['매출액','영업이익','당기순이익','부채비율','자본유보율','현금배당성향(%)']):
-        if name in ['매출액','영업이익','당기순이익','자본유보율']:
+        if name in ['매출액','영업이익','당기순이익']:
             my_list[idx] = df.loc[name,:].fillna(0).astype(float).astype(int).to_list()
-        if name in ['부채비율','현금배당성향(%)']:
+        if name in ['부채비율','자본유보율','현금배당성향(%)']:
             my_list[idx] = df.loc[name,:].fillna(0).astype(float).to_list()
 
-    financial_res['dataset'] = my_list
+    # split half
+    for (idx, d) in enumerate(my_list):
+        y_list[idx] = d[:4]
+        q_list[idx] = d[4:]
+
+    financial_res['valueY'] = y_list
+    financial_res['valueQ'] = q_list
 
     return r, financial_res
 
@@ -451,7 +484,7 @@ def employee_listingdate_research(df):
         r['종업원수'] = df[1].loc[df[1]['C'] =='종업원수', 'D'].str.strip().str.split(r' \(').str[0].str.replace(',','').fillna(0).astype(int).to_list()[0]
     except: # 종업원수 null
         r['종업원수'] = 0
-        print('종업원수', df[1].columns)
+        # print('종업원수', df[1].columns)
     try:       
         r['연구개발비(연)'] = df[4]['연구개발비용지출총액'].fillna(0).astype(int).to_list()[0]
     except:        
@@ -707,23 +740,25 @@ def financial_crawler(code):
 
     wait = WebDriverWait(browser, 10)
 
-    parentTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="header-menu"]/div[1]/dl/dt[2]')))
+    parentTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="header-menu"]/div[1]/dl/dt[2]')), message='기업개요',)
     parentTab.click()
     # browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[2]')[0].click() # "기업개요" 클릭하기
-    wait.until(EC.presence_of_element_located((By.XPATH,'//*[@id="cTB201"]')))
+    wait.until(EC.presence_of_element_located((By.XPATH,'//*[@id="cTB201"]')), message='세부 기업개요 표',)
     df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
     res.update(employee_listingdate_research(df))
 
-    parentTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="header-menu"]/div[1]/dl/dt[3]')))
+    parentTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="header-menu"]/div[1]/dl/dt[3]')), message='재무분석',)
     parentTab.click()
     # browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[3]')[0].click() # "재무분석" 클릭하기
     # browser.find_elements_by_xpath('//*[@id="rpt_tab2"]')[0].click() # "재무분석" > "재무상태표" 클릭
-    childTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="rpt_tab2"]'))) # "재무분석" > "재무상태표" 클릭
+    childTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="rpt_tab2"]')), message='재무분석 > 재무상태표',) # "재무분석" > "재무상태표" 클릭
     childTab.click()
     # wait.until(EC.visibility_of_element_located((By.XPATH,'//*[@summary="IFRS연결 연간 재무 정보를 제공합니다."]')))
     # wait.until(EC.presence_of_element_located((By.XPATH,'//*[@id="chart2"]')))
     # wait.until(EC.visibility_of_element_located(By.xpath("//input[@id='text3']")));
+    # df = pd.read_html(browser.page_source, header=0, match="재무분석 리스트", encoding = 'euc-kr')
     df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
+
     try:
         res.update(current_assets_Total_liabilities(df[5]))
     except:
@@ -753,24 +788,24 @@ def main_def():
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', type=int, default=0, help="What is the start number?")
     parser.add_argument('--end', type=int, default=0, help="What is the end number?")
-    parser.add_argument('--clear', type=str2bool, nargs='?', const=True, default=False, help='Should I truncate the Table before execution?')
-    parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=False, help='Do you want to crawl the entire company regardless of start, end number')          
-
-                       
+    parser.add_argument('--initial', type=str2bool, nargs='?', const=True, default=True, help='Should I truncate the Table before execution?')
+    parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=True, help='Do you want to crawl the entire company regardless of start, end number')          
+    parser.add_argument('--update', type=str2bool, nargs='?', const=True, default=False, help='Update record even if it exists in db?')          
+     
     args = parser.parse_args()
 
     start = args.start
     end = args.end
-    clear = args.clear
+    initial = args.initial
     entire = args.entire
+    update = args.update
 
     # start_time = time.time()
 
     kindInfo = get_kind_stock_code()
     # print(kindInfo)
     # kindInfo = {'회사명' : 'DSR', '종목코드': '155660', '업종': '1차 비철금속 제조업', '주요제품' : '', '상장일': '', '결산월' : '', '대표자명': '', '홈페이지': '', '지역': ''}
-
-          
+           
     # threading.Timer(1, main_def(repeat_cnt)).start()
 
     if entire:
@@ -778,37 +813,59 @@ def main_def():
     else:
         rangeValue = range(start, end)
 
-    print('총 상장법인수 :', len(kindInfo))
-    print('실행건       :', len(rangeValue))        
-    print('실행소요예상 :', int(int(len(rangeValue)) * 1 / 60), '분')        
-
-    if clear:
+    dbStockCodeList = []
+    if initial:
         backupAndEmptyTable()
+    else: # finish only missing crawls
+        dbStockCodeList = missingCrawlCheck()
+
+
+    execCnt = len(rangeValue) if not entire or (entire and initial) else len(rangeValue) - len(dbStockCodeList)
+    now = datetime.now()
+    print('크롤시간 :', now.strftime("%Y.%m.%d %H:%M:%S"))
+    print('총 상장법인수 :', len(kindInfo))
+    print('실행건       :', execCnt)       
+    print('실행소요예상 :', int(int(execCnt) * 1.5 / 60), '분')        
+
     # for i in range(len(kindInfo)):
     # for i in range(0,50):
     for i in rangeValue:
         start_time = time.time()
         try:
             kiscode = kindInfo.종목코드.values[i].strip()
-            print(kiscode)
+            print(
+                "{0}. {1} ".format(
+                    str(i),
+                    str(kiscode),
+                ), end="", flush="True"
+            )             
         except:
             print('----------------------')
             print(str(i) + "번에 대한 종목코드가 없어서 종료합니다.")            
             print('done')
             break
+
+        if not update:
+            if kiscode in dbStockCodeList:
+                print("")
+                continue
+
         info, financial_res = financial_crawler(kiscode)
-        if existCheck(kiscode) != 0:
-            updateTable(i, kiscode, info, financial_res)
+
+        if update:
+            if existCheck(kiscode) != 0:
+                updateTable(i, kiscode, info, financial_res)
+            else:
+                insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])
         else:
-            insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])     
+            insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])
+                         
 
         # memory usage check
         memoryUse = psutil.virtual_memory()[2] 
 
         print(
-            "{0}. {1} {2} {3} success --- {4} 초 ---".format(
-                str(i),
-                str(kiscode),
+            "{0} {1} success --- {2} 초 ---".format(
                 time.strftime('%H:%M', time.localtime(time.time())), 
                 str(memoryUse)+'%',
                 round(time.time() - start_time,1)

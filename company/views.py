@@ -48,6 +48,9 @@ def get_stock_search_top(request):
 def get_stock_upper(request):
     return crawler.crawl_stock_upper()
 
+def get_stock_lower(request):
+    return crawler.crawl_stock_lower()
+
 def get_labels(request):
     return label.get_labels()
 

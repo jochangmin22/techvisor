@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*- 
 from __future__ import print_function
 import argparse 
 from bs4 import BeautifulSoup
@@ -58,15 +59,12 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
-# def connect():
-#     connection = psycopg2.connect(
-#         host="localhost", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"
-#     )
-#     return connection    
+ 
 
 def connect():
     connection = psycopg2.connect(
         host="localhost", database="dj11000", user="postgres", password="btw160302*", port="5432"
+        # host="localhost", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"        
     )
     return connection   
 
@@ -99,9 +97,8 @@ def get_db_appNo_list(appNo, startNo):
                 query = "select 출원번호 from 공개공보 WHERE 출원번호 > " + str(appNo) + " and (출원인코드1 <> 419980424971 or 출원인코드1 is null) ORDER BY 출원번호 ASC LIMIT " + str(startNo) + " OFFSET 0"      
                 cursor.execute(query)
                 connection.commit()
-                # rawdata = dictfetchall(cursor)
-                rawdata = cursor.fetchall()
-                return rawdata
+                row = dictfetchall(cursor)
+                return [d['출원번호']for d in row]
 
     except (Exception, psycopg2.Error) as error :
         if(connection):
@@ -113,12 +110,36 @@ def get_db_appNo_list(appNo, startNo):
             connection.close()
     return                     
 
+def family_cnt(appList):
+    res = []
+    try:
+        with connect() as connection:
+            with connection.cursor() as cursor:
+                for appNo in appList:
+                    # sql = "SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호  in (" + appListStr +")"             
+                    sql = "SELECT COUNT(*) cnt FROM (SELECT DISTINCT 패밀리국가코드 FROM 특허패밀리 where 출원번호 = $$" + str(appNo) + "$$) as TEMP"
+                    cursor.execute(sql)
+                    connection.commit()
+                    row = dictfetchall(cursor)
+                    res.append(row[0]['cnt'])
+                return res
+        
+    except (Exception, psycopg2.Error) as error:
+        print("2️⃣ Error in family cont check operation", error)
+        return None
 
-def get_db_count(appNoList, table = '특허실용심사피인용문헌1'):
+    finally:
+        # closing database connection.
+        if (connection):
+            cursor.close()
+            connection.close()
+
+
+def get_db_count(appNoList, table = '특허실용심사피인용문헌'):
     try:
         with connect() as connection:
             with connection.cursor() as cursor:      
-                query ="select count(출원번호) cnt from " + table + " where 출원번호 IN (" + str(appNoList) +");"  
+                query ="select count(피인용문헌번호) cnt from " + table + " where 피인용문헌번호 = ANY( " + appNoList +" );"  
                 cursor.execute(query)
                 connection.commit()
                 row = dictfetchall(cursor)
@@ -138,9 +159,9 @@ def get_citing(appNo):
     url = rest_url + '?standardCitationApplicationNumber=' + str(appNo) + '&accessKey=' + service_key
     items = ['ApplicationNumber','StandardCitationApplicationNumber','StandardStatusCode','StandardStatusCodeName','CitationLiteratureTypeCode','CitationLiteratureTypeCodeName']
     item_names = ['출원번호','피인용문헌번호','표준상태코드','표준상태코드명','피인용문헌구분코드','피인용문헌구분코드명']        
-    print(url)
     try:
-        html = requests.get(url)
+        # html = requests.get(url)
+        html = requests.get(url,headers={'Connection':'close'})
     except requests.exceptions.RequestException as e:
         print(
             "====== {0} error ======".format(
@@ -151,8 +172,8 @@ def get_citing(appNo):
         
     soup = BeautifulSoup(html.content, 'xml')        
     data = soup.find_all('citingInfo')
-    print(data)
     rawdata = []
+    # 피인용 있으면
     if data:
         for d in data:
             if d:
@@ -161,28 +182,27 @@ def get_citing(appNo):
                     res[item_names[idx]] = d.find(key).get_text()
 
                 rawdata.append(res)
-
-        df = pd.DataFrame(rawdata) 
-        return df
+        return rawdata
     else:
-        return pd.DataFrame([]) 
+        # 피인용 없는 건
+        return rawdata 
 
 def main_def(repeat_cnt = 0):
     """ 메인 def """
-    parser = argparse.ArgumentParser()
+    # parser = argparse.ArgumentParser()
     # parser.add_argument('--start', type=int, default=0, help="What is the start number?")
     # parser.add_argument('--end', type=int, default=0, help="What is the end number?")
-    parser.add_argument('--compare', type=str2bool, nargs='?', const=True, default=True, help='Do you check db and total number after crawling?')
+    # parser.add_argument('--compare', type=str2bool, nargs='?', const=True, default=False, help='Do you check db and total number after crawling?')
 
     # parser.add_argument('--clear', type=str2bool, nargs='?', const=True, default=False, help='Should I truncate the Table before execution?')
     # parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=False, help='Do you want to crawl the entire company regardless of start, end number')          
 
                        
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
     # start = args.start
     # end = args.end
-    compare = args.compare
+    # compare = args.compare
     # clear = args.clear
     # entire = args.entire
 
@@ -198,55 +218,63 @@ def main_def(repeat_cnt = 0):
     f.close()    
 
     # db 출원번호(100개)로 citing append해서 dataframe 만들기
-    rawdata = get_db_appNo_list(appNo, startNo)
-    main_df = pd.DataFrame([], columns=item_names)
+    print(
+        "{0}. {1} ".format(
+            str(repeat_cnt),
+            str(appNo),
+        ), end="", flush="True"
+    )
+
+
+    dbAppNoList = get_db_appNo_list(appNo, startNo)
     lastAppNo = ""
-
-    for row in rawdata:
+    myDict = []
+    myCitingDict = []
+    for dbAppNo in dbAppNoList:
         # 피인용
-        if row[0]:
-            df = get_citing(row[0])
-            print(df)
-            if not df.empty:
-                main_df.append(df)
-            else:
-                print('error')
-                # print(f'{Fore.BLUE}' + str(dt) + f'{Style.RESET_ALL}', page, f'{Fore.RED}error{Style.RESET_ALL}')
-                # record_log(
-                #     "{0}. {1} / {2} - total: {3} --- {4}".format(
-                #     str(dt),
-                #     str(page),
-                #     str(totalPage+1), 
-                #     str(api_count),
-                #     time.strftime('%H:%M', time.localtime(time.time())), 
-                #     )
-                # )                    
-            time.sleep(1)
-    # save db            
+        if dbAppNo:
+            myDict = get_citing(dbAppNo)
+            time.sleep(0.3)
+            if myDict:
+                myDict += myDict
+
+            myCitingDict += [{'출원번호': str(dbAppNo), '피인용수' : len(myDict)}]
+
+    if myDict:
+        # save db
+        df = pd.DataFrame(myDict, columns=item_names)           
+        engine = create_engine(db_connection_url)
+        df.to_sql(name='특허실용심사피인용문헌_temp', con=engine, if_exists='replace')
+        # note : need CREATE EXTENSION pgcrypto; psql >=12 , when using gen_random_uuid (),
+        with engine.begin() as cn:
+            sql = """INSERT INTO "특허실용심사피인용문헌" (출원번호,피인용문헌번호,표준상태코드,표준상태코드명,피인용문헌구분코드,피인용문헌구분코드명)
+                        SELECT t.출원번호::numeric, t.피인용문헌번호, t.표준상태코드, t.표준상태코드명, t.피인용문헌구분코드, t.피인용문헌구분코드명 
+                        FROM 특허실용심사피인용문헌_temp t
+                        WHERE NOT EXISTS 
+                            (SELECT 1 FROM "특허실용심사피인용문헌" f
+                            WHERE t.출원번호::numeric = f.출원번호::numeric)"""
+            cn.execute(sql)
+
+        # save second db
+    appList = [d['출원번호'] for d in myCitingDict]
+    familyList = family_cnt(appList)
+    citingList = [d['피인용수'] for d in myCitingDict]
+    df = pd.DataFrame({'출원번호': appList, '피인용수': citingList, '패밀리수' :familyList})
     engine = create_engine(db_connection_url)
-    df.to_sql(name='특허실용심사피인용문헌1_temp', con=engine, if_exists='replace')
-    # note : need CREATE EXTENSION pgcrypto; psql >=12 , when using gen_random_uuid (),
+    df.to_sql(name='특허실용심사피인용수패밀리수_temp', con=engine, if_exists='replace')         
     with engine.begin() as cn:
-        sql = """INSERT INTO "특허실용심사피인용문헌1" (출원번호,피인용문헌번호,표준상태코드,표준상태코드명,피인용문헌구분코드,피인용문헌구분코드명)
-                    SELECT t.출원번호, t.피인용문헌번호, t.표준상태코드, t.표준상태코드명, t.피인용문헌구분코드, t.피인용문헌구분코드명 
-                    FROM 특허실용심사피인용문헌1_temp t
+        sql = """INSERT INTO "특허실용심사피인용수패밀리수" (출원번호,피인용수,패밀리수)
+                    SELECT t.출원번호::numeric, t.피인용수::numeric, t.패밀리수::numeric  
+                    FROM 특허실용심사피인용수패밀리수_temp t
                     WHERE NOT EXISTS 
-                        (SELECT 1 FROM "특허실용심사피인용문헌1" f
-                        WHERE t.출원번호 = f.출원번호)"""
-        cn.execute(sql)
+                        (SELECT 1 FROM "특허실용심사피인용수패밀리수" f
+                        WHERE t.출원번호::numeric = f.출원번호::numeric)"""
+        cn.execute(sql)        
 
 
-    # # 피인용수, 패밀리수
-    # citingCnt = len(info) if info else 0
-    # family = family_cnt(row[0])
-    # # if existCheck2(row[0]) != 0:
-    #     # updateTable2(row[0], citingCnt, family)
-    # # else:
-    # insertTable2(row[0], citingCnt, family)            
-            
-    time.sleep(3)
+    # time.sleep(1)
 
-    lastAppNo = row[0] 
+    lastAppNo =dbAppNo
 
     #######################
     # file에 endNo 저장
@@ -259,29 +287,23 @@ def main_def(repeat_cnt = 0):
     memoryUse = psutil.virtual_memory()[2] 
 
     print(
-        "{0}. {1} {2} {3} success --- {4} 초 ---".format(
-            str(repeat_cnt),
-            time.strftime('%H:%M', time.localtime(time.time())), 
-            str(memoryUse)+'%',
+        "~ {0} {1} {2} success --- {3} 초 ---".format(
             str(lastAppNo),
+            str(memoryUse)+'%',
+            time.strftime('%H:%M', time.localtime(time.time())), 
             round(time.time() - start_time,1)
         )
     )
 
-    if compare:
-        msg = 'db : '
-        appNoList = ''
-        for row in rawdata:
-            if row[0]:
-                appNoList += row[0] + ","
-
-        if appNoList.endswith(","):
-            appNoList = appNoList[:-1]                
-
-        db_count = get_db_count(appNoList)
-        if db_count > 0 :
-            msg += str(appNo) + ': ' + f'{Fore.GREEN}' + str(db_count) + f'{Style.RESET_ALL}' + ' , '
-    print(msg)
+    # if compare:
+    #     msg = 'db : '
+    #     # dbAppNoComma = ','.join(dbAppNoList)
+    #     # dbAppNoComma = ','.join(map(str, dbAppNoList))
+    #     db_count = get_db_count(dbAppNoList)
+    #     print(db_count, len(myDict))
+    #     if db_count > 0 :
+    #         msg += str(appNo) + ': ' + f'{Fore.GREEN}' + str(db_count) + f'{Style.RESET_ALL}' + ' , '
+    # print(msg)
 
     repeat_cnt += 1  
 
