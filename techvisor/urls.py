@@ -25,6 +25,7 @@ urlpatterns = [
     path('', include('abroad.urls')),
     path('', include('company.urls')),
     path('', include('users.urls')),
+    path('', include('bill.urls', namespace = 'bill')),
 
     path("auth/google/login", redirect_google_login),
     path("auth/google", google_callback),    

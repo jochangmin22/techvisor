@@ -510,8 +510,11 @@ def create_label(request):
         received_label= data["label"]
 
         user_query = users.objects.get(id = received_id)
-        if received_label not in user_query.data['label'].keys():
+        if not user_query.data['label']:
             user_query.data['label'][received_label] = []
+        else:    
+            if received_label not in user_query.data['label'].keys():
+                user_query.data['label'][received_label] = []
         user_query.save()
         return JsonResponse({ "users_label" : user_query.data['label']}, status = 200, safe = False)
 

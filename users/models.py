@@ -16,7 +16,7 @@ class users(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now_add=True)
     is_certified = models.BooleanField(default=False)
-
+    download_count = models.PositiveIntegerField(default = 0)
     # @OneToOne(type => UserProfile, profile => profile.user)
     # profile!: UserProfile;
 
@@ -77,6 +77,9 @@ class email_auth(models.Model):
     logged = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email
 
     class Meta:
         db_table = '"email_auth"'    
