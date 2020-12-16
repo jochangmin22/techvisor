@@ -12,7 +12,7 @@ import requests
 import json
 
 from django.db.models import Q
-from .models import listed_corp
+from .models import Listed_corp
 
 # caching with redis
 from django.core.cache import cache
@@ -608,11 +608,11 @@ def associate_corp(request):
         data = json.loads(request.body.decode('utf-8'))
         applicant = data['applicant']
         if applicant:
-            isExist = listed_corp.objects.filter(Q(회사명__contains=applicant) | Q(대표자명__contains=applicant)).exists()
+            isExist = Listed_corp.objects.filter(Q(회사명__contains=applicant) | Q(대표자명__contains=applicant)).exists()
             if not isExist:
                 return JsonResponse([], safe=False)
             
-            row = listed_corp.objects.filter(Q(회사명__contains=applicant)| Q(대표자명__contains=applicant)).values()
+            row = Listed_corp.objects.filter(Q(회사명__contains=applicant)| Q(대표자명__contains=applicant)).values()
             row = list(row)
 
     return JsonResponse(row, safe=False)

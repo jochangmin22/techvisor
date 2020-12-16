@@ -23,7 +23,7 @@ def register(request):
 
 def do_update(request):
     return users.update_user_data(request)
-
+    
 def interested(request):
     return users.update_user_interested(request)
 

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*- 
+
 from __future__ import print_function
 import argparse 
 
@@ -109,6 +111,25 @@ def backupAndEmptyTable():
             cursor.close()
             connection.close()
 
+
+def missingCrawlCheck():
+    try:
+        with connect() as connection:
+            with connection.cursor() as cursor:      
+                query ="select 종목코드 from listed_corp;"  
+                cursor.execute(query)
+                connection.commit()
+                row = dictfetchall(cursor)
+                return [d['종목코드']for d in row]
+    except (Exception, psycopg2.Error) as error :
+        if(connection):
+            print("Failed to backup and empty listed_corp table", error)
+
+    finally:
+        if(connection):
+            cursor.close()
+            connection.close()            
+
 def insertTable(no, kiscode, info, financial_res, name, upjong, product, listed_date, settlemonth, representive, homepage, area):
     # table = 'listed_corp'    
     info = json.dumps(info)
@@ -195,33 +216,35 @@ empty_dict = {
     '당기순이익': 0,
     '매출액': 0,
     '발행주식수(보통주)': 0,
-    '부채비율': 0,
+    '부채비율(%)': 0,
     '부채총계': 0,
     '상장일': '',    
     '수익률':0,
-    '순이익증감(전전)': 0,
-    '순이익증감(직전)': 0,
-    '시가총액':0,
+    '당기순이익(Y/Y)': 0,
+    '시가총액(억)':0,
     '업종PER(배)': 0,
     '영업이익': 0,
-    '영업이익증감(전전)': 0,
-    '영업이익증감(직전)': 0,
+    '영업이익(Y/Y)': 0,
     '자본총계': 0,
     '자본총계(지배)': 0,
     '자산총계': 0,
     '적(1)PER*EPS': 0,
     '적(2)ROE*EPS': 0,
     '적(3)EPS*10': 0,
-    '적(4)s-lim': 0,
+    '적(4)s-rim': 0,
     '적(5)당기순이익*PER': 0,
-    '적정가': 0,
+    '적정가평균': 0,
     '종업원수': 0,
     '추천매수가': 0,
+    '현금DPS(원)': 0,
     '현금배당수익률': 0,
-    '현재가': 0,    
+    '전일종가': 0,    
     'BPS(원)': 0,    
     'EPS(원)': 0,
+    'NCAV(억)': 0,
+    'NCAV(%)': 0,
     'PBR(배)': 0,
+    'PEGR(배)': 0,
     'PER(배)': 0,
     'PER갭(%)': 0,
     'ROA(%)': 0,
@@ -251,14 +274,14 @@ def sectorPer(df):
 
 import math
 def fundamental(df):
-    ''' df[5] :  'PER', 'PBR', 'EPS', 'BPS', '현금배당수익률' '''
+    ''' df[5] :  'PER', 'PBR', 'EPS', 'BPS', '현금DPS', '현금배당수익률' '''
     r = {}
 
     # C 컬럼이 안읽힐경우 C 포기
     df.columns = ['A','B','C'][:len(df.columns)]
 
     # 가장 최근으로 선택
-    for name in ['PER', 'PBR', 'EPS', 'BPS', '현금배당수익률']:
+    for name in ['PER', 'PBR', 'EPS', 'BPS', '현금DPS', '현금배당수익률']:
         bVal = df.loc[df['A'] == name, 'B']
         try:
             cVal = df.loc[df['A'] == name, 'C']
@@ -273,36 +296,53 @@ def fundamental(df):
     for name in ['PER','PBR']:
         r[name] = r[name].fillna(0).astype(float).to_list()[0]
 
-    for name in ['EPS','BPS']:
+    for name in ['EPS','BPS','현금DPS']:
         try: 
             r[name] = r[name].str.replace('원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
         except: # 원 없고 null
             r[name] = 0
+    # change name        
+    r['현금DPS(원)'] = r['현금DPS']
+    del r['현금DPS']
+
     try:
         r['현금배당수익률'] = r['현금배당수익률'].str.replace('%', '').fillna(0).astype(float).to_list()[0]
     except:
         r['현금배당수익률'] = 0 # 숫자없고 %만 있는 경우
-
+    
     return r
 
+# def qPrice(df):
+#     ''' df[6] : 전분기 대비 : '영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)' '''
+#     df.columns = df.iloc[0]
+#     df = df.reindex(df.index.drop(0)).reset_index(drop=True)
+#     df.columns.name = None 
+#     jcols = list(df.columns)
+
+#     jjbun = df[jcols[2]].fillna(0).to_list() # 3번째 cols
+#     jbun = df[jcols[3]].fillna(0).to_list() # 4번째 cols
+  
+#     return {'영업이익증감(전전)' : str2round(jjbun[4]),'영업이익증감(직전)' : str2round(jbun[4]),'순이익증감(전전)' : str2round(jjbun[9]),'순이익증감(직전)' : str2round(jbun[9])}
+
 def qPrice(df):
-    ''' df[6] : '영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)' '''
+    ''' FIXME : df[6] : '영업이익' -> '전년동기대비', '당기순이익' -> '전년동기대비' : '영업이익(y/y)' , '당기순이익(y/y) '''
     df.columns = df.iloc[0]
     df = df.reindex(df.index.drop(0)).reset_index(drop=True)
     df.columns.name = None 
     jcols = list(df.columns)
 
-    jjbun = df[jcols[2]].fillna(0).to_list() # 3번째 cols
+    # jjbun = df[jcols[2]].fillna(0).to_list() # 3번째 cols
+    # 최근분기만 사용
     jbun = df[jcols[3]].fillna(0).to_list() # 4번째 cols
   
-    return {'영업이익증감(전전)' : str2round(jjbun[4]),'영업이익증감(직전)' : str2round(jbun[4]),'순이익증감(전전)' : str2round(jjbun[9]),'순이익증감(직전)' : str2round(jbun[9])}
+    return {'영업이익(Y/Y)' : str2round(jbun[3]),'당기순이익(Y/Y)' : str2round(jbun[8]), '영업이익(Q/Q)' : str2round(jbun[4]),'당기순이익(Q/Q)' : str2round(jbun[9])}
 
 def stockVolume(df):
-    ''' df[1] : '거래량','시가총액' '''
+    ''' df[1] : '거래량','시가총액(억)' '''
     r = {}
     df.columns = ['A','B']
     r['거래량'] = df.loc[df['A'] == '거래량/거래대금', 'B'].str.split('주 /').str[0].str.replace(',', '').fillna(0).astype(int).to_list()[0]
-    r['시가총액'] = df.loc[df['A'] == '시가총액', 'B'].str.replace('억원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
+    r['시가총액(억)'] = df.loc[df['A'] == '시가총액', 'B'].str.replace('억원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
 
     return r
 
@@ -314,9 +354,10 @@ def get_date_str(s):
 
     return date_str
 
-def financialSummary(df):
+def financialSummary(df, PER):
     ''' df[12] : '매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','자본총계(지배)','부채비율','BPS(원)','PBR(배)','발행주식수(보통주)' 
     'ROE(%)','ROA(%)','EPS(원)','PER(배)' 는 최근분기 사용
+    PER : PEGR 만들때 사용
     '''
     r={}
     # columns을 first row로 변경 or pd.read_html(url, header=1)
@@ -356,7 +397,40 @@ def financialSummary(df):
     for name in my_df_cols[:-1]: # '부채비율' 제외
         r[name] = my_df[name].fillna(0).astype(int).to_list()[0]
 
-    r['부채비율'] = my_df['부채비율'].fillna(0).astype(float).to_list()[0]
+    r['부채비율(%)'] = my_df['부채비율'].fillna(0).astype(float).to_list()[0]
+
+    # EPS(%) 구하기 
+    # 공식: (마지막연도EPS(원)/시작연도EPS(원))^(1/계산하는연도갯수)-1
+    x = []
+    for i in range(0,3):
+        my_df = df_f.loc[[cols[i]],['EPS(원)']]
+        EPS = my_df['EPS(원)'].fillna(0).astype(int).to_list()[0]
+        if EPS != 0:
+            x.append(EPS)
+    x_len = len(x)
+    if x_len < 2:
+        r['EPS(%)'] = 0
+    else:
+        # print('length', x_len-1, 'start', x[0], 'end',x[-1])
+        if x[0] <= 0 or x[-1] <= 0:
+            r['EPS(%)'] = 0
+        else:            
+            try:
+                r['EPS(%)'] = ((x[-1] / x[0])**(1/(x_len - 1))-1) * 100
+                # print('EPS', r['EPS(%)'])
+            except:
+                r['EPS(%)'] = 0
+
+    if r['EPS(%)'] == 0:
+        r['PEGR(배)'] = 0
+    else:
+        if PER >= 0:        
+            try:
+                r['PEGR(배)'] = PER / r['EPS(%)']
+                r['PEGR(배)'] = str2round(r['PEGR(배)'])
+                # print('PER', PER, 'PEGR', r['PEGR(배)'])
+            except:        
+                r['PEGR(배)'] = 0
 
     df_l = df.loc[:,~df.columns.duplicated(keep='last')]  # 중복된건 나중것만
     df_l = df_l.T
@@ -371,18 +445,26 @@ def financialSummary(df):
 
 
     # 재무 field
-    # 형태 { "date" : ['2017/12','2018/12','2019/12','2019/12','2020/03','2020/06'], "dataset": [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]]}
+    # 형태 { "dateY" : ["2017/12", "2018/12", "2019/12", "2020/12"], "dateQ" : ["2020/03", "2020/06", "2020/09", "2020/12"], "valueY": [[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0]], "valueQ" : [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]]}
 
-    financial_res = { "date" : cols, "dataset": []}
+    financial_res = { "dateY" : cols[:4], "dateQ": cols[4:], "valueY": [], "valueQ": []}
     my_list = [[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0]]
-
+    y_list = [[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]
+    q_list = [[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]
+    
     for (idx, name) in enumerate(['매출액','영업이익','당기순이익','부채비율','자본유보율','현금배당성향(%)']):
-        if name in ['매출액','영업이익','당기순이익','자본유보율']:
+        if name in ['매출액','영업이익','당기순이익']:
             my_list[idx] = df.loc[name,:].fillna(0).astype(float).astype(int).to_list()
-        if name in ['부채비율','현금배당성향(%)']:
+        if name in ['부채비율','자본유보율','현금배당성향(%)']:
             my_list[idx] = df.loc[name,:].fillna(0).astype(float).to_list()
 
-    financial_res['dataset'] = my_list
+    # split half
+    for (idx, d) in enumerate(my_list):
+        y_list[idx] = d[:4]
+        q_list[idx] = d[4:]
+
+    financial_res['valueY'] = y_list
+    financial_res['valueQ'] = q_list
 
     return r, financial_res
 
@@ -402,12 +484,45 @@ def employee_listingdate_research(df):
         r['종업원수'] = df[1].loc[df[1]['C'] =='종업원수', 'D'].str.strip().str.split(r' \(').str[0].str.replace(',','').fillna(0).astype(int).to_list()[0]
     except: # 종업원수 null
         r['종업원수'] = 0
-        print('종업원수', df[1].columns)
+        # print('종업원수', df[1].columns)
     try:       
         r['연구개발비(연)'] = df[4]['연구개발비용지출총액'].fillna(0).astype(int).to_list()[0]
     except:        
         r['연구개발비(연)'] = 0
         print('연구개발비', df[4].columns)
+
+    return r
+
+def current_assets_Total_liabilities(df):
+    ''' 유동자산, 부채총계 '''
+    r = {}
+
+    try:        
+        df.columns = ['A','B','C','D','E','F','G','H','I'][:len(df.columns)]
+    except:
+        print(len(df.columns))
+        pass        
+
+    r['유동자산'] = 0
+    try:
+        r['유동자산'] = df.loc[df['A'] =='유동자산', 'E'].fillna(0).astype(float).to_list()[0]
+    except:
+        pass        
+    try:
+        r['유동자산'] = df.loc[df['A'] =='유동자산', 'F'].fillna(0).astype(float).to_list()[0]
+    except:
+        pass
+
+    r['부채총계'] = 0
+    try:
+        r['부채총계'] = df.loc[df['A'] =='부채총계', 'E'].fillna(0).astype(float).to_list()[0]
+    except:
+        pass        
+    try:
+        r['부채총계'] = df.loc[df['A'] =='부채총계', 'F'].fillna(0).astype(float).to_list()[0]
+    except:
+        pass
+
 
     return r
 
@@ -442,14 +557,14 @@ def calculate_stock_fair_value(r):
         sumCnt -= 1  
 
     try:
-        res['적(4)s-lim'] = res['기업가치(백만)']/ r['발행주식수(보통주)']*100000000 #100000000     #적정주가(4)s-lim
-        res['적(4)s-lim'] = int(res['적(4)s-lim'])
-        if res['적(4)s-lim'] < 0:
-            res['적(4)s-lim'] = 0
+        res['적(4)s-rim'] = res['기업가치(백만)']/ r['발행주식수(보통주)']*100000000 #100000000     #적정주가(4)s-rim
+        res['적(4)s-rim'] = int(res['적(4)s-rim'])
+        if res['적(4)s-rim'] < 0:
+            res['적(4)s-rim'] = 0
     except:
-         res['적(4)s-lim'] = 0
+         res['적(4)s-rim'] = 0
     finally:         
-        if res['적(4)s-lim'] == 0:
+        if res['적(4)s-rim'] == 0:
             sumCnt -= 1         
 
     try:
@@ -470,45 +585,45 @@ def calculate_stock_fair_value(r):
         res['추천매수가'] = 0
         
     try:
-        res['적정가'] = sum([res['적(1)PER*EPS'],res['적(2)ROE*EPS'],res['적(3)EPS*10'],res['적(4)s-lim'],res['적(5)당기순이익*PER']]) / sumCnt
-        res['적정가'] = int(res['적정가'])
-        if res['적정가'] < 0:
-            res['적정가'] = 0
+        res['적정가평균'] = sum([res['적(1)PER*EPS'],res['적(2)ROE*EPS'],res['적(3)EPS*10'],res['적(4)s-rim'],res['적(5)당기순이익*PER']]) / sumCnt
+        res['적정가평균'] = int(res['적정가평균'])
+        if res['적정가평균'] < 0:
+            res['적정가평균'] = 0
     except:
-        res['적정가'] = 0
+        res['적정가평균'] = 0
 
     try:
-        res['갭1'] = (1 - r['현재가'] / res['적(1)PER*EPS']) * 100    #1-현재가/적정가*100
+        res['갭1'] = (1 - r['전일종가'] / res['적(1)PER*EPS']) * 100    #1-전일종가/적정가*100
         res['갭1'] = str2round(res['갭1'],0)
     except:
         res['갭1'] = 0
         
     try:
-        res['갭2'] = (1 - r['현재가'] / res['적(2)ROE*EPS']) * 100    #1-현재가/적정가*100
+        res['갭2'] = (1 - r['전일종가'] / res['적(2)ROE*EPS']) * 100    #1-전일종가/적정가*100
         res['갭2'] = str2round(res['갭2'],0)
     except:
         res['갭1'] = 0    
         
     try:
-        res['갭3'] = (1 - r['현재가'] / res['적(3)EPS*10']) * 100    #1-현재가/적정가*100
+        res['갭3'] = (1 - r['전일종가'] / res['적(3)EPS*10']) * 100    #1-전일종가/적정가*100
         res['갭3'] = str2round(res['갭3'],0)
     except:
         res['갭1'] = 0    
         
     try:
-        res['갭4'] = (1 - r['현재가'] / res['적(4)s-lim']) * 100    #1-현재가/적정가*100
+        res['갭4'] = (1 - r['전일종가'] / res['적(4)s-rim']) * 100    #1-전일종가/적정가*100
         res['갭4'] = str2round(res['갭4'],0)
     except:
         res['갭1'] = 0    
         
     try:
-        res['갭5'] = (1 - r['현재가'] / res['적(5)당기순이익*PER']) * 100    #1-현재가/적정가*100
+        res['갭5'] = (1 - r['전일종가'] / res['적(5)당기순이익*PER']) * 100    #1-전일종가/적정가*100
         res['갭5'] = str2round(res['갭5'],0)
     except:
         res['갭1'] = 0    
 
-    if res['적정가'] >  r['현재가']:                  #(평균목표가 - 현재가) / 평균목표가
-        res['기대수익률'] = (res['적정가'] - r['현재가']) / res['적정가'] *100
+    if res['적정가평균'] >  r['전일종가']:                  #(평균목표가 - 전일종가) / 평균목표가
+        res['기대수익률'] = (res['적정가평균'] - r['전일종가']) / res['적정가평균'] *100
         res['기대수익률'] = round(res['기대수익률'],0)
     else:
         res['기대수익률'] = 0    
@@ -520,7 +635,7 @@ def calculate_stock_fair_value(r):
         res['PER갭(%)'] = 0
 
     try:
-        res['PRR(배)'] = r['시가총액'] / r['연구개발비(연)'] * 100 # 단위 보정 ; 억원 / 백만원
+        res['PRR(배)'] = r['시가총액(억)'] / r['연구개발비(연)'] * 100 # 단위 보정 ; 억원 / 백만원
         res['PRR(배)'] = round(res['PRR(배)'],2)        
     except:
         res['PRR(배)'] = 0
@@ -536,13 +651,26 @@ def calculate_stock_fair_value(r):
 
     # 가격성장흐름(PGF)
     try: 
-        res['PGF(%)'] = (res['주당R&D(원)'] + r['EPS(원)'] ) / r['현재가'] * 100
+        res['PGF(%)'] = (res['주당R&D(원)'] + r['EPS(원)'] ) / r['전일종가'] * 100
         res['PGF(%)'] = int(res['PGF(%)'])        
     except:
         res['PGF(%)'] = 0
     finally:
         if not res['PGF(%)']:
-            res['PGF(%)'] = 0             
+            res['PGF(%)'] = 0 
+
+    # NCAV(억) : 유동자산 - 부채총계
+    # NCAV(%) : NCAV(유동자산-부채총계) / (시가총액(억)*1.5)
+    try:
+        res['NCAV(억)'] = r['유동자산'] - r['부채총계']
+        res['NCAV(억)'] = round(res['NCAV(억)'],1)    
+    except:
+        res['NCAV(억)'] = 0
+    try:            
+        res['NCAV(%)'] = res['NCAV(억)'] / (r['시가총액(억)']*1.5)
+        res['NCAV(%)'] = round(res['NCAV(%)'],2)
+    except:        
+        res['NCAV(%)'] = 0
 
     return res
 
@@ -584,12 +712,12 @@ def financial_crawler(code):
     html0 = browser.page_source
     html1 = BeautifulSoup(html0,'lxml')
 
-    # * 현재가, 
+    # * 전일종가, 
     # * 업종PER : df[0]
     # * 'PER', 'PBR', 'EPS', 'BPS', '현금배당수익률' - 펀더멘털 : df[5]
     # * '영업이익증감(전전)' - 펀더멘탈 > 어닝서프라이즈 > 영업이익 > 전분기대비 : df[5]
     # * '순이익증감(전전)' - 펀더멘탈 > 어닝서프라이즈 > 당기순이익 > 전분기대비 
-    # * '거래량', '시가총액', 수익률(1d/1m/1y) 구하기
+    # * '거래량', '시가총액(억)', 수익률(1d/1m/1y) 구하기
     # * 피낸셜 서머리 : df[12]
 
     df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
@@ -597,7 +725,7 @@ def financial_crawler(code):
     res = {}
 
     nowPrice = html1.find_all('strong')[0].get_text().strip()
-    res.update({'현재가' : str2int(nowPrice) })
+    res.update({'전일종가' : str2int(nowPrice) })
 
     res.update(sectorPer(df[0]))
 
@@ -607,15 +735,35 @@ def financial_crawler(code):
 
     res.update(stockVolume(df[1]))
 
-    temp_res, second_res = financialSummary(df[12])
+    temp_res, second_res = financialSummary(df[12], res['PER'])
     res.update(temp_res)
 
-    browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[2]')[0].click() # "기업개요" 클릭하기
+    wait = WebDriverWait(browser, 10)
 
+    parentTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="header-menu"]/div[1]/dl/dt[2]')), message='기업개요',)
+    parentTab.click()
+    # browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[2]')[0].click() # "기업개요" 클릭하기
+    wait.until(EC.presence_of_element_located((By.XPATH,'//*[@id="cTB201"]')), message='세부 기업개요 표',)
+    df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
+    res.update(employee_listingdate_research(df))
+
+    parentTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="header-menu"]/div[1]/dl/dt[3]')), message='재무분석',)
+    parentTab.click()
+    # browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[3]')[0].click() # "재무분석" 클릭하기
+    # browser.find_elements_by_xpath('//*[@id="rpt_tab2"]')[0].click() # "재무분석" > "재무상태표" 클릭
+    childTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="rpt_tab2"]')), message='재무분석 > 재무상태표',) # "재무분석" > "재무상태표" 클릭
+    childTab.click()
+    # wait.until(EC.visibility_of_element_located((By.XPATH,'//*[@summary="IFRS연결 연간 재무 정보를 제공합니다."]')))
+    # wait.until(EC.presence_of_element_located((By.XPATH,'//*[@id="chart2"]')))
+    # wait.until(EC.visibility_of_element_located(By.xpath("//input[@id='text3']")));
+    # df = pd.read_html(browser.page_source, header=0, match="재무분석 리스트", encoding = 'euc-kr')
     df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
 
-
-    res.update(employee_listingdate_research(df))
+    try:
+        res.update(current_assets_Total_liabilities(df[5]))
+    except:
+        print('table length',len(df))
+        print(df)
 
     res.update(calculate_stock_fair_value(res))
 
@@ -640,24 +788,24 @@ def main_def():
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', type=int, default=0, help="What is the start number?")
     parser.add_argument('--end', type=int, default=0, help="What is the end number?")
-    parser.add_argument('--clear', type=str2bool, nargs='?', const=True, default=False, help='Should I truncate the Table before execution?')
-    parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=False, help='Do you want to crawl the entire company regardless of start, end number')          
-
-                       
+    parser.add_argument('--initial', type=str2bool, nargs='?', const=True, default=True, help='Should I truncate the Table before execution?')
+    parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=True, help='Do you want to crawl the entire company regardless of start, end number')          
+    parser.add_argument('--update', type=str2bool, nargs='?', const=True, default=False, help='Update record even if it exists in db?')          
+     
     args = parser.parse_args()
 
     start = args.start
     end = args.end
-    clear = args.clear
+    initial = args.initial
     entire = args.entire
+    update = args.update
 
     # start_time = time.time()
 
     kindInfo = get_kind_stock_code()
     # print(kindInfo)
     # kindInfo = {'회사명' : 'DSR', '종목코드': '155660', '업종': '1차 비철금속 제조업', '주요제품' : '', '상장일': '', '결산월' : '', '대표자명': '', '홈페이지': '', '지역': ''}
-
-          
+           
     # threading.Timer(1, main_def(repeat_cnt)).start()
 
     if entire:
@@ -665,37 +813,59 @@ def main_def():
     else:
         rangeValue = range(start, end)
 
-    print('총 상장법인수 :', len(kindInfo))
-    print('실행건       :', len(rangeValue))        
-    print('실행소요예상 :', int(int(len(rangeValue)) * 1 / 60), '분')        
-
-    if clear:
+    dbStockCodeList = []
+    if initial:
         backupAndEmptyTable()
+    else: # finish only missing crawls
+        dbStockCodeList = missingCrawlCheck()
+
+
+    execCnt = len(rangeValue) if not entire or (entire and initial) else len(rangeValue) - len(dbStockCodeList)
+    now = datetime.now()
+    print('크롤시간 :', now.strftime("%Y.%m.%d %H:%M:%S"))
+    print('총 상장법인수 :', len(kindInfo))
+    print('실행건       :', execCnt)       
+    print('실행소요예상 :', int(int(execCnt) * 1.5 / 60), '분')        
+
     # for i in range(len(kindInfo)):
     # for i in range(0,50):
     for i in rangeValue:
         start_time = time.time()
         try:
             kiscode = kindInfo.종목코드.values[i].strip()
-            print(kiscode)
+            print(
+                "{0}. {1} ".format(
+                    str(i),
+                    str(kiscode),
+                ), end="", flush="True"
+            )             
         except:
             print('----------------------')
             print(str(i) + "번에 대한 종목코드가 없어서 종료합니다.")            
             print('done')
             break
+
+        if not update:
+            if kiscode in dbStockCodeList:
+                print("")
+                continue
+
         info, financial_res = financial_crawler(kiscode)
-        if existCheck(kiscode) != 0:
-            updateTable(i, kiscode, info, financial_res)
+
+        if update:
+            if existCheck(kiscode) != 0:
+                updateTable(i, kiscode, info, financial_res)
+            else:
+                insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])
         else:
-            insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])     
+            insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])
+                         
 
         # memory usage check
         memoryUse = psutil.virtual_memory()[2] 
 
         print(
-            "{0}. {1} {2} {3} success --- {4} 초 ---".format(
-                str(i),
-                str(kiscode),
+            "{0} {1} success --- {2} 초 ---".format(
                 time.strftime('%H:%M', time.localtime(time.time())), 
                 str(memoryUse)+'%',
                 round(time.time() - start_time,1)

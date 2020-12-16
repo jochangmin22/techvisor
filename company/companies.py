@@ -28,8 +28,8 @@ import json
 
 from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc, like_parse, str2int, str2round
 from .crawler import crawl_stock
-from .models import nice_corp, stock_quotes, mdcin_clinc_test_info, financial_statements
-from search.models import listed_corp, disclosure
+from .models import Nice_corp, Stock_quotes, Mdcin_clinc_test_info, Financial_statements
+from search.models import Listed_corp, Disclosure
 
 # caching with redis
 from django.core.cache import cache
@@ -81,10 +81,10 @@ empty_fair = {
   '적(1)PER*EPS': 0,
   '적(2)ROE*EPS': 0,
   '적(3)EPS*10': 0,
-  '적(4)s-lim': 0,
+  '적(4)s-rim': 0,
   '적(5)당기순이익*PER': 0,
   '추천매수가': 0,
-  '적정가': 0,
+  '적정가평균': 0,
   '갭1': 0,
   '갭2': 0,
   '갭3': 0,
@@ -123,9 +123,9 @@ empty_dict = {
     '적(1)PER*EPS': 0,
     '적(2)ROE*EPS': 0,
     '적(3)EPS*10': 0,
-    '적(4)s-lim': 0,
+    '적(4)s-rim': 0,
     '적(5)당기순이익*PER': 0,
-    '적정가': 0,
+    '적정가평균': 0,
     '종업원수': 0,
     '추천매수가': 0,
     '현금배당수익률': 0,
@@ -153,7 +153,54 @@ empty_info_dart = {
     '주소':''
 }
 
+def get_companies(request, mode="begin"):
+    mainKey = '¶all'
+    context = cache.get(mainKey)
+    if mode == "begin":
+        try:
+            if context['raw']:
+                return JsonResponse(context['raw'], safe=False)
+        except:
+            pass  
+
+    with connection.cursor() as cursor:
+
+        whereAll = "1=1)"
+
+        query = 'SELECT * FROM listed_corp WHERE (' + \
+            whereAll
+
+        if mode == "query": # mode가 query면 여기서 분기
+            return query
+
+        cursor.execute(
+            "SET work_mem to '100MB';"
+            + query
+        )
+        row = dictfetchall(cursor)
+
+    if row:
+        for i in range(len(row)):
+            data = json.loads(row[i]['정보']) # move position each fields of 정보 json to main fields
+            row[i]['id'] = row[i]['종목코드']
+            for key, value in data.items():
+                row[i].update({key: value})
+
+            del row[i]['정보']
+
+    # redis 저장 {
+    new_context = {}
+    new_context['raw'] = row
+
+    cache.set(mainKey, new_context, CACHE_TTL)
+    # redis 저장 }
+
+    if mode == "begin":
+        return JsonResponse(row, safe=False)
+   
+
 def parse_companies(request, mode="begin"): # mode : begin, nlp, query
+
 
     mainKey, _, params, _ = get_redis_key(request)
 
@@ -206,8 +253,8 @@ def parse_companies(request, mode="begin"): # mode : begin, nlp, query
     #         del row[i]["전체항token"]
 
     # all entries
-    # entriesToRemove = ('BPS(원)','EPS(원)','PBR(배)','PER(배)','PER갭(%)','ROA(%)','ROE(%)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','대표자명','매출액','발행주식수(보통주)','부채비율','부채총계','적정가','상장일','수익률','순이익증감(전전)','순이익증감(직전)','시가총액','업종','업종PER(배)','영업이익','영업이익증감(전전)','영업이익증감(직전)','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-lim','적(5)당기순이익*PER','종목코드','종업원수','주요제품','지역','추천매수가','현재가','홈페이지','회사명')
-    # entriesToRemove = ('BPS(원)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','매출액','발행주식수(보통주)','부채총계','상장일','수익률','영업이익','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-lim','적(5)당기순이익*PER','종업원수','추천매수가')
+    # entriesToRemove = ('BPS(원)','EPS(원)','PBR(배)','PER(배)','PER갭(%)','ROA(%)','ROE(%)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','대표자명','매출액','발행주식수(보통주)','부채비율','부채총계','적정가','상장일','수익률','순이익증감(전전)','순이익증감(직전)','시가총액','업종','업종PER(배)','영업이익','영업이익증감(전전)','영업이익증감(직전)','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-rim','적(5)당기순이익*PER','종목코드','종업원수','주요제품','지역','추천매수가','현재가','홈페이지','회사명')
+    # entriesToRemove = ('BPS(원)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','매출액','발행주식수(보통주)','부채총계','상장일','수익률','영업이익','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-rim','적(5)당기순이익*PER','종업원수','추천매수가')
     if row:
         # res = deepcopy(res)
         for i in range(len(row)):
@@ -254,16 +301,16 @@ def parse_financial_info(request):
         # crawl current financial info
         # financial_crawler(stockCode)  # skip for faster page loading
 
-        isExist = listed_corp.objects.filter(종목코드=stockCode).exists()
+        isExist = Listed_corp.objects.filter(종목코드=stockCode).exists()
         if not isExist:
             return JsonResponse([], safe=False)
             # return HttpResponse('Not Found', status=404)
 
-        row = listed_corp.objects.filter(종목코드=stockCode).values()
+        row = Listed_corp.objects.filter(종목코드=stockCode).values()
         row = list(row)
         res = row[0]['재무'] if row else {}
         if row:
-            res.update({ 'stockFairValue': [ row[0]['정보']['적(1)PER*EPS'], row[0]['정보']['적(2)ROE*EPS'], row[0]['정보']['적(3)EPS*10'], row[0]['정보']['적(4)s-lim'], row[0]['정보']['적(5)당기순이익*PER'], row[0]['정보']['적정가'], row[0]['정보']['현재가']]})
+            res.update({ 'stockFairValue': [ row[0]['정보']['적(1)PER*EPS'], row[0]['정보']['적(2)ROE*EPS'], row[0]['정보']['적(3)EPS*10'], row[0]['정보']['적(4)s-rim'], row[0]['정보']['적(5)당기순이익*PER'], row[0]['정보']['적정가평균'], row[0]['정보']['전일종가']]})
 
     return JsonResponse(res, safe=False)    
 
@@ -300,11 +347,11 @@ def parse_stock(request):
             range_from = temp.strftime('%Y-%m-%d')
 
     
-            isExist = stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today]).exists()
+            isExist = Stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today]).exists()
             if not isExist:
                 return HttpResponse('Not Found', status=404)
 
-            stockQuotes = stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today])
+            stockQuotes = Stock_quotes.objects.filter(stock_code=stockCode, price_date__range=[range_from,today])
 
             myDate = list(stockQuotes.values_list('price_date', flat=True).order_by('price_date'))
             myStock = list(stockQuotes.values_list('stock', flat=True).order_by('price_date'))
@@ -316,7 +363,7 @@ def parse_stock(request):
             return HttpResponse() # 500    
        
 def get_corpCode(stockCode):
-    disc = disclosure.objects.filter(stock_code=stockCode)
+    disc = Disclosure.objects.filter(stock_code=stockCode)
     if disc.exists():
         rows = list(disc.values())
         row = rows[0]
@@ -325,7 +372,7 @@ def get_corpCode(stockCode):
         return None  
              
 def crawl_dart(corpCode):
-    rows = financial_statements.objects.filter(corp_code=corpCode)
+    rows = Financial_statements.objects.filter(corp_code=corpCode)
     if rows.exists():
         row = rows.values()
         row = list(row)
@@ -380,9 +427,9 @@ def crawl_dart(corpCode):
     # isMatchToday = True if lastRecordDate and lastRecordDate_obj.date() == newDate_obj.date() else False
 
     # if not isMatchToday:
-    financial_statements.objects.create(**newDart)
+    Financial_statements.objects.create(**newDart)
     # else:                            
-        # financial_statements.objects.filter(corp_code=corpCode).update(**newDart)
+        # Financial_statements.objects.filter(corp_code=corpCode).update(**newDart)
 
 
 
@@ -461,7 +508,7 @@ def crawl_naver(stock_code):
     market_cap = td2.strip()
     
     # If there is data in db, fetch it or continue crawling
-    listedCorp = listed_corp.objects.get(종목코드=stock_code)
+    listedCorp = Listed_corp.objects.get(종목코드=stock_code)
     if listedCorp.정보['당기순이익'] != '':
         res = listedCorp.정보
         res.update({
@@ -554,7 +601,7 @@ def crawl_naver(stock_code):
     })
 
     # save data in db if necessary
-    # listedCorp = listed_corp.objects.get(종목코드=stock_code)
+    # listedCorp = Listed_corp.objects.get(종목코드=stock_code)
     listedCorp.정보 = res[0]
     listedCorp.save(update_fields=['정보'])
 

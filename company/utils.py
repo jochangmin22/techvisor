@@ -24,19 +24,29 @@ def get_redis_key(request):
     "Return mainKey, subKey, params, subParams"
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        params = data['params']
-        subParams = data['subParams']
+        params = data.get('params','')
+        subParams = data.get('subParams','')
     else:
         params = request.GET.get('params','')
         subParams = request.GET.get('subParams','')
         params = json.loads(params)
         subParams = json.loads(subParams)
-
-    searchNum = params['searchNum'] if hasattr(params, 'searchNum') else ''
-    mainKey = "¶".join(params.values()) if searchNum == '' else searchNum
+    try:
+        searchNum = params['searchNum']
+    except:
+        searchNum = ''    
+    # searchNum = params['searchNum'] if hasattr(params, 'searchNum') else ''
+    try:
+        mainKey = "¶".join(params.values()) if searchNum == '' else searchNum
+    except:
+        mainKey = "¶all"
 
     # one more key to be used for a separated from searchParams
-    subKey = mainKey + "¶".join(list(NestedDictValues(subParams))) if searchNum == '' else searchNum   
+    try:
+        subKey = mainKey + "¶".join(list(NestedDictValues(subParams))) if searchNum == '' else searchNum   
+    except:
+        subKey = mainKey + "¶"    
+
 
     return mainKey, subKey, params, subParams
 
@@ -59,7 +69,7 @@ def remove_tags(text):
 
 
 def remove_brackets(text):
-    return re.sub("[\\(\\[].*?[\\)\\]]", "", text)
+    return re.sub(r"[\(\[].*?[\)\]]", "", text)
 
 
 def remove_punc(text):

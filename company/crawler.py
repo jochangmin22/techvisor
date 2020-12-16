@@ -3,7 +3,7 @@ import requests
 import json
 import pandas as pd
 from sqlalchemy import create_engine
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from bs4 import BeautifulSoup
 from django.http import JsonResponse, HttpResponse
 from urllib.request import urlopen
@@ -38,8 +38,8 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-from search.models import listed_corp
-from .models import disclosure_report, stock_quotes
+from search.models import Listed_corp
+from .models import Disclosure_report, Stock_quotes, Mdcin_clinc_test_info
 
 from .utils import str2int, str2round
 
@@ -56,6 +56,9 @@ db_connection_url = "postgresql://{}:{}@{}:{}/{}".format(
     DATABASES['default']['PORT'],
     DATABASES['default']['NAME'],
 )
+def daterange(date1, date2):
+    for n in range(int ((date2 - date1).days)+1):
+        yield date1 + timedelta(n)  
 
 def update_today_disclosure_report():
     today = datetime.today().strftime('%Y%m%d')
@@ -116,32 +119,45 @@ def crawl_disclosure_report(**kwargs):
 
 
 def update_today_crawl_mdcline():
-    # today = datetime.today().strftime('%Y%m%d')
-    today = datetime.today()
-    today = today + timedelta(days=-1)
-    today = today.strftime('%Y%m%d')
 
-    totalCount, df = crawl_mdcline(singleDate=today)
+    mdcinClinc = Mdcin_clinc_test_info.objects.latest('승인일')
+    start = mdcinClinc.승인일
 
-    if totalCount == 0:
-        return
-    if not df.empty:
-        engine = create_engine(db_connection_url)
-        df.to_sql(name='mdcin_clinc_test_info_temp', con=engine, if_exists='replace')
-        # note : need CREATE EXTENSION pgcrypto; psql >=12 , when using gen_random_uuid (),
-        with engine.begin() as cn:
-            sql = """INSERT INTO mdcin_clinc_test_info (id, 신청자, 승인일, 제품명, 시험제목, 연구실명, 임상단계)
-                        SELECT gen_random_uuid (), t.신청자, t.승인일::integer, t.제품명, t.시험제목, t.연구실명, t.임상단계 
-                        FROM mdcin_clinc_test_info_temp t
-                        WHERE NOT EXISTS 
-                            (SELECT 1 FROM mdcin_clinc_test_info f
-                            WHERE t.신청자 = f.신청자 and t.승인일::integer = f.승인일 and t.제품명 = f.제품명 and t.임상단계 = f.임상단계)"""
-            cn.execute(sql)                             
+    end = datetime.today().strftime('%Y%m%d')    
+    # today = datetime.today()
+    # today = today + timedelta(days=0)
+    # today = today.strftime('%Y%m%d')
+
+    data = str(start)
+    start_dt = date(int(data[0:4]), int(data[4:6]), int(data[6:8]))
+
+    data = str(end)
+    end_dt = date(int(data[0:4]), int(data[4:6]), int(data[6:8]))
+
+    for dt in daterange(start_dt, end_dt):
+        my_date = dt.strftime("%Y%m%d")  
+        totalCount, df = crawl_mdcline(singleDate=my_date)
+
+        if totalCount == 0:
+            return
+        if not df.empty:
+            engine = create_engine(db_connection_url)
+            df.to_sql(name='mdcin_clinc_test_info_temp', con=engine, if_exists='replace')
+            # note : need CREATE EXTENSION pgcrypto; psql >=12 , when using gen_random_uuid (),
+            with engine.begin() as cn:
+                sql = """INSERT INTO mdcin_clinc_test_info (id, 신청자, 승인일, 제품명, 시험제목, 연구실명, 임상단계)
+                            SELECT gen_random_uuid (), t.신청자, t.승인일::integer, t.제품명, t.시험제목, t.연구실명, t.임상단계 
+                            FROM mdcin_clinc_test_info_temp t
+                            WHERE NOT EXISTS 
+                                (SELECT 1 FROM mdcin_clinc_test_info f
+                                WHERE t.신청자 = f.신청자 and t.승인일::integer = f.승인일 and t.제품명 = f.제품명 and t.임상단계 = f.임상단계)"""
+                cn.execute(sql) 
+    return                                            
 
 def crawl_mdcline(singleDate):
     ''' 임상정보 크롤링'''
     # try:
-    html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=100&pageNo=1&approval_time=" + str(singleDate), timeout=10)
+    html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=100&pageNo=1&approval_time=" + str(singleDate)) #, timeout=10)
     # except requests.exceptions.Timeout: # 결과 없는 경우나 시간이 길어지면 stop
         # return 0, {}
 
@@ -149,13 +165,17 @@ def crawl_mdcline(singleDate):
     totalCount = soup.find("totalcount").get_text()
     if totalCount == '0':  # 결과 없으면
         return 0, {}
+    items = ['apply_entp_name','approval_time','goods_name','lab_name','clinic_exam_title','clinic_step_name']
+    item_names = ['신청자','승인일','제품명','연구실명','시험제목','임상단계']
 
     data = soup.find_all("item")
     rawdata = []
     for d in data:
-        citingNo = d.find('apply_entp_name').get_text()
-        if citingNo:
-            res = {'신청자' : citingNo, '승인일' : d.find("approval_time").get_text(), '제품명' : d.find("goods_name").get_text(),'연구실명' : d.find("lab_name").get_text(), '시험제목' : d.find("clinic_exam_title").get_text(),'임상단계' : d.find("clinic_step_name").get_text()}
+        if d:
+            res = {}
+            for (idx, key) in enumerate(items):
+                res[item_names[idx]] = d.find(key).get_text()
+
             rawdata.append(res)    
 
     df = pd.DataFrame(rawdata)            
@@ -184,8 +204,151 @@ def crawl_stock_search_top():
 
     return JsonResponse(res, safe=False)
 
+def crawl_stock_upper():
+    ''' 네이버 금융 > 국내증시 > 상한가  + 상승'''
+    res = []
+    # 상한가
+    df = pd.read_html(NAVER['stock_upper_url'], header=0, encoding = 'euc-kr')
+    for i in [1,2]: # 2dn,3rd table
+        mydf = df[i]
+        # 필요한 row, column만
+        # mydf = mydf.iloc[1:,0:11]
+        mydf = mydf.iloc[1:,[3,4,5,6,7,11]]
+
+        # convert values to numeric
+        # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+        mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+        mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
+        mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
+
+        #remove null row
+        # mydf = mydf[mydf.N != 0]
+        mydf = mydf[mydf.현재가 != 0]
+
+        # add stockCode from model
+        mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+        
+        res += mydf.to_dict('records')
+    # 상승 - 기본탭 코스피
+    df = pd.read_html(NAVER['stock_rise_url'], header=0, encoding = 'euc-kr')
+    mydf = df[1]
+    # 필요한 row, column만
+    mydf = mydf.iloc[0:30,[1,2,3,4,5,10]]
+
+    # convert values to numeric
+    # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+    mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
+    mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
+
+    #remove null row
+    # mydf = mydf[mydf.N != 0]
+    mydf = mydf[mydf.현재가 != 0]
+
+    # add stockCode from model
+    mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    
+    res += mydf.to_dict('records')
+
+    # 상승 - 코스닥
+    df = pd.read_html(NAVER['stock_rise_url']+ '?sosok=1', header=0, encoding = 'euc-kr')
+    mydf = df[1]
+    # 필요한 row, column만
+    mydf = mydf.iloc[0:30,[1,2,3,4,5,10]]
+
+    # convert values to numeric
+    # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+    mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
+    mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
+
+    #remove null row
+    # mydf = mydf[mydf.N != 0]
+    mydf = mydf[mydf.현재가 != 0]
+
+    # add stockCode from model
+    mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    res += mydf.to_dict('records')
+
+    res = sorted(res, key=lambda k : k["등락률"], reverse=True)
+
+
+    return JsonResponse(res, safe=False)    
+
+def crawl_stock_lower():
+    ''' 네이버 금융 > 국내증시 > 하한가  + 하락'''
+    res = []
+    # 하한가
+    df = pd.read_html(NAVER['stock_lower_url'], header=0, encoding = 'euc-kr')
+    for i in [1,2]: # 2dn,3rd table
+        mydf = df[i]
+        # 필요한 row, column만
+        # mydf = mydf.iloc[1:,0:11]
+        mydf = mydf.iloc[1:,[3,4,5,6,7,11]]
+
+        # convert values to numeric
+        # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+        mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+        mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
+        mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
+
+        #remove null row
+        # mydf = mydf[mydf.N != 0]
+        mydf = mydf[mydf.현재가 != 0]
+
+        # add stockCode from model
+        mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+        
+        res += mydf.to_dict('records')
+    # 하락 - 기본탭 코스피 
+    df = pd.read_html(NAVER['stock_fall_url'], header=0, encoding = 'euc-kr')
+    mydf = df[1]
+    # 필요한 row, column만
+    mydf = mydf.iloc[0:30,[1,2,3,4,5,10]]
+
+    # convert values to numeric
+    # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+    mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
+    mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
+
+    #remove null row
+    # mydf = mydf[mydf.N != 0]
+    mydf = mydf[mydf.현재가 != 0]
+
+    # add stockCode from model
+    mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    
+    res += mydf.to_dict('records')
+
+    # 하락 - 코스닥 
+    df = pd.read_html(NAVER['stock_fall_url'] + '?sosok=1', header=0, encoding = 'euc-kr')
+    mydf = df[1]
+    # 필요한 row, column만
+    mydf = mydf.iloc[0:30,[1,2,3,4,5,10]]
+
+    # convert values to numeric
+    # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+    mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
+    mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
+
+    #remove null row
+    # mydf = mydf[mydf.N != 0]
+    mydf = mydf[mydf.현재가 != 0]
+
+    # add stockCode from model
+    mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    mydf = mydf.sort_values(by='등락률', ascending=False)
+
+    res += mydf.to_dict('records') 
+    res = sorted(res, key=lambda k : k["등락률"])
+
+    return JsonResponse(res, safe=False)    
+
+
 def get_stockCode(corpName):
-    listed = listed_corp.objects.filter(회사명=corpName)
+    listed = Listed_corp.objects.filter(회사명=corpName)
     if listed.exists():
         rows = list(listed.values())
         row = rows[0]
@@ -198,7 +361,7 @@ def crawl_stock(request):
     * dataframe 스타일로 rebuild
     page 1 부터 crawling -> if exist at db ? 
               yes -> return
-              no -> stock_quotes.objects.create(**newStock)
+              no -> Stock_quotes.objects.create(**newStock)
     '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -206,7 +369,7 @@ def crawl_stock(request):
 
         # exist ? {
         try:
-            stockQuotes = stock_quotes.objects.filter(stock_code=stockCode).latest('price_date')
+            stockQuotes = Stock_quotes.objects.filter(stock_code=stockCode).latest('price_date')
             maxRecordDate = stockQuotes.price_date if stockQuotes else None
         except:
             maxRecordDate = None
@@ -274,13 +437,13 @@ def crawl_stock(request):
                         # print ("current page content is in db partially")
                         if maxRecordDate and maxRecordDate.date() == price_date.date():
                             # print("match today")
-                            stock_quotes.objects.filter(stock_code=stockCode, price_date=price_date).update(**newStock)
+                            Stock_quotes.objects.filter(stock_code=stockCode, price_date=price_date).update(**newStock)
                         elif maxRecordDate and maxRecordDate.date() < price_date.date():
                             # print("db date is lower then price_date")    
-                            stock_quotes.objects.create(**newStock)
+                            Stock_quotes.objects.create(**newStock)
                     else:
                         # print("db date is older then the page")
-                        stock_quotes.objects.create(**newStock)
+                        Stock_quotes.objects.create(**newStock)
 
 
             # True after waiting the today's stock was updated; skip next page crawl
@@ -300,7 +463,7 @@ def sectorPer(df):
     return {'업종PER(배)' : 0}
 
 def fundamental(df):
-    ''' df[5] :  'PER', 'PBR', 'EPS', 'BPS', '현금배당수익률' '''
+    ''' df[5] :  'PER', 'PBR', 'EPS', 'BPS', '현금DPS', '현금배당수익률' '''
 
     r = {}
 
@@ -308,7 +471,7 @@ def fundamental(df):
     df.columns = ['A','B','C'][:len(df.columns)]
 
     # 가장 최근으로 선택
-    for name in ['PER', 'PBR', 'EPS', 'BPS', '현금배당수익률']:
+    for name in ['PER', 'PBR', 'EPS', 'BPS', '현금DPS', '현금배당수익률']:
         bVal = df.loc[df['A'] == name, 'B']
         try:
             cVal = df.loc[df['A'] == name, 'C']
@@ -322,11 +485,15 @@ def fundamental(df):
     for name in ['PER','PBR']:
         r[name] = r[name].fillna(0).astype(float).to_list()[0]
 
-    for name in ['EPS','BPS']:
+    for name in ['EPS','BPS','현금DPS']:
         try: 
             r[name] = r[name].str.replace('원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
         except: # 원 없고 null
             r[name] = 0
+    # change name        
+    r['현금DPS(원)'] = r['현금DPS']
+    del r['현금DPS']
+    
     try:
         r['현금배당수익률'] = r['현금배당수익률'].str.replace('%', '').fillna(0).astype(float).to_list()[0]
     except:
@@ -334,16 +501,31 @@ def fundamental(df):
 
     return r
 
+# def qPrice(df):
+#     ''' df[6] : 전분기 대비 : '영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)' '''
+#     df.columns = df.iloc[0]
+#     df = df.reindex(df.index.drop(0)).reset_index(drop=True)
+#     df.columns.name = None 
+#     jcols = list(df.columns)
+
+#     jjbun = df[jcols[2]].fillna(0).to_list() # 3번째 cols
+#     jbun = df[jcols[3]].fillna(0).to_list() # 4번째 cols
+  
+#     return {'영업이익증감(전전)' : str2round(jjbun[4]),'영업이익증감(직전)' : str2round(jbun[4]),'순이익증감(전전)' : str2round(jjbun[9]),'순이익증감(직전)' : str2round(jbun[9])}
+
 def qPrice(df):
-    ''' df[6] : '영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)' '''
+    ''' FIXME : df[6] : '영업이익' -> '전년동기대비', '당기순이익' -> '전년동기대비' : '영업이익(y/y)' , '당기순이익(y/y) '''
     df.columns = df.iloc[0]
     df = df.reindex(df.index.drop(0)).reset_index(drop=True)
+    df.columns.name = None 
     jcols = list(df.columns)
 
-    jjbun = df[jcols[2]].fillna(0).to_list() # 3번째 cols
-    jbun = df[jcols[3]].fillna(0).to_list() # 4번째 cols           
+    # jjbun = df[jcols[2]].fillna(0).to_list() # 3번째 cols
+    # 최근분기만 사용
+    jbun = df[jcols[3]].fillna(0).to_list() # 4번째 cols
+  
+    return {'영업이익(Y/Y)' : str2round(jbun[3]),'당기순이익(Y/Y)' : str2round(jbun[8]), '영업이익(Q/Q)' : str2round(jbun[4]),'당기순이익(Q/Q)' : str2round(jbun[9])}
 
-    return {'영업이익증감(전전)' : str2round(jjbun[4]),'영업이익증감(직전)' : str2round(jbun[4]),'순이익증감(전전)' : str2round(jjbun[9]),'순이익증감(직전)' : str2round(jbun[9])}
 
 def stockVolume(df):
     ''' df[1] : '거래량','시가총액' '''
@@ -363,9 +545,10 @@ def get_date_str(s):
 
     return date_str
 
-def financialSummary(df):
+def financialSummary(df, PER):
     ''' df[12] : '매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','자본총계(지배)','부채비율','BPS(원)','PBR(배)','발행주식수(보통주)' 
     'ROE(%)','ROA(%)','EPS(원)','PER(배)' 는 최근분기 사용
+    PER : PEGR 만들때 사용
     '''
     r={}
     # columns을 first row로 변경 or pd.read_html(url, header=1)
@@ -405,7 +588,37 @@ def financialSummary(df):
     for name in my_df_cols[:-1]: # '부채비율' 제외
         r[name] = my_df[name].fillna(0).astype(int).to_list()[0]
 
-    r['부채비율'] = my_df['부채비율'].fillna(0).astype(float).to_list()[0]
+    r['부채비율(%)'] = my_df['부채비율'].fillna(0).astype(float).to_list()[0]
+
+    # EPS(%) 구하기 
+    # 공식: (마지막연도EPS(원)/시작연도EPS(원))^(1/계산하는연도갯수)-1
+    x = []
+    for i in range(0,3):
+        my_df = df_f.loc[[cols[i]],['EPS(원)']]
+        EPS = my_df['EPS(원)'].fillna(0).astype(int).to_list()[0]
+        if EPS != 0:
+            x.append(EPS)
+    x_len = len(x)
+    if x_len < 2:
+        r['EPS(%)'] = 0
+    else:
+        if x[0] <= 0 or x[-1] <= 0:
+            r['EPS(%)'] = 0
+        else:          
+            try:
+                r['EPS(%)'] = ((x[:-1] / x[0])**(1/(x_len - 1))-1) * 100
+            except:
+                r['EPS(%)'] = 0
+
+    if r['EPS(%)'] == 0:
+        r['PEGR(배)'] = 0
+    else:
+        if PER >= 0:          
+            try:
+                r['PEGR(배)'] = PER / r['EPS(%)']
+                r['PEGR(배)'] = str2round(r['PEGR(배)'])
+            except:        
+                r['PEGR(배)'] = 0    
  
     df_l = df.loc[:,~df.columns.duplicated(keep='last')]  # 중복된건 나중것만
     df_l = df_l.T
@@ -422,7 +635,10 @@ def financialSummary(df):
     # 재무 field
     # 형태 { "date" : ['2017/12','2018/12','2019/12','2019/12','2020/03','2020/06'], "dataset": [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]]}
 
-    financial_res = { "date" : cols, "dataset": []}
+    financial_res = { "dateY" : cols[:4], "dateQ": cols[4:], "valueY": [], "valueQ": []}
+    my_list = [[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0]]
+    y_list = [[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]
+    q_list = [[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]
     my_list = [[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0]]
 
     for (idx, name) in enumerate(['매출액','영업이익','당기순이익','부채비율','자본유보율','현금배당성향(%)']):
@@ -431,7 +647,13 @@ def financialSummary(df):
         if name in ['부채비율','현금배당성향(%)']:
             my_list[idx] = df.loc[name,:].fillna(0).astype(float).to_list()
 
-    financial_res['dataset'] = my_list
+    # split half
+    for (idx, d) in enumerate(my_list):
+        y_list[idx] = d[:4]
+        q_list[idx] = d[4:]
+
+    financial_res['valueY'] = y_list
+    financial_res['valueQ'] = q_list
 
     return r, financial_res
 
@@ -454,6 +676,38 @@ def employee_listingdate_research(df):
         r['연구개발비(연)'] = 0
 
     return r
+
+def current_assets_Total_liabilities(df):
+    ''' 유동자산, 부채총계 '''
+    r = {}
+
+    try:        
+        df.columns = ['A','B','C','D','E','F','G','H','I'][:len(df.columns)]
+    except:
+        pass        
+
+    r['유동자산'] = 0
+    try:
+        r['유동자산'] = df.loc[df['A'] =='유동자산', 'E'].fillna(0).astype(float).to_list()[0]
+    except:
+        pass        
+    try:
+        r['유동자산'] = df.loc[df['A'] =='유동자산', 'F'].fillna(0).astype(float).to_list()[0]
+    except:
+        pass
+
+    r['부채총계'] = 0
+    try:
+        r['부채총계'] = df.loc[df['A'] =='부채총계', 'E'].fillna(0).astype(float).to_list()[0]
+    except:
+        pass        
+    try:
+        r['부채총계'] = df.loc[df['A'] =='부채총계', 'F'].fillna(0).astype(float).to_list()[0]
+    except:
+        pass
+
+
+    return r    
 
 def calculate_stock_fair_value(r):
     '''
@@ -486,14 +740,14 @@ def calculate_stock_fair_value(r):
         sumCnt -= 1  
 
     try:
-        res['적(4)s-lim'] = res['기업가치(백만)']/ r['발행주식수(보통주)']*100000000 #100000000     #적정주가(4)s-lim
-        res['적(4)s-lim'] = int(res['적(4)s-lim'])
-        if res['적(4)s-lim'] < 0:
-            res['적(4)s-lim'] = 0
+        res['적(4)s-rim'] = res['기업가치(백만)']/ r['발행주식수(보통주)']*100000000 #100000000     #적정주가(4)s-rim
+        res['적(4)s-rim'] = int(res['적(4)s-rim'])
+        if res['적(4)s-rim'] < 0:
+            res['적(4)s-rim'] = 0
     except:
-         res['적(4)s-lim'] = 0
+         res['적(4)s-rim'] = 0
     finally:         
-        if res['적(4)s-lim'] == 0:
+        if res['적(4)s-rim'] == 0:
             sumCnt -= 1         
 
     try:
@@ -514,45 +768,45 @@ def calculate_stock_fair_value(r):
         res['추천매수가'] = 0
         
     try:
-        res['적정가'] = sum([res['적(1)PER*EPS'],res['적(2)ROE*EPS'],res['적(3)EPS*10'],res['적(4)s-lim'],res['적(5)당기순이익*PER']]) / sumCnt
-        res['적정가'] = int(res['적정가'])
-        if res['적정가'] < 0:
-            res['적정가'] = 0
+        res['적정가평균'] = sum([res['적(1)PER*EPS'],res['적(2)ROE*EPS'],res['적(3)EPS*10'],res['적(4)s-rim'],res['적(5)당기순이익*PER']]) / sumCnt
+        res['적정가평균'] = int(res['적정가평균'])
+        if res['적정가평균'] < 0:
+            res['적정가평균'] = 0
     except:
-        res['적정가'] = 0
+        res['적정가평균'] = 0
 
     try:
-        res['갭1'] = (1 - r['현재가'] / res['적(1)PER*EPS']) * 100    #1-현재가/적정가*100
+        res['갭1'] = (1 - r['전일종가'] / res['적(1)PER*EPS']) * 100    #1-전일종가/적정가평균*100
         res['갭1'] = str2round(res['갭1'],0)
     except:
         res['갭1'] = 0
         
     try:
-        res['갭2'] = (1 - r['현재가'] / res['적(2)ROE*EPS']) * 100    #1-현재가/적정가*100
+        res['갭2'] = (1 - r['전일종가'] / res['적(2)ROE*EPS']) * 100    #1-전일종가/적정가평균*100
         res['갭2'] = str2round(res['갭2'],0)
     except:
         res['갭1'] = 0    
         
     try:
-        res['갭3'] = (1 - r['현재가'] / res['적(3)EPS*10']) * 100    #1-현재가/적정가*100
+        res['갭3'] = (1 - r['전일종가'] / res['적(3)EPS*10']) * 100    #1-전일종가/적정가평균*100
         res['갭3'] = str2round(res['갭3'],0)
     except:
         res['갭1'] = 0    
         
     try:
-        res['갭4'] = (1 - r['현재가'] / res['적(4)s-lim']) * 100    #1-현재가/적정가*100
+        res['갭4'] = (1 - r['전일종가'] / res['적(4)s-rim']) * 100    #1-전일종가/적정가평균*100
         res['갭4'] = str2round(res['갭4'],0)
     except:
         res['갭1'] = 0    
         
     try:
-        res['갭5'] = (1 - r['현재가'] / res['적(5)당기순이익*PER']) * 100    #1-현재가/적정가*100
+        res['갭5'] = (1 - r['전일종가'] / res['적(5)당기순이익*PER']) * 100    #1-전일종가/적정가평균*100
         res['갭5'] = str2round(res['갭5'],0)
     except:
         res['갭1'] = 0    
 
-    if res['적정가'] >  r['현재가']:                  #(평균목표가 - 현재가) / 평균목표가
-        res['기대수익률'] = (res['적정가'] - r['현재가']) / res['적정가'] *100
+    if res['적정가평균'] >  r['전일종가']:                  #(평균목표가 - 현재가) / 평균목표가
+        res['기대수익률'] = (res['적정가평균'] - r['전일종가']) / res['적정가평균'] *100
         res['기대수익률'] = round(res['기대수익률'],0)
     else:
         res['기대수익률'] = 0    
@@ -580,13 +834,26 @@ def calculate_stock_fair_value(r):
 
     # 가격성장흐름(PGF)
     try: 
-        res['PGF(%)'] = (res['주당R&D(원)'] + r['EPS(원)'] ) / r['현재가'] * 100
+        res['PGF(%)'] = (res['주당R&D(원)'] + r['EPS(원)'] ) / r['전일종가'] * 100
         res['PGF(%)'] = int(res['PGF(%)'])        
     except:
         res['PGF(%)'] = 0
     finally:
         if not res['PGF(%)']:
-            res['PGF(%)'] = 0             
+            res['PGF(%)'] = 0
+
+    # NCAV(억) : 유동자산 - 부채총계
+    # NCAV(%) : NCAV(유동자산-부채총계) / (시가총액(억)*1.5)
+    try:
+        res['NCAV(억)'] = r['유동자산'] - r['부채총계']
+        res['NCAV(억)'] = round(res['NCAV(억)'],1)    
+    except:
+        res['NCAV(억)'] = 0
+    try:            
+        res['NCAV(%)'] = res['NCAV(억)'] / (r['시가총액(억)']*1.5)
+        res['NCAV(%)'] = round(res['NCAV(%)'],2)
+    except:        
+        res['NCAV(%)'] = 0
 
     return res
 
@@ -639,12 +906,12 @@ def financial_crawler(request):
     html0 = browser.page_source
     html1 = BeautifulSoup(html0,'lxml')
 
-    # * 현재가, 
+    # * 전일종가, 
     # * 업종PER : df[0]
     # * 'PER', 'PBR', 'EPS', 'BPS', '현금배당수익률' - 펀더멘털 : df[5]
     # * '영업이익증감(전전)' - 펀더멘탈 > 어닝서프라이즈 > 영업이익 > 전분기대비 : df[5]
     # * '순이익증감(전전)' - 펀더멘탈 > 어닝서프라이즈 > 당기순이익 > 전분기대비 
-    # * '거래량', '시가총액', 수익률(1d/1m/1y) 구하기
+    # * '거래량', '시가총액(억)', 수익률(1d/1m/1y) 구하기
     # * 피낸셜 서머리 : df[12]
 
     df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
@@ -652,7 +919,7 @@ def financial_crawler(request):
     res = {}
 
     nowPrice = html1.find_all('strong')[0].get_text().strip()
-    res.update({'현재가' : str2int(nowPrice) })
+    res.update({'전일종가' : str2int(nowPrice) })
 
     res.update(sectorPer(df[0]))
 
@@ -662,22 +929,35 @@ def financial_crawler(request):
 
     res.update(stockVolume(df[1]))
 
-    temp_res, second_res = financialSummary(df[12])
+    temp_res, second_res = financialSummary(df[12], res['PER'])
     res.update(temp_res)
 
+    wait = WebDriverWait(browser, 10)
+
     browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[2]')[0].click() # "기업개요" 클릭하기
+    wait.until(EC.presence_of_element_located((By.XPATH,'//*[@id="cTB201"]')))
     df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
     res.update(employee_listingdate_research(df))
+
+
+    browser.find_elements_by_xpath('//*[@id="header-menu"]/div[1]/dl/dt[3]')[0].click() # "재무분석" 클릭하기
+    # browser.find_elements_by_xpath('//*[@id="rpt_tab2"]')[0].click() # "재무분석" > "재무상태표" 클릭
+    childTab = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="rpt_tab2"]'))) # "재무분석" > "재무상태표" 클릭
+    childTab.click()
+    wait.until(EC.presence_of_element_located((By.XPATH,'//*[@id="chart2"]')))
+
+    df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')
+    res.update(current_assets_Total_liabilities(df[5]))
 
     res.update(calculate_stock_fair_value(res))
 
     # save data in db if necessary
-    listedCorp = listed_corp.objects.get(종목코드=stockCode)
+    listedCorp = Listed_corp.objects.get(종목코드=stockCode)
     
     listedCorp.정보 = res
     listedCorp.save(update_fields=['정보'])
 
-    listedCorp = listed_corp.objects.get(종목코드=stockCode)
+    listedCorp = Listed_corp.objects.get(종목코드=stockCode)
     listedCorp.재무 = second_res
     listedCorp.save(update_fields=['재무'])    
    
@@ -695,33 +975,35 @@ empty_dict = {
     '당기순이익': 0,
     '매출액': 0,
     '발행주식수(보통주)': 0,
-    '부채비율': 0,
+    '부채비율(%)': 0,
     '부채총계': 0,
     '상장일': '',    
     '수익률':0,
-    '순이익증감(전전)': 0,
-    '순이익증감(직전)': 0,
-    '시가총액':0,
+    '당기순이익(Y/Y)': 0,
+    '시가총액(억)':0,
     '업종PER(배)': 0,
     '영업이익': 0,
-    '영업이익증감(전전)': 0,
-    '영업이익증감(직전)': 0,
+    '영업이익(Y/Y)': 0,
     '자본총계': 0,
     '자본총계(지배)': 0,
     '자산총계': 0,
     '적(1)PER*EPS': 0,
     '적(2)ROE*EPS': 0,
     '적(3)EPS*10': 0,
-    '적(4)s-lim': 0,
+    '적(4)s-rim': 0,
     '적(5)당기순이익*PER': 0,
-    '적정가': 0,
+    '적정가평균': 0,
     '종업원수': 0,
     '추천매수가': 0,
+    '현금DPS(원)': 0,
     '현금배당수익률': 0,
-    '현재가': 0,    
+    '전일종가': 0,    
     'BPS(원)': 0,    
     'EPS(원)': 0,
+    'NCAV(억)': 0,
+    'NCAV(%)': 0,    
     'PBR(배)': 0,
+    'PEGR(배)': 0,
     'PER(배)': 0,
     'PER갭(%)': 0,
     'ROA(%)': 0,

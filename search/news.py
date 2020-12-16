@@ -10,7 +10,7 @@ from konlpy.tag import Mecab
 from django.http import JsonResponse
 from django.http import HttpResponse
 
-from .models import listed_corp
+from .models import Listed_corp
 
 from .utils import get_redis_key
 
@@ -199,12 +199,12 @@ def parse_news_nlp(request, mode="needJson"):
 #     unique_news_nlp= remove_duplicate(news_nlp)
     
 #     try:
-#         isExist = disclosure.objects.filter(corp_name__in=unique_news_nlp).exists()
+#         isExist = Disclosure.objects.filter(corp_name__in=unique_news_nlp).exists()
 #         if not isExist:
 #             return HttpResponse('Not Found', status=404)
 #         EXCLUDE_COMPANY_NAME = getattr(settings, 'EXCLUDE_COMPANY_NAME')
 
-#         disClosure = disclosure.objects.filter(corp_name__in=unique_news_nlp).exclude(corp_name__in=EXCLUDE_COMPANY_NAME)
+#         disClosure = Disclosure.objects.filter(corp_name__in=unique_news_nlp).exclude(corp_name__in=EXCLUDE_COMPANY_NAME)
 #         myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('-stock_code','corp_name'))[:10]
 #         myCorpCode = list(disClosure.values_list('corp_code', flat=True).order_by('-stock_code','corp_name'))[:10]
 #         myStockCode = list(disClosure.values_list('stock_code', flat=True).order_by('-stock_code','corp_name'))[:10]
@@ -265,13 +265,13 @@ def parse_related_company(request, mode="needJson"):
     unique_news_nlp= remove_duplicate(news_nlp)
     
     try:
-        isExist = listed_corp.objects.filter(회사명__in=unique_news_nlp).exists()
+        isExist = Listed_corp.objects.filter(회사명__in=unique_news_nlp).exists()
         if not isExist:
             return HttpResponse('Not Found', status=404)
 
         EXCLUDE_COMPANY_NAME = settings.TERMS['EXCLUDE_COMPANY_NAME']
 
-        listedCorp = listed_corp.objects.filter(회사명__in=unique_news_nlp).exclude(회사명__in=EXCLUDE_COMPANY_NAME)
+        listedCorp = Listed_corp.objects.filter(회사명__in=unique_news_nlp).exclude(회사명__in=EXCLUDE_COMPANY_NAME)
         myCorpName = list(listedCorp.values_list('회사명', flat=True).order_by('-종목코드','회사명'))[:10]
         # myCorpCode = list(listedCorp.values_list('corp_code', flat=True).order_by('-종목코드','회사명'))[:10]
         myStockCode = list(listedCorp.values_list('종목코드', flat=True).order_by('-종목코드','회사명'))[:10]
