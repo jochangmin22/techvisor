@@ -139,7 +139,7 @@ def update_today_crawl_mdcline():
         totalCount, df = crawl_mdcline(singleDate=my_date)
 
         if totalCount == 0:
-            return
+            continue
         if not df.empty:
             engine = create_engine(db_connection_url)
             df.to_sql(name='mdcin_clinc_test_info_temp', con=engine, if_exists='replace')
