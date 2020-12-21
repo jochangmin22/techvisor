@@ -5,5 +5,5 @@ from .models import Order
 class OrderCreateForm(ModelForm):
     class Meta:
         model = Order
-        fields = ['discount']
+        fields = ['discount', 'user']
         # fields = "__all__"

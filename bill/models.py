@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 
-from users.models import users
+from users.models import Users
 
 # Create your models here.
 class Product(models.Model):
@@ -26,7 +26,7 @@ class Order(models.Model):
         default = uuid.uuid4,
         editable = False
     )
-    user = models.ForeignKey(users, on_delete = models.CASCADE)
+    user = models.ForeignKey(Users, on_delete = models.CASCADE)
     created_at = models.DateTimeField(auto_now_add = True)
     updated_at = models.DateTimeField(auto_now = True)
     paid = models.BooleanField(default = False)
@@ -71,25 +71,24 @@ class OrderTransactionManager(models.Manager):
     def create_new(self, order, amount, success = None, transaction_status = None):
         if not order:
             raise ValueError("주문 오류")
-        user_data = users.objects.get(id = order.user_id)
+        user_data = Users.objects.get(id = order.user_id)
         order_hash = hashlib.sha256(str(order.id).encode('utf-8')).hexdigest()
         email_hash = user_data.data["email"].split("@")[0]
         final_hash = hashlib.sha256((order_hash + email_hash).encode('utf-8')).hexdigest()[:10]
         merchant_order_id = "%s"%(final_hash)
 
-        payment_prepare(merchant_order_id, amount)
-
-        transaction = self.model(
-            order = order,
-            merchant_order_id = merchant_order_id,
-            amount = amount
-        )
-
-        if success is not None:
-            transaction.success = success
-            transaction.transaction_status = transaction_status
-        
+        payments_prepare(merchant_order_id, amount)
         try:
+            transaction = self.model(
+                order = order,
+                merchant_order_id = merchant_order_id,
+                amount = amount
+            )
+
+            if success is not None:
+                transaction.success = success
+                transaction.transaction_status = transaction_status
+            print('Transaction status : ', transaction)    
             transaction.save()
         except Exception as e:
             print("Save Error", e)
@@ -98,6 +97,7 @@ class OrderTransactionManager(models.Manager):
     
     def get_transaction(self, merchant_order_id):
         result = find_transaction(merchant_order_id)
+        print('trans result : ', result)
         if result['status'] == 'paid':
             return result
         else:
@@ -109,7 +109,7 @@ class OrderTransaction(models.Model):
         default = uuid.uuid4,
         editable = False
     )
-    user = models.ForeignKey(users, on_delete = models.CASCADE, null = True)
+    order = models.ForeignKey(Order, on_delete = models.CASCADE, null = True)
     merchant_order_id = models.CharField(max_length = 120, null = True, blank = True)
     transaction_id = models.CharField(max_length = 120, null = True, blank = True)
     amount = models.PositiveIntegerField(default = 0)
@@ -118,16 +118,23 @@ class OrderTransaction(models.Model):
     type = models.CharField(max_length = 120)
     created = models.DateTimeField(auto_now_add = True, auto_now = False)
 
+    trans_objects = OrderTransactionManager()
+
     def __str__(self):
-        return self.order_id
+        return str(self.order_id)
 
     class Meta:
         db_table = 'order_transaction'
         ordering = ['-created']
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+# @receiver(post_save, sender = OrderTransaction)
 def order_payment_validation(sender, instance, created, *args, **kwargs):
     if instance.transaction_id:
-        import_transaction = OrderTransaction.objects.get_transaction(merchant_order_id = instance.merchant_order_id)
+        import_transaction = OrderTransaction.trans_objects.get_transaction(merchant_order_id = instance.merchant_order_id)
+        print('WHO R U : ', import_transaction)
 
         merchant_order_id = import_transaction["merchant_order_id"]
         imp_id = import_transaction["imp_id"]
@@ -138,5 +145,5 @@ def order_payment_validation(sender, instance, created, *args, **kwargs):
         if not import_transaction or not local_transaction:
             raise ValueError("비정상 거래입니다.")
 
-from django.db.models.signals import post_save
+
 post_save.connect(order_payment_validation, sender = OrderTransaction)
