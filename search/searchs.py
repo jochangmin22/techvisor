@@ -157,11 +157,7 @@ def parse_searchs(request, mode="begin"):
 
         # npl and mtx parse
         for i in range(len(row)):
-<<<<<<< HEAD
             row[i]['id'] = row[i]['출원번호'] # add id key for FE's ids
-=======
-            row[i]['id'] = row[i]['출원번호'] # add id for FE's ids
->>>>>>> 23aec19... Modify the crawler to work in crontab
             raw_abstract += row[i]["요약token"] if row[i]["요약token"] else "" + " "
             raw_claims += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
 

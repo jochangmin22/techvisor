@@ -515,6 +515,7 @@ def create_label(request):
         else:    
             if received_label not in user_query.data['label'].keys():
                 user_query.data['label'][received_label] = []
+
         user_query.save()
         return JsonResponse({ "users_label" : user_query.data['labels']}, status = 200, safe = False)
 
