@@ -241,19 +241,22 @@ def parse_indicator(request):
     # 개별 등록건수 count
     df = pd.DataFrame(d).loc[:,['출원인코드1','등록일자']]
     df['출원인코드1'] = df['출원인코드1'].astype(str)
-    grantedList = (df[df.등록일자.notnull()]
+    # grantedList = (df[df.등록일자.notnull()]
+    grantedList = (df
         .value_counts(['출원인코드1'])
         .reset_index(name='value')
         .rename(columns={'출원인코드1':'code'})
         .to_dict('r'))
 
+
     # 전체 row 의 등록건 출원번호 list
     df = pd.DataFrame(d).loc[:,['출원번호','등록일자']]
-    df = df[df.등록일자.notnull()].loc[:,['출원번호']].출원번호.astype(str).tolist()      
+    # df = df[df.등록일자.notnull()].loc[:,['출원번호']].출원번호.astype(str).tolist()      
+    df = df.loc[:,['출원번호']].출원번호.astype(str).tolist()      
     total_granted = len(df) # get total_granted
+
+  
     appNoList = ', '.join(df)
-
-
     # 전체 등록특허의 피인용수
     try:
         with connection.cursor() as cursor: 
@@ -271,7 +274,6 @@ def parse_indicator(request):
     df = pd.DataFrame(d).loc[:,['출원인1','출원인코드1','출원번호']]
     df['출원인코드1'] = df['출원인코드1'].astype(str)
     df['출원번호'] = df['출원번호'].astype(str)
-
     df = (df
         .groupby(['출원인1','출원인코드1'])
         .출원번호
@@ -280,11 +282,23 @@ def parse_indicator(request):
         .to_dict('r')
         )
 
-    dataList = [{'name' : dic['출원인1'], 'code' : dic['출원인코드1'], 'appNo' : dic['출원번호']} for dic in df]
+    companyLimit = 1000    
 
+    # dataList = [{'name' : dic['출원인1'], 'code' : dic['출원인코드1'], 'appNo' : dic['출원번호']} for dic in df]
+    dataList = [{'name' : dic['출원인1'], 'code' : dic['출원인코드1'], 'appNo' : dic['출원번호']} for dic in df][:companyLimit]
+
+    # TODO : list of dict 출원번호 sort desc로 자르기
+
+    dataLen = companyLimit if len(dataList) >= companyLimit else len(dataList)
     l = []
-    for i in range(len(dataList)):
+    for i in range(dataLen):
+    # for i in range(len(dataList)):
         with connection.cursor() as cursor:
+
+            # 출원인1이 1000개 이상인 건만 출원건 1개인 출원인 제외 - 속도
+            if dataLen == 1000:
+                if len(dataList[i]['appNo']) == 1:
+                    continue
 
             appNos = ', '.join(dataList[i]['appNo'])
             code = dataList[i]['code']

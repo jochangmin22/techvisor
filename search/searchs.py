@@ -8,6 +8,7 @@ from konlpy.tag import Mecab
 from copy import deepcopy
 import json
 
+
 from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
 # from .similarity import similarity
 
@@ -65,8 +66,8 @@ def parse_searchs(request, mode="begin"):
 
     elif mode == "indicator":
         try:
-            if context['raw']:
-                return context['raw']
+            if context['ind_raw']:
+                return context['ind_raw']
         except:
             pass
 
@@ -145,14 +146,18 @@ def parse_searchs(request, mode="begin"):
     raw_abstract = ''
     raw_claims = ''
     mtx_raw = []
-    entriesToRemove = ('등록사항', '발명의명칭(국문)', '발명의명칭(영문)', '출원인코드1', '출원인국가코드1', '발명자1', '발명자국가코드1', '등록일자', '공개일자')
+    ind_raw = []
+    dropKeysMatrix = ('등록사항', '발명의명칭(국문)', '발명의명칭(영문)', '출원인코드1', '출원인국가코드1', '발명자1', '발명자국가코드1', '등록일자', '공개일자')
+    dropKeysIndicater = ('등록사항', '발명의명칭(국문)', '발명의명칭(영문)', '출원인국가코드1', '발명자1', '발명자국가코드1', '공개일자','ipc요약', '요약token', '전체항token')
+
     if row:
-        # matrix list 생성
+        # copy
         mtx_raw = deepcopy(row)
+        ind_raw = deepcopy(row)
 
         # npl and mtx parse
         for i in range(len(row)):
-            row[i]['id'] = row[i]['출원번호'] # add id for FE's ids
+            row[i]['id'] = row[i]['출원번호'] # add id key for FE's ids
             raw_abstract += row[i]["요약token"] if row[i]["요약token"] else "" + " "
             raw_claims += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
 
@@ -161,13 +166,25 @@ def parse_searchs(request, mode="begin"):
             del row[i]["전체항token"]
 
             # matrix는 출원번호, 출원일자, 출원인1, ipc요약, 요약token, 전체항token만 사용
-            for k in entriesToRemove:
+            for k in dropKeysMatrix:
                 mtx_raw[i].pop(k, None)
 
+            # 출원년만 사용
             mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]
+
+            # indicater는 ['출원번호','출원인코드1','등록일자','출원인1'] 만 사용
+            for k in dropKeysIndicater:
+                ind_raw[i].pop(k, None)
 
     else:  # 결과값 없을 때 처리
         row = []
+
+    # if mtx_raw:
+    #    for i in mtx_raw:
+    #        mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]
+        
+    if ind_raw:
+        ind_raw = [i for i in ind_raw if not (i['등록일자'] == None)] # 등록건만
 
     # sampling_row =sampling(row, subParams['analysisOptions']['tableOptions']['pageIndex'], subParams['analysisOptions']['tableOptions']['pageSize'])
     # res = { 'entities' : sampling_row, 'dataCount' : len(row)}
@@ -180,6 +197,7 @@ def parse_searchs(request, mode="begin"):
     # redis 저장 {
     new_context = {}
     new_context['mtx_raw'] = mtx_raw
+    new_context['ind_raw'] = ind_raw
     new_context['raw'] = row
     # new_context['raw_fetch'] = res
     new_context['raw_abstract'] = raw_abstract
@@ -194,7 +212,7 @@ def parse_searchs(request, mode="begin"):
     elif mode == "matrix":
         return mtx_raw          
     elif mode == "indicator":
-        return row          
+        return ind_raw
 
 def parse_nlp(request, analType):
     """ 쿼리 실행 및 결과 저장

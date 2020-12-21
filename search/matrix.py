@@ -60,11 +60,13 @@ def parse_matrix(request):
     elif subParams['analysisOptions']['matrixOptions']['volume'] == '청구항':
         targetField = '전체항token'        
 
-    # mtx_raw의 요약token에서 topic 20 (unitNumber) 이 포함되는 [출원일자, ipc요약, 출원인1] count 
+    # mtx_raw의 요약token에서 topic N (unitNumber) 이 포함되는 [출원일자, ipc요약, 출원인1] count 
     # (mtx_raw는 출원번호, 출원일자(년), 출원인1, ipc요약, 요약token 로 구성)
     mlist = []  # list of dic
     all_list = {}  # dic of list of dic
     matrixMax = 0
+    xData = []
+    yData = []
     try:
         for j in range(len(topic)):  # topic 20
             temp = [d for d in mtx_raw if topic[j].replace("_"," ") in d[targetField]]
@@ -72,12 +74,18 @@ def parse_matrix(request):
             max_value = max(list(temp2.values()), default=0)
             matrixMax = max_value if matrixMax < max_value else matrixMax
             mlist.append(temp2)
+            _yData = list(set().union(*mlist))
+            yData = list(set(yData + _yData))
             all_list[topic[j].replace("_"," ")] = mlist
             mlist = []
     except:
         pass
 
-    res =  {"entities": all_list, "max": matrixMax}
+    xData = list(set().union(all_list.keys()))
+    yData.sort(reverse=True)
+    yData = yData[:15]
+
+    res =  {"entities": all_list, "max": matrixMax, "xData": xData, "yData" : yData}
 
     # Redis {
     try:
