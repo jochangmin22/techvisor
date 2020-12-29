@@ -23,6 +23,16 @@ class Stock_quotes(models.Model):
         db_table = '"stock_quotes"'
         indexes = [models.Index(fields=['stock_code', 'price_date'])]
 
+class Stock_split(models.Model):
+    objects = models.Manager()    
+    stock_code = models.CharField(max_length=10)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    stock_split = models.DecimalField(max_digits=4, decimal_places=3)
+    
+    class Meta:
+        db_table = '"stock_split"'
+
 class Financial_statements(models.Model):
     objects = models.Manager()
     # id = models.UUIDField(
@@ -90,7 +100,7 @@ class Nice_corp(models.Model):
         db_table = '"nice_corp"'
 
 class Disclosure_report(models.Model):
-    objects = models.Manager()
+    objects = models.Manager()    
     법인구분 = models.CharField(max_length=10, null=True)
     종목명 = models.CharField(max_length=255)
     고유번호 = models.CharField(max_length=10) 
@@ -103,6 +113,6 @@ class Disclosure_report(models.Model):
 
     class Meta:
         db_table = '"disclosure_report"'            
-       
+
 
 # primary_key가 있어야 id가 생성안됨

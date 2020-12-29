@@ -8,9 +8,8 @@
 from . import companies
 from . import related_info
 # from . import company
-from . import finance
 from . import crawler
-from . import label
+from . import favorite
 # from . import company_info
 
 # companies 
@@ -52,10 +51,10 @@ def get_stock_lower(request):
     return crawler.crawl_stock_lower()
 
 def get_labels(request):
-    return label.get_labels()
+    return favorite.get_labels()
 
 def update_labels(request):
-    return label.update_labels(request)
+    return favorite.update_labels(request)
 
 # company
 # def get_company(request, companyId=""):
@@ -67,12 +66,36 @@ def update_labels(request):
 
 
 
-def get_company(request):
-    return finance.crawl_dart(request)
-
 # def get_topic(request):
 #     return kr_nlp(request, "topic")
 
 
 # def get_vec(request):
 #     return kr_nlp(request, "vec")
+
+def toggle_searchs_starred(request):
+    return favorite.toggle_starred(request)
+
+def set_searchs_starred(request):
+    return favorite.set_starred(request)
+
+def set_searchs_unstarred(request):
+    return favorite.set_unstarred(request)
+
+def set_searchs_labels(request):
+    return favorite.set_labels(request)
+
+def set_searchs_unlabels(request):
+    return favorite.set_unlabels(request)
+
+def create_label(request):
+    return favorite.create_label(request)
+
+def remove_label(request):
+    return favorite.remove_label(request)
+
+def labeling(request):
+    return favorite.user_labeling(request)
+
+def remove_labeling(request):
+    return favorite.user_remove_labeling(request)
