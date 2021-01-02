@@ -192,26 +192,26 @@ def get_companies(request, mode="begin"):
         cursor.execute(
             "SET work_mem to '100MB';"
             + query)            
-        row = dictfetchall(cursor)
+        result = dictfetchall(cursor)
 
-    if row:
-        for i in range(len(row)):
-            data = json.loads(row[i]['정보']) # move position each fields of 정보 json to main fields
-            row[i]['id'] = row[i]['종목코드']
+    if result:
+        for i in range(len(result)):
+            data = json.loads(result[i]['정보']) # move position each fields of 정보 json to main fields
+            result[i]['id'] = result[i]['종목코드']
             for key, value in data.items():
-                row[i].update({key: value})
+                result[i].update({key: value})
 
-            del row[i]['정보']
+            del result[i]['정보']
 
     # redis 저장 {
     new_context = {}
-    new_context['raw'] = row
+    new_context['raw'] = result
 
     cache.set(mainKey, new_context, CACHE_TTL)
     # redis 저장 }
 
     if mode == "begin":
-        return JsonResponse(row, safe=False)
+        return JsonResponse(result, safe=False)
    
 
 def parse_companies(request, mode="begin"): # mode : begin, nlp, query
@@ -260,45 +260,45 @@ def parse_companies(request, mode="begin"): # mode : begin, nlp, query
             "SET work_mem to '100MB';"
             + query
         )
-        row = dictfetchall(cursor)
+        result = dictfetchall(cursor)
 
-    # if row:
-    #     for i in range(len(row)):
-    #         del row[i]["요약token"]
-    #         del row[i]["전체항token"]
+    # if result:
+    #     for i in range(len(result)):
+    #         del result[i]["요약token"]
+    #         del result[i]["전체항token"]
 
     # all entries
     # entriesToRemove = ('BPS(원)','EPS(원)','PBR(배)','PER(배)','PER갭(%)','ROA(%)','ROE(%)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','대표자명','매출액','발행주식수(보통주)','부채비율','부채총계','적정가','상장일','수익률','순이익증감(전전)','순이익증감(직전)','시가총액','업종','업종PER(배)','영업이익','영업이익증감(전전)','영업이익증감(직전)','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-rim','적(5)당기순이익*PER','종목코드','종업원수','주요제품','지역','추천매수가','현재가','홈페이지','회사명')
     # entriesToRemove = ('BPS(원)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','매출액','발행주식수(보통주)','부채총계','상장일','수익률','영업이익','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-rim','적(5)당기순이익*PER','종업원수','추천매수가')
-    if row:
+    if result:
         # res = deepcopy(res)
-        for i in range(len(row)):
-            data = json.loads(row[i]['정보']) # move position each fields of 정보 json to main fields
+        for i in range(len(result)):
+            data = json.loads(result[i]['정보']) # move position each fields of 정보 json to main fields
             for key, value in data.items():
-                row[i].update({key: value})
+                result[i].update({key: value})
 
-            # data = json.loads(row[i]['적정'])
+            # data = json.loads(result[i]['적정'])
             # for key, value in data.items():
-            #     row[i].update({key: value})                
+            #     result[i].update({key: value})                
 
-            del row[i]['정보']
-            # del row[i]['적정'] 
+            del result[i]['정보']
+            # del result[i]['적정'] 
 
             # for k in entriesToRemove:
-            #     row[i].pop(k, None)       
+            #     result[i].pop(k, None)       
 
 
     # redis 저장 {
     new_context = {}
     # new_context['nlp_raw'] = nlp_raw
     # new_context['mtx_raw'] = mtx_raw
-    new_context['raw'] = row
+    new_context['raw'] = result
 
     cache.set(mainKey, new_context, CACHE_TTL)
     # redis 저장 }
 
     if mode == "begin":
-        return JsonResponse(row, safe=False)
+        return JsonResponse(result, safe=False)
     # elif mode == "nlp":
     #     return nlp_raw
     # elif mode =="matrix":
@@ -323,11 +323,11 @@ def parse_financial_info(request):
 
         row = Listed_corp.objects.filter(종목코드=stockCode).values()
         row = list(row)
-        res = row[0]['재무'] if row else {}
+        result = row[0]['재무'] if row else {}
         if row:
-            res.update({ 'stockFairValue': [ row[0]['정보']['적(1)PER*EPS'], row[0]['정보']['적(2)ROE*EPS'], row[0]['정보']['적(3)EPS*10'], row[0]['정보']['적(4)s-rim'], row[0]['정보']['적(5)당기순이익*PER'], row[0]['정보']['적정가평균'], row[0]['정보']['전일종가']]})
+            result.update({ 'stockFairValue': [ row[0]['정보']['적(1)PER*EPS'], row[0]['정보']['적(2)ROE*EPS'], row[0]['정보']['적(3)EPS*10'], row[0]['정보']['적(4)s-rim'], row[0]['정보']['적(5)당기순이익*PER'], row[0]['정보']['적정가평균'], row[0]['정보']['전일종가']]})
 
-    return JsonResponse(res, safe=False)    
+    return JsonResponse(result, safe=False)    
 
 def parse_stock(request):
     """ stock quote """

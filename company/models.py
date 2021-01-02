@@ -13,11 +13,7 @@ class Stock_quotes(models.Model):
     stock_code = models.CharField(max_length=10)
     price_date = models.DateField()
     stock = models.JSONField(default=list, null=True)
-    # volume = models.DecimalField(max_digits=15, decimal_places=1)
     volume = models.IntegerField()
-    # volume = models.CharField(max_length=255)
-    # created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    # updated_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = '"stock_quotes"'
@@ -57,7 +53,6 @@ class Mdcin_clinc_test_info(models.Model):
     신청자 = models.CharField(max_length=100)
     승인일 = models.IntegerField()
     제품명 = models.CharField(max_length=255)
-    # 정보 = models.JSONField(default=dict, null=True)
     시험제목 = models.TextField(blank=True, null=True)
     연구실명 = models.TextField(blank=True, null=True)
     임상단계 = models.CharField(max_length=50, null=True)

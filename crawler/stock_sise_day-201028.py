@@ -311,6 +311,9 @@ def main_def():
     parser.add_argument('--end', type=int, default=0, help="What is the end number?")
     parser.add_argument('--clear', type=str2bool, nargs='?', const=True, default=False, help='Should I truncate the Table before execution?')
     parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=False, help='Do you want to crawl the entire company regardless of start, end number')          
+    parser.add_argument('--acode', type=str, nargs='?', const=True, default=None, help='What is the stockcode of company do you want Update?') 
+
+
 
                        
     args = parser.parse_args()
@@ -319,34 +322,55 @@ def main_def():
     end = args.end
     clear = args.clear
     entire = args.entire
+    acode = args.acode
 
     # start_time = time.time()
+    if not acode:
+        kindInfo = get_kind_stock_code()
 
-    kindInfo = get_kind_stock_code()
 
+            
+        # threading.Timer(1, main_def(repeat_cnt)).start()
 
-          
-    # threading.Timer(1, main_def(repeat_cnt)).start()
+        if entire:
+            rangeValue = range(len(kindInfo))
+        else:
+            rangeValue = range(start, end)
 
-    if entire:
-        rangeValue = range(len(kindInfo))
+        print('총 상장법인수 :', len(kindInfo))
+        print('실행건       :', len(rangeValue))        
+        print('실행소요예상 :', int(int(len(rangeValue)) * 1 / 60), '분')        
+
+        if clear:
+            backupAndEmptyTable()
+        # for i in range(len(kindInfo)):
+        # for i in range(0,50):
+        for i in rangeValue:
+            start_time = time.time()
+
+            stockCode = kindInfo.종목코드.values[i].strip()
+        #     print(stockCode)
+            crawl_stock(i, stockCode)
+
+            # memory usage check
+            memoryUse = psutil.virtual_memory()[2] 
+
+            print(
+                "{0}. {1} {2} {3} success --- {4} 초 ---".format(
+                    str(i),
+                    str(stockCode),
+                    time.strftime('%H:%M', time.localtime(time.time())), 
+                    str(memoryUse)+'%',
+                    round(time.time() - start_time,1)
+                )
+            )            
+                
+        print('----------------------')
+        print('done')
     else:
-        rangeValue = range(start, end)
-
-    print('총 상장법인수 :', len(kindInfo))
-    print('실행건       :', len(rangeValue))        
-    print('실행소요예상 :', int(int(len(rangeValue)) * 1 / 60), '분')        
-
-    if clear:
-        backupAndEmptyTable()
-    # for i in range(len(kindInfo)):
-    # for i in range(0,50):
-    for i in rangeValue:
-        start_time = time.time()
-
-        stockCode = kindInfo.종목코드.values[i].strip()
-    #     print(stockCode)
-        crawl_stock(i, stockCode)
+        stockCode = acode
+        print('실행건       :', stockCode)   
+        crawl_stock(0, stockCode)
 
         # memory usage check
         memoryUse = psutil.virtual_memory()[2] 
@@ -360,11 +384,9 @@ def main_def():
                 round(time.time() - start_time,1)
             )
         )            
-            
-    print('----------------------')
-    print('done')
-
-      
+                
+        print('----------------------')
+        print('done')
 
 if __name__ == "__main__":
     # request = int(sys.argv[1])

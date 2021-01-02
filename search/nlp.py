@@ -64,22 +64,22 @@ def parse_wordcloud(request):
         sublist.items(), key=operator.itemgetter(1), reverse=True)[:unitNumber]
 
     fields = ["name", "value"]
-    dicts = [dict(zip(fields, d)) for d in sublist]
+    result = [dict(zip(fields, d)) for d in sublist]
 
     # json 형태로 출력
-    dicts = json.dumps(dicts, ensure_ascii=False, indent="\t")
-    if not dicts:
+    result = json.dumps(result, ensure_ascii=False, indent="\t")
+    if not result:
         return HttpResponse("[]", content_type="text/plain; charset=utf-8")
 
     # Redis {
     try:
-        sub_context['wordcloud'] = dicts
+        sub_context['wordcloud'] = result
         cache.set(subKey, sub_context, CACHE_TTL)
     except:
         pass        
     # Redis }
 
-    return HttpResponse(dicts)
+    return HttpResponse(result)
 
 def parse_vec(request):
     """ 빈도수 단어로 연관 단어 추출 (처음은 맨 앞단어로) """
@@ -92,9 +92,9 @@ def parse_vec(request):
         _modelType = None
 
     try:
-        _keywordvec = subParams['analysisOptions']['keywordsOptions']['keywordvec']
+        _keywordsvec = subParams['analysisOptions']['keywordsOptions']['keywordsVec']
     except:
-        _keywordvec = None
+        _keywordsvec = None
 
     try:
         unitNumber = subParams['analysisOptions']['keywordsOptions']['output']
@@ -129,7 +129,7 @@ def parse_vec(request):
     sublist = dict(_sublist)
 
     # select first topic word if no related word is specified
-    keywordvec = _keywordvec or list(sublist.keys())[0]
+    keywordsvec = _keywordsvec or list(sublist.keys())[0]
 
     modelType = _modelType or "word2vec"
 
@@ -157,7 +157,7 @@ def parse_vec(request):
     elif modelType == 'fasttext':
         model = FastText(sentences=[taged_docs],
                         workers=num_workers,
-                        size=num_features,
+                        size=num_features-200,
                         min_count=min_word_count,
                         # iter=100,
                         window=window_context, sg=0)
@@ -174,7 +174,7 @@ def parse_vec(request):
     )                                
 
     try:
-        wordtovec_result = model.wv.most_similar(keywordvec, topn=unitNumber)  # most_similar: 가장 유사한 단어를 출력
+        wordtovec_result = model.wv.most_similar(keywordsvec, topn=unitNumber)  # most_similar: 가장 유사한 단어를 출력
     except:
         # error handle "word '...' not in vocabulary"
         return JsonResponse('{"vec":[{"label":"없음","value":0}]}', safe=False)
@@ -191,17 +191,17 @@ def parse_vec(request):
     # 연관 단어 추출 }
 
     # multiple result를 위해 json사용
-    res = {"topic": sublist_result_remove, "vec": d}
+    result = {"topic": sublist_result_remove, "vec": d}
 
     # Redis {
     try:
-        sub_context['vec'] = res
+        sub_context['vec'] = result
         cache.set(subKey, sub_context, CACHE_TTL)
     except:
         pass        
     # Redis }
 
-    return HttpResponse(json.dumps(res, ensure_ascii=False))
+    return HttpResponse(json.dumps(result, ensure_ascii=False))
 
 def parse_indicator(request):
     """ 지표분석, 출원인 CPP, PFS 추출 """
@@ -388,18 +388,18 @@ def parse_indicator(request):
                             
             l.append({ 'name': name, 'citing' : citing, 'cnt': granted, 'cpp' : cpp, 'pii' : pii, 'ts' : ts, 'pfs' : pfs })
 
-    res = sorted(l, key=itemgetter('cnt'), reverse=True)
+    result = sorted(l, key=itemgetter('cnt'), reverse=True)
 
     # Redis {
     try:
-        sub_context['indicator'] = res
+        sub_context['indicator'] = result
         cache.set(subKey, sub_context, CACHE_TTL)
     except:
         pass        
     # Redis }
 
-    # return HttpResponse(json.dumps(res, ensure_ascii=False))
-    return JsonResponse(res, safe=False)
+    # return HttpResponse(json.dumps(result, ensure_ascii=False))
+    return JsonResponse(result, safe=False)
 
 
 def get_citingInfo(appNo):
@@ -415,13 +415,13 @@ def get_citingInfo(appNo):
     soup = BeautifulSoup(html.content, 'xml')        
     bs = soup.find_all(operationKey)
 
-    res = 0          
+    result = 0          
     if bs:
         for bs1 in bs:
             if bs1:
                 try:
                     bs1.find("ApplicationNumber").get_text()
-                    res += 1
+                    result += 1
                 except:
                     pass                    
-    return res
+    return result

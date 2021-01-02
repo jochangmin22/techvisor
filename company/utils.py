@@ -83,10 +83,10 @@ def str2round(value, num=1):
         pass
     
     try:
-        res = round(float(value.replace(",","")),num)
+        result = round(float(value.replace(",","")),num)
     except:
-        res = 0
-    return res
+        result = 0
+    return result
 
 def str2int(value):
     try:
@@ -96,10 +96,10 @@ def str2int(value):
         pass
     
     try:
-        res = int(value.replace(",",""))
+        result = int(value.replace(",",""))
     except:
-        res = 0
-    return res     
+        result = 0
+    return result     
 
 
 raw_len_limit = 20000
@@ -136,7 +136,7 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
 
     saving = ''
     close = None
-    raw_list = []
+    result = []
     for word, tag in mecab.pos(raw[:raw_len_limit]):
         if tag in pos:
             if word not in STOPWORDS: # and len(word) > 1:
@@ -146,9 +146,9 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
             close= False
             if saving:
                 if '_' in saving and saving not in STOPWORDS_PHRASE:
-                    raw_list.append(saving)            
+                    result.append(saving)            
                 saving = ''
-    return raw_list  
+    return result  
 
 def like_parse(keyword=""):
     """ like query 생성 """

@@ -14,7 +14,6 @@ from . import favorite
 
 # companies 
 def get_companies(request):
-    # return companies.parse_companies(request)
     return companies.get_companies(request)
 
 def get_query(request):
@@ -50,28 +49,12 @@ def get_stock_upper(request):
 def get_stock_lower(request):
     return crawler.crawl_stock_lower()
 
+#favorite
 def get_labels(request):
     return favorite.get_labels()
 
 def update_labels(request):
     return favorite.update_labels(request)
-
-# company
-# def get_company(request, companyId=""):
-#     return company.parse_company(request, companyId)
-
-
-# def get_stock(request):
-#     return company.parse_stock(request)
-
-
-
-# def get_topic(request):
-#     return kr_nlp(request, "topic")
-
-
-# def get_vec(request):
-#     return kr_nlp(request, "vec")
 
 def toggle_searchs_starred(request):
     return favorite.toggle_starred(request)
