@@ -121,7 +121,6 @@ INSTALLED_APPS = [
     # "django_extensions",
     # app
     "search",
-    "abroad",
     "users",
     "company",
     "bill",

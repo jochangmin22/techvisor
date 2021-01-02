@@ -27,3 +27,6 @@ search/training
 diagnose_tensorboard.py
 *.swp
 conda_env.txt
+
+*/migrations/*
+!*/migrations/__init__.py
