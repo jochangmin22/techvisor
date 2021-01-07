@@ -6,7 +6,7 @@ from . import search
 from . import nlp
 from . import news
 from . import matrix
-
+from . import visual
 
 # searchs
 def get_searchs(request):
@@ -86,6 +86,10 @@ def get_matrix(request):
 
 def get_matrix_dialog(request):
     return matrix.parse_matrix_dialog(request)
+
+# visual
+def get_applicant_classify(request):
+    return visual.applicant_classify(request)
 
 
 
