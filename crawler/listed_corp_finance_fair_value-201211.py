@@ -307,6 +307,12 @@ def fundamental(df):
     result['현금DPS(원)'] = result['현금DPS']
     del result['현금DPS']
 
+    result['PER(배)'] = result['PER']
+    del result['PER']
+
+    result['PBR(배)'] = result['PBR']
+    del result['PBR']
+
     try:
         result['현금배당수익률'] = result['현금배당수익률'].str.replace('%', '').fillna(0).astype(float).to_list()[0]
     except:
@@ -441,9 +447,11 @@ def financialSummary(df, PER):
     df_l = df_l.T
 
     # 최근 분기에서 4가지
-    my_q_df_cols = ['ROE(%)','ROA(%)','PER(배)','PBR(배)']     
+    # 분기와 평균 수치 괴리가 커서 (PER, PBR)는 펀더멘털 것으로 다시 사용 210107
+    # my_q_df_cols = ['ROE(%)','ROA(%)','PER(배)','PBR(배)']     
+    my_q_df_cols = ['ROE(%)','ROA(%)']     
 
-    my_q_df = df_l.loc[[cols[6]],my_q_df_cols] # 7번째 cols ; '2020/06' 
+    my_q_df = df_l.loc[[cols[6]],my_q_df_cols] # 7번째 cols ; '분기 끝에서 2번째 ex) 2020/09' 
 
     for name in my_q_df_cols:
         result[name] = my_q_df[name].fillna(0).astype(float).to_list()[0]
@@ -739,7 +747,7 @@ def financial_crawler(code):
 
     res.update(stockVolume(df[1]))
 
-    temp_res, second_res = financialSummary(df[12], res['PER'])
+    temp_res, second_res = financialSummary(df[12], res['PER(배)'])
     res.update(temp_res)
 
     wait = WebDriverWait(browser, 10)

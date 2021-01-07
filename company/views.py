@@ -1,16 +1,8 @@
-# from django.shortcuts import render
-# from django.http import HttpResponse
-
-# from .companies import parse_companies, parse_query, parse_companies_num
-# from .company import parse_company
-# from .finance import parse_stock, crawl_stock, crawl_dart
-
 from . import companies
 from . import related_info
-# from . import company
 from . import crawler
 from . import favorite
-# from . import company_info
+
 
 # companies 
 def get_companies(request):
@@ -50,12 +42,6 @@ def get_stock_lower(request):
     return crawler.crawl_stock_lower()
 
 #favorite
-def get_labels(request):
-    return favorite.get_labels()
-
-def update_labels(request):
-    return favorite.update_labels(request)
-
 def toggle_searchs_starred(request):
     return favorite.toggle_starred(request)
 
@@ -65,20 +51,8 @@ def set_searchs_starred(request):
 def set_searchs_unstarred(request):
     return favorite.set_unstarred(request)
 
-def set_searchs_labels(request):
-    return favorite.set_labels(request)
+def update_searchs_labels(request):
+    return favorite.update_searchs_labels(request)    
 
-def set_searchs_unlabels(request):
-    return favorite.set_unlabels(request)
-
-def create_label(request):
-    return favorite.create_label(request)
-
-def remove_label(request):
-    return favorite.remove_label(request)
-
-def labeling(request):
-    return favorite.user_labeling(request)
-
-def remove_labeling(request):
-    return favorite.user_remove_labeling(request)
+def update_labels(request):
+    return favorite.update_labels(request)    
