@@ -140,6 +140,7 @@ def update_today_crawl_mdcline():
 
         if totalCount == 0:
             continue
+
         if not df.empty:
             engine = create_engine(db_connection_url)
             df.to_sql(name='mdcin_clinc_test_info_temp', con=engine, if_exists='replace')
@@ -221,6 +222,7 @@ def crawl_stock_upper():
         mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
         mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
 
+
         #remove null row
         # mydf = mydf[mydf.N != 0]
         mydf = mydf[mydf.현재가 != 0]
@@ -229,6 +231,7 @@ def crawl_stock_upper():
         mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
         
         result += mydf.to_dict('records')
+        
     # 상승 - 기본탭 코스피
     df = pd.read_html(NAVER['stock_rise_url'], header=0, encoding = 'euc-kr')
     mydf = df[1]
