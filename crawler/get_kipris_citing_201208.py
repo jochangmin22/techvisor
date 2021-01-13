@@ -94,7 +94,7 @@ def get_db_appNo_list(appNo, startNo):
     try:
         with connect() as connection:
             with connection.cursor() as cursor:
-                query = "select 출원번호 from 공개공보 WHERE 출원번호 > " + str(appNo) + " and (출원인코드1 <> 419980424971 or 출원인코드1 is null) ORDER BY 출원번호 ASC LIMIT " + str(startNo) + " OFFSET 0"      
+                query = "select 출원번호 from 공개공보 WHERE 출원번호 > " + str(appNo) + " and (출원인코드1 <> 419980424971 or 출원인코드1 is null) ORDER BY 출원번호 ASC LIMIT " + str(startNo) + " OFFSET 0"
                 cursor.execute(query)
                 connection.commit()
                 row = dictfetchall(cursor)

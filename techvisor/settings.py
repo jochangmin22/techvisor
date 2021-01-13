@@ -50,6 +50,9 @@ GOOGLE = get_json("GOOGLE")
 CELERY = get_json("CELERY")
 CACHES = get_json('CACHES')
 TERMS = get_json('TERMS', "default")
+IAMPORT_KEY = get_json("IAMPORT")['IMP_KEY']
+IAMPORT_SECRET = get_json("IAMPORT")['IMP_SECRET']
+IAMPORT_CODE = get_json("IAMPORT")['IMP_CODE']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -63,7 +66,8 @@ ALLOWED_HOSTS = [
     "techvisor.co.kr",
     "v.techvisor.co.kr",
     "v2.techvisor.co.kr",
-    "52.79.161.225"
+    "52.79.161.225",
+    "14.32.114.185"
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True # Credential true
@@ -253,7 +257,7 @@ TIME_ZONE = "Asia/Seoul"
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATICFILES_DIRS = [os.path.join(BASE_DIR, "staticfiles")]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 # STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static-cdn-local")
 
 REST_FRAMEWORK = {

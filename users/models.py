@@ -17,6 +17,7 @@ class Users(models.Model):
     updated_at = models.DateTimeField(auto_now_add=True)
     is_certified = models.BooleanField(default=False)
     download_count = models.PositiveIntegerField(default = 0)
+    merchant_uid = models.CharField(max_length=300, null=True)
     # @OneToOne(type => UserProfile, profile => profile.user)
     # profile!: UserProfile;
 

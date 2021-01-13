@@ -219,15 +219,7 @@ def crawl_stock_upper():
         # mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']] = mydf[['N','연속', '누적', '현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
         mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
         mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
-<<<<<<< HEAD
-<<<<<<< HEAD
         mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
-=======
-        mydf['등락률'] = mydf['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
->>>>>>> 30e2055... Apply pascalCase to model class name
-=======
-        mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
->>>>>>> 23aec19... Modify the crawler to work in crontab
 
         #remove null row
         # mydf = mydf[mydf.N != 0]
@@ -237,15 +229,8 @@ def crawl_stock_upper():
         mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
         
         res += mydf.to_dict('records')
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     # 상승 - 기본탭 코스피
-=======
-    # 상승
->>>>>>> 30e2055... Apply pascalCase to model class name
-=======
-    # 상승 - 기본탭 코스피
->>>>>>> 23aec19... Modify the crawler to work in crontab
     df = pd.read_html(NAVER['stock_rise_url'], header=0, encoding = 'euc-kr')
     mydf = df[1]
     # 필요한 row, column만

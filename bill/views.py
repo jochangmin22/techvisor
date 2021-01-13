@@ -1,155 +1,101 @@
 import json
 import requests
-import weasyprint
+from iamport import Iamport
 
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.template.loader import render_to_string
+from django.shortcuts import render
 from django.views.generic.base import View
-from django.contrib.admin.views.decorators import staff_member_required
 
 from .forms import *
 from .models import *
+from .iamport import *
+from users.models import *
 
+
+iamport = Iamport(
+    imp_key = settings.IAMPORT_KEY,
+    imp_secret = settings.IAMPORT_SECRET
+    )
+imp_code = settings.IAMPORT_CODE
 
 def order_create(request):
-    data = json.loads(request.body)
-    
+    # data = json.loads(request.body)
+    Order.objects.create(user_id = '87b0466f-06ee-458e-bb5c-c5c65002bca4')
     if request.method == "POST":
-        form = OrderCreateForm(request.POST)
 
-        if form.is_valid():
-            order = form.save()
-
-            OrderItem.objects.create(
-                order_id = order.id,
-                product_id = data['product'],
-                price = data['price'],
-                quantity = data['quantity']
-            )
-            return render(request, 'bill/created.html', {'order' : order})
+        # Order.objects.create(user_id = data['user'])
+        # return render(
+        #     request,
+        #     'bill/create.html',
+        #     {
+        #         'user_data' : user_data,
+        #         'product_data' : product_data,
+        #         'imp_code' : imp_code
+        #     })
+        pass
     else:
-        form = OrderCreateForm()
-    return render(request, 'bill/create.html', {'data' : data, 'form' : form})
+        pass
+    return render(request,  'bill/create.html', { 'imp_code' : imp_code })
+    # return HttpResponse(status = 400)
 
-@staff_member_required
-def admin_order_detail(request, order_id):
-    order = get_object_or_404(Order, id = order_id)
-    return JsonResponse({ 'Order' : order }, status = 200)
-    # return render(request, 'bill/admin/detail.html', {'order' : order})
 
-@staff_member_required
-def admin_order_pdf(request, order_id):
-    order = get_object_or_404(Order, id = order_id)
-    html = render_to_string('bill/admin/pdf.html', {'order' : order})
-    response = HttpResponse(content_type = 'application/pdf')
-    response['Content-Disposition'] = 'filename = order_{}.pdf'.format(order.id)
-    weasyprint.HTML(string = html).write_pdf(
-        response,
-        stylesheets = [weasyprint.CSS(settings.STATICFILES_DIRS[0]+'/css/pdf.css')]
-        )
-    return response
-
-def order_complete(request):
-    order_id = request.Get.get('order_id')
-    order = Order.objects.get(id = order_id)
-    # return JsonResponse({ 'Order' : order }, status = 200)
-    return render(request, 'bill/created.html', {'order' : order})
-
-class OrderCreateAjaxView(View):
-    def post(self, request, *args, **kwargs):
-        # if not request.user.is_authenticated:
-        #     return JsonResponse({"authenticated" : False}, status = 403)
+class SubscribeScheduleView(View):
+    def get(self, request):
+        access_token = get_access_token()
+        data = json.loads(request.body)
         
-        if request.method == "POST":
-            body_data = json.loads(request.body)
-            form = OrderCreateForm(body_data)
-            print("form date : ", form)
-
-            if form.is_valid():
-                order = form.save()
-            
-                OrderItem.objects.create(
-                        order_id = order.id,
-                        product_id = body_data['product'],
-                        price = body_data['price'],
-                        quantity = body_data['quantity']
-                    )
-                data = {
-                    "order_id" : order.id
-                }
-                return JsonResponse(data)
-            
-            else:
-                return JsonResponse({}, status = 401)
-
-class OrderCheckoutAjaxView(View):
-    def post(self, request, *args, **kwargs):
-        # if not request.user.is_authenticated:
-        #     return JsonResponse({"authenticated" : False}, status = 403)
-
-        order_id = request.POST.get('order_id')
-        order = Order.objects.get(id = order_id)
-        amount = request.POST.get('amount')
-
-        # print('order_id : ', order)
-        # print('amount : ', amount)
-
-        try:
-            merchant_order_id = OrderTransaction.trans_objects.create_new(
-                order = order,
-                amount = amount
-            )
-            print('merchantID : ', merchant_order_id)
-        except:
-            merchant_order_id = None
-
-        if merchant_order_id is not None:
-            data = {
-                "works" : True,
-                "merchant_id" : merchant_order_id
-            }
-            return JsonResponse(data)
+        url = "https://api.iamport.kr/subscribe/payments/schedule/" + data['merchant_uid']
         
-        else:
-            # print('amount : ', merchant_order_id)
-            return JsonResponse({}, status = 401)
+        headers = {
+            'Authorization' : access_token
+        }
 
-class OrderImpAjaxView(View):
-    def post(self, request, *args, **kwargs):
-        # if not request.user.is_authenticated:
-        #     return JsonResponse({"authenticated" : False}, status = 403)
+        req = requests.get(url, headers = headers)
+        res = req.json()
 
-        order_id = request.POST.get('order_id')
-        order = Order.objects.get(id = order_id)
-        merchant_id = request.POST.get('merchant_id')
-        imp_id = request.POST.get('imp_id')
-        amount = request.POST.get('amount')
+        print('Search schedule : ', res)
 
-        try:
-            trans = OrderTransaction.trans_objects.get(
-                order = order,
-                merchant_order_id = merchant_id,
-                amount = amount
-            )
-        except:
-            trans = None
-
-        print('Trans : ' ,trans)
-
-        if trans is not None:
-            trans.transaction_id = imp_id
-            trans.success = True
-            trans.save()
-            order.paid = True
-            order.save()
-
-            data = {
-                "works" : True
+        if res['code'] == 0:
+            result = {
+                'customer_uid' : res['response']['customer_uid'],
+                'imp_uid' : res['response']['imp_uid'],
+                'amount' : res['response']['amount']
             }
-
-            return JsonResponse(data)
+            return JsonResponse({ 'Message' : result }, status = 200)
 
         else:
-            return JsonResponse({}, status = 401)
+            return JsonResponse({ 'Message' : '예약된 결제 정보가 없습니다.'}, status = 400)
+    
+
+class OrderCancelView(View):
+    def post(self, request):
+        data = json.loads(request.body)
+
+        try:
+            response = iamport.cancel(data['reason'], imp_uid = data['imp_uid'])
+            return HttpResponse(status = 200)
+
+        except Iamport.ResponseError as e:
+            print('ERROR_CODE : ', e.code)
+            print('ERROR_MESSAGE : ', e.message)
+
+        except Iamport.HttpError as http_error:
+            print('HTTP_ERROR_CODE : ', http_error.code)
+            print('HTTP_ERROR_REASON : ', http_error.reason)
+
+
+class OrderTransactionView(View):
+    def get(self, request):
+        data = json.loads(request.body)
+
+        result = find_transaction(data['imp_uid'])
+
+        user_data = {
+            'paid_at' : datetime.datetime.fromtimestamp(result['paid_at']).strftime('%Y-%m-%d'),
+            'amount' : result['amount'],
+            'type' : result['type'],
+            'status' : result['status'],
+            'receipt_url' : result['receipt_url']
+        }
+        return JsonResponse({ 'result' : user_data }, status = 200)

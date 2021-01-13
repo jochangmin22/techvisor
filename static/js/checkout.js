@@ -1,44 +1,101 @@
-$(function () {
-    const IMP = window.IMP;
-    IMP.init('imp79353885');
-    $('.order-form').on('submit', function (e) {
-        let amount = 1;
-        let type = $('order-form input[name="type"]:checked').val()
+// $(function () {
+//     const IMP = window.IMP;
+//     IMP.init('imp79353885');
+    // $('.order-form').on('submit', function (e) {
+    // $('.order-form').onload( function (e) {
+        // let amount = parseFloat($('.order-form input[name="amount"]').val().replace(',', ''));
+        // let type = $('order-form input[name="type"]:checked').val()
+        // let user = $('order-form input[name="user_id"]').val()
 
-        console.log('javascript check : ', type)
-        let order_id = AjaxCreateOrder(e);
-        if (order_id === false) {
-            alert('주문 생성 실패\n 다시 시도해주세요.');
-            return false;
-        }
+        // console.log('javascript check : ', user)
+        // let order_id = AjaxCreateOrder(e);
+        // if (order_id === false) {
+        //     alert('주문 생성 실패\n 다시 시도해주세요.');
+        //     return false;
+        // }
 
-        let merchant_id = AjaxStoreTransaction(e, order_id, amount, type);
+        // let merchant_id = AjaxStoreTransaction(e, order_id, amount, type);
+        // let customer_id = user;
 
-        if (merchant_id !== '') {
-            IMP.request_pay({
-                merchant_uid : merchant_id,
-                name : 'Techvisor',
-                buyer_name : 'shrhkddh',
-                buyer_email : 'abs@gmail.com',
-                amount : amount
-            }, function (rsp) {
-                if (rsp.success) {
-                    const msg = '결제가 완료되었습니다.';
-                    msg += '고유ID : ' + rsp.imp_uid;
-                    msg += '상점 거래ID : ' + rsp.merchant_uid;
-                    msg += '결제 금액 : ' + rsp.paid_amount;
-                    msg += '카드 승인번호 : ' + rsp.apply_num;
+        // if (merchant_id !== '') {
+        //     IMP.request_pay({
+        //         merchant_uid : merchant_id,
+        //         name : 'Techvisor',
+        //         buyer_name : 'shrhkddh',
+        //         buyer_email : 'abs@gmail.com',
+        //         amount : amount
+        //     }, function (rsp) {
+        //         if (rsp.success) {
+        //             const msg = '결제가 완료되었습니다.';
+        //             msg += '고유ID : ' + rsp.imp_uid;
+        //             msg += '상점 거래ID : ' + rsp.merchant_uid;
+        //             msg += '결제 금액 : ' + rsp.paid_amount;
+        //             msg += '카드 승인번호 : ' + rsp.apply_num;
 
-                    ImpTransaction(e, order_id, rsp.merchant_uid, rsp.imp_uid, rsp.paid_amount);
-                } else {
-                    const msg = '결제에 실패하였습니다.';
-                    msg += '에러 내용 : ' + rsp.error_msg;
-                    console.log(msg);
-                }
-            });
-        }
-        return false;
-    });
+        //             ImpTransaction(e, order_id, rsp.merchant_uid, rsp.imp_uid, rsp.paid_amount);
+        //         } else {
+        //             const msg = '결제에 실패하였습니다.';
+        //             msg += '에러 내용 : ' + rsp.error_msg;
+        //             console.log(msg);
+        //         }
+        //     });
+        // }
+        // if (merchant_id !== '') {
+            // IMP.request_pay({
+            //     pg : 'html5_inicis',
+            //     pay_methood : 'card',
+            //     merchant_uid : 'merchant_id', //,'00000000'
+            //     customer_uid : 'customer_id',
+            //     name : 'Techvisor',
+            //     buyer_name : 'shrhkddh',
+            //     buyer_email : 'abs@gmail.com',
+            //     amount : 1000 //amount
+            // }, function (rsp) {
+            //     if (rsp.success) {
+            //         const msg = '결제가 완료되었습니다.';
+            //         msg += '고유ID : ' + rsp.imp_uid;
+            //         msg += '상점 거래ID : ' + rsp.merchant_uid;
+            //         msg += '결제 금액 : ' + rsp.paid_amount;
+            //         msg += '카드 승인번호 : ' + rsp.apply_num;
+
+            //         // ImpTransaction(e, order_id, rsp.merchant_uid, rsp.imp_uid, rsp.paid_amount);
+            //     } else {
+            //         const msg = '결제에 실패하였습니다.';
+            //         msg += '에러 내용 : ' + rsp.error_msg;
+            //         console.log(msg);
+            //     }
+            // });
+        // }
+    //     return false;
+    // });
+// });
+
+const IMP = window.IMP;
+IMP.init('imp79353885');
+
+IMP.request_pay({
+    pg : 'html5_inicis',
+    pay_methood : 'card',
+    merchant_uid : 'merchant_id', //,'00000000'
+    customer_uid : 'customer_id',
+    name : 'Techvisor',
+    buyer_name : 'shrhkddh',
+    buyer_email : 'abs@gmail.com',
+    amount : 1000 //amount
+}, function (rsp) {
+    if (rsp.success) {
+        const msg = '결제가 완료되었습니다.';
+        msg += '고유ID : ' + rsp.imp_uid;
+        msg += '상점 거래ID : ' + rsp.merchant_uid;
+        msg += '결제 금액 : ' + rsp.paid_amount;
+        msg += '카드 승인번호 : ' + rsp.apply_num;
+
+        // ImpTransaction(e, order_id, rsp.merchant_uid, rsp.imp_uid, rsp.paid_amount);
+    } else {
+        const msg = '결제에 실패하였습니다.';
+        msg += '에러 내용 : ' + rsp.error_msg;
+        console.log(msg);
+    }
 });
 
 function AjaxCreateOrder(e) {
@@ -48,6 +105,8 @@ function AjaxCreateOrder(e) {
         method : "POST",
         url : order_create_url,
         async : false,
+        // create.html 의 form부분에 hidden으로 몇가지 데이터를 추가 해 놓으면
+        // 쉽게 필요한 데이터 처리를 할 수 있을듯 하다.
         data : $('.order-form').serialize()
     });
     request.done(function (data) {
