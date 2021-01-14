@@ -469,8 +469,8 @@ def update_user_data(request):
         newData = {
             'data' : data["user"]["data"]
         }
-        Users.objects.filter(id=received_id).update(**newData)
-        return JsonResponse({ "user": data}, status=200, safe=False)
+        Users.objects.filter(id  = received_id).update(**newData)
+        return JsonResponse({ "user": data}, status = 200, safe = False)
 
 def update_user_interested(request):
     if request.method == 'POST':
@@ -511,10 +511,10 @@ def create_label(request):
 
         user_query = users.objects.get(id = received_id)
         if not user_query.data['label']:
-            user_query.data['label'][received_label] = []
+            user_query.data['label'][received_label] = {}
         else:    
             if received_label not in user_query.data['label'].keys():
-                user_query.data['label'][received_label] = []
+                user_query.data['label'][received_label] = {}
         user_query.save()
         return JsonResponse({ "users_label" : user_query.data['labels']}, status = 200, safe = False)
 
@@ -562,4 +562,14 @@ def user_remove_labeling(request):
             ]
             user_query.save()
         return JsonResponse({ "user_labeling_list" : user_query.data['labels']}, status = 200, safe = False)
+        
+def create_filter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        received_id = data["user"]
+        received_filter = data["filter"]
+
+        user_query = Users.objects.get(id = received_id)
+        if not user_query['filters']:
+            user_query.data['filters'] = {}
         

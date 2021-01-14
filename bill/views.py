@@ -6,6 +6,7 @@ from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.generic.base import View
+from django.views.decorators.http import require_http_methods
 
 from .forms import *
 from .models import *
@@ -19,6 +20,7 @@ iamport = Iamport(
     )
 imp_code = settings.IAMPORT_CODE
 
+# @require_http_methods(["POST"])
 def order_create(request):
     # data = json.loads(request.body)
     Order.objects.create(user_id = '87b0466f-06ee-458e-bb5c-c5c65002bca4')
@@ -54,8 +56,6 @@ class SubscribeScheduleView(View):
         req = requests.get(url, headers = headers)
         res = req.json()
 
-        print('Search schedule : ', res)
-
         if res['code'] == 0:
             result = {
                 'customer_uid' : res['response']['customer_uid'],
@@ -77,12 +77,10 @@ class OrderCancelView(View):
             return HttpResponse(status = 200)
 
         except Iamport.ResponseError as e:
-            print('ERROR_CODE : ', e.code)
-            print('ERROR_MESSAGE : ', e.message)
+            return JsonResponse({ 'Message' : e.message}, status = 400)
 
         except Iamport.HttpError as http_error:
-            print('HTTP_ERROR_CODE : ', http_error.code)
-            print('HTTP_ERROR_REASON : ', http_error.reason)
+            return JsonResponse({ 'Message' : http_error.reason}, status = 400)
 
 
 class OrderTransactionView(View):

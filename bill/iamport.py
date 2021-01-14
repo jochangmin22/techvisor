@@ -6,6 +6,7 @@ import time
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_http_methods
 
 from iamport import Iamport
 
@@ -63,8 +64,6 @@ def payments_prepare(request):
         req = requests.post(url, data = access_data, headers = headers)
         res = req.json()
 
-        print('res info : ', res)
-
         if res['code'] == 0:
             if res['response']['status'] == 'paid':                
                 last_order.paid = True
@@ -91,9 +90,7 @@ def payments_schedule(imp, merchant):
     access_token = get_access_token()
 
     if access_token:
-        payments_find = find_transaction(imp)
-        print('find_data : ', payments_find)
-        
+        payments_find = find_transaction(imp)        
         next_payments_date = datetime.datetime.fromtimestamp(payments_find['paid_at']) + datetime.timedelta(minutes=1)
         new_paymet_day = int(time.mktime(next_payments_date.timetuple()))
 
@@ -107,7 +104,7 @@ def payments_schedule(imp, merchant):
                 }
             ]
         }
-        print('transaction payload : ', payload)
+        
         user_schedule = payload['schedules'][0]
         Users.objects.filter(
             id = payments_find['customer_uid']
@@ -120,13 +117,14 @@ def payments_schedule(imp, merchant):
             response = iamport.pay_schedule(**payload)
 
         except KeyError:
-            pass
+            return JsonResponse({ 'Message' : 'INVALID KEY'}, status = 400)
 
         except Iamport.ResponseError as e:
-            pass
+            return JsonResponse({ 'Message' : e.message}, status = 400)
 
         except Iamport.HttpError as http_error:
-            pass        
+            return JsonResponse({ 'Message' : http_error.reason}, status = 400)
+
 
 
 def find_transaction(imp):
@@ -169,42 +167,55 @@ def find_transaction(imp):
         raise ValueError("인증 토큰이 없습니다.")
 
 
+@require_http_methods(["POST"])
 def payments_unschedule(request):
-    data = json.loads(request.body)
-    # last_order = find_transaction(data['imp_uid'])
-    
-    payload = {
-        'customer_uid' : data['customer_uid'],
-        'merchant_uid' : data['merchant_uid']
-    }
-
     try:
+        data = json.loads(request.body)
+
+        last_order = Users.objects.get(id = data['user_id'])
+        
+        payload = {
+            'customer_uid' : data['user_id'],
+            'merchant_uid' : last_order.merchant_uid
+        }
+    
         response = iamport.pay_unschedule(**payload)
-        print('unschedule res : ', response)
-        return HttpResponse(status = 200)
+        return JsonResponse({ 'Message' : '정기 결제 취소' },status = 200)        
 
     except KeyError:
-        pass
+        return JsonResponse({ 'Message' : 'INVALID KEY'}, status = 400)
 
     except Iamport.ResponseError as e:
-        pass
+        return JsonResponse({ 'Message' : e.message}, status = 400)
 
     except Iamport.HttpError as http_error:
-        pass
+        return JsonResponse({ 'Message' : http_error.reason}, status = 400)
 
 def schedule_webhook(request):
     data = json.loads(request.body)
     access_token = get_access_token()
 
     transaction_data = find_transaction(data['imp_uid'])
-    print('WebHook transaction : ', transaction_data)
 
     if transaction_data['status'] == 'paid':
         payments_schedule(transaction_data['imp_uid'], transaction_data['merchant_uid'])
-        print('정기결제 성공')
-        return HttpResponse(status = 200)
+        return JsonResponse({ 'Message' : '정기결제 성공' }, status = 200)
 
     else:
-        print('재 결제 시도해야함@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-        return HttpResponse(status = 400)
+        payload = {
+            'customer_uid' : transaction_data['customer_uid'],
+            'merchant_uid' : transaction_data['merchant_uid'],
+            'amount' : transaction_data['amount']
+        }
+        try:
+            response = iamport.pay_again(**payload)
+        
+        except KeyError:
+            return JsonResponse({ 'Message' : 'INVALID KEY'}, status = 400)
+
+        except Iamport.ResponseError as e:
+            return JsonResponse({ 'Message' : e.message}, status = 400)
+
+        except Iamport.HttpError as http_error:
+            return JsonResponse({ 'Message' : http_error.reason}, status = 400)
         

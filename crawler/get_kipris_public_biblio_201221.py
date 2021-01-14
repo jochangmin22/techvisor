@@ -89,7 +89,7 @@ def dictfetchall(cursor):
 
 def record_log(msg):
     #######################
-    # file에 log 저장
+    #   file에 log 저장    #
     #######################
     f = open("/mnt/c/Users/User/Desktop/techback/crawler/sciting_crawl_log.txt", "a")
     f.write(str(msg)+'\n')
@@ -175,10 +175,12 @@ def get_biblo(appNo):
     url = biblo_url + '?applicationNumber=' + str(appNo) + '&ServiceKey=' + service_key
     items = ['applicationNumber','applicationDate','openNumber','openDate','registerDate','registerNumber','publicationDate','publicationNumber','inventionTitle','registerStatus', 'applicantInfoArray', 'ipcInfoArray','inventorInfoArray']
     item_names = ['출원번호','출원일자','공개번호','공개일자','등록번호','등록일자','공고번호','공고일자','발명의명칭국문','등록사항', '출원인1', 'ipc코드']
-  
+    
+    print('biblo_url : ', url)
     try:
         biblo_api = requests.get(url, headers={'Connection':'close'}).text.encode()
-
+        # biblo_api = requests.get(url, headers={ "Content-Type": "application/json" }).text.encode()
+        # print('API data : ', biblo_api)
     except requests.exceptions.RequestException as e:
         print(
             "====== {0} error ======".format(
@@ -188,6 +190,8 @@ def get_biblo(appNo):
         raise SystemExit(e)
     
     soup = BeautifulSoup(biblo_api, 'lxml-xml')
+    # print('soup data : ', soup)
+
     ipc_data = soup.select('ipcInfoArray')[0].ipcNumber.text
     app_data = soup.select('applicantInfo > name')[0].text
     # print('What data : ', ipc_data.text, app_data)
@@ -296,7 +300,7 @@ def main_def(repeat_cnt = 0):
     lastAppNo = dbAppNo
 
     #######################
-    # file에 endNo 저장
+    #  file에 endNo 저장   #
     #######################
     f = open("./new_app.txt", "w")
     f.write(str(lastAppNo))
