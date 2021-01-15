@@ -6,7 +6,6 @@ from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.generic.base import View
-from django.views.decorators.http import require_http_methods
 
 from .forms import *
 from .models import *
@@ -20,10 +19,10 @@ iamport = Iamport(
     )
 imp_code = settings.IAMPORT_CODE
 
-# @require_http_methods(["POST"])
+
 def order_create(request):
     # data = json.loads(request.body)
-    Order.objects.create(user_id = '87b0466f-06ee-458e-bb5c-c5c65002bca4')
+    
     if request.method == "POST":
 
         # Order.objects.create(user_id = data['user'])
@@ -39,7 +38,6 @@ def order_create(request):
     else:
         pass
     return render(request,  'bill/create.html', { 'imp_code' : imp_code })
-    # return HttpResponse(status = 400)
 
 
 class SubscribeScheduleView(View):
