@@ -42,7 +42,7 @@ def update_searchs_labels(request):
         data = json.loads(request.body.decode('utf-8'))
         received_user_id = data["userId"]
         received_selected_labels = data["selected"]
-        received_deselected_labels = data["deSelected"]
+        received_deselected_labels = data["deselected"]
         received_search_ids = data["searchIds"]
 
         user_query = Users.objects.get(id = received_user_id)
@@ -87,4 +87,5 @@ def update_labels(request):
         user_query.save()
 
     return JsonResponse( user_query.data['labels'], status = 200, safe = False)     
+ 
  

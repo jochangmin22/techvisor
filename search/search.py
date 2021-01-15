@@ -602,20 +602,46 @@ def similar(request):
 
     return HttpResponse(res, content_type="application/json")
 
+def _move_jsonfield_to_top_level(result):
+    ''' move position each fields of 정보 json to main fields '''
+    for i in range(len(result)):
+        # data = json.loads(result[i]['정보']) 
+        data = result[i]['정보'] 
+        for key, value in data.items():
+            result[i].update({key: value})
+
+        del result[i]['정보']
+        del result[i]['재무']
+    return result            
+
 def associate_corp(request):
     ''' Search for a company name that matches the applicant and representative or company name '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         applicant = data['applicant']
-        if applicant:
-            isExist = Listed_corp.objects.filter(Q(회사명__contains=applicant) | Q(대표자명__contains=applicant)).exists()
-            if not isExist:
-                return JsonResponse([], safe=False)
-            
-            row = Listed_corp.objects.filter(Q(회사명__contains=applicant)| Q(대표자명__contains=applicant)).values()
-            row = list(row)
 
-    return JsonResponse(row, safe=False)
+        if applicant:
+            listedCorp = Listed_corp.objects.filter(Q(회사명__contains=applicant) | Q(대표자명__contains=applicant))
+            if not listedCorp.exists():
+                strings = ["주식회사","(주)"]
+                for string in strings:
+                    new_applicant = applicant.replace(string,"").strip()
+                    
+                    if new_applicant:
+                        newListedCorp = Listed_corp.objects.filter(Q(회사명__contains=new_applicant) | Q(대표자명__contains=new_applicant))
+                        if not newListedCorp.exists():
+                            return JsonResponse([], safe=False)
+
+                        row = newListedCorp.values()
+                        result = list(row)
+                        result = _move_jsonfield_to_top_level(result)
+                        return JsonResponse(result, safe=False)
+
+            row = listedCorp.values()
+            result = list(row)
+            result = _move_jsonfield_to_top_level(result)
+
+    return JsonResponse(result, safe=False)
 
 def handleRedis(redisKey, keys, data="", mode="r"):
     """ read or write to redis """

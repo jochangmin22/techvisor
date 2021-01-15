@@ -260,8 +260,10 @@ def register(request):
                     'settings': {},
                     'shortcuts': [],
                     'starred': [],
+                    'trashed': [],
                     'interests' : [],  # 여기에서 미리 빈 배열을 만들어 놔야 할 것 같음
-                    'labels' : []
+                    'labels' : {},
+                    'filters' : {},
                 },
                 'is_certified': True
             }
@@ -477,6 +479,6 @@ def update_user_data(request):
         newData = {
             'data' : data["user"]["data"]
         }
-        Users.objects.filter(id=received_id).update(**newData)
-        return JsonResponse({ "user": data}, status=200, safe=False)
-       
+        Users.objects.filter(id  = received_id).update(**newData)
+        return JsonResponse({ "user": data}, status = 200, safe = False)
+     
