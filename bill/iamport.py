@@ -5,6 +5,7 @@ import json
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_http_methods
 
 # @csrf_exempt
 def get_access_token(*args):
@@ -47,7 +48,23 @@ def payments_prepare(order_id, amount, *args, **kwargs):
         res = req.json()
         print('res Error222222222222222 : ', res)
 
-        if res['code'] is not 0:
+        if res['code'] == 0:
+            if res['response']['status'] == 'paid':                
+                last_order.paid = True
+                last_order.save()
+
+                OrderItem.objects.create(
+                    price = res['response']['amount'],
+                    order_id = last_order.id,
+                    product_id = 'ebcdd792-f289-4fd6-be2e-c4726245cefc'
+                    # product_id = data['product_id']
+                )
+
+                return JsonResponse({ 'Message' : '결제 성공' }, status = 200)
+            else:
+                return JsonResponse({ 'Message' : '결제 오류' }, status = 400)
+        
+        elif res['code'] is not 0:
             raise ValueError("API 연결에 문제가 생겼습니다.")       
     else:
         raise ValueError("인증 토큰이 없습니다.")
@@ -55,7 +72,47 @@ def payments_prepare(order_id, amount, *args, **kwargs):
 def find_transaction(order_id, *args, **kwargs):
     access_token = get_access_token()
     if access_token:
-        url = "https://api.iamport.kr/payments/find/" + order_id
+        payments_find = find_transaction(imp)        
+        next_payments_date = datetime.datetime.fromtimestamp(payments_find['paid_at']) + datetime.timedelta(minutes=1)
+        new_paymet_day = int(time.mktime(next_payments_date.timetuple()))
+
+        payload = {
+            'customer_uid' : payments_find['customer_uid'],
+            'schedules' : [
+                {
+                'merchant_uid' : 'Techvisor_' + str(int(datetime.datetime.now().timestamp())),
+                'schedule_at' : new_paymet_day,
+                'amount' : payments_find['amount']
+                }
+            ]
+        }
+        
+        user_schedule = payload['schedules'][0]
+        Users.objects.filter(
+            id = payments_find['customer_uid']
+            ).update(
+                merchant_uid = user_schedule['merchant_uid']
+            )
+
+
+        try:
+            response = iamport.pay_schedule(**payload)
+
+        except KeyError:
+            return JsonResponse({ 'Message' : 'INVALID KEY'}, status = 400)
+
+        except Iamport.ResponseError as e:
+            return JsonResponse({ 'Message' : e.message}, status = 400)
+
+        except Iamport.HttpError as http_error:
+            return JsonResponse({ 'Message' : http_error.reason}, status = 400)
+
+
+
+def find_transaction(imp):
+    access_token = get_access_token()
+    if access_token:
+        url = "https://api.iamport.kr/payments/" + imp
 
         headers = {
             'Authorization' : access_token
@@ -80,4 +137,56 @@ def find_transaction(order_id, *args, **kwargs):
     else:
         raise ValueError("인증 토큰이 없습니다.")
 
+
+@require_http_methods(["POST"])
+def payments_unschedule(request):
+    try:
+        data = json.loads(request.body)
+
+        last_order = Users.objects.get(id = data['user_id'])
+        
+        payload = {
+            'customer_uid' : data['user_id'],
+            'merchant_uid' : last_order.merchant_uid
+        }
+    
+        response = iamport.pay_unschedule(**payload)
+        return JsonResponse({ 'Message' : '정기 결제 취소' },status = 200)        
+
+    except KeyError:
+        return JsonResponse({ 'Message' : 'INVALID KEY'}, status = 400)
+
+    except Iamport.ResponseError as e:
+        return JsonResponse({ 'Message' : e.message}, status = 400)
+
+    except Iamport.HttpError as http_error:
+        return JsonResponse({ 'Message' : http_error.reason}, status = 400)
+
+def schedule_webhook(request):
+    data = json.loads(request.body)
+    access_token = get_access_token()
+
+    transaction_data = find_transaction(data['imp_uid'])
+
+    if transaction_data['status'] == 'paid':
+        payments_schedule(transaction_data['imp_uid'], transaction_data['merchant_uid'])
+        return JsonResponse({ 'Message' : '정기결제 성공' }, status = 200)
+
+    else:
+        payload = {
+            'customer_uid' : transaction_data['customer_uid'],
+            'merchant_uid' : transaction_data['merchant_uid'],
+            'amount' : transaction_data['amount']
+        }
+        try:
+            response = iamport.pay_again(**payload)
+        
+        except KeyError:
+            return JsonResponse({ 'Message' : 'INVALID KEY'}, status = 400)
+
+        except Iamport.ResponseError as e:
+            return JsonResponse({ 'Message' : e.message}, status = 400)
+
+        except Iamport.HttpError as http_error:
+            return JsonResponse({ 'Message' : http_error.reason}, status = 400)
         

@@ -7,12 +7,26 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.views.generic.base import View
+<<<<<<< HEAD
 from django.contrib.admin.views.decorators import staff_member_required
+=======
+from django.views.decorators.http import require_http_methods
+>>>>>>> 502c007... merge전 저장
 
 from .forms import *
 from .models import *
 
 
+<<<<<<< HEAD
+=======
+iamport = Iamport(
+    imp_key = settings.IAMPORT_KEY,
+    imp_secret = settings.IAMPORT_SECRET
+    )
+imp_code = settings.IAMPORT_CODE
+
+# @require_http_methods(["POST"])
+>>>>>>> 502c007... merge전 저장
 def order_create(request):
     data = json.loads(request.body)
     
@@ -62,6 +76,7 @@ class OrderCreateAjaxView(View):
         # if not request.user.is_authenticated:
         #     return JsonResponse({"authenticated" : False}, status = 403)
         
+<<<<<<< HEAD
         if request.method == "POST":
             body_data = json.loads(request.body)
             form = OrderCreateForm(body_data)
@@ -109,6 +124,22 @@ class OrderCheckoutAjaxView(View):
             data = {
                 "works" : True,
                 "merchant_id" : merchant_order_id
+=======
+        url = "https://api.iamport.kr/subscribe/payments/schedule/" + data['merchant_uid']
+        
+        headers = {
+            'Authorization' : access_token
+        }
+
+        req = requests.get(url, headers = headers)
+        res = req.json()
+
+        if res['code'] == 0:
+            result = {
+                'customer_uid' : res['response']['customer_uid'],
+                'imp_uid' : res['response']['imp_uid'],
+                'amount' : res['response']['amount']
+>>>>>>> 502c007... merge전 저장
             }
             return JsonResponse(data)
         
@@ -116,6 +147,7 @@ class OrderCheckoutAjaxView(View):
             # print('amount : ', merchant_order_id)
             return JsonResponse({}, status = 401)
 
+<<<<<<< HEAD
 class OrderImpAjaxView(View):
     def post(self, request, *args, **kwargs):
         # if not request.user.is_authenticated:
@@ -126,6 +158,13 @@ class OrderImpAjaxView(View):
         merchant_id = request.POST.get('merchant_id')
         imp_id = request.POST.get('imp_id')
         amount = request.POST.get('amount')
+=======
+        except Iamport.ResponseError as e:
+            return JsonResponse({ 'Message' : e.message}, status = 400)
+
+        except Iamport.HttpError as http_error:
+            return JsonResponse({ 'Message' : http_error.reason}, status = 400)
+>>>>>>> 502c007... merge전 저장
 
         try:
             trans = OrderTransaction.trans_objects.get(
