@@ -75,8 +75,8 @@ def password(request):
         received_email = data["data"].get('email')
         received_password = data["data"].get('password')           
 
-        row = Users.objects.filter(data__email=received_email).values()
-        row = list(row)
+        users = Users.objects.filter(data__email=received_email)
+        row = list(users.values())
 
         userData = row[0] if row else {}#dict
         password = userData.get('password')
@@ -85,7 +85,6 @@ def password(request):
         error['password'] = None if userData and bcrypt.checkpw(received_password.encode('utf-8'), password.encode('utf-8')) else '암호가 잘못되었습니다'
 
         if not error['password']:
-            del userData['password'] # deleted for security
 
             payload = {
                 'id': str(userData['id']),
@@ -94,6 +93,12 @@ def password(request):
             }
 
             access_token = jwt.encode(payload, secret_key, algorithm=algorithm).decode('utf-8')
+
+            # save updated_at to db
+            userData['updated_at'] = now
+            users.update(**userData)  
+
+            del userData['password'] # deleted for security
 
             response = { "user" : userData, "access_token" : access_token }
             res = JsonResponse(response, status=200, safe=False)
@@ -254,6 +259,7 @@ def register(request):
                     'email': received_email,
                     'settings': {},
                     'shortcuts': [],
+                    'starred': [],
                     'interests' : [],  # 여기에서 미리 빈 배열을 만들어 놔야 할 것 같음
                     'labels' : []
                 },
@@ -273,11 +279,11 @@ def register(request):
             access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
 
             # send welcome email
-            keywords = {
-                'type': 'welcome',
-                'text': '가입을 환영합니다.',
-                'displayName' : received_displayName,
-            }            
+            # keywords = {
+            #     'type': 'welcome',
+            #     'text': '가입을 환영합니다.',
+            #     'displayName' : received_displayName,
+            # }            
             # sendmail('', received_email, keywords)            
 
             return JsonResponse({ "user": newUser, "access_token" : access_token.decode('utf-8')}, status=200, safe=False)
@@ -379,7 +385,7 @@ def access_token(request):
             row = Users.objects.filter(id=received_id).values()
             row = list(row)
             userData = row[0] if row else {}
-            del userData['password'] # deleted for security
+
 
             # update user token
             payload = {
@@ -388,6 +394,8 @@ def access_token(request):
                 'exp': now + datetime.timedelta(days=expiresIn)
             }
             updated_access_token = jwt.encode(payload, secret_key, algorithm=algorithm)
+
+            del userData['password'] # deleted for security
 
             return JsonResponse({ "user" : userData, "access_token" : updated_access_token.decode('utf-8')}, status=200, safe=False)            
         except:

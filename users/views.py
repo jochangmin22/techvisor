@@ -23,21 +23,3 @@ def register(request):
 
 def do_update(request):
     return users.update_user_data(request)
-    
-def interested(request):
-    return users.update_user_interested(request)
-
-def uninterested(request):
-    return users.update_user_uninterested(request)
-
-def create_label(request):
-    return users.create_label(request)
-
-def remove_label(request):
-    return users.remove_label(request)
-
-def labeling(request):
-    return users.user_labeling(request)
-
-def remove_labeling(request):
-    return users.user_remove_labeling(request)

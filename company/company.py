@@ -61,49 +61,48 @@ def parse_company(request, companyId=""):
             # + " limit 1000"
         )
         row = dictfetchall(cursor)
-        # _row = row[0]
-        # row[0].update({"독립항수": 99, "종속항수": 88})
-        # row[0].update(parse_claims(request, row[0]["청구항"]))
+        result = row[0]
+
         res = (
-            parse_claims(request, row[0]["청구항"], row[0]["출원번호"])
-            if row[0]["청구항"] and row[0]["청구항"] != "<SDOCL></SDOCL>"
+            parse_claims(request, result["청구항"], result["출원번호"])
+            if result["청구항"] and result["청구항"] != "<SDOCL></SDOCL>"
             # else {"독립항수": 0, "종속항수": 0, "청구항들": []}
             else {"청구항종류": [], "청구항들": []}
         )
 
-        row[0].update(res)
+        result.update(res)
 
-        del row[0]['청구항'] # remove claims for memory save
+        del result['청구항'] # remove claims for memory save
 
         res = (
-            parse_abstract(request, row[0]["초록"])
-            if row[0]["초록"] and row[0]["초록"] != "<SDOAB></SDOAB>"
+            parse_abstract(request, result["초록"])
+            if result["초록"] and result["초록"] != "<SDOAB></SDOAB>"
             else {"초록": '', "키워드": ''}
         )
 
-        row[0].update(res)
+        result.update(res)
 
         empty_res = {"기술분야": "", "배경기술": "", "해결과제": "", "해결수단": "", "발명효과": "", "도면설명": "", "발명의실시예": ""}
         res = (
-            parse_description(request, row[0]["명세서"])
-            if row[0]["명세서"] and row[0]["명세서"] != "<SDODE></SDODE>"
+            parse_description(request, result["명세서"])
+            if result["명세서"] and result["명세서"] != "<SDODE></SDODE>"
             else empty_res
         )
         # res = res if res else empty_res
 
-        row[0].update(res)
+        result.update(res)
 
-        del row[0]['명세서'] # remove description for memory save
+        del result['명세서'] # remove description for memory save
 
         # 전문소 tokenizer
-        res = ({'전문소token': ' '.join(tokenizer(row[0]['전문소token']) if row[0]['전문소token'] else [])})
-        row[0].update(res)
+        res = ({'전문소token': ' '.join(tokenizer(result['전문소token']) if result['전문소token'] else [])})
+        result.update(res)
 
     # Redis {
-    handleRedis(redisKey, 'raw', row[0], mode="w")        
+    handleRedis(redisKey, 'raw', result, mode="w")        
     # Redis } 
    
-    return JsonResponse(row[0], safe=False)
+    return JsonResponse(result, safe=False)
     # return HttpResponse(row, content_type="text/plain; charset=utf-8")
 
 def parse_company_quote(request, companyId=""):
@@ -123,13 +122,13 @@ def parse_company_quote(request, companyId=""):
             + ") A LEFT JOIN (SELECT 출원번호, \"발명의명칭(국문)\" || case when coalesce(\"발명의명칭(영문)\", '') = '' then '' else ' (' || \"발명의명칭(영문)\" || ')' end 명칭, 출원인1 || case when coalesce(출원인2, '') = '' then '' else ', ' || 출원인2 end || case when coalesce(출원인3, '') = '' then '' else ', ' || 출원인3 end 출원인, 등록일자 FROM 공개공보 "
             + ") B ON A.인용문헌번호1 = B.출원번호"
         )
-        row = dictfetchall(cursor)
+        result = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'quote', row, mode="w")        
+    handleRedis(redisKey, 'quote', result, mode="w")        
     # Redis }       
 
-    return JsonResponse(row, safe=False)
+    return JsonResponse(result, safe=False)
 
 def parse_company_family(request, companyId=""):
     """ searchDetails용 패밀리 검색 """
@@ -146,13 +145,13 @@ def parse_company_family(request, companyId=""):
             + ") A LEFT JOIN (SELECT 출원번호, \"발명의명칭(국문)\" || case when coalesce(\"발명의명칭(영문)\", '') = '' then '' else ' (' || \"발명의명칭(영문)\" || ')' end 명칭, 등록일자, ipc코드 FROM 공개공보 "
             + ") B ON A.패밀리출원번호1 = B.출원번호"
         )
-        row = dictfetchall(cursor)
+        result = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'family', row, mode="w")        
+    handleRedis(redisKey, 'family', result, mode="w")        
     # Redis } 
 
-    return JsonResponse(row, safe=False)
+    return JsonResponse(result, safe=False)
 
 def parse_company_legal(request, companyId=""):
     """ searchDetails용 법적상태이력 검색 """
@@ -168,13 +167,13 @@ def parse_company_legal(request, companyId=""):
             + whereAppNo
             + " order by 법적상태일자 DESC , 일련번호 DESC"
         )
-        row = dictfetchall(cursor)
+        result = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'legal', row, mode="w")        
+    handleRedis(redisKey, 'legal', result, mode="w")        
     # Redis }          
 
-    return JsonResponse(row, safe=False)
+    return JsonResponse(result, safe=False)
 
 def parse_company_registerfee(request, rgNo=""):
     """ searchDetails용 등록료 검색 """
@@ -190,13 +189,13 @@ def parse_company_registerfee(request, rgNo=""):
             + whereRgNo
             + " order by 시작연차 DESC"
         )
-        row = dictfetchall(cursor)
+        result = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'registerfee', row, mode="w")        
+    handleRedis(redisKey, 'registerfee', result, mode="w")        
     # Redis }         
 
-    return JsonResponse(row, safe=False)
+    return JsonResponse(result, safe=False)
 
 def parse_company_rightfullorder(request, companyId=""):
     """ searchDetails용 권리순위 검색 """
@@ -212,13 +211,13 @@ def parse_company_rightfullorder(request, companyId=""):
             + whereAppNo
             + " order by 순위번호 ASC"
         )
-        row = dictfetchall(cursor)
+        result = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'rightfullorder', row, mode="w")        
+    handleRedis(redisKey, 'rightfullorder', result, mode="w")        
     # Redis }   
 
-    return JsonResponse(row, safe=False)
+    return JsonResponse(result, safe=False)
 
 def parse_company_rightholder(request, rgNo=""):
     """ searchDetails용 권리권자변동 검색 """
@@ -234,13 +233,13 @@ def parse_company_rightholder(request, rgNo=""):
             + whereRgNo
             + " order by 순위번호 ASC"
         )
-        row = dictfetchall(cursor)
+        result = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'rightholder', row, mode="w")        
+    handleRedis(redisKey, 'rightholder', result, mode="w")        
     # Redis }  
 
-    return JsonResponse(row, safe=False)
+    return JsonResponse(result, safe=False)
 
 def parse_company_applicant(request, cusNo=""):
     """ searchDetails용 출원인 법인, 출원동향, 보유기술 검색 """
@@ -281,13 +280,13 @@ def parse_company_applicant(request, cusNo=""):
     # </body>
     # </response>
 
-    res = { "name" : "", "corpNo" : "", "bizNo" : "" }
+    result = { "name" : "", "corpNo" : "", "bizNo" : "" }
     bs = soup.find(operationKey)
     if bs:
-        res['name'] = bs.find("ApplicantName")
-        res['corpNo'] = bs.find("CorporationNumber")
-        res['bizNo'] = bs.find("BusinessRegistrationNumber")
-    return JsonResponse(res, safe=False)
+        result['name'] = bs.find("ApplicantName")
+        result['corpNo'] = bs.find("CorporationNumber")
+        result['bizNo'] = bs.find("BusinessRegistrationNumber")
+    return JsonResponse(result, safe=False)
 
        
 def parse_company_applicant_trend(request, cusNo=""):
@@ -304,16 +303,16 @@ def parse_company_applicant_trend(request, cusNo=""):
         # query = "SELECT left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereCusNo
         query = "SELECT left(출원일자::text,4) 출원년, ipc요약 FROM 공개공보 " + whereCusNo
         cursor.execute(query)
-        row = dictfetchall(cursor)
+        result = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'applicant_trend', row, mode="w")        
+    handleRedis(redisKey, 'applicant_trend', result, mode="w")        
     # Redis }  
     #        
-    return JsonResponse(row, safe=False)
+    return JsonResponse(result, safe=False)
 
 
-def handleRedis(redisKey, keys, data="", mode="r"):
+def handleRedis(redisKey, keys, result="", mode="r"):
     """ read or write to redis """
     context = cache.get(redisKey) 
     if mode == 'r':
@@ -321,24 +320,24 @@ def handleRedis(redisKey, keys, data="", mode="r"):
             return JsonResponse(context[keys], safe=False)
     if mode == 'w':
         if context is not None:
-            context[keys] = data
+            context[keys] = result
             cache.set(redisKey, context, CACHE_TTL)
-        return JsonResponse(data, safe=False)        
+        return JsonResponse(result, safe=False)        
     return    
 
-def _parse_typo(xmlStr=""): 
+def _parse_typo(result=""): 
     """ 오타 정리 """
-    xmlStr = re.sub(r"<EMIID=", "<EMI ID=", xmlStr)  # tag 오타
-    xmlStr = re.sub(
-        r"<EMI .*?>", "", xmlStr
+    result = re.sub(r"<EMIID=", "<EMI ID=", result)  # tag 오타
+    result = re.sub(
+        r"<EMI .*?>", "", result
     )  # attribute 에 따옴표 없는 tree 에러 방지 - <EMI ID=8 HE=24 WI=164 FILE="kpo00008.TIF">
-    xmlStr = re.sub(
-        r"(<SB>|</SB>|<SP>|</SP>|<AP>|<U>|</U>|<SB\.| >|<PS>|</Sb>|)", "", xmlStr
+    result = re.sub(
+        r"(<SB>|</SB>|<SP>|</SP>|<AP>|<U>|</U>|<SB\.| >|<PS>|</Sb>|)", "", result
     )  # <P></P> 사이에 문제되는 태그, 오타 태그 정리
-    xmlStr = re.sub(r"(</SB)", "", xmlStr)  # <P></P> 사이에 문제되는 태그, 오타 태그 정리 2
-    xmlStr = re.sub(r"</p>", "</P>", xmlStr)
-    xmlStr = re.sub(r".TIF<", '.TIF"><', xmlStr)  # FILE="kpo00001.TIF</P>
-    return xmlStr
+    result = re.sub(r"(</SB)", "", result)  # <P></P> 사이에 문제되는 태그, 오타 태그 정리 2
+    result = re.sub(r"</p>", "</P>", result)
+    result = re.sub(r".TIF<", '.TIF"><', result)  # FILE="kpo00001.TIF</P>
+    return result
 
 def parse_abstract(request, xmlStr=""):
 
@@ -346,17 +345,17 @@ def parse_abstract(request, xmlStr=""):
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
 
-    my_dict = {"초록": "", "키워드": ""}
+    result = {"초록": "", "키워드": ""}
 
     if bs.find("sdoab"): # type sdoab tag start
-        my_dict["초록"], my_dict["키워드"] = abstract_type(bs, 'sdoab', 'summary', 'idxword')
-        return my_dict
+        result["초록"], result["키워드"] = abstract_type(bs, 'sdoab', 'summary', 'idxword')
+        return result
     elif bs.find("abstract"):  # type abstract tag start
-        my_dict["초록"], my_dict["키워드"] = abstract_type(bs, 'abstract', 'summary', 'keyword')
-        return my_dict
+        result["초록"], result["키워드"] = abstract_type(bs, 'abstract', 'summary', 'keyword')
+        return result
     elif bs.find("summary"):  # type summary tag start
-        my_dict["초록"], my_dict["키워드"] = abstract_type(bs, 'summary', '', 'keyword')
-        return my_dict        
+        result["초록"], result["키워드"] = abstract_type(bs, 'summary', '', 'keyword')
+        return result        
 
 def abstract_type(bs, startTag, nextTag, keywordTag):
     # sample : <SDOAB><SUMMARY><P INDENT="14" ALIGN="JUSTIFIED">본 발명은 구아바로부터 얻은 단백질 타이로신 탈인산화 효소 1B 저해용 활성분획 추출물에 관한 것으로, 더욱 상세하게는 열대 식물인 구아바(guava, <I>Psidium guajava </I>Linn)의 잎 또는 열매로부터 단백질 타이로신 탈인산화 효소 1B(protein tyrosine phosphatase 1B, PTP1B)를 저해하여 인슐린의 작용을 촉진시킴으로써 당뇨병의 증상인 혈당상승에 대한 혈당강하 효과를 갖는 활성분획 추출물과 이를 효율적으로 추출, 정제하는 방법 그리고 그 추출물을 유효성분으로 함유하는 당뇨병 예방과 치료, 혈당강하 및 지방간 억제용 생약제에 관한 것이다.</P></SUMMARY><ABDR><DRAWREF IDREF="2"></ABDR><BR><IDXWORD>구아바, 단백질 타이로신 탈인산화 효소 1B(protein tyrosine phosphatase1B, PTP1B), 당뇨병 예방과 치료, 혈당강하, 지방간 억제</IDXWORD></SDOAB>
@@ -364,8 +363,8 @@ def abstract_type(bs, startTag, nextTag, keywordTag):
     # sample : <Abstract><Summary><P align="JUSTIFIED" indent="14">본 발명은 비자 유래의 신규 단백질 타이로신 탈인산효소 1B 저해용 화합물에 관한 것으로서, 비자(<I>Torreya nucifera</I>)를 메탄올 추출한 후 크로마토그래피를 이용하여 순수 분리 정제하여 얻은 신규 단백질 타이로신 탈인산효소 1B(protein tyrosine phosphatase1B, PTP1B) 저해 화합물과 이를 효율적으로 추출, 정제하는 방법 그리고 비자 추출물 및 이로부터 분리된 화합물을 유효성분으로 함유하는 당뇨병 예방과 치료, 혈당 강하용 용도에 관한 것이다.</P></Summary><AbstractFigure><DrawReference idref="1"/><BR/></AbstractFigure><Keyword>비자(Torreya nucifera), 단백질 타이로신 탈인산 효소 1B(protein tyrosine phosphatase1B, PTP1B), 당뇨병 예방과 치료, 혈당 강하용<DP n="2" type="HARD"/></Keyword></Abstract>
 
     # sample : <Summary><P align="JUSTIFIED" indent="14">본 발명은 부추(Allium tuberosum Rottler, Leek) 추출물로부터 분리한 단백질을 유효성분으로 함유하는 혈전 관련 질환의 예방 및 치료용 조성물에 관한 것으로, 보다 상세하게는 부추 추출물로부터 분리·정제되고 서열번호 1로 기재되는 아미노산 서열을 가지는 단백질은 피브린에 대한 효소 특이성을 가지고 있어 혈전 분해 활성을 나타내며, 주사제로 사용하고 있는 종래의 혈전용해제와 비교해 볼 때 식용식물의 대사산물로서의 안전성과 혈전용해 활성이 우수함으로써 혈전 관련 질환의 예방 및 치료용 조성물, 또는 건강식품으로 유용하게 사용될 수 있다. </P><BR></BR></Summary><AbstractFigure><DrawReference idref="1"></DrawReference><BR></BR></AbstractFigure><Keyword>부추 추출물, 혈전 용해<BR></BR></Keyword>     
-    my_abstract = ""
-    my_keyword = ""
+    result_abstract = ""
+    result_keyword = ""
 
     bs1 = bs.find(startTag).find_all(nextTag) if nextTag != '' else bs.find_all(startTag)# sdoab summary / abstract summary / summary
     if bs1:
@@ -376,12 +375,12 @@ def abstract_type(bs, startTag, nextTag, keywordTag):
                     p_txt += "\n" + soup.get_text()
                 else:
                     p_txt += soup.get_text()
-            my_abstract =p_txt
+            result_abstract =p_txt
     bs_keyword = bs.find(startTag).find(keywordTag)                    
     if bs_keyword:
-        my_keyword = bs_keyword.get_text()            
+        result_keyword = bs_keyword.get_text()            
 
-    return my_abstract, my_keyword
+    return result_abstract, result_keyword
 
 def parse_claims(request, xmlStr="", appNo=""):
     """ 비정형 청구항을 bs를 이용하여 처리 """
@@ -392,21 +391,21 @@ def parse_claims(request, xmlStr="", appNo=""):
     # tree = elemTree.fromstring(xmlStr)
 
     # total = tree.findall("claim")
-    # my_dict = {"독립항수": 0, "종속항수": 0, "총청구항수": len(total), "청구항들": []}
-    # my_dict = {"독립항수": 0, "종속항수": 0, "청구항들": []}
-    my_dict = {"청구항종류": [], "청구항들": []}
+    # result = {"독립항수": 0, "종속항수": 0, "총청구항수": len(total), "청구항들": []}
+    # result = {"독립항수": 0, "종속항수": 0, "청구항들": []}
+    result = {"청구항종류": [], "청구항들": []}
 
     if bs.find("sdocl"):  # 청구항 타입 a
-        # my_dict["독립항수"], my_dict["종속항수"], my_dict["청구항들"] = claims_a_type(bs)
-        my_dict["청구항종류"], my_dict["청구항들"] = claims_a_type(bs)
-        return my_dict
+        # result["독립항수"], result["종속항수"], result["청구항들"] = claims_a_type(bs)
+        result["청구항종류"], result["청구항들"] = claims_a_type(bs)
+        return result
     elif bs.find("claims"):  # 청구항 타입 b
-        my_dict["청구항종류"], my_dict["청구항들"] = claims_b_type(bs)
-        return my_dict
+        result["청구항종류"], result["청구항들"] = claims_b_type(bs)
+        return result
     elif bs.find("claim"):  # 청구항 타입 c
         # print(appNo)
-        my_dict["청구항종류"], my_dict["청구항들"] = claims_c_type(bs)
-        return my_dict
+        result["청구항종류"], result["청구항들"] = claims_c_type(bs)
+        return result
 
 def ClaimTypeCheck(val):
     """ 독립항, 종속항, 삭제항 판단 """
@@ -419,8 +418,8 @@ def ClaimTypeCheck(val):
 
 def claims_a_type(bs):
     """ 청구항 비정형타입 A """
-    my_claim = []
-    my_claim_type = []
+    result_claim = []
+    result_claim_type = []
 
     # jong = 0
     # dok = 0
@@ -440,9 +439,9 @@ def claims_a_type(bs):
                         p_txt += "\n" + soup2.get_text()
                     else:
                         p_txt += soup2.get_text()
-            my_claim.append(p_txt)
-            my_claim_type.append(t_txt)
-        return my_claim_type, my_claim        
+            result_claim.append(p_txt)
+            result_claim_type.append(t_txt)
+        return result_claim_type, result_claim        
     elif bs4:
         p_txt = ""
         t_txt = ""         
@@ -453,14 +452,14 @@ def claims_a_type(bs):
                     p_txt += "\n" + soup.get_text()
                 else:
                     p_txt += soup.get_text()
-            my_claim.append(p_txt)
-            my_claim_type.append(t_txt)            
-        return my_claim_type, my_claim
+            result_claim.append(p_txt)
+            result_claim_type.append(t_txt)            
+        return result_claim_type, result_claim
 
 def claims_b_type(bs):
     """ 청구항 비정형타입 B """    
-    my_claim = []
-    my_claim_type = []    
+    result_claim = []
+    result_claim_type = []    
     # jong = 0
     # dok = 0
 
@@ -477,14 +476,14 @@ def claims_b_type(bs):
                     p_txt += "\n" + soup2.get_text()
                 else:
                     p_txt += soup2.get_text()
-        my_claim.append(p_txt)
-        my_claim_type.append(t_txt)        
-    return my_claim_type, my_claim    
+        result_claim.append(p_txt)
+        result_claim_type.append(t_txt)        
+    return result_claim_type, result_claim    
 
 def claims_c_type(bs):
     """ 청구항 비정형타입 C """    
-    my_claim = []
-    my_claim_type = []
+    result_claim = []
+    result_claim_type = []
     # jong = 0
     # dok = 0
 
@@ -504,13 +503,13 @@ def claims_c_type(bs):
             bs_amend = soup.find("amendstatus")
             t_txt = ""
             if bs_text:
-                my_claim.append(bs_text.get_text())
+                result_claim.append(bs_text.get_text())
                 t_txt = ClaimTypeCheck(soup.get_text())
-                my_claim_type.append(t_txt)
+                result_claim_type.append(t_txt)
             elif bs_amend:
-                my_claim.append(bs_amend.get_text())
+                result_claim.append(bs_amend.get_text())
                 t_txt = ClaimTypeCheck(soup.get_text())
-                my_claim_type.append(t_txt)                
+                result_claim_type.append(t_txt)                
     elif bs2:
         for soup in bs.find_all("claim"):
             p_txt = ""
@@ -534,8 +533,8 @@ def claims_c_type(bs):
             # p 태그가 청구항내 복수개
             t_txt = ClaimTypeCheck(p_txt)
 
-            my_claim.append(p_txt)
-            my_claim_type.append(t_txt)
+            result_claim.append(p_txt)
+            result_claim_type.append(t_txt)
     elif bs3:
         for soup in bs.find_all("claim"):
             p_txt = ""
@@ -549,9 +548,9 @@ def claims_c_type(bs):
             # p 태그가 청구항내 복수개
             t_txt = ClaimTypeCheck(p_txt)
 
-            my_claim.append(p_txt)
-            my_claim_type.append(t_txt)
-    return my_claim_type, my_claim
+            result_claim.append(p_txt)
+            result_claim_type.append(t_txt)
+    return result_claim_type, result_claim
 
 def parse_description(request, xmlStr=""):
 
@@ -626,15 +625,15 @@ def parse_description(request, xmlStr=""):
         return ""  
         
 def description_type(bs, attName, my_name, my_tag):
-    my_dict = {}
+    result = {}
     for idx, val in enumerate(my_tag):
-        my_dict[my_name[idx]] = bs_desc(bs.find_all(val), attName)
-    my_dict['descPart'] = my_name
-    return my_dict                          
+        result[my_name[idx]] = bs_desc(bs.find_all(val), attName)
+    result['descPart'] = my_name
+    return result                          
 
 def bs_desc(bs, attName):
     if bs:
-        p_txt = ""
+        result = ""
         n_txt = ""
         for soup in bs:
             if soup:
@@ -647,22 +646,22 @@ def bs_desc(bs, attName):
                             n_txt = ''        
                         s = replace_with_newlines(soup2)
                         # s = re.sub('<br\s*?>', '\n', soup2)
-                        if p_txt:
-                            p_txt = p_txt + "\n" + n_txt + s # soup2.get_text("\n")
+                        if result:
+                            result = result + "\n" + n_txt + s # soup2.get_text("\n")
                         else:
-                            p_txt = n_txt + s # soup2.get_text("\n")
-        return p_txt
+                            result = n_txt + s # soup2.get_text("\n")
+        return result
     else:
         return ""
 
 def replace_with_newlines(element):
-    text = ''
+    result = ''
     for elem in element.recursiveChildGenerator():
         if isinstance(elem, str):
-            text += elem.strip()
+            result += elem.strip()
         elif elem.name == 'br':
-            text += '\n'
-    return text                
+            result += '\n'
+    return result                
 
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"

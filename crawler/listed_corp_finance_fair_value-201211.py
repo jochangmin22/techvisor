@@ -264,18 +264,20 @@ empty_financial_info = {
 }
 
 def sectorPer(df):
-    ''' df[0] : '업종PER' '''
+    ''' df[0] : 'EPS', '업종PER' '''
     mylist = df.iloc[0].values[0].replace('  ', ' ').split(' ')
+    result = {'EPS(원)': 0, '업종PER(배)' : 0}
     for (idx, val) in enumerate(mylist):
+        if val == 'EPS':
+            result.update({'EPS(원)' : str2int(mylist[idx + 1]) })
         if val == '업종PER':
-            return {'업종PER(배)' : str2round(mylist[idx + 1]) }
-
-    return {'업종PER(배)' : 0}
+            result.update({'업종PER(배)' : str2round(mylist[idx + 1]) })
+    return result
 
 import math
 def fundamental(df):
     ''' df[5] :  'PER', 'PBR', 'EPS', 'BPS', '현금DPS', '현금배당수익률' '''
-    r = {}
+    result = {}
 
     # C 컬럼이 안읽힐경우 C 포기
     df.columns = ['A','B','C'][:len(df.columns)]
@@ -288,29 +290,35 @@ def fundamental(df):
         except:
             pass
         try:            
-            r[name] = bVal if cVal.isnull().values.any() else cVal
+            result[name] = bVal if cVal.isnull().values.any() else cVal
         except:
-            r[name] = bVal
+            result[name] = bVal
 
 
     for name in ['PER','PBR']:
-        r[name] = r[name].fillna(0).astype(float).to_list()[0]
+        result[name] = result[name].fillna(0).astype(float).to_list()[0]
 
-    for name in ['EPS','BPS','현금DPS']:
+    for name in ['EPS', 'BPS','현금DPS']:
         try: 
-            r[name] = r[name].str.replace('원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
+            result[name] = result[name].str.replace('원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
         except: # 원 없고 null
-            r[name] = 0
+            result[name] = 0
     # change name        
-    r['현금DPS(원)'] = r['현금DPS']
-    del r['현금DPS']
+    result['현금DPS(원)'] = result['현금DPS']
+    del result['현금DPS']
+
+    result['PER(배)'] = result['PER']
+    del result['PER']
+
+    result['PBR(배)'] = result['PBR']
+    del result['PBR']
 
     try:
-        r['현금배당수익률'] = r['현금배당수익률'].str.replace('%', '').fillna(0).astype(float).to_list()[0]
+        result['현금배당수익률'] = result['현금배당수익률'].str.replace('%', '').fillna(0).astype(float).to_list()[0]
     except:
-        r['현금배당수익률'] = 0 # 숫자없고 %만 있는 경우
+        result['현금배당수익률'] = 0 # 숫자없고 %만 있는 경우
     
-    return r
+    return result
 
 # def qPrice(df):
 #     ''' df[6] : 전분기 대비 : '영업이익증감(전전)','영업이익증감(직전)','순이익증감(전전)','순이익증감(직전)' '''
@@ -339,12 +347,12 @@ def qPrice(df):
 
 def stockVolume(df):
     ''' df[1] : '거래량','시가총액(억)' '''
-    r = {}
+    result = {}
     df.columns = ['A','B']
-    r['거래량'] = df.loc[df['A'] == '거래량/거래대금', 'B'].str.split('주 /').str[0].str.replace(',', '').fillna(0).astype(int).to_list()[0]
-    r['시가총액(억)'] = df.loc[df['A'] == '시가총액', 'B'].str.replace('억원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
+    result['거래량'] = df.loc[df['A'] == '거래량/거래대금', 'B'].str.split('주 /').str[0].str.replace(',', '').fillna(0).astype(int).to_list()[0]
+    result['시가총액(억)'] = df.loc[df['A'] == '시가총액', 'B'].str.replace('억원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
 
-    return r
+    return result
 
 def get_date_str(s):
     date_str = ''
@@ -359,7 +367,7 @@ def financialSummary(df, PER):
     'ROE(%)','ROA(%)','EPS(원)','PER(배)' 는 최근분기 사용
     PER : PEGR 만들때 사용
     '''
-    r={}
+    result={}
     # columns을 first row로 변경 or pd.read_html(url, header=1)
     df.columns = df.iloc[0]
     # 첫줄 삭제
@@ -390,14 +398,14 @@ def financialSummary(df, PER):
     df_f = df.loc[:,~df.columns.duplicated(keep='first')]  # 중복된건 앞에것만
     df_f = df_f.T
 
-    my_df_cols = ['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','자본총계(지배)','EPS(원)','BPS(원)','발행주식수(보통주)','부채비율']
+    my_df_cols = ['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','자본총계(지배)','EPS(원)', 'BPS(원)','발행주식수(보통주)','부채비율']
 
     my_df = df_f.loc[[cols[2]],my_df_cols] # 3번째 cols ; '2019/12'        
 
     for name in my_df_cols[:-1]: # '부채비율' 제외
-        r[name] = my_df[name].fillna(0).astype(int).to_list()[0]
+        result[name] = my_df[name].fillna(0).astype(int).to_list()[0]
 
-    r['부채비율(%)'] = my_df['부채비율'].fillna(0).astype(float).to_list()[0]
+    result['부채비율(%)'] = my_df['부채비율'].fillna(0).astype(float).to_list()[0]
 
     # EPS(%) 구하기 
     # 공식: (마지막연도EPS(원)/시작연도EPS(원))^(1/계산하는연도갯수)-1
@@ -409,40 +417,44 @@ def financialSummary(df, PER):
             x.append(EPS)
     x_len = len(x)
     if x_len < 2:
-        r['EPS(%)'] = 0
+        result['EPS(%)'] = 0
     else:
         # print('length', x_len-1, 'start', x[0], 'end',x[-1])
         if x[0] <= 0 or x[-1] <= 0:
-            r['EPS(%)'] = 0
+            result['EPS(%)'] = 0
         else:            
             try:
-                r['EPS(%)'] = ((x[-1] / x[0])**(1/(x_len - 1))-1) * 100
-                # print('EPS', r['EPS(%)'])
+                result['EPS(%)'] = ((x[-1] / x[0])**(1/(x_len - 1))-1) * 100
+                # print('EPS', result['EPS(%)'])
             except:
-                r['EPS(%)'] = 0
+                result['EPS(%)'] = 0
 
-    if r['EPS(%)'] == 0:
-        r['PEGR(배)'] = 0
+    if result['EPS(%)'] == 0:
+        result['PEGR(배)'] = 0
     else:
         if PER >= 0:        
             try:
-                r['PEGR(배)'] = PER / r['EPS(%)']
-                r['PEGR(배)'] = str2round(r['PEGR(배)'])
-                # print('PER', PER, 'PEGR', r['PEGR(배)'])
+                result['PEGR(배)'] = PER / result['EPS(%)']
+                result['PEGR(배)'] = str2round(result['PEGR(배)'])
+                # print('PER', PER, 'PEGR', result['PEGR(배)'])
             except:        
-                r['PEGR(배)'] = 0
+                result['PEGR(배)'] = 0
+
+    # EPS(원)은 여기거 안쓰고 sectorPer 거 사용
+    del result['EPS(원)']                
 
     df_l = df.loc[:,~df.columns.duplicated(keep='last')]  # 중복된건 나중것만
     df_l = df_l.T
 
     # 최근 분기에서 4가지
-    my_q_df_cols = ['ROE(%)','ROA(%)','PER(배)','PBR(배)']     
+    # 분기와 평균 수치 괴리가 커서 (PER, PBR)는 펀더멘털 것으로 다시 사용 210107
+    # my_q_df_cols = ['ROE(%)','ROA(%)','PER(배)','PBR(배)']     
+    my_q_df_cols = ['ROE(%)','ROA(%)']     
 
-    my_q_df = df_l.loc[[cols[6]],my_q_df_cols] # 7번째 cols ; '2020/06' 
+    my_q_df = df_l.loc[[cols[6]],my_q_df_cols] # 7번째 cols ; '분기 끝에서 2번째 ex) 2020/09' 
 
     for name in my_q_df_cols:
-        r[name] = my_q_df[name].fillna(0).astype(float).to_list()[0]
-
+        result[name] = my_q_df[name].fillna(0).astype(float).to_list()[0]
 
     # 재무 field
     # 형태 { "dateY" : ["2017/12", "2018/12", "2019/12", "2020/12"], "dateQ" : ["2020/03", "2020/06", "2020/09", "2020/12"], "valueY": [[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0]], "valueQ" : [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]]}
@@ -466,36 +478,36 @@ def financialSummary(df, PER):
     financial_res['valueY'] = y_list
     financial_res['valueQ'] = q_list
 
-    return r, financial_res
+    return result, financial_res
 
 
 def employee_listingdate_research(df):
     ''' 기업개요 - df[1] : 종업원수,상장일, df[4]: 연구개발비 '''
-    r = {}
+    result = {}
 
     # C,D 컬럼이 안읽힐경우 C, D 포기
     df[1].columns = ['A','B','C','D'][:len(df[1].columns)]
     try:
-        r['상장일'] = df[1].loc[df[1]['A'] =='설립일', 'B'].str.split('상장일: ').str[1].str.replace('/','.').str.replace(')','').to_list()[0]
+        result['상장일'] = df[1].loc[df[1]['A'] =='설립일', 'B'].str.split('상장일: ').str[1].str.replace('/','.').str.replace(')','').to_list()[0]
     except:
-        r['상장일']  = ''
+        result['상장일']  = ''
         print('상장일', df[1].columns)
     try:
-        r['종업원수'] = df[1].loc[df[1]['C'] =='종업원수', 'D'].str.strip().str.split(r' \(').str[0].str.replace(',','').fillna(0).astype(int).to_list()[0]
+        result['종업원수'] = df[1].loc[df[1]['C'] =='종업원수', 'D'].str.strip().str.split(r' \(').str[0].str.replace(',','').fillna(0).astype(int).to_list()[0]
     except: # 종업원수 null
-        r['종업원수'] = 0
+        result['종업원수'] = 0
         # print('종업원수', df[1].columns)
     try:       
-        r['연구개발비(연)'] = df[4]['연구개발비용지출총액'].fillna(0).astype(int).to_list()[0]
+        result['연구개발비(연)'] = df[4]['연구개발비용지출총액'].fillna(0).astype(int).to_list()[0]
     except:        
-        r['연구개발비(연)'] = 0
+        result['연구개발비(연)'] = 0
         print('연구개발비', df[4].columns)
 
-    return r
+    return result
 
 def current_assets_Total_liabilities(df):
     ''' 유동자산, 부채총계 '''
-    r = {}
+    result = {}
 
     try:        
         df.columns = ['A','B','C','D','E','F','G','H','I'][:len(df.columns)]
@@ -503,176 +515,176 @@ def current_assets_Total_liabilities(df):
         print(len(df.columns))
         pass        
 
-    r['유동자산'] = 0
+    result['유동자산'] = 0
     try:
-        r['유동자산'] = df.loc[df['A'] =='유동자산', 'E'].fillna(0).astype(float).to_list()[0]
+        result['유동자산'] = df.loc[df['A'] =='유동자산', 'E'].fillna(0).astype(float).to_list()[0]
     except:
         pass        
     try:
-        r['유동자산'] = df.loc[df['A'] =='유동자산', 'F'].fillna(0).astype(float).to_list()[0]
+        result['유동자산'] = df.loc[df['A'] =='유동자산', 'F'].fillna(0).astype(float).to_list()[0]
     except:
         pass
 
-    r['부채총계'] = 0
+    result['부채총계'] = 0
     try:
-        r['부채총계'] = df.loc[df['A'] =='부채총계', 'E'].fillna(0).astype(float).to_list()[0]
+        result['부채총계'] = df.loc[df['A'] =='부채총계', 'E'].fillna(0).astype(float).to_list()[0]
     except:
         pass        
     try:
-        r['부채총계'] = df.loc[df['A'] =='부채총계', 'F'].fillna(0).astype(float).to_list()[0]
+        result['부채총계'] = df.loc[df['A'] =='부채총계', 'F'].fillna(0).astype(float).to_list()[0]
     except:
         pass
 
 
-    return r
+    return result
 
 def calculate_stock_fair_value(r):
     '''
     적정주가 계산식
     '''
-    res = {}    
-    res['기업가치(백만)'] = r['자본총계(지배)']+(r['자본총계(지배)']*(r['ROE(%)']-7.9)/7.9)
-    res['기업가치(백만)'] = int(res['기업가치(백만)'])
+    result = {}    
+    result['기업가치(백만)'] = r['자본총계(지배)']+(r['자본총계(지배)']*(r['ROE(%)']-7.9)/7.9)
+    result['기업가치(백만)'] = int(result['기업가치(백만)'])
 
     sumCnt = 5
     if r['PER(배)'] > 0 and r['EPS(원)'] > 0:
-        res['적(1)PER*EPS'] = r['PER(배)'] * r['EPS(원)']   #적정주가(1)PER*EPS
-        res['적(1)PER*EPS'] =  int(res['적(1)PER*EPS'])     
+        result['적(1)PER*EPS'] = r['PER(배)'] * r['EPS(원)']   #적정주가(1)PER*EPS
+        result['적(1)PER*EPS'] =  int(result['적(1)PER*EPS'])     
     else:        
-        res['적(1)PER*EPS'] = 0
+        result['적(1)PER*EPS'] = 0
         sumCnt -= 1
 
     if r['ROE(%)'] > 0 and r['EPS(원)'] > 0:
-        res['적(2)ROE*EPS'] = r['ROE(%)'] * r['EPS(원)']    #적정주가(2)ROE*EPS
-        res['적(2)ROE*EPS'] = int(res['적(2)ROE*EPS'])
+        result['적(2)ROE*EPS'] = r['ROE(%)'] * r['EPS(원)']    #적정주가(2)ROE*EPS
+        result['적(2)ROE*EPS'] = int(result['적(2)ROE*EPS'])
     else:
-        res['적(2)ROE*EPS'] = 0         
+        result['적(2)ROE*EPS'] = 0         
         sumCnt -= 1    
 
     if r['EPS(원)'] > 0:
-        res['적(3)EPS*10'] =  r['EPS(원)']*10    #적정주가(3)EPS*10
-        res['적(3)EPS*10'] = int(res['적(3)EPS*10'])
+        result['적(3)EPS*10'] =  r['EPS(원)']*10    #적정주가(3)EPS*10
+        result['적(3)EPS*10'] = int(result['적(3)EPS*10'])
     else:        
-        res['적(3)EPS*10'] = 0
+        result['적(3)EPS*10'] = 0
         sumCnt -= 1  
 
     try:
-        res['적(4)s-rim'] = res['기업가치(백만)']/ r['발행주식수(보통주)']*100000000 #100000000     #적정주가(4)s-rim
-        res['적(4)s-rim'] = int(res['적(4)s-rim'])
-        if res['적(4)s-rim'] < 0:
-            res['적(4)s-rim'] = 0
+        result['적(4)s-rim'] = result['기업가치(백만)']/ r['발행주식수(보통주)']*100000000 #100000000     #적정주가(4)s-rim
+        result['적(4)s-rim'] = int(result['적(4)s-rim'])
+        if result['적(4)s-rim'] < 0:
+            result['적(4)s-rim'] = 0
     except:
-         res['적(4)s-rim'] = 0
+         result['적(4)s-rim'] = 0
     finally:         
-        if res['적(4)s-rim'] == 0:
+        if result['적(4)s-rim'] == 0:
             sumCnt -= 1         
 
     try:
-        res['적(5)당기순이익*PER'] = r['당기순이익'] * r['PER(배)'] * 100000000 / r['발행주식수(보통주)'] #100000000    #적정주가(5)당기순이익*PER
-        res['적(5)당기순이익*PER'] = int(res['적(5)당기순이익*PER'])
-        if res['적(5)당기순이익*PER'] < 0:
-            res['적(5)당기순이익*PER'] = 0        
+        result['적(5)당기순이익*PER'] = r['당기순이익'] * r['PER(배)'] * 100000000 / r['발행주식수(보통주)'] #100000000    #적정주가(5)당기순이익*PER
+        result['적(5)당기순이익*PER'] = int(result['적(5)당기순이익*PER'])
+        if result['적(5)당기순이익*PER'] < 0:
+            result['적(5)당기순이익*PER'] = 0        
     except:
-        res['적(5)당기순이익*PER'] = 0
+        result['적(5)당기순이익*PER'] = 0
     finally:         
-        if  res['적(5)당기순이익*PER'] == 0:
+        if  result['적(5)당기순이익*PER'] == 0:
             sumCnt -= 1         
 
     try:
-        res['추천매수가'] = (r['자본총계(지배)']+r['자본총계(지배)']*(r['ROE(%)']-7.9)/7.9*(0.8/(1+7.9-0.8)))/r['발행주식수(보통주)']*100000000 #100000000    #적정매수가
-        res['추천매수가'] = int(res['추천매수가'])
+        result['추천매수가'] = (r['자본총계(지배)']+r['자본총계(지배)']*(r['ROE(%)']-7.9)/7.9*(0.8/(1+7.9-0.8)))/r['발행주식수(보통주)']*100000000 #100000000    #적정매수가
+        result['추천매수가'] = int(result['추천매수가'])
     except:
-        res['추천매수가'] = 0
+        result['추천매수가'] = 0
         
     try:
-        res['적정가평균'] = sum([res['적(1)PER*EPS'],res['적(2)ROE*EPS'],res['적(3)EPS*10'],res['적(4)s-rim'],res['적(5)당기순이익*PER']]) / sumCnt
-        res['적정가평균'] = int(res['적정가평균'])
-        if res['적정가평균'] < 0:
-            res['적정가평균'] = 0
+        result['적정가평균'] = sum([result['적(1)PER*EPS'],result['적(2)ROE*EPS'],result['적(3)EPS*10'],result['적(4)s-rim'],result['적(5)당기순이익*PER']]) / sumCnt
+        result['적정가평균'] = int(result['적정가평균'])
+        if result['적정가평균'] < 0:
+            result['적정가평균'] = 0
     except:
-        res['적정가평균'] = 0
+        result['적정가평균'] = 0
 
     try:
-        res['갭1'] = (1 - r['전일종가'] / res['적(1)PER*EPS']) * 100    #1-전일종가/적정가*100
-        res['갭1'] = str2round(res['갭1'],0)
+        result['갭1'] = (1 - r['전일종가'] / result['적(1)PER*EPS']) * 100    #1-전일종가/적정가*100
+        result['갭1'] = str2round(result['갭1'],0)
     except:
-        res['갭1'] = 0
+        result['갭1'] = 0
         
     try:
-        res['갭2'] = (1 - r['전일종가'] / res['적(2)ROE*EPS']) * 100    #1-전일종가/적정가*100
-        res['갭2'] = str2round(res['갭2'],0)
+        result['갭2'] = (1 - r['전일종가'] / result['적(2)ROE*EPS']) * 100    #1-전일종가/적정가*100
+        result['갭2'] = str2round(result['갭2'],0)
     except:
-        res['갭1'] = 0    
+        result['갭1'] = 0    
         
     try:
-        res['갭3'] = (1 - r['전일종가'] / res['적(3)EPS*10']) * 100    #1-전일종가/적정가*100
-        res['갭3'] = str2round(res['갭3'],0)
+        result['갭3'] = (1 - r['전일종가'] / result['적(3)EPS*10']) * 100    #1-전일종가/적정가*100
+        result['갭3'] = str2round(result['갭3'],0)
     except:
-        res['갭1'] = 0    
+        result['갭1'] = 0    
         
     try:
-        res['갭4'] = (1 - r['전일종가'] / res['적(4)s-rim']) * 100    #1-전일종가/적정가*100
-        res['갭4'] = str2round(res['갭4'],0)
+        result['갭4'] = (1 - r['전일종가'] / result['적(4)s-rim']) * 100    #1-전일종가/적정가*100
+        result['갭4'] = str2round(result['갭4'],0)
     except:
-        res['갭1'] = 0    
+        result['갭1'] = 0    
         
     try:
-        res['갭5'] = (1 - r['전일종가'] / res['적(5)당기순이익*PER']) * 100    #1-전일종가/적정가*100
-        res['갭5'] = str2round(res['갭5'],0)
+        result['갭5'] = (1 - r['전일종가'] / result['적(5)당기순이익*PER']) * 100    #1-전일종가/적정가*100
+        result['갭5'] = str2round(result['갭5'],0)
     except:
-        res['갭1'] = 0    
+        result['갭1'] = 0    
 
-    if res['적정가평균'] >  r['전일종가']:                  #(평균목표가 - 전일종가) / 평균목표가
-        res['기대수익률'] = (res['적정가평균'] - r['전일종가']) / res['적정가평균'] *100
-        res['기대수익률'] = round(res['기대수익률'],0)
+    if result['적정가평균'] >  r['전일종가']:                  #(평균목표가 - 전일종가) / 평균목표가
+        result['기대수익률'] = (result['적정가평균'] - r['전일종가']) / result['적정가평균'] *100
+        result['기대수익률'] = round(result['기대수익률'],0)
     else:
-        res['기대수익률'] = 0    
+        result['기대수익률'] = 0    
 
     if r['업종PER(배)'] > 0:                                # 기업 per 비율
-        res['PER갭(%)'] = r['PER(배)'] / r['업종PER(배)'] *100
-        res['PER갭(%)'] = round(res['PER갭(%)'],1)        
+        result['PER갭(%)'] = r['PER(배)'] / r['업종PER(배)'] *100
+        result['PER갭(%)'] = round(result['PER갭(%)'],1)        
     else:
-        res['PER갭(%)'] = 0
+        result['PER갭(%)'] = 0
 
     try:
-        res['PRR(배)'] = r['시가총액(억)'] / r['연구개발비(연)'] * 100 # 단위 보정 ; 억원 / 백만원
-        res['PRR(배)'] = round(res['PRR(배)'],2)        
+        result['PRR(배)'] = r['시가총액(억)'] / r['연구개발비(연)'] * 100 # 단위 보정 ; 억원 / 백만원
+        result['PRR(배)'] = round(result['PRR(배)'],2)        
     except:
-        res['PRR(배)'] = 0
+        result['PRR(배)'] = 0
 
     try:
-        res['주당R&D(원)'] = r['연구개발비(연)'] / r['발행주식수(보통주)'] * 1000000 # 단위 보정 ; 백만원 / 원
-        res['주당R&D(원)'] = int(res['주당R&D(원)'])        
+        result['주당R&D(원)'] = r['연구개발비(연)'] / r['발행주식수(보통주)'] * 1000000 # 단위 보정 ; 백만원 / 원
+        result['주당R&D(원)'] = int(result['주당R&D(원)'])        
     except:
-        res['주당R&D(원)'] = 0
+        result['주당R&D(원)'] = 0
     finally:
-        if not res['주당R&D(원)']:
-            res['주당R&D(원)'] = 0
+        if not result['주당R&D(원)']:
+            result['주당R&D(원)'] = 0
 
     # 가격성장흐름(PGF)
     try: 
-        res['PGF(%)'] = (res['주당R&D(원)'] + r['EPS(원)'] ) / r['전일종가'] * 100
-        res['PGF(%)'] = int(res['PGF(%)'])        
+        result['PGF(%)'] = (result['주당R&D(원)'] + r['EPS(원)'] ) / r['전일종가'] * 100
+        result['PGF(%)'] = int(result['PGF(%)'])        
     except:
-        res['PGF(%)'] = 0
+        result['PGF(%)'] = 0
     finally:
-        if not res['PGF(%)']:
-            res['PGF(%)'] = 0 
+        if not result['PGF(%)']:
+            result['PGF(%)'] = 0 
 
     # NCAV(억) : 유동자산 - 부채총계
     # NCAV(%) : NCAV(유동자산-부채총계) / (시가총액(억)*1.5)
     try:
-        res['NCAV(억)'] = r['유동자산'] - r['부채총계']
-        res['NCAV(억)'] = round(res['NCAV(억)'],1)    
+        result['NCAV(억)'] = r['유동자산'] - r['부채총계']
+        result['NCAV(억)'] = round(result['NCAV(억)'],1)    
     except:
-        res['NCAV(억)'] = 0
+        result['NCAV(억)'] = 0
     try:            
-        res['NCAV(%)'] = res['NCAV(억)'] / (r['시가총액(억)']*1.5)
-        res['NCAV(%)'] = round(res['NCAV(%)'],2)
+        result['NCAV(%)'] = result['NCAV(억)'] / (r['시가총액(억)']*1.5)
+        result['NCAV(%)'] = round(result['NCAV(%)'],2)
     except:        
-        res['NCAV(%)'] = 0
+        result['NCAV(%)'] = 0
 
-    return res
+    return result
 
 def financial_crawler(code):
     #code = 종목번호
@@ -735,7 +747,7 @@ def financial_crawler(code):
 
     res.update(stockVolume(df[1]))
 
-    temp_res, second_res = financialSummary(df[12], res['PER'])
+    temp_res, second_res = financialSummary(df[12], res['PER(배)'])
     res.update(temp_res)
 
     wait = WebDriverWait(browser, 10)

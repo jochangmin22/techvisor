@@ -1,21 +1,11 @@
-# from django.shortcuts import render
-# from django.http import HttpResponse
-
-# from .companies import parse_companies, parse_query, parse_companies_num
-# from .company import parse_company
-# from .finance import parse_stock, crawl_stock, crawl_dart
-
 from . import companies
 from . import related_info
-# from . import company
-from . import finance
 from . import crawler
-from . import label
-# from . import company_info
+from . import favorite
+
 
 # companies 
 def get_companies(request):
-    # return companies.parse_companies(request)
     return companies.get_companies(request)
 
 def get_query(request):
@@ -51,28 +41,24 @@ def get_stock_upper(request):
 def get_stock_lower(request):
     return crawler.crawl_stock_lower()
 
-def get_labels(request):
-    return label.get_labels()
+#favorite
+def toggle_searchs_starred(request):
+    return favorite.toggle_starred(request)
+
+def set_searchs_starred(request):
+    return favorite.set_starred(request)
+
+def set_searchs_unstarred(request):
+    return favorite.set_unstarred(request)
+
+def update_searchs_labels(request):
+    return favorite.update_searchs_labels(request)    
 
 def update_labels(request):
-    return label.update_labels(request)
+    return favorite.update_labels(request)    
 
-# company
-# def get_company(request, companyId=""):
-#     return company.parse_company(request, companyId)
+def update_filters(request):
+    return favorite.update_filters(request)
 
-
-# def get_stock(request):
-#     return company.parse_stock(request)
-
-
-
-def get_company(request):
-    return finance.crawl_dart(request)
-
-# def get_topic(request):
-#     return kr_nlp(request, "topic")
-
-
-# def get_vec(request):
-#     return kr_nlp(request, "vec")
+def update_searchs_filters(request):
+    return favorite.update_searchs_filters(request)

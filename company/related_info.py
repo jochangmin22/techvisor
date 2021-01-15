@@ -42,7 +42,7 @@ def clinic_test(request):
             rows = Mdcin_clinc_test_info.objects.all().order_by('-승인일')[:100].values()            
 
         rows = list(rows)
-        res = [dict(row, **{
+        result = [dict(row, **{
                 '신청자': row['신청자'],
                 '승인일': row['승인일'],
                 '제품명': row['제품명'],
@@ -51,7 +51,7 @@ def clinic_test(request):
                 '임상단계': row['임상단계'],
             }) for row in rows]
             
-        return JsonResponse(res, safe=False) 
+        return JsonResponse(result, safe=False) 
 
 def get_disclosure_report(request):
     ''' If there is no corpName, the last 100 rows are displayed '''
@@ -75,7 +75,7 @@ def get_disclosure_report(request):
             rows = Disclosure_report.objects.exclude(종목코드__exact='').order_by('-접수번호')[:100].values()            
 
         rows = list(rows)
-        res = [dict(row, **{
+        result = [dict(row, **{
                 '공시대상회사': row['종목명'],
                 '보고서명': row['보고서명'],
                 '제출인': row['공시제출인명'],
@@ -83,7 +83,7 @@ def get_disclosure_report(request):
                 '비고': row['비고'],
             }) for row in rows]
             
-        return JsonResponse(res, safe=False)         
+        return JsonResponse(result, safe=False)         
 
 def get_owned_patent(request, mode="begin"): # mode : begin, nlp 
     ''' If there is no corpName, the last 100 rows are displayed '''
@@ -106,28 +106,28 @@ def get_owned_patent(request, mode="begin"): # mode : begin, nlp
             else:                    
                 wherePharse =  'where 출원일자 is not null order by 출원일자 desc limit 100'
             cursor.execute(query + wherePharse)
-            row = dictfetchall(cursor)
+            result = dictfetchall(cursor)
 
         # wordcloud에 쓰일 nlp 만들기
         raw_abstract = ''
         raw_claims = ''
-        for i in range(len(row)):
-            raw_abstract += row[i]["요약token"] if row[i]["요약token"] else "" + " "
-            raw_claims += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "   
+        for i in range(len(result)):
+            raw_abstract += result[i]["요약token"] if result[i]["요약token"] else "" + " "
+            raw_claims += result[i]["전체항token"] if result[i]["전체항token"] else "" + " "   
 
-            del row[i]["요약token"]
-            del row[i]["전체항token"]
+            del result[i]["요약token"]
+            del result[i]["전체항token"]
 
         # redis 저장 {
         new_context = {}
-        new_context['raw'] = row
+        new_context['raw'] = result
         new_context['raw_abstract'] = raw_abstract
         new_context['raw_claims'] = raw_claims            
         cache.set(mainKey, new_context, CACHE_TTL)
         # redis 저장 }                
 
         if mode == "begin":
-            return JsonResponse(row, safe=False)
+            return JsonResponse(result, safe=False)
         elif mode == "nlp":
             return raw_abstract, raw_claims
     except:
@@ -221,19 +221,19 @@ def wordcloud(request):
         sublist.items(), key=operator.itemgetter(1), reverse=True)[:unitNumber]
 
     fields = ["name", "value"]
-    dicts = [dict(zip(fields, d)) for d in sublist]
+    result = [dict(zip(fields, d)) for d in sublist]
 
     # json 형태로 출력
-    dicts = json.dumps(dicts, ensure_ascii=False, indent="\t")
-    if not dicts:
+    result = json.dumps(result, ensure_ascii=False, indent="\t")
+    if not result:
         return HttpResponse("[]", content_type="text/plain; charset=utf-8")
 
     # Redis {
     try:
-        sub_context['wordcloud'] = dicts
+        sub_context['wordcloud'] = result
         cache.set(subKey, sub_context, CACHE_TTL)
     except:
         pass        
     # Redis }
 
-    return HttpResponse(dicts)                            
+    return HttpResponse(result)                            

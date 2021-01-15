@@ -36,6 +36,7 @@ def order_create(request):
         #     })
         pass
     else:
+
         pass
     return render(request,  'bill/create.html', { 'imp_code' : imp_code })
 
@@ -44,7 +45,7 @@ class SubscribeScheduleView(View):
     def get(self, request):
         access_token = get_access_token()
         data = json.loads(request.body)
-        
+
         url = "https://api.iamport.kr/subscribe/payments/schedule/" + data['merchant_uid']
         
         headers = {

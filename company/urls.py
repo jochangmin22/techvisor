@@ -16,15 +16,15 @@ urlpatterns = [
     re_path(r"^api/company-app/searchs/stockupper$", csrf_exempt(views.get_stock_upper), name='get_stock_upper'),
     re_path(r"^api/company-app/searchs/stocklower$", csrf_exempt(views.get_stock_lower), name='get_stock_lower'),
 
-    re_path(r"^api/company-app/searchs/labels$", csrf_exempt(views.get_labels), name='get_labels'),
-    re_path(r"^api/company-app/searchs/update-labels$", csrf_exempt(views.update_labels), name='update_labels'),
+    # starred, labels
+    re_path(r"^api/company-app/toggle-starred$", csrf_exempt(views.toggle_searchs_starred), name='toggle_searchs_starred'),
+    re_path(r"^api/company-app/set-searchs-starred$", csrf_exempt(views.set_searchs_starred), name='set_searchs_starred'),
+    re_path(r"^api/company-app/set-searchs-unstarred$", csrf_exempt(views.set_searchs_unstarred), name='set_searchs_unstarred'),
+    re_path(r"^api/company-app/update-searchs-labels$", csrf_exempt(views.update_searchs_labels), name='update_searchs_labels'),
+    re_path(r"^api/company-app/update-labels$", csrf_exempt(views.update_labels), name='update_labels'),
+    re_path(r"^api/company-app/update-filters$", csrf_exempt(views.update_filters), name='update_filters'),
+    re_path(r"^api/company-app/update-searchs-filters$", csrf_exempt(views.update_searchs_filters), name='update_searchs_filters'),
 
-
-    # re_path(r"^api/company-app/searchs/searchsnum$", get_companies_num, name='get_companies_num'),
-    # re_path(r"^api/company-app/searchs/stock$", get_stock, name='get_stock'),
-    # re_path(r"^api/company-app/searchs/vec$", get_vec, name='get_vec'),
-    
     re_path(r"^api/company-app/search/stock$", csrf_exempt(views.get_stock), name='get_stock'),
-    re_path(r"^api/company-app/search/companyinfo$", csrf_exempt(views.get_company), name='get_company'),
-    # re_path(r"^api/company-app/search/crawlstock$", csrf_exempt(views.get_crawl), name='get_crawl'),
+
 ]
