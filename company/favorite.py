@@ -88,3 +88,27 @@ def update_labels(request):
 
     return JsonResponse( user_query.data['labels'], status = 200, safe = False)     
  
+def update_filters(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        received_user_id = data["userId"]
+        received_filters = data["_filters"]
+
+        user_query = Users.objects.get(id = received_user_id)
+
+        for key, value in received_filters.items():
+            user_query.data['filters'].update({
+                key : value
+            })
+        user_query.save()
+        return JsonResponse( user_query.data['filters'], status = 200, safe = False)
+
+def update_searchs_filters(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        received_user_id = data["userId"]
+        received_filters = data["filters"]
+
+        user_query = Users.objects.get(id = received_user_id)
+
+        return JsonResponse( user_query.data['filters']['received_filters'], status = 200, safe = False)
