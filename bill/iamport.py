@@ -1,19 +1,28 @@
 import requests
 import json
-# import datetime  + datetime.now().strftime('%Y%m%d%H%M%S')
+import datetime
+import time
 
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_http_methods
 
-# @csrf_exempt
+from iamport import Iamport
+
+from bill.models import *
+from users.models import *
+
+iamport = Iamport(
+    imp_key = settings.IAMPORT_KEY,
+    imp_secret = settings.IAMPORT_SECRET
+    )
+imp_code = settings.IAMPORT_CODE
+
 def get_access_token(*args):
     access_data = {
-        # 'imp_key' : settings.IAMPORT_KEY,
-        # 'imp_secret' : settings.IAMPORT_SECRET
-        'imp_key' : '8620374806320572',
-        'imp_secret' : 'HaeE0q8O4oOn9jbc0At2abkT6GuqwlZeweTxE1mJqb6AuiMuSfx3rRXxxrY4NXjjccRRedAEoGfTZ1nR'
+        'imp_key' : settings.IAMPORT_KEY,
+        'imp_secret' : settings.IAMPORT_SECRET
     }
 
     url = "https://api.iamport.kr/users/getToken"
@@ -26,19 +35,27 @@ def get_access_token(*args):
         return None
 
 @csrf_exempt
-def payments_prepare(order_id, amount, *args, **kwargs):
-    # order_id = 'bd8bd067-40dd-47ac-92b2-a64f15459c38', amount = 3000
+def payments_prepare(request):
+    data = json.loads(request.body)
     access_token = get_access_token()
 
+    last_order = Order.objects.filter(user_id = data['customer_uid'])[0]
+    OrderTransaction.objects.create(
+        order_id = last_order.id,
+        merchant_uid = data['merchant_uid'],
+        amount = data['amount'],
+        pay_type = ''
+    )
+    
     if access_token:
         access_data = {
-            'merchant_uid' : order_id,
-            'amount' : amount
-            # 'merchant_uid' : 'imp79353885',
-            # 'amount' : 1000
+            'customer_uid' : data['customer_uid'],
+            'merchant_uid' : data['merchant_uid'] + '1',
+            'amount' : data['amount'],
+            'name' : 'Techvisor 정기결제'
         }
-
-        url = "https://api.iamport.kr/payments/prepare"
+        
+        url = "https://api.iamport.kr/subscribe/payments/again"
 
         headers = {
             'Authorization' : access_token
@@ -46,7 +63,6 @@ def payments_prepare(order_id, amount, *args, **kwargs):
 
         req = requests.post(url, data = access_data, headers = headers)
         res = req.json()
-        print('res Error222222222222222 : ', res)
 
         if res['code'] == 0:
             if res['response']['status'] == 'paid':                
@@ -69,8 +85,10 @@ def payments_prepare(order_id, amount, *args, **kwargs):
     else:
         raise ValueError("인증 토큰이 없습니다.")
 
-def find_transaction(order_id, *args, **kwargs):
+
+def payments_schedule(imp, merchant):
     access_token = get_access_token()
+
     if access_token:
         payments_find = find_transaction(imp)        
         next_payments_date = datetime.datetime.fromtimestamp(payments_find['paid_at']) + datetime.timedelta(minutes=1)
@@ -119,18 +137,29 @@ def find_transaction(imp):
         }
 
         req = requests.post(url, headers = headers)
-        res = req.json()
-        print('res is : ', res)
+        res = req.json()        
         
         if res['code'] is 0:
             context = {
-                'imp_id' : res['response']['imp_uid'],
-                'merchant_order_id' : res['response']['merchant_uid'],
+                'imp_uid' : res['response']['imp_uid'],
+                'merchant_uid' : res['response']['merchant_uid'],
+                'customer_uid' : res['response']['customer_uid'],
                 'amount' : res['response']['amount'],
                 'status' : res['response']['status'],
                 'type' : res['response']['pay_method'],
-                'receipt_url' : res['response']['receipt_url']
+                'receipt_url' : res['response']['receipt_url'],
+                'paid_at' : res['response']['paid_at']
             }
+            
+            OrderTransaction.objects.filter(
+                merchant_uid = res['response']['merchant_uid']
+                ).update(
+                    imp_uid = res['response']['imp_uid'],
+                    pay_type = res['response']['pay_method'],
+                    transaction_status = res['response']['status'],
+                    success = True
+                )
+
             return context
         else:
             return None
