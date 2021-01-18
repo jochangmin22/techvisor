@@ -56,3 +56,9 @@ def update_searchs_labels(request):
 
 def update_labels(request):
     return favorite.update_labels(request)    
+
+def update_filters(request):
+    return favorite.update_filters(request)
+
+def update_searchs_filters(request):
+    return favorite.update_searchs_filters(request)

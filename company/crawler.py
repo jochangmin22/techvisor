@@ -222,7 +222,6 @@ def crawl_stock_upper():
         mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
         mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
 
-
         #remove null row
         # mydf = mydf[mydf.N != 0]
         mydf = mydf[mydf.현재가 != 0]

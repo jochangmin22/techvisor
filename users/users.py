@@ -481,4 +481,3 @@ def update_user_data(request):
         }
         Users.objects.filter(id  = received_id).update(**newData)
         return JsonResponse({ "user": data}, status = 200, safe = False)
-     
