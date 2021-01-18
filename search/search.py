@@ -833,6 +833,7 @@ def claims_c_type(bs):
     #                 <claim num="12"><AmendStatus status="D">삭제</AmendStatus></claim>
     #           c-2 - <Claim num="1"><P align="JUSTIFIED" indent="14">이산화탄소 격리방법으로서, </P>
     # 청구항 타입 c-3 - <CLAIM N="1">       <P ALIGN="JUSTIFIED" INDENT="14">1. 로봇트의 리 : 1019850007359
+    # 청구항 타입 c-4 - <Claim n="1"><P align="JUSTIFIED" indent="14"><Claim n="2"><AmendStatus status="D">삭제</AmendStatus> : 1020087019727
     temp = bs.find_all("claim", {"num": 1})
     bs1 = bs.find("claim-text") if temp else None
     bs2 = bs.find("p") if temp else None
@@ -881,12 +882,22 @@ def claims_c_type(bs):
         for soup in bs.find_all("claim"):
             p_txt = ""
             t_txt = ""
-            for soup2 in soup.find_all("p"):
-                if soup2:
-                    if p_txt:
-                        p_txt += "\n" + soup2.get_text()
-                    else:
-                        p_txt += soup2.get_text()
+            bs_p = soup.find_all("p")
+            bs_amend = soup.find_all("amendstatus")
+            if bs_p:            
+                for soup2 in soup.find_all("p"):
+                    if soup2:
+                        if p_txt:
+                            p_txt += "\n" + soup2.get_text()
+                        else:
+                            p_txt += soup2.get_text()
+            elif bs_amend:
+                for soup2 in soup.find_all("amendstatus"):
+                    if soup2:
+                        if p_txt:
+                            p_txt += "\n" + soup2.get_text()
+                        else:
+                            p_txt += soup2.get_text()                                            
             # p 태그가 청구항내 복수개
             t_txt = ClaimTypeCheck(p_txt)
 
@@ -994,6 +1005,17 @@ def parse_description(request, xmlStr=""):
         # my_tag = ['descriptiondrawings', 'disclosure', 'inventionpurpose','backgroundart','abstractproblem','inventionconfiguration', 'advantageouseffects']
         my_tag = ['descriptiondrawings', '', '', 'backgroundart',
                   'abstractproblem', 'inventionconfiguration', 'advantageouseffects']
+        # 상위 제목 - disclosure, inventionpurpose
+        # TODO inventdetailcontent 가 뒤에 practiceexample 와 중복
+        return description_type(bs, 'n', my_name, my_tag)
+    elif bs.find("invti") and bs.find("invdes"):
+        # ex. 1019850007359
+
+        my_name = ["발명의 명칭", "도면의 간단한 설명", "청구의 범위",
+                   "발명의 목적", "배경기술", "기술분야", "발명의 구성 및 작용","발명의 효과"]
+        # my_tag = ['invti', 'drdes', 'invdes','purinv','bkgr','tech', 'config','effect']
+        my_tag = ['invti', 'drdes', '', '','bkgr', '', '', '']
+
         # 상위 제목 - disclosure, inventionpurpose
         # TODO inventdetailcontent 가 뒤에 practiceexample 와 중복
         return description_type(bs, 'n', my_name, my_tag)

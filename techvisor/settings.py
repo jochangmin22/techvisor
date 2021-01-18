@@ -50,6 +50,9 @@ GOOGLE = get_json("GOOGLE")
 CELERY = get_json("CELERY")
 CACHES = get_json('CACHES')
 TERMS = get_json('TERMS', "default")
+IAMPORT_KEY = get_json("IAMPORT")['IMP_KEY']
+IAMPORT_SECRET = get_json("IAMPORT")['IMP_SECRET']
+IAMPORT_CODE = get_json("IAMPORT")['IMP_CODE']
 
 
 # SECURITY WARNING: don't run with debug turned on in production!

@@ -7,14 +7,12 @@ from .forms import *
 app_name = 'bill'
 
 urlpatterns = [
-    path('api/auth/admin/order/<int:order_id>', admin_order_detail, name='admin_order_detail'),
-    path('api/auth/admin/order/<int:order_id>/pdf', admin_order_pdf, name='admin_order_pdf'),
-    path('api/auth/user/create', order_create, name='order_create'),
-    path('api/auth/user/order/create_ajax', OrderCreateAjaxView.as_view(), name='order_create'),
-    path('api/auth/user/order/checkout', OrderCheckoutAjaxView.as_view(), name='order_checkout'),
-    path('api/auth/user/order/validation', OrderImpAjaxView.as_view(), name='order_validation'),
-    path('api/auth/user/order/complete', order_complete, name='order_complete'),
-    
-    path('api/auth/user/order', payments_prepare, name='get_access_token'),
-    path('api/auth/user/order/form', OrderCreateForm, name='create_form'),
+    path('api/auth/user/order/create', order_create, name='order_create'),
+    path('api/auth/user/order/subscribe', SubscribeScheduleView.as_view(), name='subscribe'),
+    path('api/auth/user/order/billings', payments_prepare, name='payments_prepare'),    
+    path('api/auth/user/order/unschedule', payments_unschedule, name='payments_unschedule'),
+    path('api/auth/user/order/webhook', schedule_webhook, name='schedule_webhook'),
+    path('api/auth/user/order/verification', OrderTransactionView.as_view(), name='order_transaction'),
+    path('api/auth/user/order/cancel', OrderCancelView.as_view(), name='order_cancel'),
+    # path('api/auth/user/order/schedule', payments_schedule, name='payments_schedule'),
 ]
