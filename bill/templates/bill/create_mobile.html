@@ -20,7 +20,8 @@
                 name: 'Techvisor 최초인증결제',
                 buyer_name: 'shrhkddh',
                 buyer_email: 'abs@gmail.com',
-                amount: 0
+                amount: 0,
+                m_redirect_url: "https://www.myservice.com/payments/complete/mobile"
             }, function (rsp) {
                 if (rsp.success) {
                     // var msg = '결제가 완료되었습니다.';
@@ -57,7 +58,8 @@
             //     buyer_name: '{{ user_data.data.displayName }}',
             //     buyer_email: '{{ user_data.data.email }}',
             //     // amount: '{{ product_data.price }}' //amount
-            //     amount: 0
+            //     amount: 0,
+            //     m_redirect_url: "https://www.myservice.com/payments/complete/mobile"
             // }, function (rsp) {
             //     if (rsp.success) {
             //         const msg = '빌링키 발급 성공'

@@ -165,11 +165,7 @@ def parse_searchs(request, mode="begin"):
 
         # row and npl
         for i in range(len(row)):
-<<<<<<< HEAD
-            row[i]['id'] = row[i]['출원번호'] # add id for FE's ids
-=======
             row[i]['id'] = row[i]['출원번호'] # add id key for FE's ids
->>>>>>> master
             raw_abstract += row[i]["요약token"] if row[i]["요약token"] else "" + " "
             raw_claims += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
 

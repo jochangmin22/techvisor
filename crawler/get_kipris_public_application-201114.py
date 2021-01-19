@@ -127,13 +127,8 @@ def get_api_date_count(date):
 
 def get_public_application(date, page):
     
-<<<<<<< HEAD
-    items = ['applicationNumber','applicationDate','openNumber','openDate','registerDate','registerNumber','publicationDate','publicationNumber','inventionTitle','registerStatus', 'applicantInfoArray', 'ipcInfoArray']
-    item_names = ['출원번호','출원일자','공개번호','공개일자','등록번호','등록일자','공고번호','공고일자','발명의명칭국문','등록사항', '출원인1', 'ipc코드']
-=======
     items = ['applicationNumber','applicationDate','openNumber','openDate','registerDate','registerNumber','publicationDate','publicationNumber','inventionTitle','registerStatus','applicationNumber','ipcNumber']
     item_names = ['출원번호','출원일자','공개번호','공개일자','등록번호','등록일자','공고번호','공고일자','발명의명칭국문','등록사항','출원인','ipc번호']        
->>>>>>> master
     
     url = count_url + '?openDate=' + str(date) + '~' + str(date) + '&patent=true&utility=true&numOfRows=99&pageNo=' + str(page) + '&ServiceKey=' + service_key
     try:
@@ -205,13 +200,8 @@ def main_def():
                 df.to_sql(name='공개공보1_temp', con=engine, if_exists='replace')
                 # note : need CREATE EXTENSION pgcrypto; psql >=12 , when using gen_random_uuid (),
                 with engine.begin() as cn:
-<<<<<<< HEAD
-                    sql = """INSERT INTO "공개공보1" (출원번호,출원일자,공개번호,공개일자,등록번호,등록일자,공고번호,공고일자,"발명의명칭(국문)",등록사항, 출원인1, ipc코드)
-                                SELECT t.출원번호, t.출원일자, t.공개번호, t.공개일자, t.등록번호, t.등록일자, t.공고번호, t.공고일자, t.발명의명칭국문, t.등록사항 t.출원인1, t.ipc코드
-=======
                     sql = """INSERT INTO "공개공보1" (출원번호,출원일자,공개번호,공개일자,등록번호,등록일자,공고번호,공고일자,"발명의명칭(국문)",등록사항,출원인,ipc번호)
                                 SELECT t.출원번호, t.출원일자, t.공개번호, t.공개일자, t.등록번호, t.등록일자, t.공고번호, t.공고일자, t.발명의명칭국문, t.등록사항, t.출원인, t.ipc번호 
->>>>>>> master
                                 FROM 공개공보1_temp t
                                 WHERE NOT EXISTS 
                                     (SELECT 1 FROM "공개공보1" f
