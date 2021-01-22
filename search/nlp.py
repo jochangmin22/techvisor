@@ -177,7 +177,7 @@ def parse_vec(request):
         wordtovec_result = model.wv.most_similar(keywordsvec, topn=unitNumber)  # most_similar: 가장 유사한 단어를 출력
     except:
         # error handle "word '...' not in vocabulary"
-        return JsonResponse('{"vec":[{"label":"없음","value":0}]}', safe=False)
+        return JsonResponse('sorry, halt at model most_similar', safe=False)
 
     # convert list of lists (wordtovec_result) to list of dictionaries
     keys = ["label", "value"]
