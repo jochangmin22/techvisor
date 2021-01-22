@@ -20,6 +20,7 @@ from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
+COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
 
 def clinic_test(request):
     ''' If there is no corpName, the last 100 rows are displayed '''
@@ -28,9 +29,9 @@ def clinic_test(request):
         corpName = data['corpName']
 
          # crawl today report
-        weekno = datetime.today().weekday()
-        if weekno<5: # On weekends, the clinical server does not work, so the crawl passes
-            update_today_crawl_mdcline()
+        # weekno = datetime.today().weekday()
+        # if weekno<5: # On weekends, the clinical server does not work, so the crawl passes
+            # update_today_crawl_mdcline()
 
         if corpName:
             isExist = Mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()
@@ -98,25 +99,38 @@ def get_owned_patent(request, mode="begin"): # mode : begin, nlp
         except:
             pass          
 
+    selecting_columns = 'SELECT count(*) over () as cnt, A.등록사항, A."발명의명칭(국문)", A."발명의명칭(영문)", A.출원번호, A.출원일자, A.출원인1, A.출원인코드1, A.출원인국가코드1, A.발명자1, A.발명자국가코드1, A.등록일자, A.공개일자, A.ipc요약, A.요약token, A.전체항token FROM '
+
     try:
         with connection.cursor() as cursor:
-            query = 'select 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약,등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token, 전체항token from 공개공보 '
             if params['corpName']:
-                wherePharse =  'where "출원인1" like $$%' + params['corpName'] + '%$$ order by 출원일자 desc'
-            else:                    
-                wherePharse =  'where 출원일자 is not null order by 출원일자 desc limit 100'
-            cursor.execute(query + wherePharse)
-            result = dictfetchall(cursor)
+                corpName = params['corpName']
+                for k, v in COMPANY_ASSIGNE_MATCHING.items():
+                    if k == params['corpName']:
+                        corpName = v
+                        break
 
+                foo =  '"성명" like $$%' + corpName + '%$$'
+                query = f'{selecting_columns} ( SELECT 출원번호 FROM ( SELECT 출원번호 FROM 공개인명정보 WHERE {foo} ) K GROUP BY 출원번호 ) V, 공개공보 A WHERE V.출원번호 = A.출원번호 order by A.출원일자 desc offset 0 rows fetch next 1001 rows only;' 
+            else:                    
+                query = f'{selecting_columns} where 출원일자 is not null order by 출원일자 desc limit 100'
+
+            cursor.execute(query)
+            data = dictfetchall(cursor)
+        # return HttpResponse(json.dumps(query, ensure_ascii=False))
         # wordcloud에 쓰일 nlp 만들기
         raw_abstract = ''
         raw_claims = ''
-        for i in range(len(result)):
-            raw_abstract += result[i]["요약token"] if result[i]["요약token"] else "" + " "
-            raw_claims += result[i]["전체항token"] if result[i]["전체항token"] else "" + " "   
+        total = data[0]["cnt"] if data[0]["cnt"] else 0
+        for i in range(len(data)):
+            raw_abstract += data[i]["요약token"] if data[i]["요약token"] else "" + " "
+            raw_claims += data[i]["전체항token"] if data[i]["전체항token"] else "" + " "   
 
-            del result[i]["요약token"]
-            del result[i]["전체항token"]
+            del data[i]["요약token"]
+            del data[i]["전체항token"]
+            del data[i]["cnt"]
+
+        result = { 'total': total, 'data': data}            
 
         # redis 저장 {
         new_context = {}
