@@ -380,27 +380,31 @@ def crawl_stock(request):
 
         # get last page num
         url = NAVER['stock_sese_day_url'] + stockCode
-        html = urlopen(url) 
-        source = BeautifulSoup(html.read(), "html.parser")
+        # html = urlopen(url) 
+        html = requests.get(url, headers={'User-agent' : 'Mozilla/5.0'}).text 
+        source = BeautifulSoup(html, "lxml")
         
-        maxPage=source.find_all("table",align="center")
-        try:
-            mp = maxPage[0].find_all("td",class_="pgRR")
-        except:
-            return
+        maxPage=source.select('td.pgRR a')
+        # try:
+        #     mp = maxPage[0].find_all("td",class_="pgRR")
+        # except:
+        #     return
 
-        if mp:
-            mpNum = int(mp[0].a.get('href').split('page=')[1])
+        if maxPage:
+            mpNum = int(maxPage[0]['href'].split('=')[-1])
         else:
-            mpNum = 1    
-        
+            mpNum = 1  
+        df = pd.DataFrame()
 
         isCrawlBreak = None                                                    
         for page in range(1, mpNum+1):
             if isCrawlBreak:
                 break
 
-            df = pd.read_html(NAVER['stock_sese_day_url'] + stockCode +'&page='+ str(page), match = '날짜', header=0, encoding = 'euc-kr')[0]
+            pg_url = '{}&page={}'.format(url,page)
+            
+            df = df.append(pd.read_html(requests.get(pg_url,headers={'User-agent' : 'Mozilla/5.0'}).text)[0])
+            # df = pd.read_html(NAVER['stock_sese_day_url'] + stockCode +'&page='+ str(page), match = '날짜', header=0, encoding = 'euc-kr')[0]
 
             # remove null row
             df = df.iloc[1:]

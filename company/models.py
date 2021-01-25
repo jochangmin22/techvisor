@@ -20,6 +20,7 @@ class Stock_quotes(models.Model):
         indexes = [models.Index(fields=['stock_code', 'price_date'])]
 
 class Stock_split(models.Model):
+    # 액면 분할
     objects = models.Manager()    
     stock_code = models.CharField(max_length=10)
     start_date = models.DateField()
@@ -59,6 +60,19 @@ class Mdcin_clinc_test_info(models.Model):
 
     class Meta:
         db_table = '"mdcin_clinc_test_info"'    
+
+class Corp_intrinsic_value(models.Model):
+    objects = models.Manager()
+    id = models.UUIDField(
+        primary_key = True,
+        default = uuid.uuid4,
+        editable = False
+    )      
+    종목코드 = models.CharField(max_length=10)
+    정보 = models.JSONField(default=dict, null=True)
+    일자 = models.DateField()    
+    class Meta:
+        db_table = '"corp_intrinsic_value"'        
 
 class Nice_corp(models.Model):
     objects = models.Manager()
