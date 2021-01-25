@@ -21,15 +21,32 @@ iamport = Iamport(
 imp_code = settings.IAMPORT_CODE
 
 def order_create(request):
-    # user_agent = get_user_agent(request)
-    
+    price = 100
+    Order.objects.create(user_id = '87b0466f-06ee-458e-bb5c-c5c65002bca4')
+
     if request.user_agent.is_pc:
         print('PC 접속')
-        return render(request, 'bill/create.html', {'imp_code' : imp_code})
+        return render(request, 'bill/create.html', {'imp_code' : imp_code, 'price' : price})
+         # return render(
+        #     request,
+        #     'bill/create.html',
+        #     {
+        #         'user_data' : user_data,
+        #         'product_data' : product_data,
+        #         'imp_code' : imp_code
+        #     })
 
     elif request.user_agent.is_mobile:
         print('Mobile 접속')
         return render(request, 'bill/create_mobile.html', {'imp_code' : imp_code})
+         # return render(
+        #     request,
+        #     'bill/create_mobile.html',
+        #     {
+        #         'user_data' : user_data,
+        #         'product_data' : product_data,
+        #         'imp_code' : imp_code
+        #     })
 
     else:
         return request.user_agent.browser.family

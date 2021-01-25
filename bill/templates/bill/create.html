@@ -20,7 +20,7 @@
                 name: 'Techvisor 최초인증결제',
                 buyer_name: 'shrhkddh',
                 buyer_email: 'abs@gmail.com',
-                amount: 0
+                amount: 0,
             }, function (rsp) {
                 if (rsp.success) {
                     // var msg = '결제가 완료되었습니다.';
@@ -37,15 +37,15 @@
                             // customer_uid: "shrhkddhUID", // 카드(빌링키)와 1:1로 대응하는 값
                             customer_uid: "87b0466f-06ee-458e-bb5c-c5c65002bca4", // test용 UUID
                             merchant_uid: rsp.merchant_uid,
-                            amount: 10
+                            amount: {{ price }}
+                            // amount: 10
                         })
-                    });
-                    // ImpTransaction(e, order_id, rsp.merchant_uid, rsp.imp_uid, rsp.paid_amount);
+        });
                 } else {
-                    var msg = '빌링키 발급 실패';
-                    msg += '에러 내용 : ' + rsp.error_msg;
-                }
-                alert(msg);
+            var msg = '빌링키 발급 실패';
+            msg += '에러 내용 : ' + rsp.error_msg;
+        }
+        alert(msg);
             });
 
             // IMP.request_pay({
@@ -80,7 +80,7 @@
             //     }
             //     alert(msg);
             // });
-        })();
+        }) ();
     </script>
 
 </head>

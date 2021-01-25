@@ -260,8 +260,11 @@ def register(request):
                     'settings': {},
                     'shortcuts': [],
                     'starred': [],
+                    'trashed': [],
                     'interests' : [],  # 여기에서 미리 빈 배열을 만들어 놔야 할 것 같음
-                    'labels' : []
+                    'labels' : {},
+                    'filters' : {},
+                    'first_pay' : True
                 },
                 'is_certified': True
             }
@@ -479,105 +482,3 @@ def update_user_data(request):
         }
         Users.objects.filter(id  = received_id).update(**newData)
         return JsonResponse({ "user": data}, status = 200, safe = False)
-
-def update_user_interested(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        received_id = data["user"]
-        received_company_list = data["company"]
-    
-        user_query = Users.objects.get(id = received_id)
-        [
-            user_query.data['interests'].append(received_company)
-            for received_company in received_company_list
-            if received_company not in user_query.data['interests']
-        ]
-        user_query.save()
-        return JsonResponse({ "company_list" : user_query.data['interests']}, status = 200, safe = False)
-        
-def update_user_uninterested(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        received_id = data["user"]
-        received_company_list = data["company"]
-
-        user_query = Users.objects.get(id = received_id)
-        if user_query.data['interests']:
-            [
-                user_query.data['interests'].remove(received_company)
-                for received_company in received_company_list
-                if received_company in user_query.data['interests']
-            ]
-            user_query.save()
-        return JsonResponse({ "company_list" : user_query.data['interests']}, status = 200, safe = False)
-
-def create_label(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        received_id = data["user"]
-        received_label= data["labels"]
-
-        user_query = users.objects.get(id = received_id)
-        if not user_query.data['label']:
-            user_query.data['label'][received_label] = {}
-        else:    
-            if received_label not in user_query.data['label'].keys():
-                user_query.data['label'][received_label] = {}
-        user_query.save()
-        return JsonResponse({ "users_label" : user_query.data['labels']}, status = 200, safe = False)
-
-def remove_label(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        received_id = data["user"]
-        received_label = data["labels"]
-
-        user_query = Users.objects.get(id = received_id)
-        if received_label in user_query.data['labels'].keys():
-            del(user_query.data['labels'][received_label])
-        user_query.save()
-        return JsonResponse({ "users_label" : user_query.data['labels']}, status = 200, safe = False)
-
-def user_labeling(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        received_id = data["user"]
-        received_label = data["labels"]
-        received_item_list = data["items"]
-
-        user_query = Users.objects.get(id = received_id)
-        [
-            user_query.data["labels"][received_label].append(received_item)
-            for received_item in received_item_list
-            if received_item not in user_query.data["labels"][received_label]
-        ]
-        user_query.save()
-        return JsonResponse({ "user_labeling_list" : user_query.data['labels']}, status = 200, safe = False)
-        
-def user_remove_labeling(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        received_id = data["user"]
-        received_label = data["labels"]
-        received_item_list = data["items"]
-
-        user_query = Users.objects.get(id = received_id)
-        if user_query.data['labels'][received_label]:
-            [
-                user_query.data['labels'][received_label].remove(received_item)
-                for received_item in received_item_list
-                if received_item in user_query.data['labels'][received_label]
-            ]
-            user_query.save()
-        return JsonResponse({ "user_labeling_list" : user_query.data['labels']}, status = 200, safe = False)
-        
-def create_filter(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        received_id = data["user"]
-        received_filter = data["filter"]
-
-        user_query = Users.objects.get(id = received_id)
-        if not user_query['filters']:
-            user_query.data['filters'] = {}
-        

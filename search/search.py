@@ -602,20 +602,46 @@ def similar(request):
 
     return HttpResponse(res, content_type="application/json")
 
+def _move_jsonfield_to_top_level(result):
+    ''' move position each fields of 정보 json to main fields '''
+    for i in range(len(result)):
+        # data = json.loads(result[i]['정보']) 
+        data = result[i]['정보'] 
+        for key, value in data.items():
+            result[i].update({key: value})
+
+        del result[i]['정보']
+        del result[i]['재무']
+    return result            
+
 def associate_corp(request):
     ''' Search for a company name that matches the applicant and representative or company name '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         applicant = data['applicant']
-        if applicant:
-            isExist = Listed_corp.objects.filter(Q(회사명__contains=applicant) | Q(대표자명__contains=applicant)).exists()
-            if not isExist:
-                return JsonResponse([], safe=False)
-            
-            row = Listed_corp.objects.filter(Q(회사명__contains=applicant)| Q(대표자명__contains=applicant)).values()
-            row = list(row)
 
-    return JsonResponse(row, safe=False)
+        if applicant:
+            listedCorp = Listed_corp.objects.filter(Q(회사명__contains=applicant) | Q(대표자명__contains=applicant))
+            if not listedCorp.exists():
+                strings = ["주식회사","(주)"]
+                for string in strings:
+                    new_applicant = applicant.replace(string,"").strip()
+                    
+                    if new_applicant:
+                        newListedCorp = Listed_corp.objects.filter(Q(회사명__contains=new_applicant) | Q(대표자명__contains=new_applicant))
+                        if not newListedCorp.exists():
+                            return JsonResponse([], safe=False)
+
+                        row = newListedCorp.values()
+                        result = list(row)
+                        result = _move_jsonfield_to_top_level(result)
+                        return JsonResponse(result, safe=False)
+
+            row = listedCorp.values()
+            result = list(row)
+            result = _move_jsonfield_to_top_level(result)
+
+    return JsonResponse(result, safe=False)
 
 def handleRedis(redisKey, keys, data="", mode="r"):
     """ read or write to redis """
@@ -807,6 +833,7 @@ def claims_c_type(bs):
     #                 <claim num="12"><AmendStatus status="D">삭제</AmendStatus></claim>
     #           c-2 - <Claim num="1"><P align="JUSTIFIED" indent="14">이산화탄소 격리방법으로서, </P>
     # 청구항 타입 c-3 - <CLAIM N="1">       <P ALIGN="JUSTIFIED" INDENT="14">1. 로봇트의 리 : 1019850007359
+    # 청구항 타입 c-4 - <Claim n="1"><P align="JUSTIFIED" indent="14"><Claim n="2"><AmendStatus status="D">삭제</AmendStatus> : 1020087019727
     temp = bs.find_all("claim", {"num": 1})
     bs1 = bs.find("claim-text") if temp else None
     bs2 = bs.find("p") if temp else None
@@ -855,12 +882,22 @@ def claims_c_type(bs):
         for soup in bs.find_all("claim"):
             p_txt = ""
             t_txt = ""
-            for soup2 in soup.find_all("p"):
-                if soup2:
-                    if p_txt:
-                        p_txt += "\n" + soup2.get_text()
-                    else:
-                        p_txt += soup2.get_text()
+            bs_p = soup.find_all("p")
+            bs_amend = soup.find_all("amendstatus")
+            if bs_p:            
+                for soup2 in soup.find_all("p"):
+                    if soup2:
+                        if p_txt:
+                            p_txt += "\n" + soup2.get_text()
+                        else:
+                            p_txt += soup2.get_text()
+            elif bs_amend:
+                for soup2 in soup.find_all("amendstatus"):
+                    if soup2:
+                        if p_txt:
+                            p_txt += "\n" + soup2.get_text()
+                        else:
+                            p_txt += soup2.get_text()                                            
             # p 태그가 청구항내 복수개
             t_txt = ClaimTypeCheck(p_txt)
 
@@ -968,6 +1005,17 @@ def parse_description(request, xmlStr=""):
         # my_tag = ['descriptiondrawings', 'disclosure', 'inventionpurpose','backgroundart','abstractproblem','inventionconfiguration', 'advantageouseffects']
         my_tag = ['descriptiondrawings', '', '', 'backgroundart',
                   'abstractproblem', 'inventionconfiguration', 'advantageouseffects']
+        # 상위 제목 - disclosure, inventionpurpose
+        # TODO inventdetailcontent 가 뒤에 practiceexample 와 중복
+        return description_type(bs, 'n', my_name, my_tag)
+    elif bs.find("invti") and bs.find("invdes"):
+        # ex. 1019850007359
+
+        my_name = ["발명의 명칭", "도면의 간단한 설명", "청구의 범위",
+                   "발명의 목적", "배경기술", "기술분야", "발명의 구성 및 작용","발명의 효과"]
+        # my_tag = ['invti', 'drdes', 'invdes','purinv','bkgr','tech', 'config','effect']
+        my_tag = ['invti', 'drdes', '', '','bkgr', '', '', '']
+
         # 상위 제목 - disclosure, inventionpurpose
         # TODO inventdetailcontent 가 뒤에 practiceexample 와 중복
         return description_type(bs, 'n', my_name, my_tag)

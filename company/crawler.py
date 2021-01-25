@@ -380,23 +380,30 @@ def crawl_stock(request):
 
         # get last page num
         url = NAVER['stock_sese_day_url'] + stockCode
-        html = urlopen(url) 
-        source = BeautifulSoup(html.read(), "html.parser")
+        # html = urlopen(url)
+        html = requests.get(url, headers={'User-agent' : 'Mozilla/5.0'}).text 
+        source = BeautifulSoup(html, "lxml")
         
-        maxPage=source.find_all("table",align="center")
-        mp = maxPage[0].find_all("td",class_="pgRR")
-        if mp:
-            mpNum = int(mp[0].a.get('href').split('page=')[1])
+        maxPage=source.select('td.pgRR a')
+        # try:
+        #     mp = maxPage[0].find_all("td",class_="pgRR")
+        # except:
+        #     return
+
+        if maxPage:
+            mpNum = int(maxPage[0]['href'].split('=')[-1])
         else:
-            mpNum = 1    
-        
+            mpNum = 1      
+        df = pd.DataFrame()
 
         isCrawlBreak = None                                                    
         for page in range(1, mpNum+1):
             if isCrawlBreak:
                 break
+            pg_url = '{}&page={}'.format(url,page)
 
-            df = pd.read_html(NAVER['stock_sese_day_url'] + stockCode +'&page='+ str(page), match = '날짜', header=0, encoding = 'euc-kr')[0]
+            df = df.append(pd.read_html(requests.get(pg_url,headers={'User-agent' : 'Mozilla/5.0'}).text)[0])
+            # df = pd.read_html(NAVER['stock_sese_day_url'] + stockCode +'&page='+ str(page), match = '날짜', header=0, encoding = 'euc-kr')[0]
 
             # remove null row
             df = df.iloc[1:]
@@ -495,6 +502,12 @@ def fundamental(df):
     # change name        
     result['현금DPS(원)'] = result['현금DPS']
     del result['현금DPS']
+
+    result['PER(배)'] = result['PER']
+    del result['PER']
+
+    result['PBR(배)'] = result['PBR']
+    del result['PBR']    
     
     try:
         result['현금배당수익률'] = result['현금배당수익률'].str.replace('%', '').fillna(0).astype(float).to_list()[0]
@@ -626,7 +639,9 @@ def financialSummary(df, PER):
     df_l = df_l.T
 
     # 최근 분기에서 4가지
-    my_q_df_cols = ['ROE(%)','ROA(%)','PER(배)','PBR(배)']
+    # 분기와 평균 수치 괴리가 커서 (PER, PBR)는 펀더멘털 것으로 다시 사용 210107
+    # my_q_df_cols = ['ROE(%)','ROA(%)','PER(배)','PBR(배)']         
+    my_q_df_cols = ['ROE(%)','ROA(%)'] 
          
     my_q_df = df_l.loc[[cols[6]],my_q_df_cols] # 7번째 cols ; '2020/06'       
 
@@ -931,7 +946,7 @@ def financial_crawler(request):
 
     result.update(stockVolume(df[1]))
 
-    temp_res, second_res = financialSummary(df[12], result['PER'])
+    temp_res, second_res = financialSummary(df[12], result['PER(배)'])
     result.update(temp_res)
 
     wait = WebDriverWait(browser, 10)

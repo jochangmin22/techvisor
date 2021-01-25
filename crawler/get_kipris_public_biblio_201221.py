@@ -75,7 +75,8 @@ def str2bool(v):
 
 def connect():
     connection = psycopg2.connect(
-        host="btowin.synology.me", database="techvisor", user="postgres", password="btw*0302", port="5433"
+        # host="btowin.synology.me", database="techvisor", user="postgres", password="btw*0302", port="5433"
+        host="192.168.0.40", database="techvisor", user="postgres", password="btw*0302", port="5433"
         # host="localhost", database="dj11000", user="postgres", password="btw160302*", port="5432"
         # host="localhost", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"        
     )

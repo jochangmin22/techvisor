@@ -62,3 +62,6 @@ def update_filters(request):
 
 def update_searchs_filters(request):
     return favorite.update_searchs_filters(request)
+
+# def update_trash(request):
+#     return favorite.update_trash(request)
