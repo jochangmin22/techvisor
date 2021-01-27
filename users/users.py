@@ -275,6 +275,7 @@ def register(request):
                     'interests' : [],  # 여기에서 미리 빈 배열을 만들어 놔야 할 것 같음
                     'labels' : {},
                     'filters' : {},
+                    'first_pay' : True
                 },
                 'is_certified': True
             }

@@ -61,6 +61,7 @@ class Mdcin_clinc_test_info(models.Model):
     class Meta:
         db_table = '"mdcin_clinc_test_info"'    
 
+
 class Corp_intrinsic_value(models.Model):
     objects = models.Manager()
     id = models.UUIDField(
@@ -71,8 +72,11 @@ class Corp_intrinsic_value(models.Model):
     종목코드 = models.CharField(max_length=10)
     정보 = models.JSONField(default=dict, null=True)
     일자 = models.DateField()    
+    
     class Meta:
-        db_table = '"corp_intrinsic_value"'        
+        index_together = ['종목코드', '일자']
+        db_table = '"corp_intrinsic_value"'
+        managed = True
 
 class Nice_corp(models.Model):
     objects = models.Manager()

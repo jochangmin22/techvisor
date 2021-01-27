@@ -400,7 +400,6 @@ def crawl_stock(request):
         for page in range(1, mpNum+1):
             if isCrawlBreak:
                 break
-
             pg_url = '{}&page={}'.format(url,page)
             
             df = df.append(pd.read_html(requests.get(pg_url,headers={'User-agent' : 'Mozilla/5.0'}).text)[0])

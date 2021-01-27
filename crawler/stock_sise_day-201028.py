@@ -26,6 +26,8 @@ import sys
 
 import psycopg2
 
+from django import db
+
 # astype(int) error handle
 import numpy
 from psycopg2.extensions import register_adapter, AsIs
@@ -85,7 +87,8 @@ def dictfetchall(cursor):
 
 def connect():
     connection = psycopg2.connect(
-        host="localhost", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"
+        # host="btowin.synology.me", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"
+        host="192.168.0.40", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"
     )
     return connection    
 
@@ -116,6 +119,8 @@ def backupAndEmptyTable():
             cursor.close()
             connection.close()
 
+# from company.models import *
+
 def insertTable(no, stockCode, price_date, stock, volume):
     # table = 'listed_corp'
     stock = json.dumps(stock)    
@@ -144,7 +149,7 @@ def insertTable(no, stockCode, price_date, stock, volume):
 
 
 def updateTable(no, stockCode, price_date, stock, volume):
-    stock = json.dumps(stock)     
+    stock = json.dumps(stock)         
     try:
         with connect() as connection:
             with connection.cursor() as cursor:         
@@ -211,29 +216,29 @@ def crawl_stock(no, stockCode):
     # exist ? }
 
     # get last page num
-    stock_sese_day_url = 'http://finance.naver.com/item/sise_day.nhn?code='
-    url = stock_sese_day_url + stockCode
-    html = urlopen(url) 
-    source = BeautifulSoup(html.read(), "html.parser")
+    stock_sese_day_url = 'https://finance.naver.com/item/sise_day.nhn?code='
     
-    maxPage=source.find_all("table",align="center")
-    mp = maxPage[0].find_all("td",class_="pgRR")
-    if mp:
-        mpNum = int(mp[0].a.get('href').split('page=')[1])
+    url = stock_sese_day_url + stockCode
+    html = requests.get(url, headers={'User-agent' : 'Mozilla/5.0'}).text
+    source = BeautifulSoup(html, "lxml")    
+    
+    # python stock_sise_day-201028.py --start 1978 --end 2400 --entire F
+    maxPage=source.select('td.pgRR a')
+
+    if maxPage:
+        mpNum = int(maxPage[0]['href'].split('=')[-1])
     else:
         mpNum = 1    
-    
+    df = pd.DataFrame()
 
     isCrawlBreak = None                                                    
     for page in range(1, mpNum+1):
         if isCrawlBreak:
             break
-        # print (str(page) )
+        
+        pg_url = '{}&page={}'.format(url,page)
 
-        df = pd.read_html(stock_sese_day_url + stockCode +'&page='+ str(page), match = '날짜', header=0, encoding = 'euc-kr')[0]
-
-        # remove null row
-        df = df.iloc[1:]
+        df = df.append(pd.read_html(requests.get(pg_url,headers={'User-agent' : 'Mozilla/5.0'}).text)[0])
 
         # remove column not in used
         del df['전일비']
@@ -244,23 +249,24 @@ def crawl_stock(no, stockCode):
 
         #remove all NaT values
         df = df[df.날짜.notnull()]
-
+        
         maxDate = df.iloc[0]['날짜'] # first
         minDate = df.iloc[-1]['날짜'] # last
 
         maxRecordDate = datetime.combine(maxRecordDate, datetime.min.time()) if maxRecordDate else None
-
+        
         if maxRecordDate and maxRecordDate.date() > maxDate.date(): 
             isCrawlBreak = True 
         else:
 
 
             # delete date column not included in tolist
-            datelist = df['날짜'].tolist() 
+            datelist = df['날짜'].tolist()
             del df['날짜']
 
             # Change the order of df columns according to the recordset 종,시,고,저,거래량 => 시,종,저,고,거래량
             columnsTitles = ['시가','종가','저가','고가','거래량']
+            
             df = df.reindex(columns=columnsTitles)
 
             for (index, price_date) in enumerate(datelist):
@@ -283,7 +289,7 @@ def crawl_stock(no, stockCode):
                         # print("db date is lower then price_date")    
                         insertTable(no, stockCode, price_date, stock, volume)
                 else:
-                    # print("db date is older then the page")
+                    print("db date is older then the page")
                     insertTable(no, stockCode, price_date, stock, volume)
 
         # True after waiting the today's stock was updated; skip next page crawl
@@ -328,7 +334,6 @@ def main_def():
     if not acode:
         kindInfo = get_kind_stock_code()
 
-
             
         # threading.Timer(1, main_def(repeat_cnt)).start()
 
@@ -349,7 +354,7 @@ def main_def():
             start_time = time.time()
 
             stockCode = kindInfo.종목코드.values[i].strip()
-        #     print(stockCode)
+
             crawl_stock(i, stockCode)
 
             # memory usage check
@@ -375,15 +380,15 @@ def main_def():
         # memory usage check
         memoryUse = psutil.virtual_memory()[2] 
 
-        print(
-            "{0}. {1} {2} {3} success --- {4} 초 ---".format(
-                str(i),
-                str(stockCode),
-                time.strftime('%H:%M', time.localtime(time.time())), 
-                str(memoryUse)+'%',
-                round(time.time() - start_time,1)
-            )
-        )            
+        # print(
+        #     "{0}. {1} {2} {3} success --- {4} 초 ---".format(
+        #         str(i),
+        #         str(stockCode),
+        #         time.strftime('%H:%M', time.localtime(time.time())), 
+        #         str(memoryUse)+'%',
+        #         round(time.time() - start_time,1)
+        #     )
+        # )            
                 
         print('----------------------')
         print('done')
