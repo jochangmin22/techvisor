@@ -128,12 +128,13 @@ def update_searchs_filters(request):
 
 def update_filters(request):
     if request.method == 'POST':
+        
         data = json.loads(request.body.decode('utf-8'))
         received_user_id = data["userId"]
         received_filters = data["_filters"]
 
         user_query = Users.objects.get(id = received_user_id)
-
+        
         # for key, value in received_filters.items():
         #     user_query.data['filters'].update({
         #         key : value
@@ -141,3 +142,21 @@ def update_filters(request):
         user_query.data['filters'] = received_filters        
         user_query.save()
         return JsonResponse( user_query.data['filters'], status = 200, safe = False)
+
+# def update_trash(request):
+#     if request.method == 'POST':
+#         data = json.loads(request.body.decode('utf-8'))
+#         received_user_id = data["userId"]
+#         received_trash_list = data["searchIds"]
+
+#         user_query = Users.objects.get(id = received_user_id)            
+
+#         for trash in set(received_trash_list):
+#             if trash in user_query.data['trashed']:
+#                 user_query.data['trashed'].remove(trash) 
+            
+#             else:
+#                 user_query.data['trashed'].append(trash)
+		
+#         user_query.save()
+#     return JsonResponse( user_query.data['trashed'], status = 200, safe = False )

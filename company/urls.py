@@ -26,6 +26,8 @@ urlpatterns = [
     re_path(r"^api/company-app/update-labels$", csrf_exempt(views.update_labels), name='update_labels'),
     re_path(r"^api/company-app/update-searchs-filters$", csrf_exempt(views.update_searchs_filters), name='update_searchs_filters'),
     re_path(r"^api/company-app/update-filters$", csrf_exempt(views.update_filters), name='update_filters'),
+    
+    # re_path(r"^api/company-app/update-trash$", csrf_exempt(views.update_trash), name='update_trash'),
 
     re_path(r"^api/company-app/search/stock$", csrf_exempt(views.get_stock), name='get_stock'),
 

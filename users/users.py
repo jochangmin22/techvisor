@@ -320,6 +320,7 @@ def register(request):
                     'trashed' : {},
                     'labels' : {},
                     'filters' : {},
+                    'first_pay' : True
                 },
                 'is_certified': True
             }

@@ -59,16 +59,17 @@ IAMPORT_CODE = get_json("IAMPORT")['IMP_CODE']
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "localhost",
-    "192.168.0.50",
-    "192.168.0.40",
-    "btowin.synology.me",
-    "14.32.114.185",
-    "techvisor.co.kr",
-    "v.techvisor.co.kr",
-    "v2.techvisor.co.kr",
-    "52.79.161.225",
-    "14.32.114.185"
+    '*'
+    # "localhost",
+    # "192.168.0.50",
+    # "192.168.0.40",
+    # "btowin.synology.me",
+    # "14.32.114.185",
+    # "techvisor.co.kr",
+    # "v.techvisor.co.kr",
+    # "v2.techvisor.co.kr",
+    # "52.79.161.225",
+    # "14.32.114.185"
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True # Credential true
@@ -123,6 +124,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
+    'django_user_agents',
     # "django_extensions",
     # app
     "search",
@@ -145,6 +147,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 ROOT_URLCONF = 'techvisor.urls'

@@ -39,44 +39,43 @@ def payments_prepare(request):
     data = json.loads(request.body)
     access_token = get_access_token()
 
-    last_order = Order.objects.filter(user_id = data['customer_uid'])[0]
-    OrderTransaction.objects.create(
-        order_id = last_order.id,
-        merchant_uid = data['merchant_uid'],
-        amount = data['amount'],
-        pay_type = ''
-    )
-    
+    # Order.objects.create(user_id = data['customer_uid'])
+    user_data = Users.objects.get(id = data['customer_uid'])
+
+    if user_data.data['first_pay']:
+        amount = 10
+    else:
+        amount = data['amount']    
+
     if access_token:
         access_data = {
             'customer_uid' : data['customer_uid'],
             'merchant_uid' : data['merchant_uid'] + '1',
-            'amount' : data['amount'],
+            'amount' : amount,
             'name' : 'Techvisor 정기결제'
         }
-        
+
+
         url = "https://api.iamport.kr/subscribe/payments/again"
 
         headers = {
             'Authorization' : access_token
         }
 
+        # OrderTransaction.objects.create(
+        #     order_id = last_order.id,
+        #     merchant_uid = access_data['merchant_uid'],
+        #     amount = access_data['amount'],
+        #     pay_type = ''
+        # )
+
         req = requests.post(url, data = access_data, headers = headers)
         res = req.json()
 
         if res['code'] == 0:
             if res['response']['status'] == 'paid':                
-                last_order.paid = True
-                last_order.save()
-
-                OrderItem.objects.create(
-                    price = res['response']['amount'],
-                    order_id = last_order.id,
-                    product_id = 'ebcdd792-f289-4fd6-be2e-c4726245cefc'
-                    # product_id = data['product_id']
-                )
-
                 return JsonResponse({ 'Message' : '결제 성공' }, status = 200)
+            
             else:
                 return JsonResponse({ 'Message' : '결제 오류' }, status = 400)
         
@@ -86,35 +85,39 @@ def payments_prepare(request):
         raise ValueError("인증 토큰이 없습니다.")
 
 
-def payments_schedule(imp, merchant):
+def payments_schedule(**kwargs):
     access_token = get_access_token()
 
     if access_token:
-        payments_find = find_transaction(imp)        
-        next_payments_date = datetime.datetime.fromtimestamp(payments_find['paid_at']) + datetime.timedelta(minutes=1)
+        next_payments_date = datetime.datetime.fromtimestamp(kwargs['paid_at']) + datetime.timedelta(minutes=1)
         new_paymet_day = int(time.mktime(next_payments_date.timetuple()))
-
+        
+        order_transaction = OrderTransaction.objects.get(merchant_uid = kwargs['merchant_uid'])
+        order_item = OrderItem.objects.get(order_id = order_transaction.order_id)
+        order_product = Product.objects.get(id = order_item.product_id)
+        
         payload = {
-            'customer_uid' : payments_find['customer_uid'],
+            'customer_uid' : kwargs['customer_uid'],
             'schedules' : [
                 {
                 'merchant_uid' : 'Techvisor_' + str(int(datetime.datetime.now().timestamp())),
                 'schedule_at' : new_paymet_day,
-                'amount' : payments_find['amount']
+                'amount' : order_product.price
                 }
             ]
         }
         
-        user_schedule = payload['schedules'][0]
-        Users.objects.filter(
-            id = payments_find['customer_uid']
-            ).update(
-                merchant_uid = user_schedule['merchant_uid']
-            )
+        print('schedule payload : ', payload)
 
+        user_data = Users.objects.get(id = kwargs['customer_uid'])
+        user_data.merchant_uid = payload['merchant_uid']
+        user_data.data['first_pay'] = False
+        user_data.save()
 
         try:
             response = iamport.pay_schedule(**payload)
+            print('schedule res : ', response)
+            return response
 
         except KeyError:
             return JsonResponse({ 'Message' : 'INVALID KEY'}, status = 400)
@@ -137,7 +140,7 @@ def find_transaction(imp):
         }
 
         req = requests.post(url, headers = headers)
-        res = req.json()        
+        res = req.json()                
         
         if res['code'] is 0:
             context = {
@@ -148,9 +151,22 @@ def find_transaction(imp):
                 'status' : res['response']['status'],
                 'type' : res['response']['pay_method'],
                 'receipt_url' : res['response']['receipt_url'],
-                'paid_at' : res['response']['paid_at']
+                'paid_at' : res['response']['paid_at'],
+                'name' : res['response']['name']
             }
             
+
+            if not context['name'] == 'Techvisor 최초인증결제':
+                Order.objects.create(user_id = context['customer_uid'])
+
+                last_order = Order.objects.filter(user_id = context['customer_uid'])[0]
+                OrderTransaction.objects.create(
+                    order_id = last_order.id,
+                    merchant_uid = context['merchant_uid'],
+                    amount = context['amount'],
+                    pay_type = ''
+                )
+
             OrderTransaction.objects.filter(
                 merchant_uid = res['response']['merchant_uid']
                 ).update(
@@ -172,7 +188,7 @@ def payments_unschedule(request):
     try:
         data = json.loads(request.body)
 
-        last_order = Users.objects.get(id = data['user_id'])
+        last_order = Order.objects.get(id = data['user_id'])
         
         payload = {
             'customer_uid' : data['user_id'],
@@ -194,11 +210,25 @@ def payments_unschedule(request):
 def schedule_webhook(request):
     data = json.loads(request.body)
     access_token = get_access_token()
-
+    
+    
     transaction_data = find_transaction(data['imp_uid'])
 
     if transaction_data['status'] == 'paid':
-        payments_schedule(transaction_data['imp_uid'], transaction_data['merchant_uid'])
+        
+    
+        last_order = Order.objects.filter(user_id = transaction_data['customer_uid'])[0]
+        last_order.paid = True
+        last_order.save()
+
+        OrderItem.objects.create(
+            price = transaction_data['amount'],
+            order_id = last_order.id,
+            product_id = 'ebcdd792-f289-4fd6-be2e-c4726245cefc'
+            # product_id = data['product_id']
+        )
+
+        res = payments_schedule(**transaction_data)
         return JsonResponse({ 'Message' : '정기결제 성공' }, status = 200)
 
     else:
@@ -207,6 +237,7 @@ def schedule_webhook(request):
             'merchant_uid' : transaction_data['merchant_uid'],
             'amount' : transaction_data['amount']
         }
+
         try:
             response = iamport.pay_again(**payload)
         
