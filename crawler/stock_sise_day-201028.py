@@ -221,7 +221,7 @@ def crawl_stock(no, stockCode):
     url = stock_sese_day_url + stockCode
     html = requests.get(url, headers={'User-agent' : 'Mozilla/5.0'}).text
     source = BeautifulSoup(html, "lxml")    
-    # 235번줄에서 에러남[0]을 지우고 데이터 나오는거 확인 후 다시 크롤링 돌려야 할 듯
+    
     # python stock_sise_day-201028.py --start 1978 --end 2400 --entire F
     maxPage=source.select('td.pgRR a')
 

@@ -168,7 +168,14 @@ def get_companies(request, mode="begin"):
             if context['raw']:
                 return JsonResponse(context['raw'], safe=False)
         except:
-            pass  
+            pass 
+
+    if mode == "remove":
+        try:
+            if context['raw']:
+                return context['raw']
+        except:
+            pass 
 
     with connection.cursor() as cursor:
 
@@ -212,6 +219,27 @@ def get_companies(request, mode="begin"):
 
     if mode == "begin":
         return JsonResponse(result, safe=False)
+
+    if mode == "remove":
+        return result
+
+def remove_search(request):
+    data = json.loads(request.body.decode('utf-8'))
+    searchId = data["searchId"]
+
+    listDicts = get_companies(request, mode="remove")
+    result = [d for d in listDicts if d['id'] == searchId]
+
+    return JsonResponse(result, safe=False)    
+
+def remove_searchs(request):
+    data = json.loads(request.body.decode('utf-8'))
+    searchIds = data["searchIds"]
+
+    listDicts = get_companies(request, mode="remove")
+    result = [d for d in listDicts if d['id'] in searchIds]
+
+    return JsonResponse(result, safe=False)
    
 
 def parse_companies(request, mode="begin"): # mode : begin, nlp, query

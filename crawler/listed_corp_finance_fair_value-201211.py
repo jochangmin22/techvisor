@@ -25,11 +25,21 @@ import psutil
 import time
 import threading
 import sys
+import os
 
 import psycopg2
 from psycopg2.extensions import AsIs
 from datetime import datetime
 
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'techvisor.settings')
+
+import django
+django.setup()
+
+from company.models import Corp_intrinsic_value
+from search.models import *
 
 dt = datetime.utcnow()
 
@@ -38,7 +48,10 @@ options.add_argument("--headless")
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 options.add_argument("--remote-debugging-port=9222")
+options.add_argument('--window-size=1920x1080')
+options.add_argument("--disable-gpu")
 options.headless = True
+
 browser = webdriver.Chrome(executable_path="/usr/bin/chromedriver",options=options)
 
 pd.set_option('display.float_format', '{:,.2f}'.format)
@@ -79,7 +92,7 @@ def dictfetchall(cursor):
 
 def connect():
     connection = psycopg2.connect(
-        host="localhost", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"
+        host="192.168.0.40", database="ipgrim", user="ipgrim", password="btw*0302", port="5433"
     )
     return connection    
 
@@ -841,6 +854,7 @@ def main_def():
 
     # for i in range(len(kindInfo)):
     # for i in range(0,50):
+
     for i in rangeValue:
         start_time = time.time()
         try:
@@ -871,8 +885,7 @@ def main_def():
                 insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])
         else:
             insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])
-                         
-
+        
         # memory usage check
         memoryUse = psutil.virtual_memory()[2] 
 
@@ -886,8 +899,20 @@ def main_def():
             
     print('----------------------')
     print('done')
+    
+    browser.close()
 
-      
+    corp_list = []
+    corp_data_list = Listed_corp.objects.all()
+    for corp_data in corp_data_list:
+        new_corp = Corp_intrinsic_value()
+        new_corp.종목코드 = corp_data.종목코드
+        new_corp.정보 = corp_data.정보
+        new_corp.일자 = datetime.today().strftime('%Y-%m-%d')
+        corp_list.append(new_corp)
+
+    Corp_intrinsic_value.objects.bulk_create(corp_list)
+
 
 if __name__ == "__main__":
     # request = int(sys.argv[1])

@@ -39,7 +39,7 @@ now = datetime.datetime.utcnow()
 def email(request):
     ''' 
     Check if the email is in db :
-        send [signed-in] mail and create new row in [email_auth] db and return false 
+        send [signed-in] mail and create new row in [Email_auth] db and return false 
         : call from Login.js
     '''
     if request.method == 'POST':
@@ -110,12 +110,17 @@ def password(request):
 
 def reset_email(request):
     ''' 
-        send [change-password] mail and create new row and return true
-        : called from ResetPassword.js
+        if is_password:
+            send [change-password] mail and create new row in [Email_auth] and return true
+            : called from ResetPassword.js
+        else:
+            send [change-email] mail and create new row in [Email_auth] and return true
+            : called from profilePage.js        
     '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_email = data["data"].get('email')
+        received_is_password = data["data"].get('isPassword')
 
         userData = Users.objects.filter(data__email=received_email)
         signedUser = userData.exists()
@@ -128,12 +133,18 @@ def reset_email(request):
             row = list(row)
             data = row[0] if row else {}
             displayName = data["data"].get('displayName')
-
-            keywords = {
-                'type': 'change-password',
-                'text': '비밀번호 재설정',
-                'displayName' : displayName,
-            }            
+            if received_is_password:
+                keywords = {
+                    'type': 'change-password',
+                    'text': '비밀번호 재설정',
+                    'displayName' : displayName,
+                }
+            else:
+                keywords = {
+                    'type': 'change-email',
+                    'text': '이메일 변경',
+                    'displayName' : displayName,
+                }                  
             sendmail(shortid, received_email, keywords)
         else:
             # not exist user in db

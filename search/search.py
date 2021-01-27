@@ -19,6 +19,7 @@ from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
+COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 KIPRIS = settings.KIPRIS
@@ -121,7 +122,6 @@ def parse_search(request):
     return JsonResponse(row[0], safe=False)
     # return HttpResponse(row, content_type="text/plain; charset=utf-8")
 
-
 def parse_search_quote(request):
     """ 인용 검색 """
     if request.method == 'POST':
@@ -134,26 +134,41 @@ def parse_search_quote(request):
     # Redis }
 
     with connection.cursor() as cursor:
-        whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
-        cursor.execute(
-            "SELECT A.식별코드, A.국가, A.인용참증단계, B.명칭, A.일자, B.출원인, B.출원번호, B.\"IPC코드\" FROM (SELECT split_part(\"인용문헌출원번호_국내\", ',', 1)::numeric AS 인용문헌번호1, string_agg(인용문헌구분코드명, ', ') 인용참증단계, 'B1' 식별코드, 표준인용문헌국가코드 국가, to_char(to_date(표준인용문헌발행일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 일자, 출원번호 FROM 특허실용심사인용문헌 "
-            + whereAppNo 
-            + " GROUP BY 인용문헌번호1, 국가, 일자, 출원번호) A "
-            + "JOIN ("
-            + " SELECT 출원번호, \"발명의명칭(국문)\" || case when coalesce(\"발명의명칭(영문)\", '') = '' then '' else ' (' || \"발명의명칭(영문)\" || ')' end 명칭, 출원인1 || case when coalesce(출원인2, '') = '' then '' else ', ' || 출원인2 end || case when coalesce(출원인3, '') = '' then '' else ', ' || 출원인3 end 출원인, 등록일자, ipc코드 \"IPC코드\" FROM 공개공보 "
-            + " ) B ON A.인용문헌번호1 = B.출원번호 "           
-        )
+        query = 'SELECT Z.식별코드, Z.국가, Z.인용참증단계, A.명칭, A.출원인, case when coalesce(Z.일자,\'\')=\'\' then A.문헌일 else Z.일자 end 일자, A.출원번호, A."IPC코드" FROM ( \
+            SELECT \
+                split_part( 인용문헌출원번호_국내, \',\', 1 ) :: NUMERIC AS 인용문헌번호1, string_agg ( 인용문헌구분코드명, \', \' ) 인용참증단계, \'B1\' 식별코드, 표준인용문헌국가코드 국가, to_char( to_date( 표준인용문헌발행일자:: TEXT, \'YYYYMMDD\' ), \'YYYY.MM.DD\' ) 일자, 출원번호 FROM \
+                특허실용심사인용문헌 WHERE "출원번호" = $$' + appNo + '$$ \
+            GROUP BY \
+                인용문헌번호1, 국가, 일자, 출원번호 \
+            UNION ALL \
+            SELECT split_part( 출원번호::TEXT, \',\', 1) :: NUMERIC AS 출원번호1, string_agg( 피인용문헌구분코드명, \', \' ) 피인용참증단계, \'F1\' 식별코드, \'KR\' 국가, \'\' 일자, 피인용문헌번호::numeric FROM \
+        "특허실용심사피인용문헌" WHERE "피인용문헌번호" = $$' + appNo + '$$ \
+        GROUP BY \
+        출원번호1, 피인용문헌번호 \
+            ) \
+            Z, (SELECT 출원번호, "발명의명칭(국문)" || case when coalesce("발명의명칭(영문)", \'\') = \'\' then \'\' else \' (\' || "발명의명칭(영문)" || \')\' end 명칭, 출원인1 || case when coalesce(출원인2, \'\') = \'\' then \'\' else \', \' || 출원인2 end || case when coalesce(출원인3, \'\') = \'\' then \'\' else \', \' || 출원인3 end 출원인, case when coalesce(등록일자:: TEXT,\'\') = \'\' then to_char( to_date( 출원일자:: TEXT, \'YYYYMMDD\' ), \'YYYY.MM.DD\' ) else to_char( to_date( 등록일자:: TEXT, \'YYYYMMDD\' ), \'YYYY.MM.DD\' ) end 문헌일, ipc코드 "IPC코드" FROM 공개공보) A WHERE Z.인용문헌번호1 = A.출원번호'
+
+        cursor.execute(query)
+        # whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
+        # cursor.execute(
+        #     "SELECT A.식별코드, A.국가, A.인용참증단계, B.명칭, A.일자, B.출원인, B.출원번호, B.\"IPC코드\" FROM (SELECT split_part(\"인용문헌출원번호_국내\", ',', 1)::numeric AS 인용문헌번호1, string_agg(인용문헌구분코드명, ', ') 인용참증단계, 'B1' 식별코드, 표준인용문헌국가코드 국가, to_char(to_date(표준인용문헌발행일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 일자, 출원번호 FROM 특허실용심사인용문헌 "
+        #     + whereAppNo 
+        #     + " GROUP BY 인용문헌번호1, 국가, 일자, 출원번호) A "
+        #     + "JOIN ("
+        #     + " SELECT 출원번호, \"발명의명칭(국문)\" || case when coalesce(\"발명의명칭(영문)\", '') = '' then '' else ' (' || \"발명의명칭(영문)\" || ')' end 명칭, 출원인1 || case when coalesce(출원인2, '') = '' then '' else ', ' || 출원인2 end || case when coalesce(출원인3, '') = '' then '' else ', ' || 출원인3 end 출원인, 등록일자, ipc코드 \"IPC코드\" FROM 공개공보 "
+        #     + " ) B ON A.인용문헌번호1 = B.출원번호 "           
+        # )
         row = dictfetchall(cursor)
   
 
     # 피인용 REST ; bulk 신청못했음
-    serviceParam = 'CitingService/'
-    operationKey = 'citingInfo'
-    url = KIPRIS['rest_url'] + serviceParam + operationKey + '?standardCitationApplicationNumber=' + appNo + '&accessKey=' + KIPRIS['service_key']
-    # url = "http://plus.kipris.or.kr/openapi/rest/CitingService/citingInfo?standardCitationApplicationNumber=1019470000187&accessKey=" + KIPRIS['service_key']
-    # return JsonResponse(url, safe=False)
-    html = requests.get(url)
-    soup = BeautifulSoup(html.content, 'xml')
+    # serviceParam = 'CitingService/'
+    # operationKey = 'citingInfo'
+    # url = KIPRIS['rest_url'] + serviceParam + operationKey + '?standardCitationApplicationNumber=' + appNo + '&accessKey=' + KIPRIS['service_key']
+    # # url = "http://plus.kipris.or.kr/openapi/rest/CitingService/citingInfo?standardCitationApplicationNumber=1019470000187&accessKey=" + KIPRIS['service_key']
+    # # return JsonResponse(url, safe=False)
+    # html = requests.get(url)
+    # soup = BeautifulSoup(html.content, 'xml')
 
     # <response>
     # <header>
@@ -193,7 +208,7 @@ def parse_search_quote(request):
     # 출원인: "크리에이터 테크놀로지 비.브이."
     # 등록일자: "20141205"
 
-    bs = soup.find_all(operationKey)
+    # bs = soup.find_all(operationKey)
 
     # empty_res = {"식별코드": "", "국가": "", "문헌번호": "", "인용참증단계": "", "일자": "", "인용문헌번호1": "", "출원번호": "", "명칭": "", "출원인": "", "등록번호": ""}    
 
@@ -211,41 +226,41 @@ def parse_search_quote(request):
 
     #                     row.append(res)      
 
-    data = []          
-    if bs:
-        for bs1 in bs:
-            if bs1:
-                # res = {}
-                citingNo = bs1.find("ApplicationNumber").get_text()
-                if citingNo:
-                    res = {'출원번호' : citingNo, '인용참증단계' : bs1.find("CitationLiteratureTypeCodeName").get_text()}
-                    data.append(res)                
+    # data = []          
+    # if bs:
+    #     for bs1 in bs:
+    #         if bs1:
+    #             # res = {}
+    #             citingNo = bs1.find("ApplicationNumber").get_text()
+    #             if citingNo:
+    #                 res = {'출원번호' : citingNo, '인용참증단계' : bs1.find("CitationLiteratureTypeCodeName").get_text()}
+    #                 data.append(res)                
 
-    # Grouping                    
-    groups = {}
-    for d in data:
-        if d['출원번호'] not in groups:
-            groups[d['출원번호']] = {'인용참증단계': d['인용참증단계']}
-        else:
-            groups[d['출원번호']]['인용참증단계'] += ', ' + d['인용참증단계']
-    result = [{**{'출원번호': k}, **v} for k, v in groups.items()]        
+    # # Grouping                    
+    # groups = {}
+    # for d in data:
+    #     if d['출원번호'] not in groups:
+    #         groups[d['출원번호']] = {'인용참증단계': d['인용참증단계']}
+    #     else:
+    #         groups[d['출원번호']]['인용참증단계'] += ', ' + d['인용참증단계']
+    # result = [{**{'출원번호': k}, **v} for k, v in groups.items()]        
 
-    # Add more entires from db
-    for r in result:
-        if r['출원번호']:
-            res = get_citing_info(r['출원번호'])
-            if res:
-                # res.update({'문헌번호' : "KR" + res['문헌번호'] + ' ' + res['식별코드']})
-                res.update({'식별코드' : 'F1'})
-                res.update({'일자' : res['일자']})
-                res.update({'인용참증단계' : r['인용참증단계']}) 
+    # # Add more entires from db
+    # for r in result:
+    #     if r['출원번호']:
+    #         res = get_citing_info(r['출원번호'])
+    #         if res:
+    #             # res.update({'문헌번호' : "KR" + res['문헌번호'] + ' ' + res['식별코드']})
+    #             res.update({'식별코드' : 'F1'})
+    #             res.update({'일자' : res['일자']})
+    #             res.update({'인용참증단계' : r['인용참증단계']}) 
 
-                row.append(res)                   
+    #             row.append(res)                   
 
-    # Change words in 인용참증단계
-    for r in row:
-        if r['인용참증단계']:
-            r.update({'인용참증단계' : r['인용참증단계'].replace('발송문서','심사관 인용').replace('선행기술조사문헌','심사보고서').replace('선행기술조사보고서','선행기술조사').replace('출원서인용문헌이력정보','출원서 인용')})
+    # # Change words in 인용참증단계
+    # for r in row:
+    #     if r['인용참증단계']:
+    #         r.update({'인용참증단계' : r['인용참증단계'].replace('발송문서','심사관 인용').replace('선행기술조사문헌','심사보고서').replace('선행기술조사보고서','선행기술조사').replace('출원서인용문헌이력정보','출원서 인용')})
 
     # Redis {
     handleRedis(redisKey, 'quote', row, mode="w")
@@ -361,7 +376,6 @@ def parse_search_legal(request):
 
     return JsonResponse(row, safe=False)
 
-
 def parse_search_registerfee(request):
     """ searchDetails용 등록료 검색 """
     if request.method == 'POST':
@@ -385,7 +399,6 @@ def parse_search_registerfee(request):
     # Redis }
 
     return JsonResponse(row, safe=False)
-
 
 def parse_search_rightfullorder(request):
     """ searchDetails용 권리순위 검색 """
@@ -411,7 +424,6 @@ def parse_search_rightfullorder(request):
 
     return JsonResponse(row, safe=False)
 
-
 def parse_search_rightholder(request):
     """ searchDetails용 권리권자변동 검색 """
     if request.method == 'POST':
@@ -436,16 +448,15 @@ def parse_search_rightholder(request):
 
     return JsonResponse(row, safe=False)
 
-
 def parse_search_applicant(request):
     """ searchDetails용 출원인 법인, 출원동향, 보유기술 검색 """
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        cusNo = data["cusNo"]       
+    data = json.loads(request.body.decode('utf-8'))
+    aCode = data['aCode']
+    aCode = aCode.replace("-", "")      
 
     serviceParam = 'CorpBsApplicantService/'
     operationKey = 'corpBsApplicantInfo'
-    url = KIPRIS['rest_url'] + serviceParam + operationKey + '?ApplicantNumber=' + cusNo + '&accessKey=' + KIPRIS['service_key']
+    url = KIPRIS['rest_url'] + serviceParam + operationKey + '?ApplicantNumber=' + aCode + '&accessKey=' + KIPRIS['service_key']
     # url = "http://plus.kipris.or.kr/openapi/rest/CorpBsApplicantService/corpBsApplicantInfo?ApplicantNumber=519980692724&accessKey=" + KIPRIS['service_key']
 
     html = requests.get(url)
@@ -492,23 +503,23 @@ def parse_search_applicant(request):
 
     return JsonResponse(res, safe=False)
 
-
 def parse_search_applicant_trend(request):
     """ searchDetails용 출원인 출원동향, 보유기술 검색 """
     """ 출원건수, 특허출원, 실용출원, 특허등록, 실용등록 """
-    cusNo = request.GET.get('cusNo') if request.GET.get('cusNo') else ''
-    cusNo = cusNo.replace("-", "")
-    redisKey = cusNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    data = json.loads(request.body.decode('utf-8'))
+    aCode = data['aCode']
+    aCode = aCode.replace("-", "")
+    redisKey = aCode + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'applicant_trend')
     # Redis }
     with connection.cursor() as cursor:
-        whereCusNo = "" if cusNo == "" else 'WHERE "출원인코드1" = $$' + cusNo + "$$"
-        # query = "SELECT 출원일자, 공개일자, 등록일자, 출원번호, ipc요약 FROM 공개공보 " + whereCusNo
-        # query = "SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereCusNo
+        whereACode = "" if aCode == "" else 'WHERE "출원인코드1" = $$' + aCode + "$$"
+        # query = "SELECT 출원일자, 공개일자, 등록일자, 출원번호, ipc요약 FROM 공개공보 " + whereACode
+        # query = "SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereACode
 
-        subQuery = "SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) pyr, left(등록일자::text,4) ryr FROM 공개공보 " + whereCusNo
-        # subQueryR = "SELECT left(출원번호::text,1) 구분, left(등록일자::text,4) ryr FROM 공개공보 " + whereCusNo + " and 등록일자 is not null"
+        subQuery = "SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) pyr, left(등록일자::text,4) ryr FROM 공개공보 " + whereACode
+        # subQueryR = "SELECT left(출원번호::text,1) 구분, left(등록일자::text,4) ryr FROM 공개공보 " + whereACode + " and 등록일자 is not null"
         query = "select pyr, null ryr, count(*) pp, null::int4 up, null::int4 pr, null::int4 ur from (" + subQuery + ") A WHERE 구분 = '1' GROUP BY pyr"
         query +=" union all "
         query += "select pyr, null, null::int4, count(*), null::int4, null::int4 from (" + subQuery + ") A WHERE 구분 = '2' GROUP BY pyr"
@@ -516,7 +527,6 @@ def parse_search_applicant_trend(request):
         query += "select null, ryr, null::int4, null::int4, count(*), null::int4 from (" + subQuery + ") A WHERE 구분 = '1' GROUP BY ryr"
         query +=" union all "
         query += "select null, ryr, null::int4, null::int4,  null::int4, count(*) from (" + subQuery + ") A  WHERE 구분 = '2' GROUP BY ryr"
-
         cursor.execute(query)
         row = dictfetchall(cursor)
 
@@ -528,15 +538,16 @@ def parse_search_applicant_trend(request):
 
 def parse_search_applicant_ipc(request):
     """ searchDetails용 출원인 보유기술 검색 """
-    cusNo = request.GET.get('cusNo') if request.GET.get('cusNo') else ''
-    cusNo = cusNo.replace("-", "")
-    redisKey = cusNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    data = json.loads(request.body.decode('utf-8'))
+    aCode = data['aCode']
+    aCode = aCode.replace("-", "")
+    redisKey = aCode + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     handleRedis(redisKey, 'applicant_ipc')
     # Redis }
     with connection.cursor() as cursor:
-        whereCusNo = "" if cusNo == "" else 'WHERE "출원인코드1" = $$' + cusNo + "$$"
-        query = 'SELECT ipc요약 "name", count(*) "value" FROM 공개공보 ' + whereCusNo + ' GROUP BY ipc요약 order by "value" desc limit 15 offset 0'
+        whereACode = "" if aCode == "" else 'WHERE "출원인코드1" = $$' + aCode + "$$"
+        query = 'SELECT ipc요약 "name", count(*) "value" FROM 공개공보 ' + whereACode + ' GROUP BY ipc요약 order by "value" desc limit 15 offset 0'
 
         cursor.execute(query)
         row = dictfetchall(cursor)
@@ -619,27 +630,30 @@ def associate_corp(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         applicant = data['applicant']
-
         if applicant:
-            listedCorp = Listed_corp.objects.filter(Q(회사명__contains=applicant) | Q(대표자명__contains=applicant))
-            if not listedCorp.exists():
-                strings = ["주식회사","(주)"]
-                for string in strings:
-                    new_applicant = applicant.replace(string,"").strip()
-                    
-                    if new_applicant:
-                        newListedCorp = Listed_corp.objects.filter(Q(회사명__contains=new_applicant) | Q(대표자명__contains=new_applicant))
-                        if not newListedCorp.exists():
-                            return JsonResponse([], safe=False)
+            new_applicant = applicant
+            strings = ["주식회사","(주)"]
+            for string in strings:
+                new_applicant = new_applicant.replace(string,"").strip()
 
-                        row = newListedCorp.values()
-                        result = list(row)
-                        result = _move_jsonfield_to_top_level(result)
-                        return JsonResponse(result, safe=False)
+            for k, v in COMPANY_ASSIGNE_MATCHING.items():
+                if v == new_applicant:
+                    new_applicant = k
+                    break
+
+            listedCorp = Listed_corp.objects.filter(Q(회사명__contains=new_applicant) | Q(대표자명__contains=new_applicant))
+            if not listedCorp.exists():
+                return JsonResponse([], safe=False)
+
+                    # row = newListedCorp.values()
+                    # result = list(row)
+                    # result = _move_jsonfield_to_top_level(result)
+                    # return JsonResponse(result, safe=False)
 
             row = listedCorp.values()
             result = list(row)
             result = _move_jsonfield_to_top_level(result)
+            return JsonResponse(result, safe=False)
 
     return JsonResponse(result, safe=False)
 

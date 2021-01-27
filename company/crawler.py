@@ -380,7 +380,7 @@ def crawl_stock(request):
 
         # get last page num
         url = NAVER['stock_sese_day_url'] + stockCode
-        # html = urlopen(url)
+        # html = urlopen(url) 
         html = requests.get(url, headers={'User-agent' : 'Mozilla/5.0'}).text 
         source = BeautifulSoup(html, "lxml")
         
@@ -393,7 +393,7 @@ def crawl_stock(request):
         if maxPage:
             mpNum = int(maxPage[0]['href'].split('=')[-1])
         else:
-            mpNum = 1      
+            mpNum = 1  
         df = pd.DataFrame()
 
         isCrawlBreak = None                                                    
@@ -401,7 +401,7 @@ def crawl_stock(request):
             if isCrawlBreak:
                 break
             pg_url = '{}&page={}'.format(url,page)
-
+            
             df = df.append(pd.read_html(requests.get(pg_url,headers={'User-agent' : 'Mozilla/5.0'}).text)[0])
             # df = pd.read_html(NAVER['stock_sese_day_url'] + stockCode +'&page='+ str(page), match = '날짜', header=0, encoding = 'euc-kr')[0]
 
