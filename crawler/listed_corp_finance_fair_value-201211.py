@@ -22,7 +22,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 import psutil
-import time
 import threading
 import sys
 import os
@@ -40,6 +39,7 @@ django.setup()
 
 from company.models import Corp_intrinsic_value
 from search.models import *
+from django.conf import settings
 
 dt = datetime.utcnow()
 
@@ -143,7 +143,7 @@ def missingCrawlCheck():
             cursor.close()
             connection.close()            
 
-def insertTable(no, kiscode, info, financial_res, name, upjong, product, listed_date, settlemonth, representive, homepage, area):
+def insertTable(no, stockcode, info, financial_res, name, upjong, product, listed_date, settlemonth, representive, homepage, area):
     # table = 'listed_corp'    
     info = json.dumps(info)
     financial_res = json.dumps(financial_res)
@@ -152,13 +152,13 @@ def insertTable(no, kiscode, info, financial_res, name, upjong, product, listed_
             with connection.cursor() as cursor:      
         
                 postgres_insert_query = """ INSERT INTO listed_corp (회사명, 종목코드, 업종, 주요제품, 상장일, 결산월, 대표자명, 홈페이지, 지역, 정보, 재무) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-                record_to_insert = (name, kiscode, upjong, product, listed_date, settlemonth, representive, homepage, area, info, financial_res)
+                record_to_insert = (name, stockcode, upjong, product, listed_date, settlemonth, representive, homepage, area, info, financial_res)
                 cursor.execute(postgres_insert_query, record_to_insert)
                 
                 connection.commit()
                 # count = cursor.rowcount
                 # print (count, "Record inserted successfully into mobile table")
-                # print (no, kiscode, "Record inserted successfully" )
+                # print (no, stockcode, "Record inserted successfully" )
 
     except (Exception, psycopg2.Error) as error :
         if(connection):
@@ -171,18 +171,18 @@ def insertTable(no, kiscode, info, financial_res, name, upjong, product, listed_
             connection.close()
             # print("PostgreSQL connection is closed")
 
-def updateTable(no, kiscode, info, financial_res):
+def updateTable(no, stockcode, info, financial_res):
     info = json.dumps(info)
     financial_res = json.dumps(financial_res)    
     try:
         with connect() as connection:
             with connection.cursor() as cursor:         
-                sql_template = "UPDATE listed_corp SET 정보 = $$%s$$, 재무 = $$%s$$ WHERE 종목코드 = $$%s$$ " % (info, financial_res, kiscode)
+                sql_template = "UPDATE listed_corp SET 정보 = $$%s$$, 재무 = $$%s$$ WHERE 종목코드 = $$%s$$ " % (info, financial_res, stockcode)
                 cursor.execute(sql_template)   
                 connection.commit()
-                # cursor.execute("UPDATE listed_corp SET 정보 = %s WHERE 종목코드 = %s", (info, kiscode))
+                # cursor.execute("UPDATE listed_corp SET 정보 = %s WHERE 종목코드 = %s", (info, stockcode))
 
-                # print (no, kiscode, "Record updated successfully" )
+                # print (no, stockcode, "Record updated successfully" )
         
     except (Exception, psycopg2.Error) as error:
         print(no, "Error in update operation", error)
@@ -194,12 +194,12 @@ def updateTable(no, kiscode, info, financial_res):
             connection.close()
             # print("PostgreSQL connection is closed") 
 
-def existCheck(kiscode):
+def existCheck(stockcode):
     try:
         with connect() as connection:
             with connection.cursor() as cursor: 
         
-                sql_check = "select count(*) a from listed_corp where 종목코드 = $$%s$$ " % (kiscode)
+                sql_check = "select count(*) a from listed_corp where 종목코드 = $$%s$$ " % (stockcode)
                 cursor.execute(sql_check)
                 connection.commit()
                 row = dictfetchall(cursor)
@@ -858,11 +858,11 @@ def main_def():
     for i in rangeValue:
         start_time = time.time()
         try:
-            kiscode = kindInfo.종목코드.values[i].strip()
+            stockcode = kindInfo.종목코드.values[i].strip()
             print(
                 "{0}. {1} ".format(
                     str(i),
-                    str(kiscode),
+                    str(stockcode),
                 ), end="", flush="True"
             )             
         except:
@@ -872,19 +872,19 @@ def main_def():
             break
 
         if not update:
-            if kiscode in dbStockCodeList:
+            if stockcode in dbStockCodeList:
                 print("")
                 continue
 
-        info, financial_res = financial_crawler(kiscode)
+        info, financial_res = financial_crawler(stockcode)
 
         if update:
-            if existCheck(kiscode) != 0:
-                updateTable(i, kiscode, info, financial_res)
+            if existCheck(stockcode) != 0:
+                updateTable(i, stockcode, info, financial_res)
             else:
-                insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])
+                insertTable(i, stockcode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])
         else:
-            insertTable(i, kiscode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])
+            insertTable(i, stockcode, info, financial_res, kindInfo.회사명.values[i], kindInfo.업종.values[i], kindInfo.주요제품.values[i], kindInfo.상장일.values[i], kindInfo.결산월.values[i], kindInfo.대표자명.values[i], kindInfo.홈페이지.values[i], kindInfo.지역.values[i])
         
         # memory usage check
         memoryUse = psutil.virtual_memory()[2] 
@@ -912,7 +912,6 @@ def main_def():
         corp_list.append(new_corp)
 
     Corp_intrinsic_value.objects.bulk_create(corp_list)
-
 
 if __name__ == "__main__":
     # request = int(sys.argv[1])

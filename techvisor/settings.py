@@ -53,23 +53,23 @@ TERMS = get_json('TERMS', "default")
 IAMPORT_KEY = get_json("IAMPORT")['IMP_KEY']
 IAMPORT_SECRET = get_json("IAMPORT")['IMP_SECRET']
 IAMPORT_CODE = get_json("IAMPORT")['IMP_CODE']
-
+NICE_ID = get_json("NICE")['client_id']
+NICE_KEY = get_json("NICE")['secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '*'
-    # "localhost",
-    # "192.168.0.50",
-    # "192.168.0.40",
-    # "btowin.synology.me",
-    # "14.32.114.185",
-    # "techvisor.co.kr",
-    # "v.techvisor.co.kr",
-    # "v2.techvisor.co.kr",
-    # "52.79.161.225",
-    # "14.32.114.185"
+    "localhost",
+    "192.168.0.50",
+    "192.168.0.40",
+    "btowin.synology.me",
+    "14.32.114.185",
+    "techvisor.co.kr",
+    "v.techvisor.co.kr",
+    "v2.techvisor.co.kr",
+    "52.79.161.225",
+    "14.32.114.185"
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True # Credential true

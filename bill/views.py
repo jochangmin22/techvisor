@@ -6,7 +6,6 @@ from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.generic.base import View
-from django_user_agents.utils import get_user_agent
 
 from .forms import *
 from .models import *

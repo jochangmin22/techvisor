@@ -25,6 +25,18 @@ class Listed_corp(models.Model):
     지역 = models.CharField(max_length=50)
     정보 = models.JSONField(default=dict, null=True)
     재무 = models.JSONField(default=dict, null=True)
+    kiscode = models.OneToOneField('Corp_eval_grade_hist', on_delete = models.SET_NULL, null = True, blank = True)
     
     class Meta:
         db_table = '"listed_corp"'
+
+class Corp_eval_grade_hist(models.Model):
+    objects = models.Manager()
+    id = models.UUIDField(
+        primary_key = True,
+        default = uuid.uuid4,
+        editable = False
+    )
+    kiscode = models.CharField(max_length = 50)
+    기업평가등급 = models.JSONField(default=dict, null=True)
+    
