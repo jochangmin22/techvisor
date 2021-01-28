@@ -10,8 +10,8 @@ from django.views.decorators.http import require_http_methods
 
 from iamport import Iamport
 
-from bill.models import *
-from users.models import *
+from bill.models import Product, Order, OrderItem, OrderTransaction
+from users.models import Users
 
 iamport = Iamport(
     imp_key = settings.IAMPORT_KEY,

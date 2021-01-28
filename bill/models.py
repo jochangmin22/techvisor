@@ -6,6 +6,7 @@ from users.models import Users
 
 # Create your models here.
 class Product(models.Model):
+    objects = models.Manager()    
     id = models.UUIDField(
         primary_key = True,
         default = uuid.uuid4,
@@ -22,6 +23,7 @@ class Product(models.Model):
 
 
 class Order(models.Model):
+    objects = models.Manager()
     id = models.UUIDField(
         primary_key = True,
         default = uuid.uuid4,
@@ -48,6 +50,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
+    objects = models.Manager()    
     id = models.UUIDField(
         primary_key = True,
         default = uuid.uuid4,
@@ -69,6 +72,7 @@ class OrderItem(models.Model):
 
 
 class OrderTransaction(models.Model):
+    objects = models.Manager()    
     id = models.UUIDField(
         primary_key = True,
         default = uuid.uuid4,
