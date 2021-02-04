@@ -154,7 +154,6 @@ empty_info_dart = {
 }
 
 def get_companies(request, mode="begin"):
-
     
     # mainKey = '¶all'
     # context = cache.get(mainKey)
@@ -182,20 +181,19 @@ def get_companies(request, mode="begin"):
         # if 'starred' in params.values() and subParams:
         #     whereAll = "종목코드 = ANY(%s));"
         # else:        
-        whereAll = "1=1)"
+        # whereAll = "1=1)"
 
+        whereAll = "1=1)"
         query = 'SELECT * FROM listed_corp WHERE (' + \
             whereAll
 
+        # query = 'SELECT * FROM listed_corp ' + \
+        #     'union all ' + \
+        #     'select B.회사명, B.종목코드, A.업종, A.주요제품, A.상장일, A.결산월, A.대표자명, A.홈페이지, A.지역, A.정보, A.재무, A.kiscode FROM listed_corp A JOIN preferred_stock B ON A.종목코드 = B.연결코드'
+
         if mode == "query": # mode가 query면 여기서 분기
             return query
-        # cur.execute("SELECT * FROM data WHERE id = ANY(%s);", (ids,))
-        # if 'starred' in params.values() and subParams:
-        #     cursor.execute(
-        #         "SET work_mem to '100MB';"
-        #         + query
-        #     , (subParams,))
-        # else:
+
         cursor.execute(
             "SET work_mem to '100MB';"
             + query)            
@@ -240,7 +238,6 @@ def remove_searchs(request):
     result = [d for d in listDicts if d['id'] in searchIds]
 
     return JsonResponse(result, safe=False)
-   
 
 def parse_companies(request, mode="begin"): # mode : begin, nlp, query
 

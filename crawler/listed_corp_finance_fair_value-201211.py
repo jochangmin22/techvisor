@@ -31,15 +31,14 @@ import psycopg2
 from psycopg2.extensions import AsIs
 from datetime import datetime
 
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'techvisor.settings')
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'techvisor.settings')
+# import django
+# django.setup()
 
-import django
-django.setup()
-
-from company.models import Corp_intrinsic_value
-from search.models import *
+# from company.models import Corp_intrinsic_value, Preferred_stock
+# from search.models import Listed_corp
 
 dt = datetime.utcnow()
 
@@ -85,6 +84,16 @@ def str2round(value, num=2):
 
     return res
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')    
+
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
     columns = [col[0] for col in cursor.description]
@@ -96,17 +105,17 @@ def connect():
     )
     return connection    
 
-def get_kind_stock_code():
+def get_kind_crawl():
     ''' kind 상장법인목록 crawling '''
     # stock_code = pd.read_html('http://dev-kind.krx.co.kr/corpgeneral/corpList.do?method=download&orderMode=5&orderStat=A&searchType=13', header=0)[0] 
-    stock_code = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&orderMode=5&orderStat=A&searchType=13', header=0)[0] 
+    result = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&orderMode=5&orderStat=A&searchType=13', header=0)[0] 
     
-    # stock_code.sort_values(['상장일'], ascending=True)
+    # result.sort_values(['상장일'], ascending=True)
 
     # 종목코드 6자리로 
-    stock_code.종목코드 = stock_code.종목코드.map('{:06d}'.format) 
+    result.종목코드 = result.종목코드.map('{:06d}'.format) 
     
-    return stock_code   
+    return result   
 
 def backupAndEmptyTable():
     try:
@@ -142,6 +151,62 @@ def missingCrawlCheck():
         if(connection):
             cursor.close()
             connection.close()            
+
+def getPreferredStockList():
+    ''' 우선주 목록 '''
+    try:
+        with connect() as connection:
+            with connection.cursor() as cursor:      
+                query ="select 종목코드, 회사명, 연결코드 from preferred_stock;"  
+                cursor.execute(query)
+                connection.commit()
+                row = dictfetchall(cursor)
+                return row
+    except (Exception, psycopg2.Error) as error :
+        if(connection):
+            print("Failed to backup and empty preferred_stock table", error)
+
+    finally:
+        if(connection):
+            cursor.close()
+            connection.close()            
+
+def duplicateInfo(data):
+    ''' 보통주 -> 우선주 복제 '''
+    try:
+        with connect() as connection:
+            with connection.cursor() as cursor:      
+
+                query =f"insert into listed_corp (회사명, 종목코드, 업종 ,주요제품, 상장일, 결산월, 대표자명, 홈페이지, 지역, 정보, 재무, kiscode ) (select '{data['회사명']}', '{data['종목코드']}', 업종 ,주요제품, 상장일, 결산월, 대표자명, 홈페이지, 지역, 정보, 재무, kiscode from listed_corp where 종목코드 = '{data['연결코드']}');"  
+                cursor.execute(query)
+                connection.commit()
+    except (Exception, psycopg2.Error) as error :
+        if(connection):
+            print("Failed to backup and empty listed_corp table", error)
+
+    finally:
+        if(connection):
+            cursor.close()
+            connection.close()  
+
+def updateInfo(data, res):
+    res = json.dumps(res)
+
+    ''' 우선주 [정보] 일부 수정 '''
+    try:
+        with connect() as connection:
+            with connection.cursor() as cursor:      
+                query =f"update listed_corp set 정보 =정보::jsonb || $${res}$$ where 종목코드 = '{data['종목코드']}';"  
+                cursor.execute(query)
+                connection.commit()
+    except (Exception, psycopg2.Error) as error :
+        if(connection):
+            print("Failed to backup and empty preferred_stock table", error)
+
+    finally:
+        if(connection):
+            cursor.close()
+            connection.close()                        
 
 def insertTable(no, kiscode, info, financial_res, name, upjong, product, listed_date, settlemonth, representive, homepage, area):
     # table = 'listed_corp'    
@@ -699,7 +764,7 @@ def calculate_stock_fair_value(r):
 
     return result
 
-def financial_crawler(code):
+def financial_crawler(code, mode='common'):
     #code = 종목번호
     name = code
     base_url = 'https://finance.naver.com/item/coinfo.nhn?code='+ name + '&target=finsum_more'
@@ -752,13 +817,18 @@ def financial_crawler(code):
     nowPrice = html1.find_all('strong')[0].get_text().strip()
     res.update({'전일종가' : str2int(nowPrice) })
 
+    res.update(stockVolume(df[1]))
+
+    # 우선주면 여기서 분기
+    if mode == 'preferred':
+        return res['전일종가'], res['시가총액(억)']
+
     res.update(sectorPer(df[0]))
 
     res.update(fundamental(df[5]))
 
     res.update(qPrice(df[6]))
 
-    res.update(stockVolume(df[1]))
 
     temp_res, second_res = financialSummary(df[12], res['PER(배)'])
     res.update(temp_res)
@@ -797,15 +867,110 @@ def financial_crawler(code):
     
     return res, second_res
 
-def str2bool(v):
-    if isinstance(v, bool):
-       return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+def now_price_stock_volume_crawl(acode):
+    ''' 우선주 전일종가, 시가총액(억) 얻기 '''
+    result = {}
+    # 네이버 금융 [시세] 탭
+    base_url = f'https://finance.naver.com/item/sise.nhn?code={acode}'
+    browser.get(base_url)
+    
+    # 상장폐지되어 자료없는 경우 - NoSuchElementException 
+    try:
+        browser.find_element_by_class_name('no_data') # <div class="no_data">
+        return result
+    except:
+        pass    
+    
+    # page not found handle
+    # 상장된지 얼마안되서 자료없는 경우인듯
+    try:
+        browser.find_element_by_id('pageError') # <div id="pageError">
+        return result
+    except:
+        pass       
+
+    df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')[1]
+
+    df.columns = ['A','B','C','D'][:len(df.columns)]
+
+    foo = df.loc[df['A'] == '시가총액', 'B'].str.replace('억원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
+    bar = df.loc[df['C'] == '전일가', 'D'].str.replace(',', '').fillna(0).astype(int).to_list()[0]
+
+    result['시가총액(억)'] = foo
+    result['전일종가'] = bar
+
+    return result        
+
+def backup_to_corp_intrinsic_value():
+    try:
+        with connect() as connection:
+            with connection.cursor() as cursor:
+                query = """INSERT INTO corp_intrinsic_value (id, 종목코드, 정보, 일자)
+                    SELECT gen_random_uuid (), t.종목코드, t.정보, current_date  
+                    FROM listed_corp t
+                    WHERE NOT EXISTS 
+                        (SELECT 1 FROM corp_intrinsic_value f
+                        WHERE f.종목코드 = t.종목코드 and f.일자 = current_date)"""      
+                cursor.execute(query)
+                connection.commit()
+    except (Exception, psycopg2.Error) as error :
+        if(connection):
+            print("Failed to backup and empty corp_intrinsic_value table", error)
+
+    finally:
+        if(connection):
+            cursor.close()
+            connection.close()
+
+def preferred_stock_crawl():
+    rows = getPreferredStockList()
+
+    now = datetime.now()
+    execCnt = len(rows)
+    print('크롤시간 :', now.strftime("%Y.%m.%d %H:%M:%S"))
+    print('총 우선주수 :', execCnt)
+    print('실행건       :', execCnt)       
+    print('실행소요예상 :', int(int(execCnt) * 0.5 / 60), '분')        
+
+    for (idx, row) in enumerate(rows):
+
+        start_time = time.time()
+        try:
+            kiscode = row['종목코드']
+            print(
+                "{0}. {1} ".format(
+                    str(idx),
+                    str(kiscode),
+                ), end="", flush="True"
+            )             
+        except:
+            print('----------------------')
+            print(str(idx) + "번에 대한 종목코드가 없어서 종료합니다.")            
+            print('done')
+            break
+
+        res = now_price_stock_volume_crawl(kiscode)
+        res.update({ "종류" : "우선주" })
+        if existCheck(row['종목코드']) == 0:
+            duplicateInfo(row)
+            updateInfo(row,res)
+
+        
+        # memory usage check
+        memoryUse = psutil.virtual_memory()[2] 
+
+        print(
+            "{0} {1} success --- {2} 초 ---".format(
+                time.strftime('%H:%M', time.localtime(time.time())), 
+                str(memoryUse)+'%',
+                round(time.time() - start_time,1)
+            )
+        )            
+            
+    print('----------------------')
+    print('done')
+
+    return
 
 # def main_def(start = 0, end = 0, tableclearnow = False):
 def main_def():
@@ -827,8 +992,8 @@ def main_def():
 
     # start_time = time.time()
 
-    kindInfo = get_kind_stock_code()
-    # print(kindInfo)
+    kindInfo = get_kind_crawl()
+
     # kindInfo = {'회사명' : 'DSR', '종목코드': '155660', '업종': '1차 비철금속 제조업', '주요제품' : '', '상장일': '', '결산월' : '', '대표자명': '', '홈페이지': '', '지역': ''}
            
     # threading.Timer(1, main_def(repeat_cnt)).start()
@@ -878,6 +1043,9 @@ def main_def():
 
         info, financial_res = financial_crawler(kiscode)
 
+        # [종류]는 보통주/우선주 구분, [기업명]은 우선주일때 회사명 표시·특허정보 연결에 사용
+        info.update({ "종류": "보통주", "기업명" : kindInfo.회사명.values[i] })
+
         if update:
             if existCheck(kiscode) != 0:
                 updateTable(i, kiscode, info, financial_res)
@@ -899,19 +1067,26 @@ def main_def():
             
     print('----------------------')
     print('done')
+
+    # 우선주 추가
+    preferred_stock_crawl()
     
     browser.close()
 
-    corp_list = []
-    corp_data_list = Listed_corp.objects.all()
-    for corp_data in corp_data_list:
-        new_corp = Corp_intrinsic_value()
-        new_corp.종목코드 = corp_data.종목코드
-        new_corp.정보 = corp_data.정보
-        new_corp.일자 = datetime.today().strftime('%Y-%m-%d')
-        corp_list.append(new_corp)
+    # 일별 백업
+    backup_to_corp_intrinsic_value()
 
-    Corp_intrinsic_value.objects.bulk_create(corp_list)
+    # corp_list = []
+    # corp_data_list = Listed_corp.objects.all()
+    # for corp_data in corp_data_list:
+    #     new_corp = Corp_intrinsic_value()
+    #     new_corp.종목코드 = corp_data.종목코드
+    #     new_corp.정보 = corp_data.정보
+    #     new_corp.일자 = datetime.today().strftime('%Y-%m-%d')
+    #     corp_list.append(new_corp)
+
+    # Corp_intrinsic_value.objects.bulk_create(corp_list)
+
 
 
 if __name__ == "__main__":
@@ -922,3 +1097,5 @@ if __name__ == "__main__":
     # tableclearnow = sys.argv[3]
     sys.setrecursionlimit(5000)
     main_def()    
+
+  

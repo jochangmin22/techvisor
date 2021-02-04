@@ -125,7 +125,15 @@ class Disclosure_report(models.Model):
     비고 = models.CharField(max_length=255, null=True)
 
     class Meta:
-        db_table = '"disclosure_report"'            
+        db_table = '"disclosure_report"'
 
+class Preferred_stock(models.Model):
+    objects = models.Manager()
+    회사명 = models.CharField(max_length=100, primary_key = True)
+    종목코드 = models.CharField(max_length=10)
+    연결코드 = models.CharField(max_length=10)
+
+    class Meta:
+        db_table = '"preferred_stock"'
 
 # primary_key가 있어야 id가 생성안됨
