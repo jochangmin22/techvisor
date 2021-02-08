@@ -9,6 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_http_methods
 
 from iamport import Iamport
+from dateutil.relativedelta import relativedelta
 
 from bill.models import Product, Order, OrderItem, OrderTransaction
 from users.models import Users
@@ -39,7 +40,7 @@ def payments_prepare(request):
     data = json.loads(request.body)
     access_token = get_access_token()
 
-    # Order.objects.create(user_id = data['customer_uid'])
+    Order.objects.create(user_id = data['customer_uid'])
     user_data = Users.objects.get(id = data['customer_uid'])
 
     if user_data.data['first_pay']:
@@ -52,7 +53,9 @@ def payments_prepare(request):
             'customer_uid' : data['customer_uid'],
             'merchant_uid' : data['merchant_uid'] + '1',
             'amount' : amount,
-            'name' : 'Techvisor 정기결제'
+            'name' : 'Techvisor 정기결제',
+            'buyer_name' : user_data.data['displayName'],
+            'buyer_email' : user_data.data['email']
         }
 
 
@@ -62,18 +65,14 @@ def payments_prepare(request):
             'Authorization' : access_token
         }
 
-        # OrderTransaction.objects.create(
-        #     order_id = last_order.id,
-        #     merchant_uid = access_data['merchant_uid'],
-        #     amount = access_data['amount'],
-        #     pay_type = ''
-        # )
-
         req = requests.post(url, data = access_data, headers = headers)
         res = req.json()
 
         if res['code'] == 0:
-            if res['response']['status'] == 'paid':                
+            if res['response']['status'] == 'paid':
+                user_data.download_count = 0
+                user_data.save()
+
                 return JsonResponse({ 'Message' : '결제 성공' }, status = 200)
             
             else:
@@ -89,7 +88,16 @@ def payments_schedule(**kwargs):
     access_token = get_access_token()
 
     if access_token:
-        next_payments_date = datetime.datetime.fromtimestamp(kwargs['paid_at']) + datetime.timedelta(minutes=1)
+        order_data = Order.objects.filter(user_id = kwargs['customer_uid'])[0]
+        item_data = OrderItem.objects.get(order_id = order_data.id)
+        product_data = Product.objects.get(id = item_data.product_id)
+
+        # 지금 결제 분단위로 돌아감 정식 오픈 전에 월 단위로 변경해야함
+        next_payments_date = datetime.datetime.fromtimestamp(kwargs['paid_at']) + datetime.timedelta(minutes = int(product_data.name))
+        
+        # 아래줄이 실제 서비스 할때 실행되어야 할 로직임
+        # next_payments_date = datetime.datetime.fromtimestamp(kwargs['paid_at']) + relativedelta(months = int(product_data.name))
+        print('time test : ', datetime.datetime.fromtimestamp(kwargs['paid_at']) + relativedelta(months = int(product_data.name)))
         new_paymet_day = int(time.mktime(next_payments_date.timetuple()))
         
         order_transaction = OrderTransaction.objects.get(merchant_uid = kwargs['merchant_uid'])
@@ -102,21 +110,21 @@ def payments_schedule(**kwargs):
                 {
                 'merchant_uid' : 'Techvisor_' + str(int(datetime.datetime.now().timestamp())),
                 'schedule_at' : new_paymet_day,
-                'amount' : order_product.price
+                'amount' : order_product.price,
+                'buyer_name' : kwargs['buyer_name'],
+                'buyer_email' : kwargs['buyer_email'],
                 }
             ]
         }
         
-        print('schedule payload : ', payload)
 
         user_data = Users.objects.get(id = kwargs['customer_uid'])
-        user_data.merchant_uid = payload['merchant_uid']
+        user_data.merchant_uid = payload['schedules'][0]['merchant_uid']
         user_data.data['first_pay'] = False
         user_data.save()
 
         try:
             response = iamport.pay_schedule(**payload)
-            print('schedule res : ', response)
             return response
 
         except KeyError:
@@ -152,7 +160,9 @@ def find_transaction(imp):
                 'type' : res['response']['pay_method'],
                 'receipt_url' : res['response']['receipt_url'],
                 'paid_at' : res['response']['paid_at'],
-                'name' : res['response']['name']
+                'name' : res['response']['name'],
+                'buyer_name' : res['response']['buyer_name'],
+                'buyer_email' : res['response']['buyer_email']
             }
             
 
@@ -183,17 +193,19 @@ def find_transaction(imp):
         raise ValueError("인증 토큰이 없습니다.")
 
 
+# 정기결제 예약을 취소
 @require_http_methods(["POST"])
 def payments_unschedule(request):
     try:
         data = json.loads(request.body)
 
         last_order = Order.objects.get(id = data['user_id'])
-        
-        payload = {
-            'customer_uid' : data['user_id'],
-            'merchant_uid' : last_order.merchant_uid
-        }
+        last_transaction = OrderTransaction.objects.get(order_id = last_order.id)
+        if last_transaction.transaction_status == 'paid':
+            payload = {
+                'customer_uid' : data['user_id'],
+                'merchant_uid' : last_transaction.merchant_uid
+            }
     
         response = iamport.pay_unschedule(**payload)
         return JsonResponse({ 'Message' : '정기 결제 취소' },status = 200)        
@@ -211,7 +223,6 @@ def schedule_webhook(request):
     data = json.loads(request.body)
     access_token = get_access_token()
     
-    
     transaction_data = find_transaction(data['imp_uid'])
 
     if transaction_data['status'] == 'paid':
@@ -221,14 +232,19 @@ def schedule_webhook(request):
         last_order.paid = True
         last_order.save()
 
+        product_data = Product.objects.get(price = transaction_data['amount'])
+
         OrderItem.objects.create(
             price = transaction_data['amount'],
             order_id = last_order.id,
-            product_id = 'ebcdd792-f289-4fd6-be2e-c4726245cefc'
-            # product_id = data['product_id']
+            product_id = product_data.id
         )
 
         res = payments_schedule(**transaction_data)
+
+        Users.objects.filter(id = transaction_data['customer_uid']).update(
+            download_count = 0
+        )
         return JsonResponse({ 'Message' : '정기결제 성공' }, status = 200)
 
     else:

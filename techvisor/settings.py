@@ -53,7 +53,9 @@ TERMS = get_json('TERMS', "default")
 IAMPORT_KEY = get_json("IAMPORT")['IMP_KEY']
 IAMPORT_SECRET = get_json("IAMPORT")['IMP_SECRET']
 IAMPORT_CODE = get_json("IAMPORT")['IMP_CODE']
-
+NICE_ID = get_json("NICE")['client_id']
+NICE_KEY = get_json("NICE")['secret_key']
+SHARE_LIST = get_json("PREFERRED_SHARE_LIST", "default")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -63,6 +65,9 @@ ALLOWED_HOSTS = [
     "localhost",
     "192.168.0.50",
     "192.168.0.40",
+    "192.168.0.27",
+    "192.168.0.75",
+    "172.23.64.1",
     "btowin.synology.me",
     "14.32.114.185",
     "techvisor.co.kr",
