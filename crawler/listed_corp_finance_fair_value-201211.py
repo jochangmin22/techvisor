@@ -904,13 +904,14 @@ def main_def():
 
     corp_list = []
     corp_data_list = Listed_corp.objects.all()
-    for corp_data in corp_data_list:
-        new_corp = Corp_intrinsic_value()
-        new_corp.종목코드 = corp_data.종목코드
-        new_corp.정보 = corp_data.정보
-        new_corp.일자 = datetime.today().strftime('%Y-%m-%d')
-        corp_list.append(new_corp)
-
+    if not Corp_intrinsic_value.objects.filter(일자 = datetime.today().strftime('%Y-%m-%d')).exists():
+        for corp_data in corp_data_list.iterator():
+            new_corp = Corp_intrinsic_value()
+            new_corp.종목코드 = corp_data.종목코드
+            new_corp.정보 = corp_data.정보
+            new_corp.일자 = datetime.today().strftime('%Y-%m-%d')
+            corp_list.append(new_corp)
+    
     Corp_intrinsic_value.objects.bulk_create(corp_list)
 
 if __name__ == "__main__":

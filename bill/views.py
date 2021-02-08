@@ -20,56 +20,38 @@ iamport = Iamport(
 imp_code = settings.IAMPORT_CODE
 
 def order_create(request):
-    price = 100
-    Order.objects.create(user_id = '87b0466f-06ee-458e-bb5c-c5c65002bca4')
+    user_id = request.GET.get('userId')
+    months = request.GET.get('months')
+
+    user_data = Users.objects.get(id = user_id)
+    product_data = Product.objects.get(name = months)
 
     if request.user_agent.is_pc:
         print('PC 접속')
-        return render(request, 'bill/create.html', {'imp_code' : imp_code, 'price' : price})
-         # return render(
-        #     request,
-        #     'bill/create.html',
-        #     {
-        #         'user_data' : user_data,
-        #         'product_data' : product_data,
-        #         'imp_code' : imp_code
-        #     })
+
+        return render(
+            request,
+            'bill/create.html',
+            {
+                'user_data' : user_data,
+                'product_data' : product_data,
+                'imp_code' : imp_code
+            })
 
     elif request.user_agent.is_mobile:
         print('Mobile 접속')
-        return render(request, 'bill/create_mobile.html', {'imp_code' : imp_code})
-         # return render(
-        #     request,
-        #     'bill/create_mobile.html',
-        #     {
-        #         'user_data' : user_data,
-        #         'product_data' : product_data,
-        #         'imp_code' : imp_code
-        #     })
+
+        return render(
+            request,
+            'bill/create_mobile.html',
+            {
+                'user_data' : user_data,
+                'product_data' : product_data,
+                'imp_code' : imp_code
+            })
 
     else:
         return request.user_agent.browser.family
-
-    # return JsonResponse( user_agent.is_pc, status = 200)
-    # data = json.loads(request.body)
-    
-    # if request.method == "POST":
-
-        # Order.objects.create(user_id = data['userId'])
-
-        # user_data = Users.objects.get(id = data['userId'])
-        # product_data = Product.objects.get(id = data['productId'])
-        # product_data = data['due']
-
-        # return render(
-        #     request,
-        #     'bill/create.html',
-        #     {
-        #         'user_data' : user_data,
-        #         'product_data' : product_data,
-        #         'imp_code' : imp_code
-        #     })
-    # return render(request, 'bill/create.html', {'imp_code' : imp_code, 'amount' : '100'})
 
 
 class SubscribeScheduleView(View):
@@ -77,7 +59,9 @@ class SubscribeScheduleView(View):
         access_token = get_access_token()
         data = json.loads(request.body)
 
-        url = "https://api.iamport.kr/subscribe/payments/schedule/" + data['merchant_uid']
+        user_data = Users.objects.get(id = data['userId'])
+
+        url = "https://api.iamport.kr/subscribe/payments/schedule/" + user_data.merchant_uid
         
         headers = {
             'Authorization' : access_token
@@ -98,12 +82,16 @@ class SubscribeScheduleView(View):
             return JsonResponse({ 'Message' : '예약된 결제 정보가 없습니다.'}, status = 400)
     
 
+# 승인된 결제를 취소(환불)
 class OrderCancelView(View):
     def post(self, request):
         data = json.loads(request.body)
 
+        order_data = Order.objects.filter(user_id = data['userId'])[0]
+        transaction_data = OrderTransaction.objects.get(order_id = order_data.id)
+
         try:
-            response = iamport.cancel(data['reason'], imp_uid = data['imp_uid'])
+            response = iamport.cancel(data['reason'], imp_uid = transaction_data.imp_uid)
             return HttpResponse(status = 200)
 
         except Iamport.ResponseError as e:
@@ -117,7 +105,10 @@ class OrderTransactionView(View):
     def get(self, request):
         data = json.loads(request.body)
 
-        result = find_transaction(data['imp_uid'])
+        order_data = Order.objects.filter(user_id = data['userId'])[0]
+        transaction_data = OrderTransaction.objects.get(order_id = order_data.id)
+
+        result = find_transaction(transaction_data.imp_uid)
 
         user_data = {
             'paid_at' : datetime.datetime.fromtimestamp(result['paid_at']).strftime('%Y-%m-%d'),

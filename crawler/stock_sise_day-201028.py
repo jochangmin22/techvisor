@@ -1,32 +1,37 @@
 from __future__ import print_function
 import argparse 
-
 import requests
-from bs4 import BeautifulSoup
-from datetime import datetime
 import pandas as pd
 import time
 import urllib.request
-from selenium.webdriver import Chrome
-from selenium import webdriver
 import json
 import re     
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
 import datetime as dt
-
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-
 import psutil
 import time
 import threading
 import sys
-
 import psycopg2
+import os
+
+from datetime import datetime
+from bs4 import BeautifulSoup
+from selenium.webdriver import Chrome
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'techvisor.settings')
+
+import django
+django.setup()
 
 from django import db
+from django.conf import settings
 
 # astype(int) error handle
 import numpy
@@ -99,9 +104,9 @@ def get_kind_stock_code():
     # stock_code.sort_values(['상장일'], ascending=True)
 
     # 종목코드 6자리로 
-    stock_code.종목코드 = stock_code.종목코드.map('{:06d}'.format) 
+    stock_code.종목코드 = stock_code.종목코드.map('{:06d}'.format)
     
-    return stock_code   
+    return stock_code  
 
 def backupAndEmptyTable():
     try:
@@ -222,7 +227,6 @@ def crawl_stock(no, stockCode):
     html = requests.get(url, headers={'User-agent' : 'Mozilla/5.0'}).text
     source = BeautifulSoup(html, "lxml")    
     
-    # python stock_sise_day-201028.py --start 1978 --end 2400 --entire F
     maxPage=source.select('td.pgRR a')
 
     if maxPage:
@@ -231,71 +235,74 @@ def crawl_stock(no, stockCode):
         mpNum = 1    
     df = pd.DataFrame()
 
-    isCrawlBreak = None                                                    
-    for page in range(1, mpNum+1):
-        if isCrawlBreak:
-            break
-        
-        pg_url = '{}&page={}'.format(url,page)
-
-        df = df.append(pd.read_html(requests.get(pg_url,headers={'User-agent' : 'Mozilla/5.0'}).text)[0])
-
-        # remove column not in used
-        del df['전일비']
-
-        # convert values to numeric or date
-        df[['종가','시가', '고가', '저가','거래량']] = df[['종가','시가', '고가', '저가','거래량']].fillna("0").astype(int)
-        df[['날짜']] = df[['날짜']].astype('datetime64[ns]')
-
-        #remove all NaT values
-        df = df[df.날짜.notnull()]
-        
-        maxDate = df.iloc[0]['날짜'] # first
-        minDate = df.iloc[-1]['날짜'] # last
-
-        maxRecordDate = datetime.combine(maxRecordDate, datetime.min.time()) if maxRecordDate else None
-        
-        if maxRecordDate and maxRecordDate.date() > maxDate.date(): 
-            isCrawlBreak = True 
-        else:
-
-
-            # delete date column not included in tolist
-            datelist = df['날짜'].tolist()
-            del df['날짜']
-
-            # Change the order of df columns according to the recordset 종,시,고,저,거래량 => 시,종,저,고,거래량
-            columnsTitles = ['시가','종가','저가','고가','거래량']
+    isCrawlBreak = None
+    try:                                               
+        for page in range(1, mpNum+1):
+            if isCrawlBreak:
+                break
             
-            df = df.reindex(columns=columnsTitles)
+            pg_url = '{}&page={}'.format(url,page)
 
-            for (index, price_date) in enumerate(datelist):
-                # newStock = {
-                #     'stock_code': stockCode,
-                #     'price_date': price_date,
-                #     'stock': df[index].tolist(),
-                #     'volume' : df[index]['거래량']
-                # }
-                stock = df.iloc[index].tolist()
+            df = df.append(pd.read_html(requests.get(pg_url,headers={'User-agent' : 'Mozilla/5.0'}).text)[0])
 
-                volume = df.iloc[index]['거래량']
+            # remove column not in used
+            del df['전일비']
 
-                if maxRecordDate and maxRecordDate.date() > minDate.date():
-                    # print ("current page content is in db partially")
-                    if maxRecordDate and maxRecordDate.date() == price_date.date():
-                        # print("match today")
-                        updateTable(no, stockCode, price_date, stock, volume) 
-                    elif maxRecordDate and maxRecordDate.date() < price_date.date():
-                        # print("db date is lower then price_date")    
+            # convert values to numeric or date
+            df[['종가','시가', '고가', '저가','거래량']] = df[['종가','시가', '고가', '저가','거래량']].fillna("0").astype(int)
+            df[['날짜']] = df[['날짜']].astype('datetime64[ns]')
+
+            #remove all NaT values
+            df = df[df.날짜.notnull()]
+            
+            maxDate = df.iloc[0]['날짜'] # first
+            minDate = df.iloc[-1]['날짜'] # last
+
+            maxRecordDate = datetime.combine(maxRecordDate, datetime.min.time()) if maxRecordDate else None
+            
+            if maxRecordDate and maxRecordDate.date() > maxDate.date(): 
+                isCrawlBreak = True 
+            else:
+
+
+                # delete date column not included in tolist
+                datelist = df['날짜'].tolist()
+                del df['날짜']
+
+                # Change the order of df columns according to the recordset 종,시,고,저,거래량 => 시,종,저,고,거래량
+                columnsTitles = ['시가','종가','저가','고가','거래량']
+                
+                df = df.reindex(columns=columnsTitles)
+
+                for (index, price_date) in enumerate(datelist):
+                    # newStock = {
+                    #     'stock_code': stockCode,
+                    #     'price_date': price_date,
+                    #     'stock': df[index].tolist(),
+                    #     'volume' : df[index]['거래량']
+                    # }
+                    stock = df.iloc[index].tolist()
+
+                    volume = df.iloc[index]['거래량']
+
+                    if maxRecordDate and maxRecordDate.date() > minDate.date():
+                        # print ("current page content is in db partially")
+                        if maxRecordDate and maxRecordDate.date() == price_date.date():
+                            # print("match today")
+                            updateTable(no, stockCode, price_date, stock, volume) 
+                        elif maxRecordDate and maxRecordDate.date() < price_date.date():
+                            # print("db date is lower then price_date")    
+                            insertTable(no, stockCode, price_date, stock, volume)
+                    else:
+                        print("db date is older then the page")
                         insertTable(no, stockCode, price_date, stock, volume)
-                else:
-                    print("db date is older then the page")
-                    insertTable(no, stockCode, price_date, stock, volume)
 
-        # True after waiting the today's stock was updated; skip next page crawl
-        if maxRecordDate and maxRecordDate.date() == maxDate.date():
-            isCrawlBreak = True                   
-    return
+            # True after waiting the today's stock was updated; skip next page crawl
+            if maxRecordDate and maxRecordDate.date() == maxDate.date():
+                isCrawlBreak = True                   
+        return
+    except IndexError:
+        pass
 
 def str2bool(v):
     if isinstance(v, bool):
@@ -333,12 +340,18 @@ def main_def():
     # start_time = time.time()
     if not acode:
         kindInfo = get_kind_stock_code()
-
             
         # threading.Timer(1, main_def(repeat_cnt)).start()
 
         if entire:
-            rangeValue = range(len(kindInfo))
+            share_dict = settings.SHARE_LIST
+            share_list = list(share_dict.keys())
+            stockCode_list = []
+            for i in range(len(kindInfo)):
+                stockCode_list.append(kindInfo.종목코드.values[i].strip())
+            stockCode_list = share_list + stockCode_list
+
+            rangeValue = range(len(stockCode_list))
         else:
             rangeValue = range(start, end)
 
@@ -350,10 +363,13 @@ def main_def():
             backupAndEmptyTable()
         # for i in range(len(kindInfo)):
         # for i in range(0,50):
+
+
         for i in rangeValue:
             start_time = time.time()
-
-            stockCode = kindInfo.종목코드.values[i].strip()
+            # stockCode = kindInfo.종목코드.values[i].strip()
+            
+            stockCode = stockCode_list[i]
 
             crawl_stock(i, stockCode)
 
