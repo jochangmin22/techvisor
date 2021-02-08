@@ -103,14 +103,14 @@ def get_owned_patent(request, mode="begin"): # mode : begin, nlp
 
     try:
         with connection.cursor() as cursor:
-            if params['corpName']:
-                corpName = params['corpName']
+            if params['commonCorpName']:
+                commonCorpName = params['commonCorpName']
                 for k, v in COMPANY_ASSIGNE_MATCHING.items():
-                    if k == params['corpName']:
-                        corpName = v
+                    if k == params['commonCorpName']:
+                        commonCorpName = v
                         break
 
-                foo =  '"성명" like $$%' + corpName + '%$$'
+                foo =  '"성명" like $$%' + commonCorpName + '%$$'
                 query = f'{selecting_columns} ( SELECT 출원번호 FROM ( SELECT 출원번호 FROM 공개인명정보 WHERE {foo} ) K GROUP BY 출원번호 ) V, 공개공보 A WHERE V.출원번호 = A.출원번호 order by A.출원일자 desc offset 0 rows fetch next 1001 rows only;' 
             else:                    
                 query = f'{selecting_columns} where 출원일자 is not null order by 출원일자 desc limit 100'

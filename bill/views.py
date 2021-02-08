@@ -13,7 +13,6 @@ from .models import Product, Order, OrderTransaction
 from .iamport import get_access_token, find_transaction, payments_unschedule
 from users.models import Users
 
-
 iamport = Iamport(
     imp_key = settings.IAMPORT_KEY,
     imp_secret = settings.IAMPORT_SECRET
@@ -21,12 +20,19 @@ iamport = Iamport(
 imp_code = settings.IAMPORT_CODE
 
 def order_create(request):
-    price = 100
-    Order.objects.create(user_id = '87b0466f-06ee-458e-bb5c-c5c65002bca4')
+    # data = json.loads(request.body.decode('utf-8'))
+    user_id = json.loads(request.GET.get('userId',''))
+    # is_mobile = data['isMobile']
+    # user_id = data['userId']
 
-    if request.user_agent.is_pc:
-        print('PC 접속')
-        return render(request, 'bill/create.html', {'imp_code' : imp_code, 'price' : price})
+    price = 10
+    # Order.objects.create(user_id = '87b0466f-06ee-458e-bb5c-c5c65002bca4')
+    Order.objects.create(user_id = user_id)
+
+    # if request.user_agent.is_pc:
+    # if is_mobile == 'null':
+    print('PC 접속')
+    return render(request, 'bill/create.html', {'imp_code' : imp_code, 'price' : price})
          # return render(
         #     request,
         #     'bill/create.html',
@@ -36,20 +42,22 @@ def order_create(request):
         #         'imp_code' : imp_code
         #     })
 
-    elif request.user_agent.is_mobile:
-        print('Mobile 접속')
-        return render(request, 'bill/create_mobile.html', {'imp_code' : imp_code})
-         # return render(
-        #     request,
-        #     'bill/create_mobile.html',
-        #     {
-        #         'user_data' : user_data,
-        #         'product_data' : product_data,
-        #         'imp_code' : imp_code
-        #     })
+    # elif request.user_agent.is_mobile:
+    # elif is_mobile:
+    #     print('Mobile 접속')
+    #     return render(request, 'bill/create_mobile.html', {'imp_code' : imp_code})
+    #      # return render(
+    #     #     request,
+    #     #     'bill/create_mobile.html',
+    #     #     {
+    #     #         'user_data' : user_data,
+    #     #         'product_data' : product_data,
+    #     #         'imp_code' : imp_code
+    #     #     })
 
-    else:
-        return request.user_agent.browser.family
+    # else:
+    #     # return request.user_agent.browser.family
+    #     return JsonResponse('', safe=False)
 
     # return JsonResponse( user_agent.is_pc, status = 200)
     # data = json.loads(request.body)

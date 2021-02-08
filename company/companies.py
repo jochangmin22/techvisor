@@ -169,7 +169,7 @@ def get_companies(request, mode="begin"):
         except:
             pass 
 
-    if mode == "remove":
+    if mode == "trash":
         try:
             if context['raw']:
                 return context['raw']
@@ -218,23 +218,23 @@ def get_companies(request, mode="begin"):
     if mode == "begin":
         return JsonResponse(result, safe=False)
 
-    if mode == "remove":
+    if mode == "trash":
         return result
 
-def remove_search(request):
+def trash_search(request):
     data = json.loads(request.body.decode('utf-8'))
     searchId = data["searchId"]
 
-    listDicts = get_companies(request, mode="remove")
+    listDicts = get_companies(request, mode="trash")
     result = [d for d in listDicts if d['id'] == searchId]
 
     return JsonResponse(result, safe=False)    
 
-def remove_searchs(request):
+def trash_searchs(request):
     data = json.loads(request.body.decode('utf-8'))
     searchIds = data["searchIds"]
 
-    listDicts = get_companies(request, mode="remove")
+    listDicts = get_companies(request, mode="trash")
     result = [d for d in listDicts if d['id'] in searchIds]
 
     return JsonResponse(result, safe=False)

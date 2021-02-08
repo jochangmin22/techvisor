@@ -110,7 +110,7 @@ def payments_schedule(**kwargs):
         print('schedule payload : ', payload)
 
         user_data = Users.objects.get(id = kwargs['customer_uid'])
-        user_data.merchant_uid = payload['merchant_uid']
+        user_data.merchant_uid = payload['schedules'][0]['merchant_uid']
         user_data.data['first_pay'] = False
         user_data.save()
 

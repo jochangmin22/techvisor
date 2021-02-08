@@ -6,8 +6,8 @@ from . import views
 urlpatterns = [
     re_path(r"^api/company-app/query/$", views.get_query, name='get_query'),
     re_path(r"^api/company-app/searchs/$", csrf_exempt(views.get_companies), name='get_companies'),
-    re_path(r"^api/company-app/searchs/remove-search$", csrf_exempt(views.remove_search), name='remove_search'),
-    re_path(r"^api/company-app/searchs/remove-searchs$", csrf_exempt(views.remove_searchs), name='remove_searchs'),
+    re_path(r"^api/company-app/searchs/trash-search$", csrf_exempt(views.trash_search), name='trash_search'),
+    re_path(r"^api/company-app/searchs/trash-searchs$", csrf_exempt(views.trash_searchs), name='trash_searchs'),
     re_path(r"^api/company-app/searchs/stock$", csrf_exempt(views.get_stock), name='get_stock'),
     re_path(r"^api/company-app/searchs/financialinfo$", csrf_exempt(views.get_financial_info), name='get_financial_info'),    
     re_path(r"^api/company-app/searchs/clinic$", csrf_exempt(views.get_clinic_test), name='get_clinic_test'),

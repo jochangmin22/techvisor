@@ -8,11 +8,11 @@ from . import favorite
 def get_companies(request):
     return companies.get_companies(request)
 
-def remove_search(request):
-    return companies.remove_search(request)
+def trash_search(request):
+    return companies.trash_search(request)
 
-def remove_searchs(request):
-    return companies.remove_searchs(request)
+def trash_searchs(request):
+    return companies.trash_searchs(request)
 
 def get_query(request):
     return companies.parse_query(request)
