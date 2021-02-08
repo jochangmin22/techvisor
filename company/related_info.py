@@ -29,9 +29,9 @@ def clinic_test(request):
         corpName = data['corpName']
 
          # crawl today report
-        # weekno = datetime.today().weekday()
-        # if weekno<5: # On weekends, the clinical server does not work, so the crawl passes
-            # update_today_crawl_mdcline()
+        weekno = datetime.today().weekday()
+        if weekno<5: # On weekends, the clinical server does not work, so the crawl passes
+            update_today_crawl_mdcline()
 
         if corpName:
             isExist = Mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()

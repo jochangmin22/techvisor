@@ -1,16 +1,16 @@
 import json
 import requests
 from iamport import Iamport
-
+import datetime
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.generic.base import View
 
-from .forms import *
-from .models import *
-from .iamport import *
-from users.models import *
+from .forms import OrderCreateForm
+from .models import Product, Order, OrderTransaction
+from .iamport import get_access_token, find_transaction, payments_unschedule
+from users.models import Users
 
 
 iamport = Iamport(
@@ -104,6 +104,7 @@ class OrderCancelView(View):
 class OrderTransactionView(View):
     def get(self, request):
         data = json.loads(request.body)
+
 
         order_data = Order.objects.filter(user_id = data['userId'])[0]
         transaction_data = OrderTransaction.objects.get(order_id = order_data.id)

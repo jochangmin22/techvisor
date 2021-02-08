@@ -52,7 +52,7 @@ class Mdcin_clinc_test_info(models.Model):
         editable = False
     )     
     신청자 = models.CharField(max_length=100)
-    승인일 = models.IntegerField()
+    승인일 = models.DateField()
     제품명 = models.CharField(max_length=255)
     시험제목 = models.TextField(blank=True, null=True)
     연구실명 = models.TextField(blank=True, null=True)

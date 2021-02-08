@@ -57,6 +57,7 @@ NICE_ID = get_json("NICE")['client_id']
 NICE_KEY = get_json("NICE")['secret_key']
 SHARE_LIST = get_json("PREFERRED_SHARE_LIST", "default")
 
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -128,13 +129,13 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
-    'django_user_agents',
     # "django_extensions",
     # app
     "search",
     "users",
     "company",
     "bill",
+    # "django_user_agents",
     # "anymail",
     # "thsrs",
     # "applicant",
@@ -151,7 +152,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_user_agents.middleware.UserAgentMiddleware',
+    # 'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 ROOT_URLCONF = 'techvisor.urls'

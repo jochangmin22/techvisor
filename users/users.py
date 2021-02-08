@@ -36,6 +36,14 @@ verifyExpiresInSecs = settings.JWT_AUTH['JWT_EMAIL_CODE_EXPIRATION_SECS']
 now = datetime.datetime.utcnow()
 # now = timezone.now()
 
+errMsg = {
+    'INVAILED_CODE': '존재하지 않은 인증코드입니다.',
+    'EXPIRED_CODE': '인증코드가 만료되었습니다.',
+    'USED_CODE': '이미 처리되었거나 비활성화된 인증코드입니다.',
+    'ERROR': '잘못된 요청입니다.',
+    '': ''
+} 
+
 def email(request):
     ''' 
     Check if the email is in db :
@@ -110,41 +118,35 @@ def password(request):
 
 def reset_email(request):
     ''' 
-        if is_password:
-            send [change-password] mail and create new row in [Email_auth] and return true
-            : called from ResetPassword.js
-        else:
+        if wantChangeEmail:
             send [change-email] mail and create new row in [Email_auth] and return true
             : called from profilePage.js        
+        else:
+            send [change-password] mail and create new row in [Email_auth] and return true
+            : called from ResetPassword.js
     '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        received_email = data["data"].get('email')
-        received_is_password = data["data"].get('isPassword')
-
-        userData = Users.objects.filter(data__email=received_email)
-        signedUser = userData.exists()
+        received_email = data.get('email')
+        received_want_change_email = data.get('wantChangeEmail')
 
         shortid = shortuuid.ShortUUID().random(length=8)
+        displayName = getNamebyEmail(received_email)
 
-        if signedUser:
-            # extracted nested displayName from users db
-            row = userData.values()
-            row = list(row)
-            data = row[0] if row else {}
-            displayName = data["data"].get('displayName')
-            if received_is_password:
+        if displayName:
+            if received_want_change_email:
+                keywords = {
+                    'type': 'change-email',
+                    'text': '이메일 변경',
+                    'displayName' : displayName,
+                }
+            else:                
                 keywords = {
                     'type': 'change-password',
                     'text': '비밀번호 재설정',
                     'displayName' : displayName,
                 }
-            else:
-                keywords = {
-                    'type': 'change-email',
-                    'text': '이메일 변경',
-                    'displayName' : displayName,
-                }                  
+
             sendmail(shortid, received_email, keywords)
         else:
             # not exist user in db
@@ -162,102 +164,135 @@ def reset_email(request):
         }
         Email_auth.objects.create(**newVerify)
 
-        return JsonResponse({'signedIn' : signedUser}, status=200, safe=False)
+        return JsonResponse({'signedIn' : True if displayName else False}, status=200, safe=False)
+
+def change_email(request):
+    # change email from profile page
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        received_email = data.get('email')
+        received_code = data.get('code')
+        received_display_name = data.get('displayName')
+        received_final = data.get('final')
+
+        error = {}
+        error['email'] = '이 이메일은 이미 사용중입니다' if isEmailExists(received_email) else None
+        error['code'] = errMsg[isCodeValidate(received_code, received_email)]
+        if not error['email'] and error['code'] == '':
+            shortid = shortuuid.ShortUUID().random(length=8)
+            
+            keywords = {
+                'type': 'change-email',
+                'text': '이메일 변경',
+                'displayName' : received_display_name,
+            }
+            sendmail(shortid, received_email, keywords)
+
+            # save database with orm
+            newVerify = {
+                'id': str(uuid.uuid4()),
+                'code': shortid,
+                'email': received_email,
+            }
+            Email_auth.objects.create(**newVerify)
+
+            email_code_now_expired(received_code)
+
+            if received_final:
+                # send change notice email to both email addresses
+                received_previous_email = data.get('previousEmail')
+
+                keywords = {
+                    'type': 'notice-change-email-to-previous',
+                    'text': '로그인 이메일이 변경됐습니다.',
+                    'displayName' : received_display_name,
+                    'received_email' : received_email,
+                }           
+                sendmail('', received_previous_email, keywords)                
+
+                keywords = {
+                    'type': 'notice-change-email-to-new',
+                    'text': '계정 설정을 편집했습니다.',
+                    'displayName' : received_display_name,
+                    'received_previous_email' : received_previous_email,
+                }           
+                sendmail('', received_email, keywords)                
+            
+            return JsonResponse({'success': True, 'final' : received_final }, status=200, safe=False)          
+            
+        return JsonResponse({'error': error}, status=202, safe=False)        
 
 def change_password(request):
     ''' 
         check if the password to be changed is valid
             1. matches the old password
             2. the code has expired
+        if no_code_check_required:
+            change password from profilePage
+        else
+            ... from login     
     '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_email = data.get('email')
-        received_code = data.get('code')
         received_password = data.get('password').encode('utf-8')
+        received_no_code_check_required = data.get('noCodeCheckRequired')
 
-        userData = Users.objects.filter(data__email=received_email)
-        row = userData.values()
-        row = list(row)
+        if received_no_code_check_required:
+            received_password_old = data.get('password-old').encode('utf-8')
+            res = isPasswordValidate(received_password, received_password_old, None, received_email)
+        else:
+            received_code = data.get('code')
+            res = isPasswordValidate(received_password, None, received_code, received_email)
 
-        userData = row[0] if row else {}
-        password = userData.get('password').encode('utf-8')
+        if 'user' in res:
+            result = JsonResponse(res, status=200, safe=False)
+            result.set_cookie('access_token', res['access_token'])
+            return result
+        else:
+            return JsonResponse({'error' : res}, status=202, safe=False)    
 
-        isCodeValidate = email_code_verify(received_code, received_email)
-
-        error = {}
-        error['password'] ='passwordUsedBefore' if userData and bcrypt.checkpw(received_password, password) else None
-
-        error['code'] = None if isCodeValidate == 'OK' else isCodeValidate
-
-        if not error['password'] and not error['code']:
-
-            # update password in db
-            userData['password'] = received_password
-            userData['updated_at'] = now
-            userData.update(**userData)
-
-            # expired emailAuth code
-            email_code_now_expired(received_code)
-
-            del userData['password'] # deleted for security
-
-            payload = {
-                'id': str(userData['id']),
-                'iat': now,
-                'exp': now + datetime.timedelta(days=expiresIn)
+def delete_account(request):
+    # delete account from profile page
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        received_email = data.get('email')
+        received_display_name = data.get('displayName')
+        
+        try:
+            Users.objects.filter(data__email=received_email).delete()
+            
+            keywords = {
+                'type': 'delete-account',
+                'text': '계정 삭제',
+                'displayName' : received_display_name,
             }
+            sendmail('', received_email, keywords)
+        
+            return JsonResponse({'success': True }, status=200, safe=False) 
+        except:
+            return JsonResponse({'error': '계정 삭제를 할 수 없습니다.' }, status=202, safe=False) 
 
-            access_token = jwt.encode(payload, secret_key, algorithm=algorithm).decode('utf-8')
-
-            response = { "user" : userData, "access_token" : access_token }
-            res = JsonResponse(response, status=200, safe=False)
-            res.set_cookie('access_token', access_token)
-
-            return res
-
-        return JsonResponse({"error": error}, status=202, safe=False)                        
-
-def sendmail(shortid, received_email, keywords):
-    # aws ses : ep026
-    subject = 'TechVisor ' + keywords['text']
-    html_message = render_to_string('mailTemplate-' + keywords['type'] + '.html', {'code': shortid, 'keywords': keywords, 'received_email': received_email, 'url': 'http://techvisor.co.kr'})
-    plain_message = strip_tags(html_message)
-    from_email = settings.DEFAULT_FROM_EMAIL 
-    to = received_email
-    send_mail(subject, plain_message, from_email, [to], fail_silently=False, html_message=html_message)
+       
 
 def register(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        received_displayName = data.get('displayName')
         received_email = data.get('email')
         received_code = data.get('code')
+        received_displayName = data.get('displayName')
 
-        
         password = data.get('password').encode('utf-8')           
         received_password = bcrypt.hashpw(password, bcrypt.gensalt())
         received_password = received_password.decode('utf-8')         
 
-        isEmailExists = Users.objects.filter(data__email=received_email).count()
-
-        isCodeValidate = email_code_verify(received_code, received_email)
-
-        errMsg = {
-            'INVAILED_CODE': '존재하지 않은 토큰입니다.',
-            'EXPIRED_CODE': '인증토큰이 만료되었습니다.',
-            'USED_CODE': '이미 처리되었거나 비활성화된 인증토큰입니다.',
-            'ERROR': '잘못된 요청입니다.',
-            'OK': ''
-        }  
-
         error = {}
-        error['email'] = '이 이메일은 이미 사용중입니다' if isEmailExists else None
+        error['email'] = '이 이메일은 이미 사용중입니다' if isEmailExists(received_email) else None
+        error['code'] = errMsg[isCodeValidate(received_code, received_email)]
         error['displayName'] = '이름을 입력하세요' if not received_displayName else None
-        error['code'] = errMsg[isCodeValidate]
-        error['password'] = None
 
-        if not error['displayName'] and not error['password'] and not error['email'] and error['code'] == '':
+        if not error['displayName'] and not error['email'] and error['code'] == '':
+            # new register                
             newUid = str(uuid.uuid4())
             newUser = {
                 'id': newUid,
@@ -271,8 +306,8 @@ def register(request):
                     'settings': {},
                     'shortcuts': [],
                     'starred': [],
-                    'trashed': [],
                     'interests' : [],  # 여기에서 미리 빈 배열을 만들어 놔야 할 것 같음
+                    'trashed' : {},
                     'labels' : {},
                     'filters' : {},
                     'first_pay' : True
@@ -293,79 +328,27 @@ def register(request):
             access_token = jwt.encode(payload, secret_key , algorithm=algorithm)
 
             # send welcome email
-            # keywords = {
-            #     'type': 'welcome',
-            #     'text': '가입을 환영합니다.',
-            #     'displayName' : received_displayName,
-            # }            
-            # sendmail('', received_email, keywords)            
+            keywords = {
+                'type': 'welcome',
+                'text': '가입을 환영합니다.',
+                'displayName' : received_displayName,
+            }            
+            sendmail('', received_email, keywords)            
 
             return JsonResponse({ "user": newUser, "access_token" : access_token.decode('utf-8')}, status=200, safe=False)
-        return JsonResponse({'error': error}, status=200, safe=False)
+
+        return JsonResponse({'error': error}, status=404, safe=False)        
     
-def email_code_verify(code, email):
-    '''email code validate check'''
-    try:
-        # code not exist?
-        emailAuth = Email_auth.objects.filter(code=code)
-        if not emailAuth.exists():
-            return 'INVAILED_CODE'
-
-        row = list(emailAuth.values())
-        emailAuthData = row[0]
-        # used?
-        if emailAuthData['logged']:
-            return 'USED_CODE'
-
-        # expried? 
-        timestamp = emailAuthData['created_at'].timestamp()
-        # valid_period_secs = verifyExpiresIn.total_seconds()
-        # if time.time() - timestamp > valid_period_secs:
-        if time.time() - timestamp > verifyExpiresInSecs:
-            return 'EXPIRED_CODE'
-        # # new user?
-        # row = Users.objects.filter(data__email=emailAuthData['email'])
-        # if not row.exists():
-        #     newData = {
-        #         'is_certified' : True
-        #     }
-        #     row.update(**newData) 
-        return 'OK'
-    except:
-        return 'ERROR'
-
 def verify_email_code(request):
-    '''email code validate check'''
+    '''return isCodeValidate HttpResponse'''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         code = data['data'].get('code')
-        try:
-            # code not exist?
-            emailAuth = Email_auth.objects.filter(code=code)
-            if not emailAuth.exists():
-                return HttpResponse('INVAILED_CODE', status=404)
 
-            row = list(emailAuth.values())
-            emailAuthData = row[0]
-            # used?
-            if emailAuthData['logged']:
-                return HttpResponse('USED_CODE', status=409)
+        http_status_codes = { 'INVAILED_CODE' : 404, 'USED_CODE' : 409, 'EXPIRED_CODE': 409, 'ERROR': 500, 'OK': 204}
+        result = isCodeValidate(code, email)
+        return HttpResponse(result, status=http_status_codes[result])
 
-            # expried? 
-            timestamp = emailAuthData['created_at'].timestamp()
-            if time.time() - timestamp > verifyExpiresInSecs:
-                return HttpResponse('EXPIRED_CODE', status=409)
-
-            # # new user?
-            # row = Users.objects.filter(data__email=emailAuthData['email'])
-            # if not row.exists():
-            #     newData = {
-            #         'is_certified' : True
-            #     }
-            #     row.update(**newData) 
-            return HttpResponse('OK', status=204)
-        except:
-            return HttpResponse()
 
 def email_code_now_expired(code):
     ''' update that the email code was used once in the DB '''
@@ -378,7 +361,16 @@ def email_code_now_expired(code):
         emailAuth.update(**emailAuthData)
         return True
     except:
-        return False      
+        return False    
+
+def sendmail(shortid, received_email, keywords):
+    # aws ses : ep026
+    subject = 'TechVisor ' + keywords['text']
+    html_message = render_to_string('mailTemplate-' + keywords['type'] + '.html', {'code': shortid, 'keywords': keywords, 'received_email': received_email, 'url': 'http://techvisor.co.kr'})
+    plain_message = strip_tags(html_message)
+    from_email = settings.DEFAULT_FROM_EMAIL 
+    to = received_email
+    send_mail(subject, plain_message, from_email, [to], fail_silently=False, html_message=html_message)          
 
 def access_token(request):
     if request.method == 'POST':
@@ -415,74 +407,93 @@ def access_token(request):
         except:
             return JsonResponse({ "error" :"Invalid access token detected"}, status=500, safe=False)        
 
-# def verify_token(request, code):
-#     # 404 : 코드없음
-#     # 403 : 코드사용
-#     # 410 : 코드만료
-#     # 200 : 사용자 없음 -> send email, register_token
-#     # 201 : 사용자 있음 인증메일 -> Email_auth ㅣlogged 갱신 -> user, profile, token
-#     try:
-#         # code not exist?
-#         # 4XX : check code
-#         emailAuth = Email_auth.objects.filter(code=code)
-#         if not emailAuth.exists():
-#             return HttpResponse('Not Found', status=404)
+def isCodeValidate(code, email):
+    '''email code validate check in [Email_auth]'''
+    try:
+        # code not exist?
+        emailAuth = Email_auth.objects.filter(code=code)
+        if not emailAuth.exists():
+            return 'INVAILED_CODE'
 
-#         row = list(emailAuth.values())
-#         emailAuthData = row[0]
-#         # used?
-#         if emailAuthData['logged']:
-#             # return JsonResponse({'name': 'TOKEN_ALREADY_USED'}, status=403, safe=False)
-#             return HttpResponse('TOKEN_ALREADY_USED', status=403)
+        row = list(emailAuth.values())
+        emailAuthData = row[0]
+        # used?
+        if emailAuthData['logged']:
+            return 'USED_CODE'
 
-#         # expried? 
-#         timestamp = emailAuthData['created_at'].timestamp()
-#         valid_period_secs = verifyExpiresIn.total_seconds()
-#         if time.time() - timestamp > valid_period_secs:
-#             # return HttpResponseGone('EXPIRED_CODE') # 410
-#             return HttpResponse('EXPIRED_CODE', status=410)
+        # expried? 
+        timestamp = emailAuthData['created_at'].timestamp()
+        # valid_period_secs = verifyExpiresIn.total_seconds()
+        # if time.time() - timestamp > valid_period_secs:
+        if time.time() - timestamp > verifyExpiresInSecs:
+            return 'EXPIRED_CODE'
+        # # new user?
+        # row = Users.objects.filter(data__email=emailAuthData['email'])
+        # if not row.exists():
+        #     newData = {
+        #         'is_certified' : True
+        #     }
+        #     row.update(**newData) 
+        return ''
+    except:
+        return 'ERROR'
 
-#         # new user?
-#         # 2XX : check user with code
-#         row = Users.objects.filter(data__email=emailAuthData['email'])
-#         if not row.exists():
-#             # generate register token
-#             payload = {'id': str(emailAuthData['id']),
-#                 'email': emailAuthData['email'],
-#                 'sub': 'email-register',
-#                 'iat': now.timestamp(),
-#                 'exp': now + verifyExpiresIn
-#             }
-#             register_token = jwt.encode(payload, secret_key , algorithm=algorithm)
-#             register_token = register_token.decode('utf-8')
-#             # https://stackoverflow.com/questions/40059654/python-convert-a-bytes-array-into-json-format
-#             response = {'email': emailAuthData['email'], 'register_token' : register_token} # .decode('utf8').replace("'", '"')}
-#             return JsonResponse(response, status=200, safe=False)
+def isPasswordValidate(received_password, received_password_old, received_code, received_email):
+    ''' password exist check in [Users] and return status code'''
+    # try:
+    user_instance = Users.objects.filter(data__email=received_email)
+    row = list(user_instance.values())
+    userData = row[0]
+    user_password = userData['password'].encode('utf-8')
 
-#         # user exists
-#         row = list(row.values())
-#         userData = row[0]
+    error = {}
+    error['password'] ='이전 비밀번호와 동일합니다.' if bcrypt.checkpw(received_password, user_password) else None        
+    if received_code:
+        error['code'] = isCodeValidate(received_code, received_email)
+    if received_password_old:            
+        error['password-old'] = '이전 비밀번호가 잘못입력되었습니다.' if not bcrypt.checkpw(received_password_old, user_password) else None      
 
-#         # no userProfiles
-#         userProfiles = User_profiles.objects.filter(fk_user_id=userData['id'])
-#         if not userProfiles.exists():
-#             return HttpResponse('no profile', content_type="text/plain; charset=utf-8")
-            
-#         row = list(userProfiles.values())
-#         profileData = row[0]
+    if all(value == None for value in error.values()):
+        hashed_password = bcrypt.hashpw(received_password, bcrypt.gensalt())
+        hashed_password = hashed_password.decode('utf-8')   
 
-#         tokens  = generate_user_token(userData['id'])
-#         emailAuthData['logged'] = True
-#         emailAuthData['updated_at'] = now
-#         emailAuth.update(**emailAuthData)
+        # update password in db
+        userData['password'] = hashed_password
+        userData['updated_at'] = now
+        user_instance.update(**userData)
 
-#         response = { 'user': userData, 'profile': profileData, 'token': tokens}
-#         return JsonResponse(response,status=201, safe=False)
-       
-#     except:
-#         return HttpResponse() # 500
-#         # return JsonResponse({},status='500', safe=False)
-  
+        if received_code:
+            # expired emailAuth code
+            email_code_now_expired(received_code)
+
+        del userData['password'] # deleted for security
+
+        payload = {
+            'id': str(userData['id']),
+            'iat': now,
+            'exp': now + datetime.timedelta(days=expiresIn)
+        }
+
+        access_token = jwt.encode(payload, secret_key, algorithm=algorithm).decode('utf-8')
+
+        result = { "user" : userData, "access_token" : access_token }
+
+        return result
+
+    return error
+    # except:
+        # return 'ERROR'   
+
+def isEmailExists(email):
+    return True if Users.objects.filter(data__email=email).exists() else False
+
+def getNamebyEmail(email):
+    try:
+        user_instance = Users.objects.get(data__email=email)
+        return user_instance.data['displayName']
+    except:
+        return None
+
 def update_user_data(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))

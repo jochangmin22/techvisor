@@ -31,7 +31,7 @@ from psycopg2.extensions import AsIs
 from datetime import datetime
 
 
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'techvisor.settings')
 
 import django
