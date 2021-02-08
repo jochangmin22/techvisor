@@ -114,7 +114,7 @@ def get_db_appNo_list(appNo, startNo):
                 cursor.execute(query, (str(appNo), str(startNo)))
                 connection.commit()
                 row = dictfetchall(cursor)
-                print('query is : ', row)
+                # print('query is : ', row)
                 return [d['출원번호']for d in row]
                 
     except (Exception, psycopg2.Error) as error:
@@ -177,7 +177,7 @@ def get_biblo(appNo):
     items = ['applicationNumber','applicationDate','openNumber','openDate','registerDate','registerNumber','publicationDate','publicationNumber','inventionTitle','registerStatus', 'applicantInfoArray', 'ipcInfoArray','inventorInfoArray']
     item_names = ['출원번호','출원일자','공개번호','공개일자','등록번호','등록일자','공고번호','공고일자','발명의명칭국문','등록사항', '출원인1', 'ipc코드']
     
-    print('biblo_url : ', url)
+    # print('biblo_url : ', url)
     try:
         biblo_api = requests.get(url, headers={'Connection':'close'}).text.encode()
         # biblo_api = requests.get(url, headers={ "Content-Type": "application/json" }).text.encode()
@@ -189,13 +189,14 @@ def get_biblo(appNo):
             )
         )
         raise SystemExit(e)
-    
+
     soup = BeautifulSoup(biblo_api, 'lxml-xml')
     # print('soup data : ', soup)
-
-    ipc_data = soup.select('ipcInfoArray')[0].ipcNumber.text
-    app_data = soup.select('applicantInfo > name')[0].text
-    # print('What data : ', ipc_data.text, app_data)
+    
+    # ipc_data = soup.select('ipcInfoArray')[0].ipcNumber.text
+    ipc_data = soup.select_one('ipcInfo ipcNumber').text
+    app_data = soup.select_one('applicantInfo name').text
+    print('What data : ', ipc_data, app_data)
     rawdata = []
     
     if ipc_data or app_data:
@@ -204,9 +205,11 @@ def get_biblo(appNo):
         res[item_names[11]] = ipc_data
         res[item_names[10]] = app_data
         rawdata.append(res)
+    # print('rawdata : ', rawdata)
     return rawdata
-    
 
+    
+### 2월치 사용횟수 다 사용함
 def main_def(repeat_cnt = 0):
     """ 메인 def """
     # parser = argparse.ArgumentParser()
@@ -215,7 +218,7 @@ def main_def(repeat_cnt = 0):
     # parser.add_argument('--compare', type=str2bool, nargs='?', const=True, default=False, help='Do you check db and total number after crawling?')
 
     # parser.add_argument('--clear', type=str2bool, nargs='?', const=True, default=False, help='Should I truncate the Table before execution?')
-    # parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=False, help='Do you want to crawl the entire company regardless of start, end number')          
+    # parser.add_argument('--entire', type=str2bool, nargs='?', const=True, default=False, help='Do you want to crawl the entire company regardless of start, end number')
 
                        
     # args = parser.parse_args()
@@ -251,15 +254,15 @@ def main_def(repeat_cnt = 0):
     lastAppNo = ""
     myDict = []
     myCitingDict = []
+    # print('App_list : ', dbAppNoList[:900])
     for dbAppNo in dbAppNoList:
-        # 피인용
-        if dbAppNo:
-            myDict = get_biblo(dbAppNo)
-            time.sleep(0.5)
-            if myDict:
-                myDict += myDict
+        myDict += get_biblo(dbAppNo)
+        # print('myDict Data  : ', myDict)
+        time.sleep(0.5)
+        # if myDict:
+        #     myDict += myDict
 
-            myCitingDict += [{'출원번호': str(dbAppNo), '피인용수' : len(myDict)}]
+            # myCitingDict += [{'출원번호': str(dbAppNo), '피인용수' : len(myDict)}]
     
     # DB에 저장하는 부분에서 에러남
     if myDict:
@@ -268,16 +271,21 @@ def main_def(repeat_cnt = 0):
         engine = create_engine(db_connection_url)
         df.to_sql(name='공개공보2_temp', con=engine, if_exists='replace')
         print('dt data : ', df)
+
         # note : need CREATE EXTENSION pgcrypto; psql >=12 , when using gen_random_uuid (),
         
-        # with engine.begin() as cn:
-        #     sql = """INSERT INTO "공개공보2" (출원인1, ipc코드)
-        #                 SELECT t.출원인1, t.ipc코드
-        #                 FROM 공개공보2_temp t
-        #                 WHERE NOT EXISTS 
-        #                     (SELECT 1 FROM "공개공보2" f
-        #                     WHERE t.출원번호 = f.출원번호)"""
-        #     cn.execute(sql)
+        with engine.begin() as cn:
+            sql = """
+                    UPDATE "공개공보2"
+                    SET "출원인1" = T."출원인1", "ipc코드" = T."ipc코드" 
+                    FROM "공개공보2_temp" T
+                    WHERE "공개공보2"."출원번호" = T."출원번호"
+                    """
+            cn.execute(sql)
+
+                        # WHERE EXISTS 
+                        #     (SELECT 1 FROM 공개공보2 f
+
 
         # save second db
     # appList = [d['출원번호'] for d in myCitingDict]

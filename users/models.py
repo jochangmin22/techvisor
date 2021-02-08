@@ -21,6 +21,9 @@ class Users(models.Model):
     # @OneToOne(type => UserProfile, profile => profile.user)
     # profile!: UserProfile;
 
+    def __str__(self):
+        return self.data['email']
+
     class Meta:
         db_table = '"users"'
         verbose_name_plural = "users"

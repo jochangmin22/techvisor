@@ -11,75 +11,35 @@
         (function () {
             var IMP = window.IMP;
             IMP.init('{{ imp_code }}');
-
             IMP.request_pay({
                 pg: 'html5_inicis',
                 pay_methood: 'card',
-                merchant_uid: 'Techvisor_' + new Date().getTime(), //,'00000000'
-                customer_uid: '87b0466f-06ee-458e-bb5c-c5c65002bca4',
-                name: 'Techvisor 최초인증결제',
-                buyer_name: 'shrhkddh',
-                buyer_email: 'abs@gmail.com',
-                amount: 0,
+                merchant_uid: '{{ user_data.data.displayName }}' + new Date().getTime(), //'merchant_id', 
+                customer_uid: '{{ user_data.id }}', //'customer_id',
+                name: 'Techvisor 최초인증결제', //'{{ product_data.name }}', 
+                buyer_name: '{{ user_data.data.displayName }}',
+                buyer_email: '{{ user_data.data.email }}',
+                amount: 0
             }, function (rsp) {
                 if (rsp.success) {
-                    // var msg = '결제가 완료되었습니다.';
-                    // msg += '고유ID : ' + rsp.imp_uid;
-                    // msg += '상점 거래ID : ' + rsp.merchant_uid;
-                    // msg += '결제 금액 : ' + rsp.paid_amount;
-                    // msg += '카드 승인번호 : ' + rsp.apply_num;
-                    var msg = '빌링키 발급 성공';
+                    var msg = '빌링키 발급 성공'
                     jQuery.ajax({
                         url: "billings", // 서비스 웹서버
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         data: JSON.stringify({
-                            // customer_uid: "shrhkddhUID", // 카드(빌링키)와 1:1로 대응하는 값
-                            customer_uid: "87b0466f-06ee-458e-bb5c-c5c65002bca4", // test용 UUID
+                            customer_uid: '{{ user_data.id }}', // 카드(빌링키)와 1:1로 대응하는 값
                             merchant_uid: rsp.merchant_uid,
-                            amount: {{ price }}
-                            // amount: 10
+                            amount: {{ product_data.price }}
                         })
         });
                 } else {
-            var msg = '빌링키 발급 실패';
+            var msg = '빌링키 발금 실패';
             msg += '에러 내용 : ' + rsp.error_msg;
         }
         alert(msg);
+        window.close();
             });
-
-            // IMP.request_pay({
-            //     pg: 'html5_inicis',
-            //     pay_methood: 'card',
-            //     merchant_uid: '{{ user_data.data.displayName }}' + new Date().getTime(), //'merchant_id', 
-            //     customer_uid: '{{ user_data.id }}', //'customer_id',
-            //     name: '{{ product_data.name }}', // 'Techvisor 최초인증결제'
-            //     buyer_name: '{{ user_data.data.displayName }}',
-            //     buyer_email: '{{ user_data.data.email }}',
-            //     // amount: '{{ product_data.price }}' //amount
-            //     amount: 0
-            // }, function (rsp) {
-            //     if (rsp.success) {
-            //         const msg = '빌링키 발급 성공'
-            //         jQuery.ajax({
-            //             url: "billings", // 서비스 웹서버
-            //             method: "POST",
-            //             headers: { "Content-Type": "application/json" },
-            //             data: {
-            // customer_uid: '{{ user_data.id }}', // 카드(빌링키)와 1:1로 대응하는 값
-            // merchant_uid: rsp.merchant_uid,
-            // amount : {{ product_data.price }} // {{ product_data }}
-            //             }
-            //         });
-            //     } else {
-            //         // const msg = '결제에 실패하였습니다.';
-            //         // msg += '에러 내용 : ' + rsp.error_msg;
-            //         // console.log(msg);
-            //         const msg = '빌링키 발금 실패';
-            //         msg += '에러 내용 : ' + rsp.error_msg;
-            //     }
-            //     alert(msg);
-            // });
         }) ();
     </script>
 
