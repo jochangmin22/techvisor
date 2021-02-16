@@ -80,36 +80,21 @@ ALLOWED_HOSTS = [
 CORS_ORIGIN_ALLOW_ALL = True # Credential true
 # frontend
 CORS_ORIGIN_WHITELIST = [
-    "http://192.168.0.40",
-    "http://192.168.0.40:1000",
-    "http://192.168.0.40:3000",
-    "http://192.168.0.40:4000",
-    "http://192.168.0.50",
-    "http://192.168.0.50:1000",
-    "http://192.168.0.50:3000",
-    "http://192.168.0.50:4000",
-    "http://localhost:1000",
     "http://localhost:3000",
-    "http://localhost:4000",
-    "http://127.0.0.1:8000",
+    "http://192.168.0.27:3000",
+    "http://192.168.0.75:3000",
 
-    "http://btowin.synology.me:1000",
-    "http://btowin.synology.me:1111",
-    "http://btowin.synology.me:3000",
-    "http://btowin.synology.me:4000",
-    "http://btowin.synology.me:8000",
-    "http://v.techvisor.co.kr:8000",
+    "http://btowin.synology.me:3555",
+    "http://btowin.synology.me:3666",
     "http://v.techvisor.co.kr:8001",
     "https://v.techvisor.co.kr",
     
     "http://14.32.114.185",  # company
     "https://14.32.114.185",
     "http://techvisor.co.kr",
-    "http://www.techvisor.co.kr",
     "https://techvisor.co.kr",
-    "http://techvisor.co.kr",
     "http://www.techvisor.co.kr",
-    "https://techvisor.co.kr",
+
 
     "http://52.79.161.225",  # aws
     "https://52.79.161.225",
@@ -133,6 +118,7 @@ INSTALLED_APPS = [
     # app
     "search",
     "users",
+    "users.callback",
     "company",
     "bill",
     # "django_user_agents",

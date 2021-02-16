@@ -762,7 +762,8 @@ def parse_claims(request, xmlStr="", appNo=""):
 
 def ClaimTypeCheck(val):
     """ 독립항, 종속항, 삭제항 판단 """
-    if "항에 있어서" in val or "항의 " in val or ("청구항" in val and "에 따른" in val) or ("청구항" in val and "에 있어서" in val) or '중 어느 한 항에' in val:
+    # if "항에 있어서" in val or "항의 " in val or ("청구항" in val and "에 따른" in val) or ("청구항" in val and "에 있어서" in val) or '중 어느 한 항에' in val:
+    if "항에 있어서" in val or ("청구항" in val and "에 따른" in val) or ("청구항" in val and "에 있어서" in val) or '중 어느 한 항에' in val:
         return "jong"
     elif "삭제" in val:
         return "sak"

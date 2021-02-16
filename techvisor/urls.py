@@ -17,15 +17,11 @@ from django.contrib import admin
 from django.urls import path, re_path, include
 from django.views.decorators.csrf import csrf_exempt  # post일 경우 필요
 
-from callback.views import (redirect_google_login, google_callback)
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('search.urls')),
     path('', include('company.urls')),
     path('', include('users.urls')),
+    path('', include('users.callback.urls')),
     path('', include('bill.urls', namespace = 'bill')),
-
-    path("auth/google/login", redirect_google_login),
-    path("auth/google", google_callback),    
 ]

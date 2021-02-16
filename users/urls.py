@@ -1,6 +1,7 @@
-from django.urls import re_path
+from django.urls import re_path, path, include
 from django.views.decorators.csrf import csrf_exempt  # post일 경우 필요
 from . import views
+from . import social
 
 urlpatterns = [
     re_path(r"^api/auth/email$", csrf_exempt(views.email), name='email'),
@@ -13,4 +14,8 @@ urlpatterns = [
     re_path(r"^api/auth/delete-account$", csrf_exempt(views.delete_account), name='delete_account'),
     re_path(r"^api/auth/register$", csrf_exempt(views.register), name='register'),
     re_path(r"^api/auth/user/update$", csrf_exempt(views.do_update), name='do_update'),
+
+    re_path(r"^api/auth/verify-social$", csrf_exempt(social.verify_social), name='verify_social'),
+    re_path(r"^api/auth/social-register$", csrf_exempt(social.social_register), name='social_register'),
+    re_path(r"^api/auth/social-login$", csrf_exempt(social.social_login), name='social_login'),
 ]

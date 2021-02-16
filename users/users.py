@@ -1,40 +1,30 @@
-from .models import Users, Email_auth, User_profiles, Auth_tokens
-# from .serializers import UsersSerializer, EmailAuthSerializer
-from django.http import JsonResponse, HttpResponse
-from django.db import connection
-from django.conf import settings
-import json
 import jwt
-# from django.utils import timezone
-import datetime
+import json
+from django.conf import settings
+from django.db import connection
+from django.http import JsonResponse, HttpResponse
+
 import time
 import uuid
-import shortuuid
 import bcrypt
+import datetime
+import shortuuid
 
-# import datetime
 from psycopg2.extensions import AsIs
 from django.core.mail import send_mail
-# from django.core.mail import EmailMultiAlternatives
-# from django.template import Context
-from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-# from django.core import mail
+from django.template.loader import render_to_string
 
-# from django.conf import settings
-# from django.template import loader
-# from rest_framework.response import Response
-# from django.utils.translation import ugettext_lazy as _
-# from rest_framework import status
+from .models import Users, Email_auth, User_profiles, Auth_tokens
+# from .serializers import UsersSerializer, EmailAuthSerializer
 
 secret_key = settings.SECRET_KEY
-expiresIn = settings.JWT_AUTH['JWT_EXPIRATION_DELTA']
 algorithm = settings.JWT_AUTH['JWT_ALGORITHM']
+expiresIn = settings.JWT_AUTH['JWT_EXPIRATION_DELTA']
 verifyExpiresIn = settings.JWT_AUTH['JWT_EMAIL_CODE_EXPIRATION_DELTA']
 verifyExpiresInSecs = settings.JWT_AUTH['JWT_EMAIL_CODE_EXPIRATION_SECS']
 
 now = datetime.datetime.utcnow()
-# now = timezone.now()
 
 errMsg = {
     'INVAILED_CODE': '존재하지 않은 인증코드입니다.',
