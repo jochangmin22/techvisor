@@ -6,6 +6,6 @@ urlpatterns = [
     re_path(r"^api/auth/callback/google/login", csrf_exempt(callback.redirect_google_login), name='redirect_google_login'),
     re_path(r"^api/auth/callback/google", csrf_exempt(callback.google_callback), name='google_callback'),
     re_path(r"^api/auth/callback/naver/login", csrf_exempt(callback.redirect_naver_login), name='redirect_naver_login'),
-    re_path(r"^api/auth/callback/naver", csrf_exempt(callback.naver_login), name='naver_login'),
+    re_path(r"^api/auth/callback/naver", csrf_exempt(callback.naver_callback), name='naver_callback'),
     re_path(r"^api/auth/callback/token", csrf_exempt(callback.get_token), name='get_token'),
 ]

@@ -30,18 +30,26 @@ def handleRedis(redisKey, keys, result="", mode="r"):
         return JsonResponse(result, safe=False)        
     return
     
-def google_client_json_exist(client_json):    
+def social_login_infos_exist(client_json):    
+    ''' does provider client_json information exist? '''
     if not client_json:
         content = { "please check ENVVAR" : "Google ENVVAR is missing"}
         return Response(content, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return      
 
-def generate_token(foo):
+def generate_token(foo=None):
+    ''' generate token '''
     payload = {
         'iat': now,
         'exp': now + datetime.timedelta(days=expiresIn)
     }
-    payload.update(foo)
+    if foo:
+        payload.update(foo)
 
-    result = jwt.encode(payload, secret_key, algorithm=algorithm) # .decode('utf-8')
+    return jwt.encode(payload, secret_key, algorithm=algorithm).decode('utf-8')
+
+def get_payload_from_token(token, name)    :
+    ''' get payload from jwt token '''
+    payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+    result = payload.get(name, None)
     return result

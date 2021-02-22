@@ -98,12 +98,13 @@ class Social_accounts(models.Model):
         default = uuid.uuid4,
         editable = False
     )
-    fk_user_id = models.UUIDField()
+    # fk_user_id = models.UUIDField()
     social_id = models.CharField(max_length=255)
     access_token =models.CharField(max_length=255)
     provider = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='"fk_user_id"')
 
     class Meta:
         db_table = '"social_accounts"'     
