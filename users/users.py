@@ -10,13 +10,10 @@ import bcrypt
 import datetime
 import shortuuid
 
-from psycopg2.extensions import AsIs
-from django.core.mail import send_mail
-from django.utils.html import strip_tags
-from django.template.loader import render_to_string
-
-from .models import Users, Email_auth, User_profiles, Auth_tokens
+from .models import Users, Email_auth
 # from .serializers import UsersSerializer, EmailAuthSerializer
+
+from .utils import find_user, getNamebyEmail, check_user_exists, sendmail
 
 secret_key = settings.SECRET_KEY
 algorithm = settings.JWT_AUTH['JWT_ALGORITHM']
@@ -44,11 +41,23 @@ def email(request):
         data = json.loads(request.body.decode('utf-8'))
         email = data["data"].get('email')
 
-        signedAlready = check_user_exists('email', email)
+        result = {}
+
+        user = find_user('data__email', email)
+
+        # notify if you have signed up with sns 
+        if not user:
+            result = { 'signedIn' : False }
+        else:
+            if not user.password and user.my_from in ['google','naver','kakao']:
+                result = { 'signedIn' : True, 'isSocial' : True, 'error' : { 'email' : user.my_from + ' 계정으로 가입된 이메일입니다.' }}
+                return JsonResponse(result, status=202, safe=False)
+            else:                
+                result = { 'signedIn' : True }
 
         if email:
             shortid = shortuuid.ShortUUID().random(length=8)
-            if not signedAlready:
+            if not user:
                 # sendmail
                 keywords = {
                     'type': 'invite',
@@ -56,7 +65,7 @@ def email(request):
                 }
                 sendmail(shortid, email, keywords)
 
-            # save database with orm
+            # create row in email_auth for certify
             newVerify = {
                 'id': str(uuid.uuid4()),
                 'code': shortid,
@@ -64,7 +73,7 @@ def email(request):
             }
             Email_auth.objects.create(**newVerify)
 
-        return JsonResponse({'signedIn' : signedAlready}, status=200, safe=False)
+        return JsonResponse(result, status=200, safe=False)
 
 def password(request):
     if request.method == 'POST':
@@ -97,6 +106,8 @@ def password(request):
         # save updated_at to db
         userData['updated_at'] = now
         users.update(**userData)  
+
+        userData['emptyPassword'] = False if userData['password'] else True
 
         del userData['password'] # deleted for security
 
@@ -228,14 +239,16 @@ def change_password(request):
         else
             ... from login     
     '''
+
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         email = data.get('email')
         password = data.get('password').encode('utf-8')
         no_code_check_required = data.get('noCodeCheckRequired')
+        no_password_check_required = data.get('noPasswordCheckRequired', False)
 
         if no_code_check_required:
-            password_old = data.get('password-old').encode('utf-8')
+            password_old = data.get('password-old').encode('utf-8') if not no_password_check_required else None
             res = isPasswordValidate(password, password_old, None, email)
         else:
             code = data.get('code')
@@ -296,7 +309,7 @@ def register(request):
         newUid = str(uuid.uuid4())
         newUser = {
             'id': newUid,
-            'my_from': 'custom-db',
+            'my_from': 'local',
             'password': password,
             'role': 'user',
             'data': {
@@ -360,13 +373,7 @@ def email_code_now_expired(code):
     except:
         return False    
 
-def sendmail(shortid, email, keywords):
-    subject = 'TechVisor ' + keywords['text']
-    html_message = render_to_string('mailTemplate-' + keywords['type'] + '.html', {'code': shortid, 'keywords': keywords, 'email': email, 'url': 'http://techvisor.co.kr'})
-    plain_message = strip_tags(html_message)
-    from_email = settings.DEFAULT_FROM_EMAIL 
-    to = email
-    send_mail(subject, plain_message, from_email, [to], fail_silently=False, html_message=html_message)          
+   
 
 def access_token(request):
     if request.method == 'POST':
@@ -396,6 +403,8 @@ def access_token(request):
                 'exp': now + datetime.timedelta(days=expiresIn)
             }
             updated_access_token = jwt.encode(payload, secret_key, algorithm=algorithm).decode('utf-8')
+
+            userData['emptyPassword'] = False if userData['password'] else True
 
             del userData['password'] # deleted for security
 
@@ -442,13 +451,14 @@ def isPasswordValidate(password, password_old, code, email):
     userData = row[0]
     user_password = userData['password'].encode('utf-8')
 
-    if userData:
+    if userData and userData['password']: # db password is empty then pass check
         error = {}
         error['password'] ='이전 비밀번호와 동일합니다.' if bcrypt.checkpw(password, user_password) else None        
-        error['code'] = isCodeValidate(code, email) if code else None
         error['password-old'] = '이전 비밀번호가 잘못입력되었습니다.' if password_old and not bcrypt.checkpw(password_old, user_password) else None
+        if code:
+            error['code'] = isCodeValidate(code, email)
 
-        if any(value != None  for value in error.values()):
+        if any(value != None and value != '' for value in error.values()):
             return error     
 
     foo = bcrypt.hashpw(password, bcrypt.gensalt())
@@ -462,6 +472,8 @@ def isPasswordValidate(password, password_old, code, email):
     if code:
         # expired emailAuth code
         email_code_now_expired(code)
+
+    userData['emptyPassword'] = False if userData['password'] else True        
 
     del userData['password'] # deleted for security
 
@@ -479,17 +491,6 @@ def isPasswordValidate(password, password_old, code, email):
 
     # except:
         # return 'ERROR'   
-
-def check_user_exists(key,value):
-    ''' user exists check by email or displayName... '''
-    return True if Users.objects.filter(**{'data__{}'.format(key): value}).exists() else False
-
-def getNamebyEmail(email):
-    try:
-        users = Users.objects.get(data__email=email)
-        return users.data['displayName']
-    except:
-        return None
 
 def update_user_data(request):
     if request.method == 'POST':

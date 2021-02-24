@@ -5,8 +5,14 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse
 
+from django.core.mail import send_mail
+from django.utils.html import strip_tags
+from django.template.loader import render_to_string
+
 # caching with redis
 from django.core.cache import cache
+
+from .models import Users, Social_accounts
 
 now = datetime.datetime.utcnow()
 secret_key = settings.SECRET_KEY
@@ -53,3 +59,41 @@ def get_payload_from_token(token, name)    :
     payload = jwt.decode(token, secret_key, algorithms=[algorithm])
     result = payload.get(name, None)
     return result
+
+def check_user_exists(key,value):
+    ''' user exists check by email or displayName... '''
+    return True if Users.objects.filter(**{'data__{}'.format(key): value}).exists() else False    
+
+def check_user_by_social_id(social_id):
+    return True if Social_accounts.objects.filter(social_id=social_id).exists() else False
+
+def find_user(key, value):
+    ''' return user rows '''
+    try:
+        return Users.objects.get(**{'{}'.format(key): value})        
+    except:
+        return None
+
+def find_user_by_social_id(social_id):
+    ''' return user rows by Social id '''
+    try:
+        sa = Social_accounts.objects.get(social_id=social_id)
+        return find_user('id', sa.user_id)
+    except:
+        return None       
+
+def getNamebyEmail(email):
+    try:
+        users = Users.objects.get(data__email=email)
+        return users.data['displayName']
+    except:
+        return None
+
+def sendmail(shortid, email, keywords):
+    subject = 'TechVisor ' + keywords['text']
+    html_message = render_to_string('mailTemplate-' + keywords['type'] + '.html', {'code': shortid, 'keywords': keywords, 'email': email, 'url': 'http://techvisor.co.kr'})
+    plain_message = strip_tags(html_message)
+    from_email = settings.DEFAULT_FROM_EMAIL 
+    to = email
+    send_mail(subject, plain_message, from_email, [to], fail_silently=False, html_message=html_message)  
+      
