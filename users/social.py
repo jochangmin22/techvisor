@@ -26,7 +26,7 @@ providers = settings.SOCIAL_LOGIN['provider']
 
 google_scopes = ['https://www.googleapis.com/auth/userinfo.email','openid','https://www.googleapis.com/auth/userinfo.profile']
 naver_scopes = ['id', 'email', 'name', 'profile_image', 'nickname']
-
+kakao_scopes = ['id', 'email', 'nickname', 'thumbnail_image_url']
 
 def verify_social(request):
     if request.method == 'POST':
@@ -37,6 +37,7 @@ def verify_social(request):
         social_login_infos_exist(providers[provider])
 
         profile = getSocialProfile(provider, access_token)
+
         try:
             user = check_user_exists('email', profile['email'])
             social = check_user_by_social_id(str(profile['id']))
@@ -46,6 +47,7 @@ def verify_social(request):
             return JsonResponse(result, safe=False)
         except:
             return JsonResponse({'error': 'WRONG_CREDENTIALS'}, status=401,safe=False)            
+    return JsonResponse({'error': 'WRONG_CREDENTIALS'}, status=401,safe=False)            
 
 def social_login(request):
     if request.method == 'POST':
@@ -244,18 +246,39 @@ def getSocialProfile(provider, access_token):
             'thumbnail': profiles.get('profile_image'),
             'id':  profiles.get('id'),
         }
-        return result             
- 
-def get_profile(access_token, token_type='Bearer'):
-        res = requests.get(providers['naver']['profile_uri'], headers={'Authorization': '{} {}'.format(token_type, access_token)}).json()
+        return result
 
-        if res.get('resultcode') != '00':
-            return False, res.get('message')
-        else:
-            return True, res.get('response')  
+    if provider == 'kakao':
+        token_type='Bearer'
+        is_success, profiles = get_kakao_profile(access_token, token_type)
+        if not is_success:
+            return False, profiles
+
+        result = {
+            'email': profiles.get('email'),
+            'name': profiles.get('nickname'),
+            'thumbnail': profiles.get('thumbnail_image_url'),
+            'id':  profiles.get('id'),
+        }
+        return result
+ 
+def get_profile(access_token, token_type='Bearer', provider='naver'):
+        res = requests.get(providers[provider]['profile_uri'], headers={'Authorization': '{} {}'.format(token_type, access_token)}).json()
+        
+        if provider == 'naver':
+            if res.get('resultcode') != '00':
+                return False, res.get('message')
+            else:
+                return True, res.get('response')  
+        elif provider == 'kakao': 
+            if res.get('id'):
+                return True, res
+            else:
+                return False, res.get('message')
+          
 
 def get_naver_profile(access_token, token_type):
-    is_success, profiles = get_profile(access_token, token_type)
+    is_success, profiles = get_profile(access_token, token_type, 'naver')
 
     if not is_success:
         return False, profiles
@@ -265,4 +288,26 @@ def get_naver_profile(access_token, token_type):
             return False, '{}은 필수정보입니다. 정보제공에 동의해주세요.'.format(profile)
 
     return True, profiles
-      
+
+def get_kakao_profile(access_token, token_type):
+    is_success, _profiles = get_profile(access_token, token_type, 'kakao')
+
+    if not is_success:
+        return False, _profiles
+
+    foo = _profiles.get('kakao_account')
+    bar = foo.get('profile')
+
+    profiles = {
+        'email': foo.get('email'),
+        'nickname': bar.get('nickname'),
+        'thumbnail_image_url': bar.get('thumbnail_image_url'),
+        'id':  _profiles.get('id'),
+    }
+
+    for profile in kakao_scopes:
+        if profile not in profiles:
+            return False, '{}은 필수정보입니다. 정보제공에 동의해주세요.'.format(profile)
+
+    return True, profiles
+   
