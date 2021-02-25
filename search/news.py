@@ -331,7 +331,7 @@ def parse_news_sa(request):
     #     return HttpResponse() # 500     
 
 def _sensitive_analysis(news_token):
-    tr_path = settings.BASE_DIR + '/search/training/'
+    tr_path = str(settings.BASE_DIR) + '/search/training/'
 
     # with open(tr_path + 'train_docs.json') as f:
     #     train_docs = json.load(f)

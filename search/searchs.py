@@ -122,7 +122,7 @@ def parse_searchs(request, mode="begin"):
             )
             whereAssignee = (
                 like_where(params["assignee"],
-                            "출원인1") if params["assignee"] else ""
+                            "출원인token") if params["assignee"] else ""
             )
             whereOther = parse_Others(
                 params["dateType"],
@@ -138,7 +138,7 @@ def parse_searchs(request, mode="begin"):
 
         query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token, 전체항token FROM 공개공보 WHERE (' + \
             whereAll + ")"
-
+        # return HttpResponse(json.dumps(query, ensure_ascii=False))
         if mode == "query":  # mode가 query면 여기서 분기
             return query
 
@@ -467,7 +467,8 @@ def tsquery_keywords(keyword="", fieldName=""):
 
         if strKeyword.endswith(" & "):
             strKeyword = strKeyword[:-3]
-
+        if not strKeyword:
+            return None
         #  전문소 @@ plainto_tsquery('(A | B) & C')
         tsqueryType = "plainto_tsquery" if needPlainto else "to_tsquery"
         result = '"' + fieldName + "\" @@ " + \

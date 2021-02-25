@@ -1,7 +1,7 @@
 """techvisor URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/3.0/topics/http/urls/
+    https://docs.djangoproject.com/en/3.1/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -14,18 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path, include
-from django.views.decorators.csrf import csrf_exempt  # post일 경우 필요
-
-from callback.views import (redirect_google_login, google_callback)
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('search.urls')),
     path('', include('company.urls')),
     path('', include('users.urls')),
+    path('', include('users.callback.urls')),
     path('', include('bill.urls', namespace = 'bill')),
-
-    path("auth/google/login", redirect_google_login),
-    path("auth/google", google_callback),    
 ]

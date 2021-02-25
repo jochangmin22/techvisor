@@ -159,7 +159,7 @@ def update_today_crawl_mdcline():
     ''' 2021년부터 이상하게 바뀐 api 적용 '''
     foo = math.floor(get_mdcline_total_count() / 100)
 
-    for pageNo in [foo-1, foo]: # 누락방지위해 전 pageNo도 크롤
+    for pageNo in [foo, foo+1]: # 누락방지위해 전 pageNo도 크롤 ex. 8438 -> pageNo 84, 85
         df = crawl_mdcline(pageNo)
 
         if not df.empty:
