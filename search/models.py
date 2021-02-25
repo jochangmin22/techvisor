@@ -43,6 +43,3 @@ class Listed_corp(models.Model):
     
     class Meta:
         db_table = '"listed_corp"'
-
-
-    

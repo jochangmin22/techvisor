@@ -670,6 +670,7 @@ def handleRedis(redisKey, keys, data="", mode="r"):
         return JsonResponse(data, safe=False)
     return
 
+######################### 여기부분 사용 #########################
 def _parse_typo(xmlStr=""):
     """ 오타 정리 """
     xmlStr = re.sub(r"<EMIID=", "<EMI ID=", xmlStr)  # tag 오타
@@ -733,7 +734,7 @@ def abstract_type(bs, startTag, nextTag, keywordTag):
 
     return my_abstract, my_keyword
 
-
+######################### 여기부분 사용 #########################
 def parse_claims(request, xmlStr="", appNo=""):
     """ 비정형 청구항을 bs를 이용하여 처리 """
 

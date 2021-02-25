@@ -105,6 +105,10 @@ class Social_accounts(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        user_data = Users.objects.get(id = self.fk_user_id)
+        return user_data.data['email']
+
     class Meta:
         db_table = '"social_accounts"'     
         verbose_name_plural = "social_accounts"
