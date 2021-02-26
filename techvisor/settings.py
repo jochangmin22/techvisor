@@ -55,6 +55,7 @@ CORS_ORIGIN_WHITELIST = [
 
     "http://btowin.synology.me:3555",
     "http://btowin.synology.me:3666",
+    "http://btowin.synology.me:3888",
     "http://v.techvisor.co.kr:8001",
     "https://v.techvisor.co.kr",
     

@@ -7,6 +7,7 @@ urlpatterns = [
     re_path(r"^api/search-app/query/$", views.get_query, name='get_query'),
     re_path(r"^api/search-app/searchs/$", csrf_exempt(views.get_searchs), name='get_searchs'),
     re_path(r"^api/search-app/searchs/wordcloud$", csrf_exempt(views.get_wordcloud), name='get_wordcloud'),
+    re_path(r"^api/search-app/searchs/wordclouddialog$", csrf_exempt(views.get_wordcloud_dialog), name='get_wordcloud_dialog'),
     re_path(r"^api/search-app/searchs/vec$", csrf_exempt(views.get_vec), name='get_vec'),
     re_path(r"^api/search-app/searchs/news$", csrf_exempt(views.get_news), name='get_news'),
     re_path(r"^api/search-app/searchs/newssa$", csrf_exempt(views.get_news_sa), name='get_news_sa'),

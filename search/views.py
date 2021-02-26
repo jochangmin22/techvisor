@@ -61,6 +61,9 @@ def get_associate_corp(request):
 def get_wordcloud(request):
     return nlp.parse_wordcloud(request)
 
+def get_wordcloud_dialog(request):
+    return nlp.parse_wordcloud_dialog(request)    
+
 def get_vec(request):
     return nlp.parse_vec(request)
 

@@ -138,7 +138,8 @@ def similarity(abstract, modelType, absList = []):
     # df_row = new_df.to_json(orient="records")
 
 
-    result = df_sim.to_json(orient="records")
+    # result = df_sim.to_json(orient="records")
+    result = df_sim.to_json("records")
     parsed = json.loads(result)
     res = json.dumps(parsed, indent=4) 
     return res

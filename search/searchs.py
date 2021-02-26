@@ -94,6 +94,9 @@ def parse_searchs(request, mode="begin"):
         # 번호검색
         if 'searchNum' in params and params['searchNum']:
             whereAll = ""
+            # whereAll = "select 출원번호,type from kr_num_view where search::text like '%" + \
+            #     params['searchNum'].replace("-","") + "%'"
+
             # fields without "-"
             for value in ["출원번호", "공개번호", "등록번호"]:
                 whereAll += value + "::text like '%" + \
@@ -134,7 +137,7 @@ def parse_searchs(request, mode="begin"):
             whereAll = whereTermsAll + ("(" + whereInventor + ") and " if whereInventor else "") + (
                 "(" + whereAssignee + ") and " if whereAssignee else "") + whereOther
             if whereAll.endswith(" and "):
-                whereAll = whereAll[:-5]                  
+                whereAll = whereAll[:-5]
 
         query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token, 전체항token FROM 공개공보 WHERE (' + \
             whereAll + ")"

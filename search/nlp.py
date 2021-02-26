@@ -81,6 +81,71 @@ def parse_wordcloud(request):
 
     return HttpResponse(result)
 
+def parse_wordcloud_dialog(request):
+    """ 
+    전체목록에서 3가지 필터 (topic, category, category value)
+    """
+
+    _, subKey, params, subParams = get_redis_key(request)
+
+    # Redis {
+    sub_context = cache.get(subKey)    
+
+    try:
+        if sub_context['wordcloud_dialog']:
+            return JsonResponse(sub_context['wordcloud_dialog'], safe=False)
+    except:
+        pass        
+    # Redis }
+
+    # volume: '요약',
+    # unit: '구문', // '구문', '워드',
+    # output: 50,
+    # category: '기업별', // '국가별', '연도별', '기술별', '기업별'
+    # volume: '요약',
+    # unit: '구문', // '구문', '워드',
+    # output: 20,            
+
+    # if subParams['analysisOptions']['wordCloudOptions']['category'] == '연도별':
+    #     countField = 'left(출원일자,4)'
+    # elif subParams['analysisOptions']['wordCloudOptions']['category'] == '기술별':
+    #     countField = 'ipc요약'
+    # elif subParams['analysisOptions']['wordCloudOptions']['category'] == '기업별':
+    #     countField = '출원인1'
+
+    # if subParams['analysisOptions']['wordCloudOptions']['volume'] == '요약':
+    #     targetField = '요약token'
+    # elif subParams['analysisOptions']['wordCloudOptions']['volume'] == '청구항':
+    #     targetField = '전체항token'          
+
+    # if subParams['analysisOptions']['wordCloudOptions']['category'] == params['topic']:
+    #    whereTopic = '' # prevent from click on the category itself
+    # else:    
+    #     if ' ' in params['topic']:
+    #         val = re.sub(re.escape(' '), ' <1> ', params['topic'], flags=re.IGNORECASE)
+    #         whereTopic = ' and '+ targetField +' @@ to_tsquery(\'(' + val + ')\')'
+    #     else:
+    #         whereTopic = ' and '+ targetField +' like \'%' + params['topic'] + '%\'' 
+
+    # whereAll = whereTopic + ' and ' + countField + '= \'' + params['categoryValue'] + '\''
+
+    # 3가지 필터된 목록 구하기 
+    query = parse_searchs(request, mode="query")
+
+    with connection.cursor() as cursor:    
+        cursor.execute(query)
+        row = dictfetchall(cursor)
+
+    # Redis {
+    try:
+        sub_context['wordcloud_dialog'] = row
+        cache.set(subKey, sub_context, CACHE_TTL)
+    except:
+        pass        
+    # Redis }
+
+    return JsonResponse(row, safe=False)    
+
 def parse_vec(request):
     """ 빈도수 단어로 연관 단어 추출 (처음은 맨 앞단어로) """
     _, subKey, _, subParams = get_redis_key(request)
@@ -239,7 +304,7 @@ def parse_indicator(request):
     #     .to_dict('r'))    
 
     # 개별 등록건수 count
-    df = pd.DataFrame(d).loc[:,['출원인코드1','등록일자']]
+    df = pd.DataFrame(d).reindex(columns=['출원인코드1','등록일자'])
     df['출원인코드1'] = df['출원인코드1'].astype(str)
     # grantedList = (df[df.등록일자.notnull()]
     grantedList = (df
@@ -250,9 +315,9 @@ def parse_indicator(request):
 
 
     # 전체 row 의 등록건 출원번호 list
-    df = pd.DataFrame(d).loc[:,['출원번호','등록일자']]
+    df = pd.DataFrame(d).reindex(columns=['출원번호','등록일자'])
     # df = df[df.등록일자.notnull()].loc[:,['출원번호']].출원번호.astype(str).tolist()      
-    df = df.loc[:,['출원번호']].출원번호.astype(str).tolist()      
+    df = df.reindex(columns=['출원번호']).출원번호.astype(str).tolist()      
     total_granted = len(df) # get total_granted
 
   
@@ -271,7 +336,7 @@ def parse_indicator(request):
         total_citing = 0        
 
     # 출원인 groupby 출원번호 concat
-    df = pd.DataFrame(d).loc[:,['출원인1','출원인코드1','출원번호']]
+    df = pd.DataFrame(d).reindex(columns=['출원인1','출원인코드1','출원번호'])
     df['출원인코드1'] = df['출원인코드1'].astype(str)
     df['출원번호'] = df['출원번호'].astype(str)
     df = (df

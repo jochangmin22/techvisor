@@ -937,7 +937,7 @@ def parse_description(request, xmlStr=""):
         attrName = "n" if bs.find_all('p', {"n": True}) else ""
         # TODO : convert tabular tag to table tag - sample 1019970061654
         return description_type(bs, attrName, my_name, my_tag)
-    # TODO : 1019930701447 구분 태그없는 비정형 타입, 처리요망 (psdode)      
+    # TODO : 1019930701447 구분 태그없는 비정형 타입, 처리요망 (psdode) -- wips경우 구분안함     
     # TODO : 1019930700523 구분 태그없는 비정형 타입, 처리요망 (psdode)      
     # TODO : 1019900018250 구분 태그없는 비정형 타입, 처리요망 (sdode)      
     elif bs.find("psdode"):  # type psdode tag start
@@ -949,7 +949,7 @@ def parse_description(request, xmlStr=""):
             my_name = ["발명의 명칭","도면의 간단한 설명", "발명의 상세한 설명"]
             # my_tag = ["drdes", "invdes", "purinv", "bkgr", "tech", "config", "effect"]
             # my_tag = ["drdes", "", "", "bkgr", "tech", "config", "effect"]
-            my_tag = ["", ""]
+            my_tag = ["", "", ""]
             # 상위 제목 ; 내용 추출 안함 - invdes, purinv
 
         # p attribute 있는지 확인
