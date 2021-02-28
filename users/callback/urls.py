@@ -9,5 +9,7 @@ urlpatterns = [
     re_path(r"^api/auth/callback/naver", csrf_exempt(callback.naver_callback), name='naver_callback'),
     re_path(r"^api/auth/callback/kakao/login", csrf_exempt(callback.redirect_kakao_login), name='redirect_kakao_login'),
     re_path(r"^api/auth/callback/kakao", csrf_exempt(callback.kakao_callback), name='kakao_callback'),
+    re_path(r"^api/auth/callback/facebook/login", csrf_exempt(callback.redirect_facebook_login), name='redirect_facebook_login'),
+    re_path(r"^api/auth/callback/facebook", csrf_exempt(callback.facebook_callback), name='facebook_callback'),
     re_path(r"^api/auth/callback/token", csrf_exempt(callback.get_token), name='get_token'),
 ]

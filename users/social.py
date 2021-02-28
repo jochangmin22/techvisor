@@ -27,6 +27,7 @@ providers = settings.SOCIAL_LOGIN['provider']
 google_scopes = ['https://www.googleapis.com/auth/userinfo.email','openid','https://www.googleapis.com/auth/userinfo.profile']
 naver_scopes = ['id', 'email', 'name', 'profile_image', 'nickname']
 kakao_scopes = ['id', 'email', 'nickname', 'thumbnail_image_url']
+facebook_scopes = ['id', 'email', 'name', 'profile_picture']
 
 def verify_social(request):
     if request.method == 'POST':
@@ -261,6 +262,20 @@ def getSocialProfile(provider, access_token):
             'id':  profiles.get('id'),
         }
         return result
+
+    if provider == 'facebook':
+        token_type='Bearer'
+        is_success, profiles = get_facebook_profile(access_token, token_type)
+        if not is_success:
+            return False, profiles
+
+        result = {
+            'email': profiles.get('email'),
+            'name': profiles.get('nickname'),
+            'thumbnail': profiles.get('thumbnail_image_url'),
+            'id':  profiles.get('id'),
+        }
+        return result
  
 def get_profile(access_token, token_type='Bearer', provider='naver'):
         res = requests.get(providers[provider]['profile_uri'], headers={'Authorization': '{} {}'.format(token_type, access_token)}).json()
@@ -271,6 +286,11 @@ def get_profile(access_token, token_type='Bearer', provider='naver'):
             else:
                 return True, res.get('response')  
         elif provider == 'kakao': 
+            if res.get('id'):
+                return True, res
+            else:
+                return False, res.get('message')
+        elif provider == 'facebook': 
             if res.get('id'):
                 return True, res
             else:
@@ -306,6 +326,28 @@ def get_kakao_profile(access_token, token_type):
     }
 
     for profile in kakao_scopes:
+        if profile not in profiles:
+            return False, '{}은 필수정보입니다. 정보제공에 동의해주세요.'.format(profile)
+
+    return True, profiles
+
+def get_facebook_profile(access_token, token_type):
+    is_success, _profiles = get_profile(access_token, token_type, 'facebook')
+
+    if not is_success:
+        return False, _profiles
+
+    foo = _profiles.get('facebook_account')
+    bar = foo.get('profile')
+
+    profiles = {
+        'email': foo.get('email'),
+        'nickname': bar.get('nickname'),
+        'thumbnail_image_url': bar.get('thumbnail_image_url'),
+        'id':  _profiles.get('id'),
+    }
+
+    for profile in facebook_scopes:
         if profile not in profiles:
             return False, '{}은 필수정보입니다. 정보제공에 동의해주세요.'.format(profile)
 
