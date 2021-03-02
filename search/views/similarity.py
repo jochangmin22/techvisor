@@ -12,7 +12,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import random
 
-from .utils import dictfetchall, remove_tags, remove_brackets, remove_punc
+from ..utils import dictfetchall, remove_tags, remove_brackets, remove_punc
 
 
 # from .utils import get_redis_key, dictfetchall

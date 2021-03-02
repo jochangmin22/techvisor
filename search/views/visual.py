@@ -1,8 +1,8 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
-from .searchs import parse_searchs, parse_nlp
+from .searchs import get_searchs, get_nlp
 import pandas as pd
-from .utils import get_redis_key, dictfetchall
+from ..utils import get_redis_key, dictfetchall
 from operator import itemgetter
 import json
 
@@ -14,7 +14,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 
-def applicant_classify(request):
+def get_applicant_classify(request):
     """ 출원인 주체별 구분 """
 
     _, subKey, _, _ = get_redis_key(request)
@@ -29,7 +29,7 @@ def applicant_classify(request):
         pass
     # Redis }    
 
-    d = parse_searchs(request, mode="classify")
+    d = get_searchs(request, mode="classify")
 
     if not d:
         return HttpResponse(json.dumps(d, ensure_ascii=False))

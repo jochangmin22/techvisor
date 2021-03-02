@@ -10,9 +10,9 @@ from konlpy.tag import Mecab
 from django.http import JsonResponse
 from django.http import HttpResponse
 
-from .models import Listed_corp
+from ..models import Listed_corp
 
-from .utils import get_redis_key
+from ..utils import get_redis_key
 
 # caching with redis
 from django.core.cache import cache
@@ -42,7 +42,7 @@ def clean_keyword(keyword):
     res = re.sub(' and| or| adj[0-9]| near[0-9]|[\(\)]|["]| \\(@.*?\)|.AP|.INV|.CTRY|.LANG| \\(.*?\).STAT| \\(.*?\).TYPE', '', keyword, flags=re.IGNORECASE)
     return res 
 
-def parse_news(request, mode="needJson"): # mode : needJson, noJson
+def get_news(request, mode="needJson"): # mode : needJson, noJson
     """ 쿼리 실행 및 결과 저장 """
     # redis key
     mainKey, _, params, _ = get_redis_key(request)
@@ -111,7 +111,7 @@ def parse_news(request, mode="needJson"): # mode : needJson, noJson
         return JsonResponse("Error Code:" + rescode, safe=False)
         # print("Error Code:" + rescode)    
 
-def parse_news_nlp(request, mode="needJson"):
+def get_news_nlp(request, mode="needJson"):
     """ 
     news title description tokenization 
     returns a list of NNP nouns
@@ -136,7 +136,7 @@ def parse_news_nlp(request, mode="needJson"):
         pass        
     
     # no
-    news = parse_news(request, mode="noJson")    
+    news = get_news(request, mode="noJson")    
     news_nlp = ""
     if news:
         for i in range(len(news)):
@@ -165,73 +165,8 @@ def parse_news_nlp(request, mode="needJson"):
     elif mode == "noJson":
         return news_nlp        
 
-# def parse_related_company(request, mode="needJson"):
-#     ''' search news_nlp list in discloure db '''
 
-#     # redis key
-#     mainKey, _, _, _ = get_redis_key(request)
-
-#     mainKey += "news"
-#     # is there data in Redis
-#     context = cache.get(mainKey)     
-
-#     # yes
-#     try:
-#         if context['company']:
-#             if mode == "needJson":
-#                 return JsonResponse(context['company'], safe=False)
-#             else:
-#                 return context['company']            
-#     except:
-#         pass        
-    
-#     # no
-#     news = parse_news(request, mode="noJson")
-#     news_nlp = parse_news_nlp(request, mode="noJson")
-
-#     # redis save {
-#     new_context = {}
-#     new_context['news'] = news
-#     new_context['news_nlp'] = news_nlp
-#     cache.set(mainKey, new_context, CACHE_TTL)
-#     # redis save }       
-    
-#     unique_news_nlp= remove_duplicate(news_nlp)
-    
-#     try:
-#         isExist = Disclosure.objects.filter(corp_name__in=unique_news_nlp).exists()
-#         if not isExist:
-#             return HttpResponse('Not Found', status=404)
-#         EXCLUDE_COMPANY_NAME = getattr(settings, 'EXCLUDE_COMPANY_NAME')
-
-#         disClosure = Disclosure.objects.filter(corp_name__in=unique_news_nlp).exclude(corp_name__in=EXCLUDE_COMPANY_NAME)
-#         myCorpName = list(disClosure.values_list('corp_name', flat=True).order_by('-stock_code','corp_name'))[:10]
-#         myCorpCode = list(disClosure.values_list('corp_code', flat=True).order_by('-stock_code','corp_name'))[:10]
-#         myStockCode = list(disClosure.values_list('stock_code', flat=True).order_by('-stock_code','corp_name'))[:10]
-
-#         response = { 'corpName': myCorpName, 'corpCode' : myCorpCode, 'stockCode': myStockCode}
-
-#         # redis update before leave {
-#         new_context['company'] = response
-#         cache.set(mainKey, new_context, CACHE_TTL)
-#         # redis update before leave }  
-
-#         return JsonResponse(response, status=200, safe=False)
-#     except:
-#         return HttpResponse() # 500        
-#     # select * from table where value ~* 'foo|bar|baz';
-
-#     # ob_list = data.objects.filter(name__in=my_list)
-
-#     # # redis save {
-#     # new_context = {}
-#     # new_context['news'] = news
-#     # new_context['news_nlp'] = news_nlp
-#     # cache.set(mainKey, new_context, CACHE_TTL)
-#     # # redis save }            
-#     # return JsonResponse(news_nlp, safe=False)   
-#  
-def parse_related_company(request, mode="needJson"):
+def get_related_company(request, mode="needJson"):
     ''' search news_nlp list in discloure db '''
 
     # redis key
@@ -252,8 +187,8 @@ def parse_related_company(request, mode="needJson"):
         pass        
     
     # no
-    news = parse_news(request, mode="noJson")
-    news_nlp = parse_news_nlp(request, mode="noJson")
+    news = get_news(request, mode="noJson")
+    news_nlp = get_news_nlp(request, mode="noJson")
 
     # redis save {
     new_context = {}
@@ -298,7 +233,7 @@ def parse_related_company(request, mode="needJson"):
     # # redis save }            
     # return JsonResponse(news_nlp, safe=False)    
 
-def parse_news_sa(request): 
+def get_news_sa(request): 
     """ sensitive analysis whether news articles are positive or negative """
     """ ./trainning/mostcommon.txt, model.json, model.h5 """
 
@@ -310,7 +245,7 @@ def parse_news_sa(request):
     # context = cache.get(mainKey)     
 
     # yes
-    news= parse_news(request, mode="noJson")
+    news= get_news(request, mode="noJson")
 
     token = ''
     if news:

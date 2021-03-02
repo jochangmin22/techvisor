@@ -6,8 +6,8 @@ import operator
 from operator import itemgetter
 from gensim.models import Word2Vec
 from gensim.models import FastText
-from .searchs import parse_searchs, parse_nlp
-from .utils import get_redis_key, dictfetchall
+from .searchs import get_searchs, get_nlp
+from ..utils import get_redis_key, dictfetchall
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
@@ -22,7 +22,7 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 KIPRIS = settings.KIPRIS
 
-def parse_wordcloud(request):
+def get_wordcloud(request):
     """ wordcloud 관련 기능 """
 
     _, subKey, _, subParams = get_redis_key(request)
@@ -44,7 +44,7 @@ def parse_wordcloud(request):
         unitNumber = 50        
 
     try:  # handle NoneType error
-        taged_docs = parse_nlp(request, analType="wordCloud")
+        taged_docs = get_nlp(request, analType="wordCloud")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
             return HttpResponse( "[]", content_type="text/plain; charset=utf-8")
@@ -81,7 +81,7 @@ def parse_wordcloud(request):
 
     return HttpResponse(result)
 
-def parse_wordcloud_dialog(request):
+def get_wordcloud_dialog(request):
     """ 
     전체목록에서 3가지 필터 (topic, category, category value)
     """
@@ -130,7 +130,7 @@ def parse_wordcloud_dialog(request):
     # whereAll = whereTopic + ' and ' + countField + '= \'' + params['categoryValue'] + '\''
 
     # 3가지 필터된 목록 구하기 
-    query = parse_searchs(request, mode="query")
+    query = get_searchs(request, mode="query")
 
     with connection.cursor() as cursor:    
         cursor.execute(query)
@@ -146,7 +146,7 @@ def parse_wordcloud_dialog(request):
 
     return JsonResponse(row, safe=False)    
 
-def parse_vec(request):
+def get_vec(request):
     """ 빈도수 단어로 연관 단어 추출 (처음은 맨 앞단어로) """
     _, subKey, _, subParams = get_redis_key(request)
 
@@ -179,7 +179,7 @@ def parse_vec(request):
 
     #///////////////////////////////////
     try:  # handle NoneType error
-        taged_docs = parse_nlp(request, analType="keywords")
+        taged_docs = get_nlp(request, analType="keywords")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         tuple_taged_docs = tuple(taged_docs)  # list to tuble
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
@@ -268,7 +268,7 @@ def parse_vec(request):
 
     return HttpResponse(json.dumps(result, ensure_ascii=False))
 
-def parse_indicator(request):
+def get_indicator(request):
     """ 지표분석, 출원인 CPP, PFS 추출 """
 
     _, subKey, _, _ = get_redis_key(request)
@@ -283,7 +283,7 @@ def parse_indicator(request):
         pass
     # Redis }    
 
-    d = parse_searchs(request, mode="indicator")
+    d = get_searchs(request, mode="indicator")
 
     if not d:
         return HttpResponse(json.dumps(d, ensure_ascii=False))
@@ -304,7 +304,7 @@ def parse_indicator(request):
     #     .to_dict('r'))    
 
     # 개별 등록건수 count
-    df = pd.DataFrame(d).reindex(columns=['출원인코드1','등록일자'])
+    df = pd.DataFrame(d).reindex(columns=['출원인코드1','등록일'])
     df['출원인코드1'] = df['출원인코드1'].astype(str)
     # grantedList = (df[df.등록일자.notnull()]
     grantedList = (df
@@ -315,7 +315,7 @@ def parse_indicator(request):
 
 
     # 전체 row 의 등록건 출원번호 list
-    df = pd.DataFrame(d).reindex(columns=['출원번호','등록일자'])
+    df = pd.DataFrame(d).reindex(columns=['출원번호','등록일'])
     # df = df[df.등록일자.notnull()].loc[:,['출원번호']].출원번호.astype(str).tolist()      
     df = df.reindex(columns=['출원번호']).출원번호.astype(str).tolist()      
     total_granted = len(df) # get total_granted
@@ -465,28 +465,3 @@ def parse_indicator(request):
 
     # return HttpResponse(json.dumps(result, ensure_ascii=False))
     return JsonResponse(result, safe=False)
-
-
-def get_citingInfo(appNo):
-    ''' kipris api에서 출원번호에 대한 피인용수 가져오기 '''
-
-    # 피인용 REST ; 추후 bulk 신청 필요
-    serviceParam = 'CitingService/'
-    operationKey = 'citingInfo'
-    url = KIPRIS['rest_url'] + serviceParam + operationKey + '?standardCitationApplicationNumber=' + appNo + '&accessKey=' + KIPRIS['service_key']
-    # url = "http://plus.kipris.or.kr/openapi/rest/CitingService/citingInfo?standardCitationApplicationNumber=1019470000187&accessKey=" + KIPRIS['service_key']
-    # return JsonResponse(url, safe=False)
-    html = requests.get(url)
-    soup = BeautifulSoup(html.content, 'xml')        
-    bs = soup.find_all(operationKey)
-
-    result = 0          
-    if bs:
-        for bs1 in bs:
-            if bs1:
-                try:
-                    bs1.find("ApplicationNumber").get_text()
-                    result += 1
-                except:
-                    pass                    
-    return result

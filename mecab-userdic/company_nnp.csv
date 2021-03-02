@@ -1,0 +1,7 @@
+삼성전자,1786,3545,1897,NNP,인명,F,삼성전자,Compound,NNP,NNG,삼성/NNP/인명+전자/NNG/*
+삼성전자주식회사,1786,3545,3897,NNP,인명,F,삼성전자주식회사,Compound,NNP,NNG,삼성전자/NNP/인명+주식회사/NNG/*
+삼성전기,1786,3545,1269,NNP,인명,F,삼성전기,Compound,NNP,NNG,삼성/NNP/인명+전기/NNG/*
+현대자동차,1786,3545,3364,NNP,*,F,현대자동차,Compound,NNP,NNG,현대/NNP/인명+자동차/NNG/*
+현대자동차주식회사,1786,3545,5364,NNP,인명,F,현대자동차주식회사,Compound,NNP,NNG,현대자동차/NNP/인명+주식회사/NNG/*
+기아자동차,1786,3545,3909,NNP,*,F,기아자동차,Compound,NNP,NNG,기아/NNP/인명+자동차/NNG/*
+기아자동차주식회사,1786,3545,5909,NNP,인명,F,기아자동차주식회사,Compound,NNP,NNG,기아자동차/NNP/인명+주식회사/NNG/*

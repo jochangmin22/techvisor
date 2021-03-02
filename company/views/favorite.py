@@ -3,7 +3,7 @@ import json
 
 from users.models import Users
 
-def toggle_starred(request):
+def toggle_searchs_starred(request):
 	if request.method == 'POST':
 		data = json.loads(request.body.decode('utf-8'))
 		received_user_id = data["userId"]
@@ -17,7 +17,7 @@ def toggle_starred(request):
 		user_query.save()
 	return JsonResponse( user_query.data['starred'], status = 200, safe = False)
 
-def set_starred(request):
+def set_searchs_starred(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_user_id = data["userId"]
@@ -27,7 +27,7 @@ def set_starred(request):
         user_query.save()
     return JsonResponse( user_query.data['starred'], status = 200, safe = False)
 
-def set_unstarred(request):
+def set_searchs_unstarred(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         received_user_id = data["userId"]
@@ -56,19 +56,6 @@ def update_searchs_labels(request):
         for labelId in received_deselected:
             d = next(item for key, item in user_labels.items() if key == labelId)
             d['searchIds'] = list(set(d['searchIds']) - set(received_search_ids)) 
-
-        ### list version 
-        # row = user_query.data['labels']
-        # row = list(row)
-        # user_labels = row if row else {}
-        
-        # for labelId in received_selected:
-        #     d = next(item for item in user_labels if item['id'] == labelId)
-        #     d['searchIds'] = list(set(received_search_ids + d['searchIds']))
-
-        # for labelId in received_deselected:
-        #     d = next(item for item in user_labels if item['id'] == labelId)
-        #     d['searchIds'] = list(set(d['searchIds']) - set(received_search_ids)) 
 
         user_query.data['labels'] = user_labels
         user_query.save()
@@ -135,28 +122,6 @@ def update_filters(request):
 
         user_query = Users.objects.get(id = received_user_id)
         
-        # for key, value in received_filters.items():
-        #     user_query.data['filters'].update({
-        #         key : value
-        #     })
         user_query.data['filters'] = received_filters        
         user_query.save()
         return JsonResponse( user_query.data['filters'], status = 200, safe = False)
-
-# def update_trash(request):
-#     if request.method == 'POST':
-#         data = json.loads(request.body.decode('utf-8'))
-#         received_user_id = data["userId"]
-#         received_trash_list = data["searchIds"]
-
-#         user_query = Users.objects.get(id = received_user_id)            
-
-#         for trash in set(received_trash_list):
-#             if trash in user_query.data['trashed']:
-#                 user_query.data['trashed'].remove(trash) 
-            
-#             else:
-#                 user_query.data['trashed'].append(trash)
-		
-#         user_query.save()
-#     return JsonResponse( user_query.data['trashed'], status = 200, safe = False )

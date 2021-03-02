@@ -26,9 +26,9 @@ import requests
 from copy import deepcopy
 import json
 
-from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc, like_parse, str2int, str2round
+from ..utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc, like_parse, str2int, str2round
 from .crawler import crawl_stock
-from .models import Nice_corp, Stock_quotes, Stock_split, Mdcin_clinc_test_info, Financial_statements
+from ..models import Nice_corp, Stock_quotes, Stock_split, Mdcin_clinc_test_info, Financial_statements
 from search.models import Listed_corp, Disclosure
 
 # caching with redis
@@ -239,101 +239,11 @@ def trash_searchs(request):
 
     return JsonResponse(result, safe=False)
 
-def parse_companies(request, mode="begin"): # mode : begin, nlp, query
-
-
-    mainKey, _, params, _ = get_redis_key(request)
-
-    context = cache.get(mainKey)
-
-    if mode == "begin":
-        try:
-            if context['raw']:
-                return JsonResponse(context['raw'], safe=False)
-        except:
-            pass  
-
-    with connection.cursor() as cursor:
-
-        # 번호검색
-        if 'searchNum' in params and params['searchNum']:
-            whereAll = ""
-            # fields without "-"
-            for value in ["종목코드"]:
-                whereAll += value + "::text like '%" + \
-                    params["searchNum"].replace("-","") + "%' or "
-
-            if whereAll.endswith(" or "):
-                whereAll = whereAll[:-4]            
-            whereAll += ')'            
-        # 키워드 검색
-        else:
-            if (params["searchText"] == 'all'):
-                whereAll = "1=1)"
-            else:
-                whereAll = like_parse(params["searchText"]) if params["searchText"] else ""
-            # whereAll = like_parse_nice(params["searchText"]) if params["searchText"] else ""
-
-        # query = 'SELECT * FROM nice_corp WHERE (' + \
-        query = 'SELECT * FROM listed_corp WHERE (' + \
-            whereAll # + ")"
-
-        if mode == "query": # mode가 query면 여기서 분기
-            return query
-
-        cursor.execute(
-            "SET work_mem to '100MB';"
-            + query
-        )
-        result = dictfetchall(cursor)
-
-    # if result:
-    #     for i in range(len(result)):
-    #         del result[i]["요약token"]
-    #         del result[i]["전체항token"]
-
-    # all entries
-    # entriesToRemove = ('BPS(원)','EPS(원)','PBR(배)','PER(배)','PER갭(%)','ROA(%)','ROE(%)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','대표자명','매출액','발행주식수(보통주)','부채비율','부채총계','적정가','상장일','수익률','순이익증감(전전)','순이익증감(직전)','시가총액','업종','업종PER(배)','영업이익','영업이익증감(전전)','영업이익증감(직전)','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-rim','적(5)당기순이익*PER','종목코드','종업원수','주요제품','지역','추천매수가','현재가','홈페이지','회사명')
-    # entriesToRemove = ('BPS(원)','갭1','갭2','갭3','갭4','갭5','거래량','결산월','기대수익률','기업가치(백만)','당기순이익','매출액','발행주식수(보통주)','부채총계','상장일','수익률','영업이익','자본총계','자본총계(지배)','자산총계','적(1)PER*EPS','적(2)ROE*EPS','적(3)EPS*10','적(4)s-rim','적(5)당기순이익*PER','종업원수','추천매수가')
-    if result:
-        # res = deepcopy(res)
-        for i in range(len(result)):
-            data = json.loads(result[i]['정보']) # move position each fields of 정보 json to main fields
-            for key, value in data.items():
-                result[i].update({key: value})
-
-            # data = json.loads(result[i]['적정'])
-            # for key, value in data.items():
-            #     result[i].update({key: value})                
-
-            del result[i]['정보']
-            # del result[i]['적정'] 
-
-            # for k in entriesToRemove:
-            #     result[i].pop(k, None)       
-
-
-    # redis 저장 {
-    new_context = {}
-    # new_context['nlp_raw'] = nlp_raw
-    # new_context['mtx_raw'] = mtx_raw
-    new_context['raw'] = result
-
-    cache.set(mainKey, new_context, CACHE_TTL)
-    # redis 저장 }
-
-    if mode == "begin":
-        return JsonResponse(result, safe=False)
-    # elif mode == "nlp":
-    #     return nlp_raw
-    # elif mode =="matrix":
-    #     return mtx_raw        
-
-def parse_query(request):
+def get_query(request):
     """ 쿼리 확인용 """
-    return HttpResponse(parse_companies(request, mode="query"), content_type="text/plain; charset=utf-8")
+    return HttpResponse(get_companies(request, mode="query"), content_type="text/plain; charset=utf-8")
 
-def parse_financial_info(request):
+def get_financial_info(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         stockCode = data['stockCode']
@@ -354,7 +264,7 @@ def parse_financial_info(request):
 
     return JsonResponse(result, safe=False)    
 
-def parse_stock(request):
+def get_stock(request):
     """ stock quote """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))

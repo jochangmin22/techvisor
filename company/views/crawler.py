@@ -39,9 +39,9 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 from search.models import Listed_corp
-from .models import Disclosure_report, Stock_quotes, Mdcin_clinc_test_info
+from ..models import Disclosure_report, Stock_quotes, Mdcin_clinc_test_info
 
-from .utils import str2int, str2round
+from ..utils import str2int, str2round
 
 DART = settings.DART
 MFDS = settings.MFDS
@@ -118,43 +118,7 @@ def crawl_disclosure_report(**kwargs):
         return 0, df # TODO
 
 
-# def update_today_crawl_mdcline():
-
-#     mdcinClinc = Mdcin_clinc_test_info.objects.latest('승인일', '승인일')
-#     start = mdcinClinc.승인일
-
-#     end = datetime.today().strftime('%Y-%m-%d')    
-#     # today = datetime.today()
-#     # today = today + timedelta(days=0)
-#     # today = today.strftime('%Y%m%d')
-
-#     data = str(start)
-#     start_dt = date(int(data[0:4]), int(data[5:7]), int(data[8:10]))
-
-#     data = str(end)
-#     end_dt = date(int(data[0:4]), int(data[5:7]), int(data[8:10]))
-
-#     for dt in daterange(start_dt, end_dt):
-#         my_date = dt.strftime("%Y%m%d")  
-#         totalCount, df = crawl_mdcline(singleDate=my_date)
-
-#         if totalCount == 0:
-#             continue
-
-#         if not df.empty:
-#             engine = create_engine(db_connection_url)
-#             df.to_sql(name='mdcin_clinc_test_info_temp', con=engine, if_exists='replace')
-#             # note : need CREATE EXTENSION pgcrypto; psql >=12 , when using gen_random_uuid (),
-#             with engine.begin() as cn:
-#                 sql = """INSERT INTO mdcin_clinc_test_info (id, 신청자, 승인일, 제품명, 시험제목, 연구실명, 임상단계)
-#                             SELECT gen_random_uuid (), t.신청자, t.승인일::date, t.제품명, t.시험제목, t.연구실명, t.임상단계 
-#                             FROM mdcin_clinc_test_info_temp t
-#                             WHERE NOT EXISTS 
-#                                 (SELECT 1 FROM mdcin_clinc_test_info f
-#                                 WHERE t.신청자 = f.신청자 and t.승인일::date = f.승인일 and t.제품명 = f.제품명 and t.임상단계 = f.임상단계)"""
-#                 cn.execute(sql) 
-#     return
-                                            
+                                  
 def update_today_crawl_mdcline():
     ''' 2021년부터 이상하게 바뀐 api 적용 '''
     foo = math.floor(get_mdcline_total_count() / 100)
@@ -208,39 +172,7 @@ def crawl_mdcline(pageNo):
 
     df = pd.DataFrame(rawdata)            
     return df    
-# def crawl_mdcline(singleDate):
-#     ''' 임상정보 크롤링'''
-#     # 2021년이후 stdt이 안먹힘 totalCount / numOfRows ex) 8434 / 100 = 84를 pageNo에 넣어 최신 정보 얻게 고침
-#     pageNo = get_mdcline_lastest_no() / 100
-
-#     # try:
-#     html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=100&pageNo=84&stdt=" + str(singleDate)) #, timeout=10)
-#     # except requests.exceptions.Timeout: # 결과 없는 경우나 시간이 길어지면 stop
-#         # return 0, {}
-
-#     soup = BeautifulSoup(html.content, 'lxml')
-#     totalCount = soup.find("totalcount").get_text()
-#     if totalCount == '0':  # 결과 없으면
-#         return 0, {}
-#     items = ['apply_entp_name','approval_time','goods_name','lab_name','clinic_exam_title','clinic_step_name']
-#     item_names = ['신청자','승인일','제품명','연구실명','시험제목','임상단계']
-
-#     data = soup.find_all("item")
-#     rawdata = []
-#     for d in data:
-#         if d:
-#             res = {}
-#             for (idx, key) in enumerate(items):
-#                 if key == 'approval_time':
-#                     foo = d.find(key).get_text()
-#                     res[item_names[idx]] = foo[:-9]
-#                 else:                    
-#                     res[item_names[idx]] = d.find(key).get_text()
-
-#             rawdata.append(res)    
-
-#     df = pd.DataFrame(rawdata)            
-#     return totalCount, df    
+  
 
 def get_mdcline_total_count():
     ''' totalCount로 마지막 pageNo 얻기 '''
@@ -249,7 +181,7 @@ def get_mdcline_total_count():
     result = int(soup.find("totalcount").get_text())
     return result
 
-def crawl_stock_search_top():
+def get_stock_search_top(request):
     ''' 네이버 금융 > 국내증시 > 검색상위 종목'''
     df = pd.read_html(NAVER['stock_search_top_url'], match = '종목명', header=0, encoding = 'euc-kr')[0]
 
@@ -272,7 +204,7 @@ def crawl_stock_search_top():
 
     return JsonResponse(result, safe=False)
 
-def crawl_stock_upper():
+def get_stock_upper(request):
     ''' 네이버 금융 > 국내증시 > 상한가  + 상승'''
     result = []
     # 상한가
@@ -344,7 +276,7 @@ def crawl_stock_upper():
 
     return JsonResponse(result, safe=False)    
 
-def crawl_stock_lower():
+def get_stock_lower(request):
     ''' 네이버 금융 > 국내증시 > 하한가  + 하락'''
     result = []
     # 하한가
@@ -414,7 +346,6 @@ def crawl_stock_lower():
     result = sorted(result, key=lambda k : k["등락률"])
 
     return JsonResponse(result, safe=False)    
-
 
 def get_stockCode(corpName):
     listed = Listed_corp.objects.filter(회사명=corpName)

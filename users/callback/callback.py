@@ -30,8 +30,12 @@ def get_token(request):
     key = data['key']
     type = data['type']
 
-    result = { 'token' : handleRedis(key, type)}
-    return JsonResponse(result, safe=False)
+    token = handleRedis(key, type)
+    if token:
+        return JsonResponse({ 'token' : token}, safe=False)
+    else:
+        return JsonResponse({ 'message' : 'TOKEN_CANT_RECEIVED'}, status = 401, safe=False)
+        # return JsonResponse({'message': 'WRONG_TOKEN'}, status=401,safe=False) 
 
 def redirect_google_login(request):
     next = request.GET.get('next', '/landing')

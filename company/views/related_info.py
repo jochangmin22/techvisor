@@ -7,10 +7,10 @@ import json
 import operator
 from datetime import datetime
 
-from .utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase
+from ..utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase
 from .crawler import update_today_disclosure_report, update_today_crawl_mdcline
 
-from .models import Mdcin_clinc_test_info, Disclosure_report
+from ..models import Mdcin_clinc_test_info, Disclosure_report
 from search.models import Listed_corp, Disclosure
 
 
@@ -22,7 +22,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
 
-def clinic_test(request):
+def get_clinic_test(request):
     ''' If there is no corpName, the last 100 rows are displayed '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -150,7 +150,7 @@ def get_owned_patent(request, mode="begin"): # mode : begin, nlp
         elif mode == "nlp":
             return '', ''
 
-def parse_nlp(request, analType):
+def get_nlp(request, analType):
     """
        analType : wordCloud
     """
@@ -197,7 +197,7 @@ def parse_nlp(request, analType):
 
     return nlp_token                            
 
-def wordcloud(request):
+def get_wordcloud(request):
     _, subKey, _, subParams = get_redis_key(request)
 
     # Redis {
@@ -216,7 +216,7 @@ def wordcloud(request):
         unitNumber = 50        
 
     try:  # handle NoneType error
-        taged_docs = parse_nlp(request, analType="wordCloud")
+        taged_docs = get_nlp(request, analType="wordCloud")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
             return HttpResponse( "[]", content_type="text/plain; charset=utf-8")

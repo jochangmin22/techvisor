@@ -28,7 +28,7 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 # from itertools import repeat
 # for api }
 
-def parse_company(request, companyId=""):
+def get_company(request, companyId=""):
     """ searchDetails용 검색 """
     companyId = companyId.replace("-", "")
 
@@ -64,7 +64,7 @@ def parse_company(request, companyId=""):
         result = row[0]
 
         res = (
-            parse_claims(request, result["청구항"], result["출원번호"])
+            get_claims(request, result["청구항"], result["출원번호"])
             if result["청구항"] and result["청구항"] != "<SDOCL></SDOCL>"
             # else {"독립항수": 0, "종속항수": 0, "청구항들": []}
             else {"청구항종류": [], "청구항들": []}
@@ -75,7 +75,7 @@ def parse_company(request, companyId=""):
         del result['청구항'] # remove claims for memory save
 
         res = (
-            parse_abstract(request, result["초록"])
+            get_abstract(request, result["초록"])
             if result["초록"] and result["초록"] != "<SDOAB></SDOAB>"
             else {"초록": '', "키워드": ''}
         )
@@ -84,7 +84,7 @@ def parse_company(request, companyId=""):
 
         empty_res = {"기술분야": "", "배경기술": "", "해결과제": "", "해결수단": "", "발명효과": "", "도면설명": "", "발명의실시예": ""}
         res = (
-            parse_description(request, result["명세서"])
+            get_description(request, result["명세서"])
             if result["명세서"] and result["명세서"] != "<SDODE></SDODE>"
             else empty_res
         )
@@ -105,7 +105,7 @@ def parse_company(request, companyId=""):
     return JsonResponse(result, safe=False)
     # return HttpResponse(row, content_type="text/plain; charset=utf-8")
 
-def parse_company_quote(request, companyId=""):
+def get_company_quote(request, companyId=""):
     """ searchDetails용 인용 검색 """
     companyId = companyId.replace("-", "")
 
@@ -130,7 +130,7 @@ def parse_company_quote(request, companyId=""):
 
     return JsonResponse(result, safe=False)
 
-def parse_company_family(request, companyId=""):
+def get_company_family(request, companyId=""):
     """ searchDetails용 패밀리 검색 """
     companyId = companyId.replace("-", "")
     redisKey = companyId + "¶" # Add delimiter to distinguish from searchs's searchNum
@@ -153,7 +153,7 @@ def parse_company_family(request, companyId=""):
 
     return JsonResponse(result, safe=False)
 
-def parse_company_legal(request, companyId=""):
+def get_company_legal(request, companyId=""):
     """ searchDetails용 법적상태이력 검색 """
     companyId = companyId.replace("-", "")
     redisKey = companyId + "¶" # Add delimiter to distinguish from searchs's searchNum
@@ -175,7 +175,7 @@ def parse_company_legal(request, companyId=""):
 
     return JsonResponse(result, safe=False)
 
-def parse_company_registerfee(request, rgNo=""):
+def get_company_registerfee(request, rgNo=""):
     """ searchDetails용 등록료 검색 """
     rgNo = rgNo.replace("-", "")
     redisKey = rgNo + "¶" # Add delimiter to distinguish from searchs's searchNum
@@ -197,7 +197,7 @@ def parse_company_registerfee(request, rgNo=""):
 
     return JsonResponse(result, safe=False)
 
-def parse_company_rightfullorder(request, companyId=""):
+def get_company_rightfullorder(request, companyId=""):
     """ searchDetails용 권리순위 검색 """
     companyId = companyId.replace("-", "")
     redisKey = companyId + "¶" # Add delimiter to distinguish from searchs's searchNum
@@ -219,7 +219,7 @@ def parse_company_rightfullorder(request, companyId=""):
 
     return JsonResponse(result, safe=False)
 
-def parse_company_rightholder(request, rgNo=""):
+def get_company_rightholder(request, rgNo=""):
     """ searchDetails용 권리권자변동 검색 """
     rgNo = rgNo.replace("-", "")
     redisKey = rgNo + "¶" # Add delimiter to distinguish from searchs's searchNum
@@ -241,7 +241,7 @@ def parse_company_rightholder(request, rgNo=""):
 
     return JsonResponse(result, safe=False)
 
-def parse_company_applicant(request, cusNo=""):
+def get_company_applicant(request, cusNo=""):
     """ searchDetails용 출원인 법인, 출원동향, 보유기술 검색 """
     cusNo = cusNo.replace("-", "")    
     operationKey = 'corpBsApplicantInfo'
@@ -289,7 +289,7 @@ def parse_company_applicant(request, cusNo=""):
     return JsonResponse(result, safe=False)
 
        
-def parse_company_applicant_trend(request, cusNo=""):
+def get_company_applicant_trend(request, cusNo=""):
     """ searchDetails용 출원인 출원동향, 보유기술 검색 """
     cusNo = cusNo.replace("-", "")
     redisKey = cusNo + "¶" # Add delimiter to distinguish from searchs's searchNum
@@ -325,7 +325,7 @@ def handleRedis(redisKey, keys, result="", mode="r"):
         return JsonResponse(result, safe=False)        
     return    
 
-def _parse_typo(result=""): 
+def _get_typo(result=""): 
     """ 오타 정리 """
     result = re.sub(r"<EMIID=", "<EMI ID=", result)  # tag 오타
     result = re.sub(
@@ -339,9 +339,9 @@ def _parse_typo(result=""):
     result = re.sub(r".TIF<", '.TIF"><', result)  # FILE="kpo00001.TIF</P>
     return result
 
-def parse_abstract(request, xmlStr=""):
+def get_abstract(request, xmlStr=""):
 
-    xmlStr = _parse_typo(xmlStr) # typo   
+    xmlStr = _get_typo(xmlStr) # typo   
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
 
@@ -382,10 +382,10 @@ def abstract_type(bs, startTag, nextTag, keywordTag):
 
     return result_abstract, result_keyword
 
-def parse_claims(request, xmlStr="", appNo=""):
+def get_claims(request, xmlStr="", appNo=""):
     """ 비정형 청구항을 bs를 이용하여 처리 """
 
-    xmlStr = _parse_typo(xmlStr)  # typo
+    xmlStr = _get_typo(xmlStr)  # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
     # tree = elemTree.fromstring(xmlStr)
@@ -552,9 +552,9 @@ def claims_c_type(bs):
             result_claim_type.append(t_txt)
     return result_claim_type, result_claim
 
-def parse_description(request, xmlStr=""):
+def get_description(request, xmlStr=""):
 
-    xmlStr = _parse_typo(xmlStr)  # typo
+    xmlStr = _get_typo(xmlStr)  # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
 

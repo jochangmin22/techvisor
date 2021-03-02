@@ -9,8 +9,7 @@ from copy import deepcopy
 import json
 
 
-from .utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
-from .queries import number_search, string_search, like_applicant
+from ..utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
 # from .similarity import similarity
 
 # caching with redis
@@ -35,7 +34,7 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 # IPC요약(IPCM)
 # 출원인 대표명화 코드(WAP)
 
-def parse_searchs(request, mode="begin"):
+def get_searchs(request, mode="begin"):
     """ 쿼리 실행 및 결과 저장
         mode : begin, nlp, query, matrix, indicator
     """
@@ -84,65 +83,62 @@ def parse_searchs(request, mode="begin"):
         # 검색범위 선택
         try:
             if params['searchVolume'] == 'ALL':
-                searchVolume = '대'
+                searchVolume = 'search'
             elif params['searchVolume'] == 'SUMA':
-                searchVolume = '중'
+                searchVolume = 'search'
             elif params['searchVolume'] == 'SUM':
-                searchVolume = '소'
+                searchVolume = 'search'
         except:
-            searchVolume = '소'
+            searchVolume = 'search'
 
         # 번호검색
         if 'searchNum' in params and params['searchNum']:
-            query = number_search(params['searchNum'])
+            # whereAll = ""
+            whereAll = "num_search like '%" + \
+                params['searchNum'].replace("-","") + "%'"
 
-            if query.endswith(" UNION "):
-                query = query[:-7]
+        
         # 키워드 검색
         else: 
             # to_tsquery 형태로 parse
-            split_keywords, tsType = split_terms(params["searchText"])
-            whereTermsA = tsquery_keywords(split_keywords, tsType, '전문' + searchVolume)
-            
+            whereTermsA = tsquery_keywords(
+                params["searchText"], searchVolume, 'terms')
+
             # whereTermsB = like_where(params["searchText"], "출원인1")
             # 출원인 포함은 db 성능 개선하고 나중에
             # whereTermsAll = ("((" + whereTermsA + ") or " if whereTermsA else "") + ("("+ whereTermsB + ")) and " if whereTermsB else "")
-            # whereTermsAll = ("((" + whereTermsA + ")) and " if whereTermsA else "")
+            whereTermsAll = ("((" + whereTermsA + ")) and " if whereTermsA else "")
 
+            # whereInventor = (
+            #     like_where(params["inventor"],
+            #                 "발명자tsv") if params["inventor"] else ""
+            # )
+            # whereAssignee = (
+            #     like_where(params["assignee"],
+            #                 "출원인tsv") if params["assignee"] else ""
+            # )
             whereInventor = (
-                like_where(params["inventor"],
-                            "발명자1") if params["inventor"] else ""
+                tsquery_keywords(params["inventor"],
+                            "발명자tsv", "person") if params["inventor"] else ""
             )
             whereAssignee = (
-                like_where(params["assignee"],
-                            "출원인1") if params["assignee"] else ""
+                tsquery_keywords(params["assignee"],
+                            "출원인tsv", "person") if params["assignee"] else ""
             )
-
-            # whereInventor2 = (
-            #     like_query(params["inventor"],
-            #                 ["발명자1","발명자2"]) if params["inventor"] else ""
-            # )
-            # whereAssignee2 = (
-            #     like_query(params["assignee"],
-            #                ["출원인1","출원인2"]) if params["assignee"] else ""
-            # )
-            whereOther = parse_Others(
+            whereOther = get_Others(
                 params["dateType"],
                 params["startDate"],
                 params["endDate"],
                 params["status"],
                 params["ipType"],
             )
-
-            query = string_search(whereTermsA, whereInventor, whereAssignee, whereOther)  
-
-            # searchText에 .AP가 없으면 출원인 query 추가
-            if not ".AP" in params["searchText"]:
-                query += like_applicant(split_keywords) if split_keywords else ""
-
-            if query.endswith(" INTERSECT "):
-                query = query[:-11]
-
+            whereAll = whereTermsAll + ("(" + whereInventor + ") and " if whereInventor else "") + (
+                "(" + whereAssignee + ") and " if whereAssignee else "") + whereOther
+            if whereAll.endswith(" and "):
+                whereAll = whereAll[:-5]
+        query = 'select 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 초록, 청구항 FROM kr_text_view WHERE (' + \
+            whereAll + ")"
+            
         # return HttpResponse(json.dumps(query, ensure_ascii=False))
         if mode == "query":  # mode가 query면 여기서 분기
             return query
@@ -160,8 +156,8 @@ def parse_searchs(request, mode="begin"):
     mtx_raw = []
     ind_raw = []
     cla_raw = []
-    dropKeysMatrix = ('등록사항', '발명의명칭(국문)', '발명의명칭(영문)', '출원인코드1', '출원인국가코드1', '발명자1', '발명자국가코드1', '등록일자', '공개일자')
-    dropKeysIndicater = ('등록사항', '발명의명칭(국문)', '발명의명칭(영문)', '출원인국가코드1', '발명자1', '발명자국가코드1', '공개일자','ipc요약', '요약token', '전체항token')
+    dropKeysMatrix = ('등록사항', '발명의명칭', '출원인코드1', '출원인국가코드1', '발명자1', '발명자국가코드1', '등록일', '공개일')
+    dropKeysIndicater = ('등록사항', '발명의명칭', '출원인국가코드1', '발명자1', '발명자국가코드1', '공개일자','ipc코드', '초록', '청구항')
 
     if row:
         # copy
@@ -171,34 +167,34 @@ def parse_searchs(request, mode="begin"):
         # row and npl
         for i in range(len(row)):
             row[i]['id'] = row[i]['출원번호'] # add id key for FE's ids
-            raw_abstract += row[i]["요약token"] if row[i]["요약token"] else "" + " "
-            raw_claims += row[i]["전체항token"] if row[i]["전체항token"] else "" + " "                
+            raw_abstract += row[i]["초록"] if row[i]["초록"] else "" + " "
+            raw_claims += row[i]["청구항"] if row[i]["청구항"] else "" + " "                
 
-            # 전체항token과 요약token은 raw_abstract,raw_claims에 넘겨줬으므로 바로 제거 - row는 list of dictionaries 형태임
-            del row[i]["요약token"]
-            del row[i]["전체항token"]
+            # 청구항과 초록은 raw_abstract,raw_claims에 넘겨줬으므로 바로 제거 - row는 list of dictionaries 형태임
+            del row[i]["초록"]
+            del row[i]["청구항"]
 
         # matrix
         for i in range(len(mtx_raw)):
-            # matrix는 출원번호, 출원일자, 출원인1, ipc요약, 요약token, 전체항token만 사용
+            # matrix는 출원번호, 출원일자, 출원인1, ipc요약, 초록, 청구항만 사용
             for k in dropKeysMatrix:
                 mtx_raw[i].pop(k, None)
 
             # 출원년만 사용
-            mtx_raw[i]['출원일자'] = mtx_raw[i]['출원일자'][:-4]
+            mtx_raw[i]['출원일'] = mtx_raw[i]['출원일'][:-4]
 
         # indicator    
         for i in range(len(ind_raw)):
             # indicater는 ['출원번호','출원인코드1','출원인1','등록일자'] 만 사용
             for k in dropKeysIndicater:
                 ind_raw[i].pop(k, None)
-        ind_raw = [i for i in ind_raw if not (i['등록일자'] == None)] # 등록건만
+        ind_raw = [i for i in ind_raw if not (i['등록일'] == None)] # 등록건만
 
         # classify
         cla_raw = deepcopy(ind_raw)    
         for i in range(len(cla_raw)):
             # classify는 ['출원번호','출원인코드1','출원인1'] 만 사용
-            cla_raw[i].pop('등록일자', None)
+            cla_raw[i].pop('등록일', None)
 
     else:  # 결과값 없을 때 처리
         row = []
@@ -235,7 +231,7 @@ def parse_searchs(request, mode="begin"):
     elif mode == "classify":
         return cla_raw
 
-def parse_nlp(request, analType):
+def get_nlp(request, analType):
     """ 쿼리 실행 및 결과 저장
         analType : wordCloud, matrix, keywords
     """
@@ -253,7 +249,7 @@ def parse_nlp(request, analType):
     except:
         pass
 
-    raw_abstract, raw_claims = parse_searchs(request, mode="nlp")
+    raw_abstract, raw_claims = get_searchs(request, mode="nlp")
 
     nlp_raw = ''
     result = ''
@@ -332,66 +328,17 @@ def like_where(keyword="", fieldName=""):
     else:
         return result2 if result2 else ""
 
-def like_query(keyword="", fieldName=[]):
-    """ like query 생성 wih 컬럼복수 """
-    # A and F LIKE "%A%"
-    # A or B_C ; F LIKE '%A%' or F LIKE '%B C%'
-    # A and B_C ; F LIKE '%A%' and F LIKE '%B C%'
-    # A or B and not C ; F LIKE '%A%' or F LIKE '%B%' and F !'C'
-
-    if not keyword:
-        return ""
-
-    # 전체 조합에서 + 기준으로 like query 만들기
-    items = []
-    notItems = []
-    mylength = 1
-    # for val in re.split("(\\W+)", keyword): #  not a word (\w)
-    for val in re.split(r' and | or ', keyword):  # and | or
-        val = val.replace("_", " ")
-        if "not " in val or "-" in val:  # collect negative word
-            val = val.replace("-", "").replace("not ", "")
-            notItems.append(val)
-        else:
-            items.append(val)
-
-    temp = list(map("%".join, permutations(items, mylength)))
-
-    result = ""
-    for k in temp:
-        result += '"' + fieldName + "\" like '%" + k + "%' or "
-
-    if result.endswith(" or "):
-        result = result[:-4]
-
-    # append collect negative word
-    result2 = ""
-    # if not notItems:
-    temp2 = list(map("%".join, permutations(notItems, mylength)))
-
-    for k in temp2:
-        result2 += '"' + fieldName + "\" not like '%" + k + "%' and "
-
-    if result2.endswith(" and "):
-        result2 = result2[:-5]
-
-    # merge result
-    if result:
-        return ("(" + result + ") and " + result2) if result2 else result
-    else:
-        return result2 if result2 else ""        
-
-def parse_Others(dateType, startDate, endDate, status, ipType):
+def get_Others(dateType, startDate, endDate, status, ipType):
     result = ""
     if dateType:
         if dateType == 'PRD':
-            dateType = '우선권주장출원일자1'
+            dateType = '우선권주장출원일1'
         elif dateType == 'PD':
-            dateType = '공개일자'
+            dateType = '공개일'
         elif dateType == 'FD':
-            dateType = '등록일자'
+            dateType = '등록일'
         else:  # AD or else
-            dateType = '출원일자'
+            dateType = '출원일'
 
         if startDate and endDate:
             # result = " and ('["+ startDate+ ","+ endDate+ "]'::daterange @> "+ dateType+ ")"
@@ -444,32 +391,24 @@ def parse_Others(dateType, startDate, endDate, status, ipType):
 
     return result
 
-def tsquery_keywords(keywords, tsType, fieldName):
-    """ keyword 변환 => and, or, _, -, not, near, adj 를 tsquery 형식의 | & ! <1> 로 변경 """
-    # A+B;C_D => '("A" | "B") & "C D"'
-    # A or -B and C_D and not E => '(A !B) & "C D" & !E'
-    if keywords:
-        #  전문소 @@ plainto_tsquery('(A | B) & C')
-        result = '"' + fieldName + "\" @@ " + \
-            tsType + "('" + keywords + "')"
-    else:
-        result = None                
-    return result
-
-def split_terms(keyword=""):
+def tsquery_keywords(keyword="", fieldName="", mode="terms"):
     """ keyword 변환 => and, or, _, -, not, near, adj 를 tsquery 형식의 | & ! <1> 로 변경 """
     # A+B;C_D => '("A" | "B") & "C D"'
     # A or -B and C_D and not E => '(A !B) & "C D" & !E'
     if keyword and keyword != "":
         needPlainto = ""
-        result = ""  # unquote(keyword) # ; issue fix
+        strKeyword = ""  # unquote(keyword) # ; issue fix
 
         # for val in keyword.split(" AND "):
         for val in re.split(" and ", keyword, flags=re.IGNORECASE):  # case insentitive
             # continue if not terms
-            if val.startswith("(@") or val.endswith(".AP") or val.endswith(".INV") or val.endswith(".CRTY") or val.endswith(").LANG") or val.endswith(").STAT") or val.endswith(").TYPE"):
-                continue
-            result += "("  # not add paranthesis when above terms
+            if mode == 'terms':
+                if val.startswith("(@") or val.endswith(".AP") or val.endswith(".INV") or val.endswith(".CRTY") or val.endswith(").LANG") or val.endswith(").STAT") or val.endswith(").TYPE"):
+                    continue
+            elif mode == 'person':
+                if val.startswith("(@") or val.endswith(".CRTY") or val.endswith(").LANG") or val.endswith(").STAT") or val.endswith(").TYPE"):
+                    continue                
+            strKeyword += "("  # not add paranthesis when above terms
             # convert nagative - to !
             if val.startswith("-") or ' or -' in val:
                 val = val.replace("-", "!")
@@ -516,7 +455,7 @@ def split_terms(keyword=""):
                         strNear += "".join(str(v)) + " | "
                 if strNear.endswith(" | "):
                     strNear = strNear[:-3]
-                result += strNear
+                strKeyword += strNear
                 val = ""  # val clear
 
             # if " OR " in val:
@@ -525,24 +464,31 @@ def split_terms(keyword=""):
 
             # add paranthesis every terms block
 
-            result += (
+            strKeyword += (
                 needPlainto + "".join(str(val)) + needPlainto + ") & "
             )
-
-        tsType = "plainto_tsquery" if needPlainto else "to_tsquery"
-
-        result = result.replace(" AND ", needPlainto + " & ").replace(" OR ", needPlainto + " | ").replace(
+        strKeyword = strKeyword.replace(" AND ", needPlainto + " & ").replace(" OR ", needPlainto + " | ").replace(
             " and ", needPlainto + " & ").replace(" or ", needPlainto + " | ")  # .replace("_", " ")
 
-        if result.endswith(" & "):
-            result = result[:-3]
-            
+        if strKeyword.endswith(" & "):
+            strKeyword = strKeyword[:-3]
+        if not strKeyword:
+            return None
+        #  전문소 @@ plainto_tsquery('(A | B) & C')
+        tsqueryType = "plainto_tsquery" if needPlainto else "to_tsquery"
+        result = '"' + fieldName + "\" @@ " + \
+            tsqueryType + "('" + strKeyword + "')"
+        # result = '"' + fieldName + "\" @@ " + \
+        #     "to_tsquery('" + strKeyword + "')"
+        # result += ' or "' + fieldName + "\" @@ " + \
+        #     "plainto_tsquery('" + strKeyword + "')"             
+    else:
+        result = None
+    return result
 
-        return result, tsType          
-
-def parse_query(request):
+def get_query(request):
     """ 쿼리 확인용 """
-    return HttpResponse(parse_searchs(request, mode="query"), content_type="text/plain; charset=utf-8")
+    return HttpResponse(get_searchs(request, mode="query"), content_type="text/plain; charset=utf-8")
 
 raw_len_limit = 20000
 

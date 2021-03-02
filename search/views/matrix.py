@@ -1,11 +1,11 @@
 from django.db import connection
 from collections import Counter
 from django.http import JsonResponse, HttpResponse
-from .utils import get_redis_key, dictfetchall
+from ..utils import get_redis_key, dictfetchall
 import json
 import re
 
-from .searchs import parse_searchs, parse_nlp
+from .searchs import get_searchs, get_nlp
 
 # caching with redis
 from django.core.cache import cache
@@ -15,7 +15,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 
-def parse_matrix(request):
+def get_matrix(request):
     """ 
     토픽에 대한 국가별, 연도별, 기술별, 기업별 매트릭스
     1. topic, mtx_row 가져옴
@@ -36,9 +36,9 @@ def parse_matrix(request):
 
 
     # nlp_token, mtx_raw 가져오기
-    nlp_token = parse_nlp(request, analType="matrix")
+    nlp_token = get_nlp(request, analType="matrix")
 
-    mtx_raw = parse_searchs(request, mode="matrix")
+    mtx_raw = get_searchs(request, mode="matrix")
 
     # topic 가져오기
     try:
@@ -97,7 +97,7 @@ def parse_matrix(request):
 
     return JsonResponse(res, safe=False)
 
-def parse_matrix_dialog(request):
+def get_matrix_dialog(request):
     """ 
     전체목록에서 3가지 필터 (topic, category, category value)
     """
@@ -139,7 +139,7 @@ def parse_matrix_dialog(request):
     whereAll = whereTopic + ' and ' + countField + '= \'' + params['categoryValue'] + '\''
 
     # 3가지 필터된 목록 구하기 
-    query = parse_searchs(request, mode="query")
+    query = get_searchs(request, mode="query")
 
     with connection.cursor() as cursor:    
         query += whereAll
