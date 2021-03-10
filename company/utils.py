@@ -62,9 +62,9 @@ def NestedDictValues(d):
         else:
             yield str(v)
 
-TAG_RE = re.compile(r'<[^>]+>')
 
 def remove_tags(text):
+    TAG_RE = re.compile(r'<[^>]+>')
     return TAG_RE.sub('', text)
 
 
@@ -74,6 +74,12 @@ def remove_brackets(text):
 
 def remove_punc(text):
     return re.sub("[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]", ' ', text)            
+
+def sampling(selection, offset=0, limit=None):
+    return list(islice(islice(selection, offset, None), limit))
+
+def remove_duplicates(t):
+    return list(set(t))    
 
 def str2round(value, num=1):
     try:
@@ -109,7 +115,7 @@ def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     raw token화 (raw_len_limit 단어 길이로 제한; 넘으면 mecab error)
     NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
     '''    
-    raw = remove_punc(remove_brackets(remove_tags(raw)))    
+    # raw = remove_punc(remove_brackets(remove_tags(raw)))    
     mecab = Mecab()
     STOPWORDS = settings.TERMS['STOPWORDS']
     try:
@@ -128,7 +134,7 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     ''' 
     tokenizer + STOPWORDS_PHRASE 제거
     '''
-    raw = remove_punc(remove_brackets(remove_tags(raw)))
+    # raw = remove_punc(remove_brackets(remove_tags(raw)))
     mecab = Mecab()
     
     STOPWORDS = settings.TERMS['STOPWORDS']
@@ -148,7 +154,11 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
                 if '_' in saving and saving not in STOPWORDS_PHRASE:
                     result.append(saving)            
                 saving = ''
-    return result  
+    return result
+
+def sampling(selection, offset=0, limit=None):
+    """ apply offset limit """
+    return selection[offset:(limit + offset if limit is not None else None)]      
 
 def like_parse(keyword=""):
     """ like query 생성 """

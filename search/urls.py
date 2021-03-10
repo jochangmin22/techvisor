@@ -24,7 +24,7 @@ urlpatterns = [
     re_path(URL + "searchs/matrix$", csrf_exempt(views.matrix.get_matrix), name='get_matrix'),
     re_path(URL + "searchs/matrixdialog$", csrf_exempt(views.matrix.get_matrix_dialog), name='get_matrix_dialog'),
     # visual
-    re_path(URL + "searchs/classify$", csrf_exempt(views.visual.get_applicant_classify), name='get_applicant_classify'),
+    re_path(URL + "searchs/visual$", csrf_exempt(views.visual.get_visual), name='get_visual'),
     # search
     re_path(URL + "search/$", csrf_exempt(views.search.get_search), name='get_search'),
     re_path(URL + "search/quote$", csrf_exempt(views.search.get_search_quote), name='get_search_quote'),

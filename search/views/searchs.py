@@ -3,13 +3,12 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 import re
 from itertools import permutations
-from konlpy.tag import Mecab
-
-from copy import deepcopy
+import operator
 import json
+from collections import defaultdict, Counter
 
+from ..utils import get_redis_key, dictfetchall, remove_duplicates, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags
 
-from ..utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc
 # from .similarity import similarity
 
 # caching with redis
@@ -39,21 +38,22 @@ def get_searchs(request, mode="begin"):
         mode : begin, nlp, query, matrix, indicator
     """
 
-    mainKey, _, params, _ = get_redis_key(request)
+    mainKey, subKey, params, subParams = get_redis_key(request)
 
     context = cache.get(mainKey)
+    context_paging = cache.get(subKey)
 
     if mode == "begin":
         try:
-            if context['raw']:
-                return JsonResponse(context['raw'], safe=False)
+            if context_paging['raw']:
+                return JsonResponse(context_paging['raw'], safe=False)
         except:
             pass
 
     elif mode == "nlp":
         try:
-            if context['raw_abstract'] and context['raw_claims']:
-                return context['raw_abstract'], context['raw_claims']
+            if context['nlp_raw']:
+                return context['nlp_raw']
         except:
             pass
 
@@ -71,13 +71,34 @@ def get_searchs(request, mode="begin"):
         except:
             pass
 
-    elif mode == "classify":
+    elif mode == "vis_num":
         try:
-            if context['cla_raw']:
-                return context['cla_raw']
+            if context['vis_num']:
+                return context['vis_num']
+        except:
+            pass
+    elif mode == "vis_cla":
+        try:
+            if context_paging['vis_cla']:
+                return context_paging['vis_cla']
+        except:
+            pass
+    elif mode == "vis_ipc":
+        try:
+            if context['vis_ipc']:
+                return context['vis_ipc']
+        except:
+            pass
+    elif mode == "vis_per":
+        try:
+            if context['vis_per']:
+                return context['vis_per']
         except:
             pass
 
+    pageIndex = subParams.get('pageIndex', 0)
+    pageSize = subParams.get('pageSize', 10)
+    sortBy = subParams.get('sortBy', [])        
 
     with connection.cursor() as cursor:
         # 검색범위 선택
@@ -136,69 +157,63 @@ def get_searchs(request, mode="begin"):
                 "(" + whereAssignee + ") and " if whereAssignee else "") + whereOther
             if whereAll.endswith(" and "):
                 whereAll = whereAll[:-5]
-        query = 'select 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 초록, 청구항 FROM kr_text_view WHERE (' + \
+        query = 'select count(*) over () as cnt, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE (' + \
             whereAll + ")"
-            
+
         # return HttpResponse(json.dumps(query, ensure_ascii=False))
         if mode == "query":  # mode가 query면 여기서 분기
             return query
+
+        # Add sort by
+        if mode != "vis_cla":
+            if sortBy:
+                foo =' '
+                for s in sortBy:
+                    foo += s['_id']
+                    foo += ' ASC, ' if s['desc'] else ' DESC, '
+
+                if foo.endswith(", "):
+                    foo = foo[:-2]
+                query += f' order by {foo}'                    
 
         cursor.execute(
             "SET work_mem to '100MB';"
             + query
         )
-        row = dictfetchall(cursor)
+        rows = dictfetchall(cursor)
 
-    
+    if rows:
+        # get rowsCount
+        try:
+            rowsCount = rows[0]["cnt"]
+        except IndexError:        
+            rowsCount = 0
 
-    raw_abstract = ''
-    raw_claims = ''
-    mtx_raw = []
-    ind_raw = []
-    cla_raw = []
-    dropKeysMatrix = ('등록사항', '발명의명칭', '출원인코드1', '출원인국가코드1', '발명자1', '발명자국가코드1', '등록일', '공개일')
-    dropKeysIndicater = ('등록사항', '발명의명칭', '출원인국가코드1', '발명자1', '발명자국가코드1', '공개일자','ipc코드', '초록', '청구항')
+        nlp_raw = make_nlp_raw(rows)
+        mtx_raw = make_mtx_raw(rows)
+        ind_raw = make_ind_raw(rows)
+        vis_num = make_vis_num(rows)
+        vis_ipc = make_vis_ipc(rows)
+        vis_per = make_vis_per(rows)
+        vis_cla = make_vis_cla(rows, pageIndex, pageSize, sortBy)
 
-    if row:
-        # copy
-        mtx_raw = deepcopy(row)
-        ind_raw = deepcopy(row)
+        # row는 list of dictionaries 형태임
+        paging_rows = [dict() for x in range(len(rows))]
+        for i in range(len(rows)):
+            paging_rows[i]['id'] = rows[i]['출원번호'] # add id key for FE's ids
+            for key in ['출원번호','출원일','등록사항','발명의명칭','출원인1','발명자1','ipc코드']:
+                paging_rows[i][key] = rows[i][key]
 
-        # row and npl
-        for i in range(len(row)):
-            row[i]['id'] = row[i]['출원번호'] # add id key for FE's ids
-            raw_abstract += row[i]["초록"] if row[i]["초록"] else "" + " "
-            raw_claims += row[i]["청구항"] if row[i]["청구항"] else "" + " "                
-
-            # 청구항과 초록은 raw_abstract,raw_claims에 넘겨줬으므로 바로 제거 - row는 list of dictionaries 형태임
-            del row[i]["초록"]
-            del row[i]["청구항"]
-
-        # matrix
-        for i in range(len(mtx_raw)):
-            # matrix는 출원번호, 출원일자, 출원인1, ipc요약, 초록, 청구항만 사용
-            for k in dropKeysMatrix:
-                mtx_raw[i].pop(k, None)
-
-            # 출원년만 사용
-            mtx_raw[i]['출원일'] = mtx_raw[i]['출원일'][:-4]
-
-        # indicator    
-        for i in range(len(ind_raw)):
-            # indicater는 ['출원번호','출원인코드1','출원인1','등록일자'] 만 사용
-            for k in dropKeysIndicater:
-                ind_raw[i].pop(k, None)
-        ind_raw = [i for i in ind_raw if not (i['등록일'] == None)] # 등록건만
-
-        # classify
-        cla_raw = deepcopy(ind_raw)    
-        for i in range(len(cla_raw)):
-            # classify는 ['출원번호','출원인코드1','출원인1'] 만 사용
-            cla_raw[i].pop('등록일', None)
+        # Add offset limit
+        offset = pageIndex * pageSize
+        limit = pageSize
+        rows = sampling(paging_rows, offset, limit)
 
     else:  # 결과값 없을 때 처리
-        row = []
+        rows = []
+        rowsCount = 0        
 
+    result = { 'rowsCount': rowsCount, 'rows': rows}   
         
     # sampling_row =sampling(row, subParams['analysisOptions']['tableOptions']['pageIndex'], subParams['analysisOptions']['tableOptions']['pageSize'])
     # res = { 'entities' : sampling_row, 'dataCount' : len(row)}
@@ -207,33 +222,43 @@ def get_searchs(request, mode="begin"):
     # result=similarity(row)
     # return JsonResponse(result, safe=False)
 
-
     # redis 저장 {
     new_context = {}
+    new_context['nlp_raw'] = nlp_raw
     new_context['mtx_raw'] = mtx_raw
     new_context['ind_raw'] = ind_raw
-    new_context['cla_raw'] = cla_raw
-    new_context['raw'] = row
-    # new_context['raw_fetch'] = res
-    new_context['raw_abstract'] = raw_abstract
-    new_context['raw_claims'] = raw_claims
+    new_context['vis_num'] = vis_num
+    new_context['vis_ipc'] = vis_ipc
+    new_context['vis_per'] = vis_per
     cache.set(mainKey, new_context, CACHE_TTL)
+
+    new_context_paging = {}
+    new_context_paging['raw'] = result
+    new_context_paging['vis_cla'] = vis_cla
+    cache.set(subKey, new_context_paging, CACHE_TTL)    
     # redis 저장 }
 
     if mode == "begin":
-        return JsonResponse(row, safe=False)
+        return JsonResponse(result, safe=False)
     elif mode == "nlp":
-        return raw_abstract, raw_claims
+        return nlp_raw
     elif mode == "matrix":
         return mtx_raw          
     elif mode == "indicator":
         return ind_raw
-    elif mode == "classify":
-        return cla_raw
+    elif mode == "vis_num":
+        return vis_num
+    elif mode == "vis_cla":
+        return vis_cla
+    elif mode == "vis_ipc":
+        return vis_ipc
+    elif mode == "vis_per":
+        return vis_per
 
 def get_nlp(request, analType):
     """ 쿼리 실행 및 결과 저장
         analType : wordCloud, matrix, keywords
+        option : volumn, unit, emergence 개별적용
     """
 
     _, subKey, _, subParams = get_redis_key(request)
@@ -249,29 +274,37 @@ def get_nlp(request, analType):
     except:
         pass
 
-    raw_abstract, raw_claims = get_searchs(request, mode="nlp")
+    # raw_abstract, raw_claims = get_searchs(request, mode="nlp")
+    nlp_raw = get_searchs(request, mode="nlp")
 
-    nlp_raw = ''
-    result = ''
+    # nlp_raw = []
+    result = []
 
-    analType = analType + 'Options'
+    # option
+    foo = subParams['analysisOptions'][analType + 'Options']
+    volume = foo.get('volume','')
+    unit = foo.get('unit','')
+    emergence = foo.get('emergence','빈도수')
 
-    if subParams['analysisOptions'][analType]['volume'] == '요약':
-        nlp_raw = raw_abstract
-    elif subParams['analysisOptions'][analType]['volume'] == '청구항':
-        nlp_raw = raw_claims        
+    nlp_list = [d[volume] for d in nlp_raw] # '요약·청구항', '요약', '청구항', 
 
+    nlp_str = ' '.join(nlp_list) if nlp_list else None
+ 
     # tokenizer
-    if subParams['analysisOptions'][analType]['unit'] == '구문':
-        try:
-            result = tokenizer_phrase(nlp_raw)
-        except:
-            result = []
-    elif subParams['analysisOptions'][analType]['unit'] == '워드':            
-        try:
-            result = tokenizer(nlp_raw)
-        except:
-            result = []        
+    if unit == '구문':
+        if emergence == '빈도수':            
+            result = tokenizer_phrase(nlp_str)
+        elif emergence =='건수':                
+            for foo in nlp_list:
+                bar = remove_duplicates(tokenizer_phrase(foo))
+                result.extend(bar) 
+    elif unit == '워드':            
+        if emergence == '빈도수':
+            result = tokenizer(nlp_str)
+        elif emergence =='건수':                 
+            for foo in nlp_list:
+                bar = remove_duplicates(tokenizer(foo))
+                result.extend(bar)
 
     new_sub_context = {}
     new_sub_context['nlp_token'] = result
@@ -490,60 +523,191 @@ def get_query(request):
     """ 쿼리 확인용 """
     return HttpResponse(get_searchs(request, mode="query"), content_type="text/plain; charset=utf-8")
 
-raw_len_limit = 20000
+def sampling(selection, offset=0, limit=None):
+    """ apply offset limit """
+    return selection[offset:(limit + offset if limit is not None else None)]
 
-# NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
-def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
-    ''' raw token화 (raw_len_limit 단어 길이로 제한; 넘으면 mecab error)'''    
-    raw = remove_punc(remove_brackets(remove_tags(raw)))    
-    mecab = Mecab()
-    STOPWORDS = settings.TERMS['STOPWORDS']
-    try:
-        return [
-            word
-            for word, tag in mecab.pos(raw[:raw_len_limit]) if tag in pos and word not in STOPWORDS # and len(word) > 1
-            # if len(word) > 1 and tag in pos and word not in stopword
-            # if tag in pos
-            # and not type(word) == float
-        ]
-    except:
-        return []
+def make_vis_num(data):
+    ''' visual application number '''
+    rows = [dict() for x in range(len(data))]
+    for i in range(len(data)):
+        rows[i]['출원일'] = str(data[i]['출원일'])[:-4]
+        rows[i]['등록일'] = str(data[i]['등록일'])[:-4]
+        rows[i]['구분'] = str(data[i]['출원번호'])[0]
 
-def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
-    ''' raw token화 (raw_len_limit 단어 길이로 제한; 넘으면 mecab error)'''
-    raw = remove_punc(remove_brackets(remove_tags(raw)))
-    mecab = Mecab()
+    def make_each_category_dict(flag):
+        if flag:
+            foo = [i[key] for i in rows if i[key] and i['구분'] == flag]
+        else:            
+            foo = [i[key] for i in rows if i[key]]
+        bar = frequency_count(foo)        
+        labels = [key for key in sorted(bar)]
+        data = [bar[key] for key in sorted(bar)]  
+        return { 'labels': labels, 'data' : data }         
 
-    STOPWORDS = settings.TERMS['STOPWORDS']
-    STOPWORDS_PHRASE = settings.TERMS['STOPWORDS_PHRASE']
+    key = '출원일'
+    PU = make_each_category_dict(flag=None)
+    PP = make_each_category_dict(flag='1')
+    UP = make_each_category_dict(flag='2')
+    key = '등록일'
+    PR = make_each_category_dict(flag='1')
+    UR = make_each_category_dict(flag='2')    
 
-    saving = ''
-    close = None
-    result = []
-    for word, tag in mecab.pos(raw[:raw_len_limit]):
-        if tag in pos:
-            if word not in STOPWORDS: # and len(word) > 1:
-                saving = saving + '_' + word if saving and close else word
-                close=True
+    entities = {'PU' : PU, 'PP' : PP,'UP' : UP, 'PR' : PR, 'UR' : UR}
+    result = { 'mode' : 'vis_num', 'entities' : entities }
+    return result        
+
+
+# { A01K 13/00: 1, A01K 67/027: 9, A01K 67/033: 1, ...}
+#  [{ name: '', value: 0 }],
+# {data: [11, 1, 7, …], labels: ["A01K", …}
+
+def make_vis_ipc(data):
+    ''' visual ipc '''
+
+    def make_dic_to_list_of_dict(baz):
+        return [{ 'name' : k, 'value' : v} for k,v in baz.items()]
+
+    foo = [i['ipc코드'][0:4] for i in data if i['ipc코드']]
+    bar = frequency_count(foo)
+    entities = make_dic_to_list_of_dict(bar)
+    result = { 'mode' : 'vis_ipc', 'entities' : entities }
+    return result    
+
+# [{출원인명: "바이랄테크놀로지스인코포레이티드", 건수: 1},{}]
+
+def make_vis_cla(data, _pageIndex, _pageSize, _sortBy):
+    ''' visual applicant classify '''
+    pageIndex = _pageIndex
+    pageSize = _pageSize
+    sortBy = _sortBy
+    GOVERNMENT = settings.TERMS['APPLICANT_CLASSIFY']['GOVERNMENT']
+
+    def classify_swap(x,c):
+        if c == '4':
+            return '개인'        
+        if any(s in x for s in GOVERNMENT):    
+            return '공공'        
         else:
-            close= False
-            if saving:
-                if '_' in saving and saving not in STOPWORDS_PHRASE:
-                    result.append(saving)            
-                saving = ''
-    return result      
+            return '기업'
 
-def tokenizer_pos(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
-    mecab = Mecab()
-    STOPWORDS = settings.TERMS['STOPWORDS']
-    try:
-        return [
-            word
-            for word, tag in mecab.pos(raw) if len(word) > 1 and word not in STOPWORDS
-            # if len(word) > 1 and tag in pos and word not in stopword
-            # if tag in pos
-            # and not type(word) == float
-        ]
+    def make_dic_to_list_of_dict_cla(bar):
+        return [{ '출원인명' : k, '건수' : v} for k,v in bar.items()]          
+
+    def make_each_table_rows(flag):
+        foo = [i['이름'] for i in rows if i['이름'] and i['구분'] == flag]
+        bar = frequency_count(foo)
+        baz = make_dic_to_list_of_dict_cla(bar)
+
+        # Add sort by
+        if sortBy:
+            for s in sortBy:
+                reverse = True if s['desc'] else False
+                baz.sort(key=operator.itemgetter(s['_id']), reverse=reverse)
+
+        # Add offset limit
+        offset = pageIndex * pageSize
+        limit = pageSize
+
+        
+        result = sampling(baz, offset, limit)       
+
+        return { 'rowsCount': len(bar), 'rows' : result }                  
+  
+    rows = [dict() for x in range(len(data))]
+    for i in range(len(data)):        
+        name = str(data[i]['출원인1'])
+        code = str(data[i]['출원인코드1'])[0]
+
+        rows[i]['이름'] = name
+        rows[i]['구분'] = classify_swap(name, code)
+
+    P = make_each_table_rows(flag='개인')
+    G = make_each_table_rows(flag='공공')
+    C = make_each_table_rows(flag='기업')
+
+    entities = { '개인' : P, '공공기관' : G, '기업': C}
+    result = { 'mode' : 'vis_cla', 'entities' : entities }
+    return result
+
+# {	출원인: { A: [{ name: '', value: '' }], B: [{ name: '', value: '' }] },
+#	발명자: { A: [{ name: '', value: '' }], B: [{ name: '', value: '' }] },
+# }
+
+def make_vis_per(rows):
+    ''' visual related person '''
+    # relatedperson는 ['출원인1','출원인국가코드1','발명자1','발명자국가코드1] 만 사용
+    
+    NATIONALITY = settings.TERMS['NATIONALITY']
+
+    entities = {'출원인' : {}, '발명자' : {}}
+    def nat_swap(x):
+        return NATIONALITY.get(x,x)
+
+    def make_dic_to_list_of_dict(baz):
+        return [{ 'name' : k, 'value' : v} for k,v in baz.items()]               
+
+    for key in ['출원인','발명자']:
+        foo = [i[key + '1'] for i in rows if i[key + '1']]
+        bar = frequency_count(foo,20)
+        A = make_dic_to_list_of_dict(bar)
+        foo = [nat_swap(i[key + '국가코드1']) for i in rows if i[key + '국가코드1']]
+        bar = frequency_count(foo,20)
+        B = make_dic_to_list_of_dict(bar)
+
+        entities[key] = { 'A': A, 'B': B}
+
+    result = { 'mode' : 'vis_per', 'entities': entities }
+    return result    
+
+def frequency_count(data, n=None):
+    if isinstance(data, list): 
+        tuple_data = tuple(data)
+    elif isinstance(data, tuple):
+        tuple_data = data
+    try:    
+        count = Counter(tuple_data)
+        foo = count.most_common(n)
+        result = dict(foo)
     except:
-        return []        
+        result = []
+
+    return result
+
+def make_nlp_raw(rows):
+    # nlp는 요약, 청구항 만 사용
+    result = [dict() for x in range(len(rows))]
+    for i in range(len(rows)):
+        abstract = str(rows[i]['요약'])
+        claim = str(rows[i]['청구항'])
+        result[i]['요약'] = abstract
+        result[i]['청구항'] = claim
+        result[i]['요약·청구항'] = abstract + ' ' + claim
+    return result        
+
+def make_mtx_raw(rows):
+    # matrix는 출원번호, 출원일, 출원인1, ipc코드, 요약, 청구항만 사용
+    result = [dict() for x in range(len(rows))]
+    for i in range(len(rows)):
+        result[i]['출원번호'] = rows[i]['출원번호']
+        result[i]['출원일'] =  str(rows[i]['출원일'])[:-4]
+        result[i]['출원인1'] = rows[i]['출원인1']
+        result[i]['ipc코드'] = rows[i]['ipc코드']
+        abstract = str(rows[i]['요약'])
+        claim = str(rows[i]['청구항'])
+        result[i]['요약'] = abstract
+        result[i]['청구항'] = claim
+        result[i]['요약·청구항'] = abstract + ' ' + claim      
+    return result
+
+def make_ind_raw(rows):
+    # indicater는 ['출원번호','출원인코드1','출원인1','등록일'] 만 사용
+    result = [dict() for x in range(len(rows))]
+    for i in range(len(rows)):
+        for key in ['출원번호','출원인코드1','출원인1','등록일']:
+            result[i][key] = rows[i][key]
+    
+    result = [i for i in result if not (i['등록일'] == None)] # 등록건만
+        
+    return result
 

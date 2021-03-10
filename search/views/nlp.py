@@ -48,8 +48,8 @@ def get_wordcloud(request):
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
             return HttpResponse( "[]", content_type="text/plain; charset=utf-8")
-    except:
-        return HttpResponse("[]", content_type="text/plain; charset=utf-8")
+    except Exception as e:
+        return HttpResponse(e, content_type="text/plain; charset=utf-8")
     #///////////////////////////////////
 
     sublist = dict()
@@ -82,11 +82,9 @@ def get_wordcloud(request):
     return HttpResponse(result)
 
 def get_wordcloud_dialog(request):
-    """ 
-    전체목록에서 3가지 필터 (topic, category, category value)
-    """
 
     _, subKey, params, subParams = get_redis_key(request)
+
 
     # Redis {
     sub_context = cache.get(subKey)    
@@ -98,53 +96,48 @@ def get_wordcloud_dialog(request):
         pass        
     # Redis }
 
-    # volume: '요약',
-    # unit: '구문', // '구문', '워드',
-    # output: 50,
-    # category: '기업별', // '국가별', '연도별', '기술별', '기업별'
-    # volume: '요약',
-    # unit: '구문', // '구문', '워드',
-    # output: 20,            
-
-    # if subParams['analysisOptions']['wordCloudOptions']['category'] == '연도별':
-    #     countField = 'left(출원일자,4)'
-    # elif subParams['analysisOptions']['wordCloudOptions']['category'] == '기술별':
-    #     countField = 'ipc요약'
-    # elif subParams['analysisOptions']['wordCloudOptions']['category'] == '기업별':
-    #     countField = '출원인1'
-
-    # if subParams['analysisOptions']['wordCloudOptions']['volume'] == '요약':
-    #     targetField = '요약token'
-    # elif subParams['analysisOptions']['wordCloudOptions']['volume'] == '청구항':
-    #     targetField = '전체항token'          
-
-    # if subParams['analysisOptions']['wordCloudOptions']['category'] == params['topic']:
-    #    whereTopic = '' # prevent from click on the category itself
-    # else:    
-    #     if ' ' in params['topic']:
-    #         val = re.sub(re.escape(' '), ' <1> ', params['topic'], flags=re.IGNORECASE)
-    #         whereTopic = ' and '+ targetField +' @@ to_tsquery(\'(' + val + ')\')'
-    #     else:
-    #         whereTopic = ' and '+ targetField +' like \'%' + params['topic'] + '%\'' 
-
-    # whereAll = whereTopic + ' and ' + countField + '= \'' + params['categoryValue'] + '\''
+    
+    # pageIndex = subParams['analysisOptions']['tableOptions']['wordCloud']['pageIndex']
+    # pageSize = subParams['analysisOptions']['tableOptions']['wordCloud']['pageSize']
+    pageIndex = subParams.get('pageIndex', 0)
+    pageSize = subParams.get('pageSize', 10)
+    sortBy = subParams.get('sortBy', [])
 
     # 3가지 필터된 목록 구하기 
     query = get_searchs(request, mode="query")
 
+    # Add sort by
+    if sortBy:
+        foo =' '
+        for s in sortBy:
+            foo += s['_id']
+            foo += ' ASC, ' if s['desc'] else ' DESC, '
+
+        if foo.endswith(", "):
+            foo = foo[:-2]
+        query += f' order by {foo}'
+
+    # Add offset limit
+    query += f' offset {pageIndex * pageSize} limit {pageSize}'
+
     with connection.cursor() as cursor:    
         cursor.execute(query)
-        row = dictfetchall(cursor)
-
+        rows = dictfetchall(cursor)
+    try:
+        rowsCount = rows[0]["cnt"]
+    except IndexError:        
+        rowsCount = 0
+        
+    result = { 'rowsCount': rowsCount, 'rows': rows}   
     # Redis {
     try:
-        sub_context['wordcloud_dialog'] = row
+        sub_context['wordcloud_dialog'] = result
         cache.set(subKey, sub_context, CACHE_TTL)
     except:
         pass        
     # Redis }
 
-    return JsonResponse(row, safe=False)    
+    return JsonResponse(result, safe=False)    
 
 def get_vec(request):
     """ 빈도수 단어로 연관 단어 추출 (처음은 맨 앞단어로) """
