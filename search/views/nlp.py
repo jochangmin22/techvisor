@@ -261,6 +261,18 @@ def get_vec(request):
 
     return HttpResponse(json.dumps(result, ensure_ascii=False))
 
+def get_sum_query(query):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            row = dictfetchall(cursor)
+        result = row[0]['cnt']
+        if not result:
+            return 0
+        return result                
+    except:
+        return 0     
+
 def get_indicator(request):
     """ 지표분석, 출원인 CPP, PFS 추출 """
 
@@ -270,181 +282,143 @@ def get_indicator(request):
     sub_context = cache.get(subKey)
 
     try:
-        if sub_context['indicator']:        
-            return HttpResponse(json.dumps(sub_context['indicator'], ensure_ascii=False))
+        if sub_context['indicator']:
+            return JsonResponse(sub_context['indicator'], safe=False)      
     except:
         pass
     # Redis }    
 
     d = get_searchs(request, mode="indicator")
 
+    # Use fields : ['출원번호','출원인코드1','출원인1','등록일']
     if not d:
-        return HttpResponse(json.dumps(d, ensure_ascii=False))
+        return JsonResponse({"error": 'error'}, status=202, safe=False)
 
-    # df = (pd.DataFrame(d)
-    #     .loc[:,['출원인코드1']]
-    #     .value_counts(['출원인코드1'])
-    #     .reset_index(name='value')
-    #     .rename(columns={'출원인코드1':'code'})
-    #     .to_dict('r'))
+    def get_granted_list():
+        # 개별 등록건수 count
+        df = pd.DataFrame(d).reindex(columns=['출원인코드1','등록일'])
+        df['출원인코드1'] = df['출원인코드1'].astype(str)
+        return (df
+            .value_counts(['출원인코드1'])
+            .reset_index(name='value')
+            .rename(columns={'출원인코드1':'code'})
+            .to_dict('r'))
 
-    # df = (pd.DataFrame(d)
-    #     .groupby(['출원인1'])
-    #     .출원번호
-    #     .agg(list)
-    #     .reset_index()
-    #     .rename(columns={'출원인1':'name', '출원번호': 'appNo'})
-    #     .to_dict('r'))    
+    def get_total_granted_appno_list():
+        # 전체 row 등록건수 · 출원번호 list
+        df = pd.DataFrame(d).reindex(columns=['출원번호','등록일'])
+        df = df.reindex(columns=['출원번호']).출원번호.astype(str).tolist()      
+        cnt = len(df)
+        alist = ', '.join(df)
+        return cnt, alist
 
-    # 개별 등록건수 count
-    df = pd.DataFrame(d).reindex(columns=['출원인코드1','등록일'])
-    df['출원인코드1'] = df['출원인코드1'].astype(str)
-    # grantedList = (df[df.등록일자.notnull()]
-    grantedList = (df
-        .value_counts(['출원인코드1'])
-        .reset_index(name='value')
-        .rename(columns={'출원인코드1':'code'})
-        .to_dict('r'))
+    def get_total_citing():
+        # 전체 등록특허의 피인용수
+        query= 'SELECT sum(피인용수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNoList + ')'
+        return get_sum_query(query)
 
+    def get_appno_list_of_applicant():
+        # 출원인 groupby 출원번호 concat
+        df = pd.DataFrame(d).reindex(columns=['출원인1','출원인코드1','출원번호'])
+        df['출원인코드1'] = df['출원인코드1'].astype(str)
+        df['출원번호'] = df['출원번호'].astype(str)
+        df = (df
+            .groupby(['출원인1','출원인코드1'])
+            .출원번호
+            .agg(list)
+            .reset_index()
+            .to_dict('r')
+            )
+        # TODO : list of dict 출원번호 sort desc로 자르기
+        return [{'name' : dic['출원인1'], 'code' : dic['출원인코드1'], 'appNo' : dic['출원번호']} for dic in df][:companyLimit]   
 
-    # 전체 row 의 등록건 출원번호 list
-    df = pd.DataFrame(d).reindex(columns=['출원번호','등록일'])
-    # df = df[df.등록일자.notnull()].loc[:,['출원번호']].출원번호.astype(str).tolist()      
-    df = df.reindex(columns=['출원번호']).출원번호.astype(str).tolist()      
-    total_granted = len(df) # get total_granted
+    def count_citing():
+        # citing count (using appNo)
+        query= 'SELECT sum(피인용수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'
+        return get_sum_query(query)
 
-  
-    appNoList = ', '.join(df)
-    # 전체 등록특허의 피인용수
-    try:
-        with connection.cursor() as cursor: 
-            # query= 'SELECT count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (' + appNoList + ')'
-            query= 'SELECT sum(피인용수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNoList + ')'
-            cursor.execute(query)
-            row = dictfetchall(cursor)
-        total_citing = row[0]['cnt']
-        if not total_citing:
-            total_citing = 0        
-    except:
-        total_citing = 0        
+    def count_granted():            
+        # granted count (using grantedList, code)            
+        try:
+            return [item['value'] for item in grantedList if item["code"] == code][0]
+        except:
+            return 0
+    def get_cpp():
+        try:
+            return citing / granted
+        except:
+            return 0              
+    def get_pii():
+        try:
+            return  cpp / total_citing / total_granted
+        except:
+            return 0             
 
-    # 출원인 groupby 출원번호 concat
-    df = pd.DataFrame(d).reindex(columns=['출원인1','출원인코드1','출원번호'])
-    df['출원인코드1'] = df['출원인코드1'].astype(str)
-    df['출원번호'] = df['출원번호'].astype(str)
-    df = (df
-        .groupby(['출원인1','출원인코드1'])
-        .출원번호
-        .agg(list)
-        .reset_index()
-        .to_dict('r')
-        )
+    def count_family():                                                 
+        # family count (using appNo)
+        query= 'SELECT sum(패밀리수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'                
+        return get_sum_query(query)   
 
-    companyLimit = 1000    
+    def get_pfs():
+        try:
+            return family / total_family             
+        except:
+            return 0
 
-    # dataList = [{'name' : dic['출원인1'], 'code' : dic['출원인코드1'], 'appNo' : dic['출원번호']} for dic in df]
-    dataList = [{'name' : dic['출원인1'], 'code' : dic['출원인코드1'], 'appNo' : dic['출원번호']} for dic in df][:companyLimit]
+    def count_total_family():                                                 
+        # total family count (using appNo)
+        query= 'SELECT sum(패밀리수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNoList + ')'                                
+        return get_sum_query(query)        
+         
+ 
+    # Caller start            
+    grantedList = get_granted_list()
+    total_granted, appNoList = get_total_granted_appno_list()
+    total_citing = get_total_citing()
 
-    # TODO : list of dict 출원번호 sort desc로 자르기
+    companyLimit = 1000 
+    dataList = get_appno_list_of_applicant()
+        
 
     dataLen = companyLimit if len(dataList) >= companyLimit else len(dataList)
     l = []
     for i in range(dataLen):
-    # for i in range(len(dataList)):
-        with connection.cursor() as cursor:
 
-            # 출원인1이 1000개 이상인 건만 출원건 1개인 출원인 제외 - 속도
-            if dataLen == 1000:
-                if len(dataList[i]['appNo']) == 1:
-                    continue
+        # 출원인1이 1000개 이상인 경우 출원건 1개인 출원인 제외 - 속도
+        if dataLen == 1000:
+            if len(dataList[i]['appNo']) == 1:
+                continue
 
-            appNos = ', '.join(dataList[i]['appNo'])
-            code = dataList[i]['code']
-            name = dataList[i]['name']
+        appNos = ', '.join(dataList[i]['appNo'])
+        code = dataList[i]['code']
+        name = dataList[i]['name']
 
-            #////// CPP = 특정 주체의 등록특허의 피인용 횟수 / 해당 주체의 등록특허 수
+        # CPP = 특정 주체의 등록특허의 피인용 횟수 / 해당 주체의 등록특허 수
 
-            # citing count (using appNo)
-            try:
-                # query= 'SELECT count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (' + appNos + ')'
-                query= 'SELECT sum(피인용수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'
-                # query = 'SELECT Count(*) cnt from 특허실용심사인용문헌 where 출원번호 IN (SELECT 출원번호 from 공개공보 where 등록일자 is not null and 출원인코드1 = $$' + code + '$$)'
-                cursor.execute(query)
-                row = dictfetchall(cursor)
-                citing = row[0]['cnt']
-                if not citing:
-                    citing = 0
-            except:
-                citing = 0                
+        citing = count_citing()               
+        granted = count_granted()
+        cpp = get_cpp()
+       
 
-            # granted count (using grantedList, code)            
-            try:
-                granted = [item['value'] for item in grantedList if item["code"] == code][0]
-            except:
-                granted = 0
+        # PII = 특정 주체의 등록특허의 피인용도[CPP] / 전체 등록특허의 피인용도
+        pii = get_pii()
 
-            # cpp = citing / granted 
-            try:
-                cpp = citing / granted
-            except:
-                cpp = 0                
-            
-            #////// PII = 특정 주체의 등록특허의 피인용도[CPP] / 전체 등록특허의 피인용도
-            try:
-                pii = cpp / total_citing / total_granted
-            except:
-                pii = 0  
+        # TS = 특정 주체의 영향력지수[PII] × 해당 주체의 등록특허 건수              
+        ts = pii * granted
 
-            #////// TS = 특정 주체의 영향력지수[PII] × 해당 주체의 등록특허 건수              
-            try:
-                ts = pii * granted
-            except:
-                ts = 0                
+        # PFS = 특정 주체의 평균 패밀리 국가 수 / 전체 평균 패밀리 국가 수            
 
-            #////// PFS = 특정 주체의 평균 패밀리 국가 수 / 전체 평균 패밀리 국가 수            
+        family = count_family()
+        total_family = count_total_family()              
+        pfs = get_pfs()
 
-            # family count (using appNo)
-            try:
-                # query= 'SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호 IN (' + appNos + ')'
-                query= 'SELECT sum(패밀리수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'                
-                cursor.execute(query)
-                row = dictfetchall(cursor)
-                family = row[0]['cnt']
-                if not family:
-                    family = 0                 
-            except:
-                family = 0
-
-            # family count total (using appNoList)
-            try:
-                # query= 'SELECT count(DISTINCT 패밀리국가코드) cnt from 특허패밀리 where 출원번호 IN (' + appNoList + ')'
-                query= 'SELECT sum(패밀리수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNoList + ')'                                
-                cursor.execute(query)
-                row = dictfetchall(cursor)
-                total_family = row[0]['cnt']
-                if not total_family:
-                    total_family = 0                 
-            except:
-                total_family = 0                
-
-            # family / total_family
-            try:
-                pfs = family / total_family
-            except:
-                pfs = 0
-
-            # cpp = "{:.2f}".format(cpp)
-            # pii = "{:.2f}".format(pii)
-            # ts = "{:.2f}".format(ts)
-            # pfs = "{:.2f}".format(pfs)
-
-            cpp = round(cpp,2)
-            pii = round(pii,2)
-            ts = round(ts,2)
-            pfs = round(pfs,2)
-            # citing = int(citing)
-                            
-            l.append({ 'name': name, 'citing' : citing, 'cnt': granted, 'cpp' : cpp, 'pii' : pii, 'ts' : ts, 'pfs' : pfs })
+        cpp = round(cpp,2)
+        pii = round(pii,2)
+        ts = round(ts,2)
+        pfs = round(pfs,2)
+        # citing = int(citing)
+                        
+        l.append({ 'name': name, 'citing' : citing, 'cnt': granted, 'cpp' : cpp, 'pii' : pii, 'ts' : ts, 'pfs' : pfs })
 
     result = sorted(l, key=itemgetter('cnt'), reverse=True)
 
@@ -456,5 +430,4 @@ def get_indicator(request):
         pass        
     # Redis }
 
-    # return HttpResponse(json.dumps(result, ensure_ascii=False))
     return JsonResponse(result, safe=False)

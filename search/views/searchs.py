@@ -33,6 +33,7 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 # IPC요약(IPCM)
 # 출원인 대표명화 코드(WAP)
 
+
 def get_searchs(request, mode="begin"):
     """ 쿼리 실행 및 결과 저장
         mode : begin, nlp, query, matrix, indicator
@@ -43,222 +44,161 @@ def get_searchs(request, mode="begin"):
     context = cache.get(mainKey)
     context_paging = cache.get(subKey)
 
-    if mode == "begin":
+    redis_map = { 
+        'begin' : 'raw',
+        'nlp' : 'nlp_raw',
+        'matrix' : 'mtx_raw',
+        'indicator' : 'ind_raw',
+        'vis_num' : 'vis_num',
+        'vis_cla' : 'vis_cla',
+        'vis_ipc' : 'vis_ipc',
+        'vis_per' : 'vis_per',
+    }
+
+    try: 
+        if context and context[redis_map[mode]]:
+            return context[redis_map[mode]]
+        if context_paging and context_paging[redis_map[mode]]:
+            return context_paging[redis_map[mode]]                    
+    except (KeyError, NameError):
+        pass
+
+    def make_paging_rows(data):
         try:
-            if context_paging['raw']:
-                return JsonResponse(context_paging['raw'], safe=False)
-        except:
-            pass
-
-    elif mode == "nlp":
-        try:
-            if context['nlp_raw']:
-                return context['nlp_raw']
-        except:
-            pass
-
-    elif mode == "matrix":
-        try:
-            if context['mtx_raw']:
-                return context['mtx_raw']
-        except:
-            pass
-
-    elif mode == "indicator":
-        try:
-            if context['ind_raw']:
-                return context['ind_raw']
-        except:
-            pass
-
-    elif mode == "vis_num":
-        try:
-            if context['vis_num']:
-                return context['vis_num']
-        except:
-            pass
-    elif mode == "vis_cla":
-        try:
-            if context_paging['vis_cla']:
-                return context_paging['vis_cla']
-        except:
-            pass
-    elif mode == "vis_ipc":
-        try:
-            if context['vis_ipc']:
-                return context['vis_ipc']
-        except:
-            pass
-    elif mode == "vis_per":
-        try:
-            if context['vis_per']:
-                return context['vis_per']
-        except:
-            pass
-
-    pageIndex = subParams.get('pageIndex', 0)
-    pageSize = subParams.get('pageSize', 10)
-    sortBy = subParams.get('sortBy', [])        
-
-    with connection.cursor() as cursor:
-        # 검색범위 선택
-        try:
-            if params['searchVolume'] == 'ALL':
-                searchVolume = 'search'
-            elif params['searchVolume'] == 'SUMA':
-                searchVolume = 'search'
-            elif params['searchVolume'] == 'SUM':
-                searchVolume = 'search'
-        except:
-            searchVolume = 'search'
-
-        # 번호검색
-        if 'searchNum' in params and params['searchNum']:
-            # whereAll = ""
-            whereAll = "num_search like '%" + \
-                params['searchNum'].replace("-","") + "%'"
-
-        
-        # 키워드 검색
-        else: 
-            # to_tsquery 형태로 parse
-            whereTermsA = tsquery_keywords(
-                params["searchText"], searchVolume, 'terms')
-
-            # whereTermsB = like_where(params["searchText"], "출원인1")
-            # 출원인 포함은 db 성능 개선하고 나중에
-            # whereTermsAll = ("((" + whereTermsA + ") or " if whereTermsA else "") + ("("+ whereTermsB + ")) and " if whereTermsB else "")
-            whereTermsAll = ("((" + whereTermsA + ")) and " if whereTermsA else "")
-
-            # whereInventor = (
-            #     like_where(params["inventor"],
-            #                 "발명자tsv") if params["inventor"] else ""
-            # )
-            # whereAssignee = (
-            #     like_where(params["assignee"],
-            #                 "출원인tsv") if params["assignee"] else ""
-            # )
-            whereInventor = (
-                tsquery_keywords(params["inventor"],
-                            "발명자tsv", "person") if params["inventor"] else ""
-            )
-            whereAssignee = (
-                tsquery_keywords(params["assignee"],
-                            "출원인tsv", "person") if params["assignee"] else ""
-            )
-            whereOther = get_Others(
-                params["dateType"],
-                params["startDate"],
-                params["endDate"],
-                params["status"],
-                params["ipType"],
-            )
-            whereAll = whereTermsAll + ("(" + whereInventor + ") and " if whereInventor else "") + (
-                "(" + whereAssignee + ") and " if whereAssignee else "") + whereOther
-            if whereAll.endswith(" and "):
-                whereAll = whereAll[:-5]
-        query = 'select count(*) over () as cnt, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE (' + \
-            whereAll + ")"
-
-        # return HttpResponse(json.dumps(query, ensure_ascii=False))
-        if mode == "query":  # mode가 query면 여기서 분기
-            return query
-
-        # Add sort by
-        if mode != "vis_cla":
-            if sortBy:
-                foo =' '
-                for s in sortBy:
-                    foo += s['_id']
-                    foo += ' ASC, ' if s['desc'] else ' DESC, '
-
-                if foo.endswith(", "):
-                    foo = foo[:-2]
-                query += f' order by {foo}'                    
-
-        cursor.execute(
-            "SET work_mem to '100MB';"
-            + query
-        )
-        rows = dictfetchall(cursor)
-
-    if rows:
-        # get rowsCount
-        try:
-            rowsCount = rows[0]["cnt"]
+            rowsCount = data[0]["cnt"]
         except IndexError:        
             rowsCount = 0
 
-        nlp_raw = make_nlp_raw(rows)
-        mtx_raw = make_mtx_raw(rows)
-        ind_raw = make_ind_raw(rows)
-        vis_num = make_vis_num(rows)
-        vis_ipc = make_vis_ipc(rows)
-        vis_per = make_vis_per(rows)
-        vis_cla = make_vis_cla(rows, pageIndex, pageSize, sortBy)
-
-        # row는 list of dictionaries 형태임
-        paging_rows = [dict() for x in range(len(rows))]
-        for i in range(len(rows)):
-            paging_rows[i]['id'] = rows[i]['출원번호'] # add id key for FE's ids
+        foo = [dict() for x in range(len(data))]
+        for i in range(len(data)):
+            foo[i]['id'] = data[i]['출원번호'] # add id key for FE's ids
             for key in ['출원번호','출원일','등록사항','발명의명칭','출원인1','발명자1','ipc코드']:
-                paging_rows[i][key] = rows[i][key]
+                foo[i][key] = rows[i][key]
 
         # Add offset limit
         offset = pageIndex * pageSize
         limit = pageSize
-        rows = sampling(paging_rows, offset, limit)
 
-    else:  # 결과값 없을 때 처리
-        rows = []
-        rowsCount = 0        
+        return { 'rowsCount': rowsCount, 'rows': sampling(foo, offset, limit)}
 
-    result = { 'rowsCount': rowsCount, 'rows': rows}   
+    def make_sortby_clause():
+        if not sortBy:
+            return ''
+
+        foo =' '
+        for s in sortBy:
+            foo += s['_id']
+            foo += ' ASC, ' if s['desc'] else ' DESC, '
+
+        if foo.endswith(", "):
+            foo = foo[:-2]
+        return f' order by {foo}'          
+
+
+    # TODO: 검색범위 선택
+    # try:
+    #     if params['searchVolume'] == 'ALL':
+    #         searchVolume = 'search'
+    #     elif params['searchVolume'] == 'SUMA':
+    #         searchVolume = 'search'
+    #     elif params['searchVolume'] == 'SUM':
+    #         searchVolume = 'search'
+    # except:
+    searchVolume = 'search'
+
+    # 번호검색
+    if 'searchNum' in params and params['searchNum']:
+        # whereAll = ""
+        whereAll = "num_search like '%" + \
+            params['searchNum'].replace("-","") + "%'"
+
+    
+    # 키워드 검색
+    else: 
+        # to_tsquery 형태로 parse
+        whereTermsA = tsquery_keywords(
+            params["searchText"], searchVolume, 'terms')
+
+        whereTermsAll = ("((" + whereTermsA + ")) and " if whereTermsA else "")
+
+        whereInventor = (
+            tsquery_keywords(params["inventor"],
+                        "발명자tsv", "person") if params["inventor"] else ""
+        )
+        whereAssignee = (
+            tsquery_keywords(params["assignee"],
+                        "출원인tsv", "person") if params["assignee"] else ""
+        )
+        whereOther = get_Others(
+            params["dateType"],
+            params["startDate"],
+            params["endDate"],
+            params["status"],
+            params["ipType"],
+        )
+        whereAll = whereTermsAll + ("(" + whereInventor + ") and " if whereInventor else "") + (
+            "(" + whereAssignee + ") and " if whereAssignee else "") + whereOther
+        if whereAll.endswith(" and "):
+            whereAll = whereAll[:-5]
+    query = 'select count(*) over () as cnt, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE (' + \
+        whereAll + ")"
+
+    if mode == "query":  # mode가 query면 여기서 분기
+        return query
+
+    mainTable = subParams["analysisOptions"]["tableOptions"]["mainTable"]
+    pageIndex = mainTable.get('pageIndex', 0)
+    pageSize = mainTable.get('pageSize', 10)
+    sortBy = mainTable.get('sortBy', [])
+
+    # Add sort by
+    query += make_sortby_clause()
+                            
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SET work_mem to '100MB';"
+            + query
+        )
+
+        rows = dictfetchall(cursor)
+
+    if rows:
+        res = {}
+        res['nlp_raw'] = make_nlp_raw(rows)
+        res['mtx_raw'] = make_mtx_raw(rows)
+        res['ind_raw'] = make_ind_raw(rows)
+        res['vis_num'] = make_vis_num(rows)
+        res['vis_ipc'] = make_vis_ipc(rows)
+        res['vis_per'] = make_vis_per(rows)
+
+        result = make_paging_rows(rows)
+        res_sub = {}
+        res_sub['raw'] = result
+        res_sub['vis_cla'] = make_vis_cla(rows, subParams)
+    else:
+        result = { 'rowsCount': 0, 'rows': []} 
         
-    # sampling_row =sampling(row, subParams['analysisOptions']['tableOptions']['pageIndex'], subParams['analysisOptions']['tableOptions']['pageSize'])
-    # res = { 'entities' : sampling_row, 'dataCount' : len(row)}
-
     # ''' 유사도 처리 '''
     # result=similarity(row)
     # return JsonResponse(result, safe=False)
 
     # redis 저장 {
-    new_context = {}
-    new_context['nlp_raw'] = nlp_raw
-    new_context['mtx_raw'] = mtx_raw
-    new_context['ind_raw'] = ind_raw
-    new_context['vis_num'] = vis_num
-    new_context['vis_ipc'] = vis_ipc
-    new_context['vis_per'] = vis_per
-    cache.set(mainKey, new_context, CACHE_TTL)
+    cache.set(mainKey, res, CACHE_TTL)
+    cache.set(subKey, res_sub, CACHE_TTL)    
 
-    new_context_paging = {}
-    new_context_paging['raw'] = result
-    new_context_paging['vis_cla'] = vis_cla
-    cache.set(subKey, new_context_paging, CACHE_TTL)    
     # redis 저장 }
 
     if mode == "begin":
         return JsonResponse(result, safe=False)
-    elif mode == "nlp":
-        return nlp_raw
-    elif mode == "matrix":
-        return mtx_raw          
-    elif mode == "indicator":
-        return ind_raw
-    elif mode == "vis_num":
-        return vis_num
-    elif mode == "vis_cla":
-        return vis_cla
-    elif mode == "vis_ipc":
-        return vis_ipc
-    elif mode == "vis_per":
-        return vis_per
+    if mode == "vis_cla":
+        return res_sub[redis_map[mode]]
+    return res[redis_map[mode]]
+
 
 def get_nlp(request, analType):
     """ 쿼리 실행 및 결과 저장
         analType : wordCloud, matrix, keywords
-        option : volumn, unit, emergence 개별적용
+        option : volume, unit, emergence 개별적용
     """
 
     _, subKey, _, subParams = get_redis_key(request)
@@ -289,22 +229,44 @@ def get_nlp(request, analType):
     nlp_list = [d[volume] for d in nlp_raw] # '요약·청구항', '요약', '청구항', 
 
     nlp_str = ' '.join(nlp_list) if nlp_list else None
- 
+
+    def phrase_frequncy_tokenizer():
+        return tokenizer_phrase(nlp_str)
+
+    def phrase_individual_tokenizer():
+        for foo in nlp_list:
+            bar = remove_duplicates(tokenizer_phrase(foo))
+            result.extend(bar)
+        return result            
+
+    def word_frequncy_tokenizer():
+        return tokenizer(nlp_str)
+
+    def word_individual_tokenizer():
+        for foo in nlp_list:
+            bar = remove_duplicates(tokenizer(foo))
+            result.extend(bar)
+        return result            
+
+    command = { '구문': { '빈도수':phrase_frequncy_tokenizer, '건수':phrase_individual_tokenizer }, '워드': { '빈도수' :word_frequncy_tokenizer, '건수':word_individual_tokenizer } }
+    
+    result = command[unit][emergence]()    
+
     # tokenizer
-    if unit == '구문':
-        if emergence == '빈도수':            
-            result = tokenizer_phrase(nlp_str)
-        elif emergence =='건수':                
-            for foo in nlp_list:
-                bar = remove_duplicates(tokenizer_phrase(foo))
-                result.extend(bar) 
-    elif unit == '워드':            
-        if emergence == '빈도수':
-            result = tokenizer(nlp_str)
-        elif emergence =='건수':                 
-            for foo in nlp_list:
-                bar = remove_duplicates(tokenizer(foo))
-                result.extend(bar)
+    # if unit == '구문':
+    #     if emergence == '빈도수':            
+    #         result = tokenizer_phrase(nlp_str)
+    #     elif emergence =='건수':  
+    #         for foo in nlp_list:
+    #             bar = remove_duplicates(tokenizer_phrase(foo))
+    #             result.extend(bar) 
+    # elif unit == '워드':            
+    #     if emergence == '빈도수':
+    #         result = tokenizer(nlp_str)
+    #     elif emergence =='건수':
+    #         for foo in nlp_list:
+    #             bar = remove_duplicates(tokenizer(foo))
+    #             result.extend(bar)
 
     new_sub_context = {}
     new_sub_context['nlp_token'] = result
@@ -428,12 +390,48 @@ def tsquery_keywords(keyword="", fieldName="", mode="terms"):
     """ keyword 변환 => and, or, _, -, not, near, adj 를 tsquery 형식의 | & ! <1> 로 변경 """
     # A+B;C_D => '("A" | "B") & "C D"'
     # A or -B and C_D and not E => '(A !B) & "C D" & !E'
-    if keyword and keyword != "":
-        needPlainto = ""
-        strKeyword = ""  # unquote(keyword) # ; issue fix
+    adjHaveNumberExecptZero=' adj([1-9]\d*) '
+    adjHaveOnlyZero='( adj[0]\d* )'
+    adjOnly = '( adj )'
+    onlySpace = '( )'
+    adjZeroGroup = r'|'.join((adjHaveOnlyZero, adjOnly, onlySpace))
+    adjSpace = '(?<!or)(\s)(?!or)'
 
-        # for val in keyword.split(" AND "):
-        for val in re.split(" and ", keyword, flags=re.IGNORECASE):  # case insentitive
+    nearHaveNumberExecptZero=' near([1-9]\d*) '
+    nearHaveOnlyZero='( near[0]\d* )'
+    nearOnly = '( near )'
+    findDelimiter = '(<[\d+|-]>)'
+    nearZeroGroup = r'|'.join((nearHaveOnlyZero, nearOnly))
+
+    def changeAdj(v):
+        v = re.sub(adjHaveNumberExecptZero, r"<\1>", v, flags=re.IGNORECASE)
+        v = re.sub(adjZeroGroup, r"<->", v, flags=re.IGNORECASE)
+        return v + "|"
+
+    def changeNear(v):
+
+        def swapPositions(val, delimiter): 
+            foo = val.partition(delimiter)
+            return foo[2] + foo[1] + foo[0]    
+
+        v = re.sub(nearHaveNumberExecptZero, r"<\1>", v, flags=re.IGNORECASE)
+        v = re.sub(nearZeroGroup, r"<->", v, flags=re.IGNORECASE)
+        delimiter = re.search(findDelimiter, v, flags=re.IGNORECASE).group(1)
+        bar = swapPositions(v, delimiter)
+        return "(" + v + "|" + bar + ")|"
+
+    def cutDelimiter(foo, bar):
+        if foo.endswith(foo):
+            bar = -len(bar)
+            foo = foo[:bar]
+        return foo             
+
+
+    if keyword and keyword != "":
+
+        strKeyword = ""
+
+        for val in re.split(" and ", keyword, flags=re.IGNORECASE):
             # continue if not terms
             if mode == 'terms':
                 if val.startswith("(@") or val.endswith(".AP") or val.endswith(".INV") or val.endswith(".CRTY") or val.endswith(").LANG") or val.endswith(").STAT") or val.endswith(").TYPE"):
@@ -441,7 +439,7 @@ def tsquery_keywords(keyword="", fieldName="", mode="terms"):
             elif mode == 'person':
                 if val.startswith("(@") or val.endswith(".CRTY") or val.endswith(").LANG") or val.endswith(").STAT") or val.endswith(").TYPE"):
                     continue                
-            strKeyword += "("  # not add paranthesis when above terms
+
             # convert nagative - to !
             if val.startswith("-") or ' or -' in val:
                 val = val.replace("-", "!")
@@ -451,70 +449,57 @@ def tsquery_keywords(keyword="", fieldName="", mode="terms"):
             # convert wildcard * to :*
             if val.endswith("*") or '*' in val:
                 val = val.replace("*", ":*")
+                
             # handle Proximity Search
+            # ex.) 예방 and 치료 and 진단 and 조성물 adj 청구 adj 항
+            strAdj = ""
             if ' adj' in val.lower():
-                s = val.lower()[val.lower().find("adj")+3:].split()[0]
-                if s.isnumeric():
-                    delimiter = "<" + s + ">"
-                    val = val.replace(s, "")
-                else:
-                    delimiter = "<1>"
+                for v in re.split(" or ", val, flags=re.IGNORECASE):
+                    v = re.sub('[()]', '', v)
+                    if ' adj' in v.lower():
+                        strAdj += changeAdj(v)
+                    elif ' near' in v.lower():
+                        strAdj += changeNear(v)
+                    else:                        
+                        strAdj += "".join(str(v)) + "|"
+                strKeyword += cutDelimiter(strAdj, "|")               
+                val = ""
 
-                val = re.sub(re.escape('adj'), delimiter, val, flags=re.IGNORECASE)                    
-                # val = val.replace("adj", delimiter)
-            # A or B near C
-            # A near B or C
-            # A or B near C or D near E or F
             strNear = ""
             if ' near' in val.lower():
                 for v in re.split(" or ", val, flags=re.IGNORECASE):
-                    # remove possible parenthesis
                     v = re.sub('[()]', '', v)
                     if ' near' in v.lower():
-                        s = v.lower()[v.lower().find("near")+4:].split()[0]
-                        if s.isnumeric():
-                            delimiter = "<" + s + ">"
-                            v = v.replace(s, "")
-                        else:
-                            delimiter = "<1>"
+                        strNear += changeNear(v)
+                    elif ' adj' in v.lower():
+                        strNear += changeAdj(v)
+                    else:                        
+                        strNear += "".join(str(v)) + "|"
+                strKeyword += cutDelimiter(strNear, "|")
+                val = ""
 
-                        v = re.sub(re.escape('near'), delimiter, v, flags=re.IGNORECASE) 
-                        temp = v.partition(" " + delimiter + " ")
-
-                        # switch position between words and add it
-                        strNear += "(" + v + " | " + \
-                            temp[2] + " " + delimiter + " " + temp[0] + ") | "
-                    else:
-                        strNear += "".join(str(v)) + " | "
-                if strNear.endswith(" | "):
-                    strNear = strNear[:-3]
-                strKeyword += strNear
-                val = ""  # val clear
-
-            # if " OR " in val:
-            if " or ".upper() in map(str.upper, val):
-                needPlainto = "\""
-
-            # add paranthesis every terms block
-
+            strAdj = ""
+            if re.search(adjSpace, val, flags=re.IGNORECASE): 
+                for v in re.split(" or ", val, flags=re.IGNORECASE):
+                    v = re.sub('[()]', '', v)
+                    if ' ' in v.lower():
+                        strAdj += changeAdj(v)
+                    else:                        
+                        strAdj += "".join(str(v)) + "|"
+                strKeyword += cutDelimiter(strAdj, "|")
+                val = ""
+                
             strKeyword += (
-                needPlainto + "".join(str(val)) + needPlainto + ") & "
-            )
-        strKeyword = strKeyword.replace(" AND ", needPlainto + " & ").replace(" OR ", needPlainto + " | ").replace(
-            " and ", needPlainto + " & ").replace(" or ", needPlainto + " | ")  # .replace("_", " ")
+                "".join(str(val)) + "&"
+            ) 
+   
+        strKeyword = cutDelimiter(strKeyword, "&")              
 
-        if strKeyword.endswith(" & "):
-            strKeyword = strKeyword[:-3]
         if not strKeyword:
             return None
-        #  전문소 @@ plainto_tsquery('(A | B) & C')
-        tsqueryType = "plainto_tsquery" if needPlainto else "to_tsquery"
-        result = '"' + fieldName + "\" @@ " + \
-            tsqueryType + "('" + strKeyword + "')"
-        # result = '"' + fieldName + "\" @@ " + \
-        #     "to_tsquery('" + strKeyword + "')"
-        # result += ' or "' + fieldName + "\" @@ " + \
-        #     "plainto_tsquery('" + strKeyword + "')"             
+
+        result = f'"{fieldName}" @@ to_tsquery(\'{strKeyword}\')'
+       
     else:
         result = None
     return result
@@ -569,18 +554,21 @@ def make_vis_ipc(data):
         return [{ 'name' : k, 'value' : v} for k,v in baz.items()]
 
     foo = [i['ipc코드'][0:4] for i in data if i['ipc코드']]
-    bar = frequency_count(foo)
+    bar = frequency_count(foo,20)
     entities = make_dic_to_list_of_dict(bar)
     result = { 'mode' : 'vis_ipc', 'entities' : entities }
     return result    
 
 # [{출원인명: "바이랄테크놀로지스인코포레이티드", 건수: 1},{}]
 
-def make_vis_cla(data, _pageIndex, _pageSize, _sortBy):
+def make_vis_cla(data, subParams):
     ''' visual applicant classify '''
-    pageIndex = _pageIndex
-    pageSize = _pageSize
-    sortBy = _sortBy
+
+    vis_cla = subParams["analysisOptions"]["tableOptions"]["vis_cla"]
+    pageIndex = vis_cla.get('pageIndex', 0)
+    pageSize = vis_cla.get('pageSize', 10)
+    sortBy = vis_cla.get('sortBy', [])
+
     GOVERNMENT = settings.TERMS['APPLICANT_CLASSIFY']['GOVERNMENT']
 
     def classify_swap(x,c):
