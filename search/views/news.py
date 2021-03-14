@@ -12,7 +12,7 @@ from django.http import HttpResponse
 
 from ..models import Listed_corp
 
-from ..utils import get_redis_key
+from ..utils import get_redis_key, remove_duplicates
 
 # caching with redis
 from django.core.cache import cache
@@ -25,22 +25,9 @@ from tensorflow.keras import optimizers
 from tensorflow.keras import losses
 from tensorflow.keras import metrics
 
-
 import numpy as np
 
-
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-
-client_id = settings.NAVER['news_client_id']
-client_secret = settings.NAVER['news_client_secret']
-api_url = settings.NAVER['news_api_url']
-
-display = 100 # 각 키워드 당 검색해서 저장할 기사 수
-
-def clean_keyword(keyword):
-    """ 불필요한 단어 제거 """
-    res = re.sub(' and| or| adj[0-9]| near[0-9]|[\(\)]|["]| \\(@.*?\)|.AP|.INV|.CTRY|.LANG| \\(.*?\).STAT| \\(.*?\).TYPE', '', keyword, flags=re.IGNORECASE)
-    return res 
 
 def get_news(request, mode="needJson"): # mode : needJson, noJson
     """ 쿼리 실행 및 결과 저장 """
@@ -61,55 +48,69 @@ def get_news(request, mode="needJson"): # mode : needJson, noJson
     except:
         pass
 
+
+    def clean_keyword(keyword):
+        result= re.sub(r' and | adj | adj\d+ | near | near\d+ |\(\@AD.*\d{8}\)|\([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).AP|\([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).INV', ' ', keyword, flags=re.IGNORECASE)
+        result = re.sub('[\(\)]|["]', '', result, flags=re.IGNORECASE)
+        return result  
+
+    def get_naver_news(aTxt):
+        client_id = settings.NAVER['news_client_id']
+        client_secret = settings.NAVER['news_client_secret']
+        api_url = settings.NAVER['news_api_url']
+
+        display = 100 # 각 키워드 당 검색해서 저장할 기사 수
+        start = 1 # 검색 시작 위치로 최대 1000까지 가능
+        sort = 'sim' # 정렬 옵션: sim (유사도순), date (날짜순)
+
+        encText = urllib.parse.quote(aTxt)
+        url = f'{api_url}{encText}&display={display}&start={start}&sort={sort}'
+        request = urllib.request.Request(url)
+        request.add_header("X-Naver-Client-Id", client_id)
+        request.add_header("X-Naver-Client-Secret",client_secret)        
+
+        response = urllib.request.urlopen(request)
+        rescode = response.getcode()
+        if rescode != 200:
+            return {"status" : rescode }    
+
+        def strip_b_tag(aStr):
+            return re.sub('<[^<]+?>', '', aStr.replace('&quot;', '\"').replace('&amp;', '&'))
+        def change_date_format(aDate):
+            result = datetime.strptime(aDate, '%a, %d %b %Y %H:%M:%S +0900')
+            return result.strftime('%y-%m-%d %H:%M')         
+
+        response_body = json.loads(response.read().decode('utf-8'))
+        foo = response_body['items']
+        for i in range(0, len(foo)):
+            foo[i]['title'] = strip_b_tag(foo[i]['title'])
+            foo[i]['description'] = strip_b_tag(foo[i]['description'])
+            foo[i]['pubDate'] = change_date_format(foo[i]['pubDate'])
+
+        return {"status" :200 , "data" : sorted(foo, key=lambda k: k['pubDate'], reverse=True)}
+
     # No     
     min_name = clean_keyword(params['searchText'])
 
     # 단어 5개 넘으면 네이버 뉴스 검색에서 안먹는듯 - 역순으로 자름
-    min_name = ' '.join(min_name.split(' ')[-5:])
+    min_name = remove_duplicates(min_name.split(' '))
+    min_name = ' '.join(min_name[-5:])
+    
+    result = get_naver_news(min_name)
+    if result['status'] != 200:
+        return JsonResponse("Error Code:" + result['status'], safe=False)    
 
-    # min_name = "하이브리드 자동차"
-    encText = urllib.parse.quote(min_name)
-    url = api_url + encText + \
-        "&display=" + str(display) + "&sort=sim"
-    request = urllib.request.Request(url)
-    request.add_header("X-Naver-Client-Id", client_id)
-    request.add_header("X-Naver-Client-Secret",client_secret)        
+    # redis save {
+    new_context = {}
+    new_context['news'] = result['data']
+    cache.set(mainKey, new_context, CACHE_TTL)
+    # redis save }
 
-    response = urllib.request.urlopen(request)
-    rescode = response.getcode()
-    if(rescode==200):
-        response_body_str = response.read().decode('utf-8')
-        # json_acceptable_string = response_body_str.replace("'", "\"")
-        response_body = json.loads(response_body_str)
-        # title_link = {}
-        # link_description = {}
-        for i in range(0, len(response_body['items'])):
-            # strip b tag
-            response_body['items'][i]['title'] = re.sub('<[^<]+?>', '', response_body['items'][i]['title'].replace('&quot;', '\"').replace('&amp;', '&'))
-            response_body['items'][i]['description'] = re.sub('<[^<]+?>', '', response_body['items'][i]['description'].replace('&quot;', '\"').replace('&amp;', '&'))
-
-            pDate = datetime.strptime(response_body['items'][i]['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
-            # pDate = pDate.strftime('%Y-%m-%d %H:%M:%S')
-            pDate = pDate.strftime('%y-%m-%d %H:%M')
-            response_body['items'][i]['pubDate'] = pDate
-            # link_description[response_body['items'][i]['link']] = response_body['items'][i]['description']
-            # title_link[response_body['items'][i]['title']] = \
-            #     response_body['items'][i]['link']
-        res = sorted(response_body['items'], key=lambda k: k['pubDate'], reverse=True) 
-        # redis save {
-        new_context = {}
-        new_context['news'] = res
-        cache.set(mainKey, new_context, CACHE_TTL)
-        # redis save }
-        if mode == "needJson":
-            return JsonResponse(res, safe=False)
-        elif mode == "noJson":
-            return res
-        # return title_link
-
-    else:
-        return JsonResponse("Error Code:" + rescode, safe=False)
-        # print("Error Code:" + rescode)    
+    if mode == "needJson":
+        return JsonResponse(result['data'], safe=False)
+    elif mode == "noJson":
+        return result['data']
+ 
 
 def get_news_nlp(request, mode="needJson"):
     """ 

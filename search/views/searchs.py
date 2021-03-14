@@ -119,7 +119,7 @@ def get_searchs(request, mode="begin"):
         whereTermsA = tsquery_keywords(
             params["searchText"], searchVolume, 'terms')
 
-        whereTermsAll = ("((" + whereTermsA + ")) and " if whereTermsA else "")
+        whereTermsAll = ("(" + whereTermsA + ") and " if whereTermsA else "")
 
         whereInventor = (
             tsquery_keywords(params["inventor"],
@@ -387,121 +387,105 @@ def get_Others(dateType, startDate, endDate, status, ipType):
     return result
 
 def tsquery_keywords(keyword="", fieldName="", mode="terms"):
-    """ keyword 변환 => and, or, _, -, not, near, adj 를 tsquery 형식의 | & ! <1> 로 변경 """
-    # A+B;C_D => '("A" | "B") & "C D"'
-    # A or -B and C_D and not E => '(A !B) & "C D" & !E'
-    adjHaveNumberExecptZero=' adj([1-9]\d*) '
+
+    if not keyword:
+        return None    
+
     adjHaveOnlyZero='( adj[0]\d* )'
     adjOnly = '( adj )'
-    onlySpace = '( )'
-    adjZeroGroup = r'|'.join((adjHaveOnlyZero, adjOnly, onlySpace))
-    adjSpace = '(?<!or)(\s)(?!or)'
+    adjZeroGroup = r'|'.join((adjHaveOnlyZero,adjOnly))
+    adjHaveNumberExecptZero=r' adj([1-9]\d*) '
+    adjSpace = r'(\([-!:*ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+) ([-!:*ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\))'
 
-    nearHaveNumberExecptZero=' near([1-9]\d*) '
-    nearHaveOnlyZero='( near[0]\d* )'
-    nearOnly = '( near )'
-    findDelimiter = '(<[\d+|-]>)'
-    nearZeroGroup = r'|'.join((nearHaveOnlyZero, nearOnly))
+    nearHaveNumberExecptZero = '([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+) near([1-9]\d*) ([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+)'
+    nearHaveOnlyZero='([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+) near[0]\d* ([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+)'
+    nearOnly='([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+) near ([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+)' 
 
-    def changeAdj(v):
-        v = re.sub(adjHaveNumberExecptZero, r"<\1>", v, flags=re.IGNORECASE)
-        v = re.sub(adjZeroGroup, r"<->", v, flags=re.IGNORECASE)
-        return v + "|"
+    removeDate = r'( and \(\@AD.*\d{8}\))'
+    removeAP = r'( and \([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).AP)'
+    removeINV = r'( and \([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).INV)'
+    removeGroup = r'|'.join((removeDate,removeAP,removeINV)) 
 
-    def changeNear(v):
+    def convert_symbols(v):
+        result = v
+        if v.startswith("-") or ' or -' in v:
+            result = v.replace("-", "!")
+        # convert nagative not to !
+        if v.startswith("not ") or ' or not ' in v:
+            result = v.replace("not ", "!")
+        # convert wildcard * to :*
+        if v.endswith("*") or '*' in v:
+            result = v.replace("*", ":*")
+        return result
 
-        def swapPositions(val, delimiter): 
-            foo = val.partition(delimiter)
-            return foo[2] + foo[1] + foo[0]    
+    def re_sub(reg, to, val):
+        return re.sub(reg, to, val, flags=re.IGNORECASE)
 
-        v = re.sub(nearHaveNumberExecptZero, r"<\1>", v, flags=re.IGNORECASE)
-        v = re.sub(nearZeroGroup, r"<->", v, flags=re.IGNORECASE)
-        delimiter = re.search(findDelimiter, v, flags=re.IGNORECASE).group(1)
-        bar = swapPositions(v, delimiter)
-        return "(" + v + "|" + bar + ")|"
+    def removeOuterParentheses(S: str) -> str:
+        stack = []
+        res = ''
+        for i in range(len(S)):
+            stack.append(S[i])
+            if stack.count('(') == stack.count(')'):
+                res+=''.join(stack[1:-1])
+                stack = []
+        if res == '':
+            return S               
+        return res
 
-    def cutDelimiter(foo, bar):
-        if foo.endswith(foo):
-            bar = -len(bar)
-            foo = foo[:bar]
-        return foo             
+    def removeTail(result, tail):
+        if result.endswith(result):
+            tail = -len(tail)
+            result = result[:tail]
+        return result
 
+    def keepParantheses(v):
+        pattern = re.compile("\||\<[\d+|-]\>")
+        return re.search(pattern, v)
 
-    if keyword and keyword != "":
+    if mode == 'terms':
+        keyword = re_sub(removeGroup, r"", keyword)
+    elif mode == 'person':
+        keyword = re_sub(removeDate, r"", keyword)
 
-        strKeyword = ""
+    strKeyword = ''
+    
+    for v in re.split(" and ", keyword, flags=re.IGNORECASE):
+        v = convert_symbols(v)
+        v = re_sub(' or ', r"|", v)
+        if '|' in v:
+            v = removeOuterParentheses(v)
+            strOr = '('
+            for _v in re.split("\|", v):
+                _v = re_sub(adjZeroGroup, r"<->", _v)
+                _v = re_sub(adjHaveNumberExecptZero, r"<\1>", _v)
+                _v = re_sub(nearHaveNumberExecptZero, r"(\1<\2>\3|\3<\2>\1)", _v)
+                _v = re_sub(nearHaveOnlyZero, r"(\1<->\2|\2<->\1)", _v)
+                _v = re_sub(nearOnly, r"(\1<->\2|\2<->\1)", _v)
+                _v = re_sub(adjSpace, r"\1<->\2", _v)
+                _v = removeOuterParentheses(_v) if not keepParantheses(_v) else _v
+                _v = re_sub(' ', r"&", _v)
+                strOr += ("".join(str(_v)) + "|")
+            strOr = removeTail(strOr,"|")
+            strKeyword += ("".join(str(strOr)) + ")&")
+        else:
+            v = re_sub(adjZeroGroup, r"<->", v)
+            v = re_sub(adjHaveNumberExecptZero, r"<\1>", v)
+            v = re_sub(nearHaveNumberExecptZero, r"(\1<\2>\3|\3<\2>\1)", v)
+            v = re_sub(nearHaveOnlyZero, r"(\1<->\2|\2<->\1)", v)
+            v = re_sub(nearOnly, r"(\1<->\2|\2<->\1)", v)                            
+    
+            v = re_sub(adjSpace, r"\1<->\2", v)
+            v = removeOuterParentheses(v) if not keepParantheses(v) else v
+            v = re_sub(' ', r"&", v)
+            strKeyword += ("".join(str(v)) + "&")
 
-        for val in re.split(" and ", keyword, flags=re.IGNORECASE):
-            # continue if not terms
-            if mode == 'terms':
-                if val.startswith("(@") or val.endswith(".AP") or val.endswith(".INV") or val.endswith(".CRTY") or val.endswith(").LANG") or val.endswith(").STAT") or val.endswith(").TYPE"):
-                    continue
-            elif mode == 'person':
-                if val.startswith("(@") or val.endswith(".CRTY") or val.endswith(").LANG") or val.endswith(").STAT") or val.endswith(").TYPE"):
-                    continue                
+    strKeyword = removeTail(strKeyword,"&")
 
-            # convert nagative - to !
-            if val.startswith("-") or ' or -' in val:
-                val = val.replace("-", "!")
-            # convert nagative not to !
-            if val.startswith("not ") or ' or not ' in val:
-                val = val.replace("not ", "!")
-            # convert wildcard * to :*
-            if val.endswith("*") or '*' in val:
-                val = val.replace("*", ":*")
-                
-            # handle Proximity Search
-            # ex.) 예방 and 치료 and 진단 and 조성물 adj 청구 adj 항
-            strAdj = ""
-            if ' adj' in val.lower():
-                for v in re.split(" or ", val, flags=re.IGNORECASE):
-                    v = re.sub('[()]', '', v)
-                    if ' adj' in v.lower():
-                        strAdj += changeAdj(v)
-                    elif ' near' in v.lower():
-                        strAdj += changeNear(v)
-                    else:                        
-                        strAdj += "".join(str(v)) + "|"
-                strKeyword += cutDelimiter(strAdj, "|")               
-                val = ""
+    if not strKeyword:
+        return None
 
-            strNear = ""
-            if ' near' in val.lower():
-                for v in re.split(" or ", val, flags=re.IGNORECASE):
-                    v = re.sub('[()]', '', v)
-                    if ' near' in v.lower():
-                        strNear += changeNear(v)
-                    elif ' adj' in v.lower():
-                        strNear += changeAdj(v)
-                    else:                        
-                        strNear += "".join(str(v)) + "|"
-                strKeyword += cutDelimiter(strNear, "|")
-                val = ""
-
-            strAdj = ""
-            if re.search(adjSpace, val, flags=re.IGNORECASE): 
-                for v in re.split(" or ", val, flags=re.IGNORECASE):
-                    v = re.sub('[()]', '', v)
-                    if ' ' in v.lower():
-                        strAdj += changeAdj(v)
-                    else:                        
-                        strAdj += "".join(str(v)) + "|"
-                strKeyword += cutDelimiter(strAdj, "|")
-                val = ""
-                
-            strKeyword += (
-                "".join(str(val)) + "&"
-            ) 
-   
-        strKeyword = cutDelimiter(strKeyword, "&")              
-
-        if not strKeyword:
-            return None
-
-        result = f'"{fieldName}" @@ to_tsquery(\'{strKeyword}\')'
-       
-    else:
-        result = None
+    result = f'"{fieldName}" @@ to_tsquery(\'{strKeyword}\')'
     return result
 
 def get_query(request):
