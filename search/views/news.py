@@ -12,7 +12,7 @@ from django.http import HttpResponse
 
 from ..models import Listed_corp
 
-from ..utils import get_redis_key, remove_duplicates
+from ..utils import get_redis_key, remove_duplicates, sampling
 
 # caching with redis
 from django.core.cache import cache
@@ -29,25 +29,34 @@ import numpy as np
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-def get_news(request, mode="needJson"): # mode : needJson, noJson
-    """ 쿼리 실행 및 결과 저장 """
-    # redis key
-    mainKey, _, params, _ = get_redis_key(request)
 
-    mainKey += "news"
 
-    context = cache.get(mainKey)     
-    # is there data in redis?
-    # yes
-    try:
-        if context['news']:
-            if mode == "needJson":
-                return JsonResponse(context['news'], safe=False)
-            else:
-                return context['news']            
-    except:
-        pass
+def return_type(result, api):
+    return JsonResponse(result, safe=False) if api else result    
 
+def get_news(request, mode="begin", api=True): # mode : 
+
+    def load_redis(mode="begin", api=True):
+        context = cache.get(mainKey)
+        context_paging = cache.get(subKey) 
+        try:
+            if context and context[mode]:
+                return context[mode]
+            if context_paging and context_paging[mode]:
+                return context_paging[mode]                    
+        except (KeyError, NameError):
+            pass        
+        return None
+
+    def save_redis(foo, bar):
+        _foo = {}
+        _foo['nlp'] = foo
+        cache.set(mainKey, _foo, CACHE_TTL)
+
+        _bar = {}
+        _bar['begin'] = bar
+        cache.set(subKey, _bar, CACHE_TTL)
+        return    
 
     def clean_keyword(keyword):
         result= re.sub(r' and | adj | adj\d+ | near | near\d+ |\(\@AD.*\d{8}\)|\([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).AP|\([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).INV', ' ', keyword, flags=re.IGNORECASE)
@@ -82,121 +91,116 @@ def get_news(request, mode="needJson"): # mode : needJson, noJson
 
         response_body = json.loads(response.read().decode('utf-8'))
         foo = response_body['items']
+        # TODO 100개이상 구현
+        # rowsCount = response_body['total']
+        rowsCount = 100
         for i in range(0, len(foo)):
             foo[i]['title'] = strip_b_tag(foo[i]['title'])
             foo[i]['description'] = strip_b_tag(foo[i]['description'])
             foo[i]['pubDate'] = change_date_format(foo[i]['pubDate'])
 
-        return {"status" :200 , "data" : sorted(foo, key=lambda k: k['pubDate'], reverse=True)}
+        return {"status" :200 , "rowsCount" : rowsCount,  "data" : sorted(foo, key=lambda k: k['pubDate'], reverse=True)}
+    
+    def make_paging_rows(data):
+        # Add offset limit
+        offset = pageIndex * pageSize
+        limit = pageSize
+        return sampling(data, offset, limit)          
 
-    # No     
+    # caller
+    mainKey, subKey, params, subParams = get_redis_key(request)
+    mainKey += "news"
+    subKey += "news"
+
+    result = load_redis(mode, api)
+
+    if result:
+        return return_type(result, api)     
+    
+   
     min_name = clean_keyword(params['searchText'])
 
     # 단어 5개 넘으면 네이버 뉴스 검색에서 안먹는듯 - 역순으로 자름
     min_name = remove_duplicates(min_name.split(' '))
     min_name = ' '.join(min_name[-5:])
+
+    newsTable = subParams["analysisOptions"]["tableOptions"]["newsTable"]
+    pageIndex = newsTable.get('pageIndex', 0)
+    pageSize = newsTable.get('pageSize', 10)
     
-    result = get_naver_news(min_name)
-    if result['status'] != 200:
-        return JsonResponse("Error Code:" + result['status'], safe=False)    
+    res = get_naver_news(min_name)
+    if res['status'] != 200:
+        return JsonResponse("Error Code:" + res['status'], safe=False)    
 
-    # redis save {
-    new_context = {}
-    new_context['news'] = result['data']
-    cache.set(mainKey, new_context, CACHE_TTL)
-    # redis save }
+    result = { 'rowsCount': res['rowsCount'], 'rows': make_paging_rows(res['data'])}
 
-    if mode == "needJson":
-        return JsonResponse(result['data'], safe=False)
-    elif mode == "noJson":
-        return result['data']
- 
+    save_redis(res['data'], result)
 
-def get_news_nlp(request, mode="needJson"):
+    return return_type(result, api)
+
+def get_news_nlp(request, api=True):
     """ 
     news title description tokenization 
     returns a list of NNP nouns
-    ※ According to the NNP nouns of mecab, the company name may not be recognized.
+    ※ Depending on the NNP nouns dictionary of mecab, the company name may not be recognized.
     """
 
     # redis key
-    mainKey, _, _, _ = get_redis_key(request)
-
+    mainKey, subKey, _, _ = get_redis_key(request)
     mainKey += "news"
-
-    # is there data in Redis
+    subKey += "news"
     context = cache.get(mainKey)
-    # yes
     try:
-        if context['news_nlp']:
-            if mode == "needJson":
-                return JsonResponse(context['news_nlp'], safe=False)
-            else:
-                return context['news_nlp']
-    except:
-        pass        
+        if context and context['news_nlp']:
+            return return_type(context['news_nlp'], api)         
+    except (KeyError):
+        pass            
+
     
-    # no
-    news = get_news(request, mode="noJson")    
+    news = get_news(request, mode="nlp", api=False)    
     news_nlp = ""
-    if news:
-        for i in range(len(news)):
-            news_nlp += news[i]['title'] + " " if news[i]['title'] else ""
-            news_nlp += news[i]['description'] + " " if news[i]['description'] else ""
-        # news_nlp = ' '.join(tokenizer(news_nlp) if news_nlp else '')
+    if not news:
+        news_nlp = []
+    else:
+        news_nlp = ' '.join(d['title'] for d in news)
+        news_nlp += ' '.join(d['description'] for d in news)
         try:
             news_nlp = tokenizer(news_nlp)
         except:
-            news_nlp = ''
-    else:
-        news_nlp = []
+            news_nlp = []
 
     # sorting on bais of frequency of elements
     news_nlp = sorted(news_nlp, key = news_nlp.count, reverse = True) 
 
     # redis save {
-    new_context = {}
-    new_context['news'] = news
-    new_context['news_nlp'] = news_nlp
-    cache.set(mainKey, new_context, CACHE_TTL)
-    # redis save }      
-         
-    if mode == "needJson":
-        return JsonResponse(news_nlp, safe=False)
-    elif mode == "noJson":
-        return news_nlp        
+    _context = {}
+    _context['news_nlp'] = news_nlp
+    cache.set(mainKey, _context, CACHE_TTL)
+    # redis save }   
+    
+    return return_type(news_nlp, api)    
 
-
-def get_related_company(request, mode="needJson"):
+def get_related_company(request, api=True):
     ''' search news_nlp list in discloure db '''
 
     # redis key
-    mainKey, _, _, _ = get_redis_key(request)
-
+    mainKey, subKey, _, _ = get_redis_key(request)
     mainKey += "news"
-    # is there data in Redis
+    subKey += "news"
     context = cache.get(mainKey)     
 
-    # yes
     try:
-        if context['company']:
-            if mode == "needJson":
-                return JsonResponse(context['company'], safe=False)
-            else:
-                return context['company']            
-    except:
-        pass        
-    
-    # no
-    news = get_news(request, mode="noJson")
-    news_nlp = get_news_nlp(request, mode="noJson")
+        if context and context['company']:
+            return return_type(context['company'], api)      
+    except (KeyError):
+        pass
 
-    # redis save {
-    new_context = {}
-    new_context['news'] = news
-    new_context['news_nlp'] = news_nlp
-    cache.set(mainKey, new_context, CACHE_TTL)
-    # redis save }       
+    def remove_duplicate(seq):
+        seen = set()
+        seen_add = seen.add
+        return [x for x in seq if not (x in seen or seen_add(x))]    
+   
+    news_nlp = get_news_nlp(request, api=False)
     
     unique_news_nlp= remove_duplicate(news_nlp)
     
@@ -215,6 +219,7 @@ def get_related_company(request, mode="needJson"):
         response = { 'corpName': myCorpName, 'stockCode': myStockCode}
 
         # redis update before leave {
+        new_context = {}
         new_context['company'] = response
         cache.set(mainKey, new_context, CACHE_TTL)
         # redis update before leave }  
@@ -222,45 +227,45 @@ def get_related_company(request, mode="needJson"):
         return JsonResponse(response, status=200, safe=False)
     except:
         return HttpResponse() # 500        
-    # select * from table where value ~* 'foo|bar|baz';
 
-    # ob_list = data.objects.filter(name__in=my_list)
-
-    # # redis save {
-    # new_context = {}
-    # new_context['news'] = news
-    # new_context['news_nlp'] = news_nlp
-    # cache.set(mainKey, new_context, CACHE_TTL)
-    # # redis save }            
-    # return JsonResponse(news_nlp, safe=False)    
-
-def get_news_sa(request): 
+def get_news_sa(request, api=False): 
     """ sensitive analysis whether news articles are positive or negative """
     """ ./trainning/mostcommon.txt, model.json, model.h5 """
 
     # redis key
-    # mainKey, _, _, _ = get_redis_key(request)
+    mainKey, _, _, _ = get_redis_key(request)
+    mainKey += "news"
+    context = cache.get(mainKey)     
 
-    # mainKey += "news"
-    # # is there data in Redis
-    # context = cache.get(mainKey)     
+    try:
+        if context and context['news_sa']:
+            return return_type(context['news_sa'], api)      
+    except (KeyError):
+        pass
 
-    # yes
-    news= get_news(request, mode="noJson")
+    token= get_news_nlp(request, api=False)
+    # news= get_news_nlp(request, api=False)
+    # token = ''
+    # if news:
+    #     token = ' '.join(d['title'] for idx,d in enumerate(news) if idx < 6)
 
-    token = ''
-    if news:
-        for i in range(len(news)):
-            token += news[i]['title'] + " " if news[i]['title'] else ""
-            if i > 5: break
-            # token += news[i]['description'] + " " if news[i]['description'] else ""
-        # news_token = tokenize(token) if token else ''
-    # else:
-        # news_token = ''
+    #     for i in range(len(news)):
+    #         token += news[i]['title'] + " " if news[i]['title'] else ""
+    #         if i > 5: break
+    #         # token += news[i]['description'] + " " if news[i]['description'] else ""
+    #     # news_token = tokenize(token) if token else ''
+    # # else:
+    #     # news_token = ''
   
      
     result = _sensitive_analysis(token)            
     # result = _sensitive_analysis(tokenize('셀트리온이 항체치료제 선택한 이유 안전성·변이대응 탁월'))            
+
+    # redis save {
+    _context = {}
+    _context['news_sa'] = result
+    cache.set(mainKey, _context, CACHE_TTL)
+    # redis save }       
 
     return JsonResponse(result, status=200, safe=False)
     # except:
@@ -354,8 +359,10 @@ def _sensitive_analysis(news_token):
     # token = tokenizer(news_token)
     # token = tokenize("믿고 보는 감독이지만 이번에는 아니네요")
     # token = tokenize("셀트리온이 항체치료제 선택한 이유 안전성·변이대응 탁월")
-    token = tokenize(news_token)
-    tf = term_frequency(token)
+    # token = tokenize(news_token)
+    # tf = term_frequency(token)
+    tf = term_frequency(news_token)
+
     data = np.expand_dims(np.asarray(tf).astype('float32'), axis=0)
     # score = float(model.predict(data))
 
@@ -372,9 +379,6 @@ def tokenizer(raw, pos=["NNP","UNKNOWN"]):
         return [
             word
             for word, tag in mecab.pos(raw) if len(word) > 1 and tag in pos and word not in STOPWORDS
-            # if len(word) > 1 and tag in pos and word not in stopword
-            # if tag in pos
-            # and not type(word) == float
         ]
     except:
         return []       
@@ -384,10 +388,3 @@ def tokenize(doc):
     # norm은 정규화, stem은 근어로 표시하기를 나타냄
     return ['/'.join(t) for t in mecab.pos(doc)] #, norm=True, stem=True)]         
 
-def term_frequency(doc, selected_words):
-    return [doc.count(word) for word in selected_words]    
-
-def remove_duplicate(seq):
-    seen = set()
-    seen_add = seen.add
-    return [x for x in seq if not (x in seen or seen_add(x))]

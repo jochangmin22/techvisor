@@ -7,7 +7,7 @@ import operator
 import json
 from collections import defaultdict, Counter
 
-from ..utils import get_redis_key, dictfetchall, remove_duplicates, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags
+from ..utils import get_redis_key, dictfetchall, remove_duplicates, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags, remove_tail
 
 # from .similarity import similarity
 
@@ -85,14 +85,15 @@ def get_searchs(request, mode="begin"):
         if not sortBy:
             return ''
 
-        foo =' '
+        foo =', '
         for s in sortBy:
             foo += s['_id']
             foo += ' ASC, ' if s['desc'] else ' DESC, '
 
         if foo.endswith(", "):
             foo = foo[:-2]
-        return f' order by {foo}'          
+        # return f' order by {foo}'          
+        return f' {foo}'          
 
 
     # TODO: 검색범위 선택
@@ -116,19 +117,35 @@ def get_searchs(request, mode="begin"):
     # 키워드 검색
     else: 
         # to_tsquery 형태로 parse
-        whereTermsA = tsquery_keywords(
-            params["searchText"], searchVolume, 'terms')
+    # result = f'"{fieldName}" @@ to_tsquery(\'{strKeyword}\')'
+    # result += f' order by ts_rank("{fieldName}",to_tsquery(\'{strKeyword}\') desc'
 
-        whereTermsAll = ("(" + whereTermsA + ") and " if whereTermsA else "")
+        queryTextTerms = tsquery_keywords(params["searchText"], None, 'terms')
+        whereTermsTerm = f'"{searchVolume}" @@ to_tsquery(\'{queryTextTerms}\')' if queryTextTerms else ""
 
-        whereInventor = (
-            tsquery_keywords(params["inventor"],
-                        "발명자tsv", "person") if params["inventor"] else ""
-        )
-        whereAssignee = (
-            tsquery_keywords(params["assignee"],
-                        "출원인tsv", "person") if params["assignee"] else ""
-        )
+        orderClause = f' order by ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) desc '
+
+        queryTextInventor = tsquery_keywords(params["inventor"], None, 'person')
+        whereInventor = f'"발명자tsv" @@ to_tsquery(\'{queryTextInventor}\')' if queryTextInventor else ""
+
+        queryTextAssignee = tsquery_keywords(params["assignee"], None, 'person')
+        whereAssignee = f'"출원인tsv" @@ to_tsquery(\'{queryTextAssignee}\')' if queryTextAssignee else ""
+
+        
+
+        # whereTermsA = tsquery_keywords(
+        #     params["searchText"], searchVolume, 'terms')
+
+        # whereTermsAll = ("(" + whereTermsA + ") and " if whereTermsA else "")
+
+        # whereInventor = (
+        #     tsquery_keywords(params["inventor"],
+        #                 "발명자tsv", "person") if params["inventor"] else ""
+        # )
+        # whereAssignee = (
+        #     tsquery_keywords(params["assignee"],
+        #                 "출원인tsv", "person") if params["assignee"] else ""
+        # )
         whereOther = get_Others(
             params["dateType"],
             params["startDate"],
@@ -136,13 +153,17 @@ def get_searchs(request, mode="begin"):
             params["status"],
             params["ipType"],
         )
-        whereAll = whereTermsAll + ("(" + whereInventor + ") and " if whereInventor else "") + (
+        whereAll = whereTermsTerm + ("(" + whereInventor + ") and " if whereInventor else "") + (
             "(" + whereAssignee + ") and " if whereAssignee else "") + whereOther
-        if whereAll.endswith(" and "):
-            whereAll = whereAll[:-5]
-    query = 'select count(*) over () as cnt, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE (' + \
-        whereAll + ")"
 
+        whereAll = remove_tail(whereAll," and ")
+
+
+    # query = 'select count(*) over () as cnt, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE (' + \
+    #     whereAll + ")"
+    # select count(*) over () as cnt, ts_rank(search,to_tsquery('예방&치료&진단')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE (("search" @@ to_tsquery('예방&치료&진단')) and ("발명자tsv" @@ to_tsquery('조'))) order by ts_rank("search",to_tsquery('예방&치료&진단')) desc;-- offset 0 limit 10000;
+    query = f'select count(*) over () as cnt, ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE ({whereAll}){orderClause}'
+    print(query)
     if mode == "query":  # mode가 query면 여기서 분기
         return query
 
@@ -162,8 +183,9 @@ def get_searchs(request, mode="begin"):
 
         rows = dictfetchall(cursor)
 
+    res = {}
+    res_sub = {}
     if rows:
-        res = {}
         res['nlp_raw'] = make_nlp_raw(rows)
         res['mtx_raw'] = make_mtx_raw(rows)
         res['ind_raw'] = make_ind_raw(rows)
@@ -172,11 +194,19 @@ def get_searchs(request, mode="begin"):
         res['vis_per'] = make_vis_per(rows)
 
         result = make_paging_rows(rows)
-        res_sub = {}
         res_sub['raw'] = result
         res_sub['vis_cla'] = make_vis_cla(rows, subParams)
     else:
+        res['nlp_raw'] = []
+        res['mtx_raw'] = []
+        res['ind_raw'] = []
+        res['vis_num'] = []
+        res['vis_ipc'] = []
+        res['vis_per'] = []
+
         result = { 'rowsCount': 0, 'rows': []} 
+        res_sub['raw'] = result
+        res_sub['vis_cla'] = { 'mode' : 'vis_cla', 'entities' : {} }
         
     # ''' 유사도 처리 '''
     # result=similarity(row)
@@ -433,12 +463,6 @@ def tsquery_keywords(keyword="", fieldName="", mode="terms"):
             return S               
         return res
 
-    def removeTail(result, tail):
-        if result.endswith(result):
-            tail = -len(tail)
-            result = result[:tail]
-        return result
-
     def keepParantheses(v):
         pattern = re.compile("\||\<[\d+|-]\>")
         return re.search(pattern, v)
@@ -466,7 +490,7 @@ def tsquery_keywords(keyword="", fieldName="", mode="terms"):
                 _v = removeOuterParentheses(_v) if not keepParantheses(_v) else _v
                 _v = re_sub(' ', r"&", _v)
                 strOr += ("".join(str(_v)) + "|")
-            strOr = removeTail(strOr,"|")
+            strOr = remove_tail(strOr,"|")
             strKeyword += ("".join(str(strOr)) + ")&")
         else:
             v = re_sub(adjZeroGroup, r"<->", v)
@@ -480,13 +504,16 @@ def tsquery_keywords(keyword="", fieldName="", mode="terms"):
             v = re_sub(' ', r"&", v)
             strKeyword += ("".join(str(v)) + "&")
 
-    strKeyword = removeTail(strKeyword,"&")
+    strKeyword = remove_tail(strKeyword,"&")
 
     if not strKeyword:
         return None
 
-    result = f'"{fieldName}" @@ to_tsquery(\'{strKeyword}\')'
-    return result
+    return strKeyword        
+
+    # result = f'"{fieldName}" @@ to_tsquery(\'{strKeyword}\')'
+    # result += f' order by ts_rank("{fieldName}",to_tsquery(\'{strKeyword}\') desc'
+    # return result
 
 def get_query(request):
     """ 쿼리 확인용 """

@@ -62,7 +62,13 @@ def sampling(selection, offset=0, limit=None):
 def remove_duplicates(t):
     return list(set(t))
 
-raw_len_limit = 20000
+def remove_tail(result, tail):
+    if result.endswith(tail):
+        tail = -len(tail)
+        result = result[:tail]
+    return result    
+
+raw_len_limit = 50000
 STOPWORDS = settings.TERMS['STOPWORDS']
 STOPWORDS_PHRASE = settings.TERMS['STOPWORDS_PHRASE']
 
@@ -119,6 +125,9 @@ def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
 
 def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     ''' raw token화 (raw_len_limit 단어 길이로 분할 token화)'''
+    if not raw:
+        return []
+
     def _tokenizer(raw):
         def collected_exist():
             return True if '_' in saving and saving not in STOPWORDS_PHRASE else False
@@ -220,6 +229,8 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
         return result    
 
     result = []
+    print(len(raw))
+    print(len(raw)/raw_len_limit)
     for i in range(0, len(raw), raw_len_limit):
         foo = _tokenizer(raw[i:i+raw_len_limit])
         # if i == 0:
