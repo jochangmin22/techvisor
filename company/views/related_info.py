@@ -6,10 +6,10 @@ from django.http import HttpResponse
 from copy import deepcopy
 import json
 import operator
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from ..utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase, remove_duplicates, sampling
-from .crawler import update_today_disclosure_report, update_today_crawl_mdcline
+from ..utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase, remove_duplicates, sampling, remove_tail
+from .crawler import update_today_corp_report, update_today_crawl_mdcline
 
 from ..models import Mdcin_clinc_test_info, Disclosure_report
 from search.models import Listed_corp, Disclosure
@@ -23,28 +23,57 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
 
+def save_crawl_time(key):
+    now = datetime.utcnow()
+    return cache.set(key, now, CACHE_TTL)
+
+def more_then_an_hour_passed(last_updated):    
+    try:
+        if (datetime.utcnow() - last_updated) > timedelta(1):
+            return True
+        else:
+            return False            
+    except:
+        return True            
+
 def get_clinic_test(request):
     ''' If there is no corpName, the last 100 rows are displayed '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        corpName = data['corpName']
+        corpName = data.get('corpName','')
+        pageIndex = data.get('pageIndex', 0)
+        pageSize = data.get('pageSize', 10)
+        sortBy = data.get('sortBy', [])        
+
+        # Add sort by
+        orderClause = ','.join('-'+ s['_id'] if s['desc'] else s['_id'] for s in sortBy) if sortBy else '-승인일'
+        
+        # check one hour or more has passed from latest crawl
+        last_updated = cache.get('clinic_text_crawl') if cache.get('clinic_text_crawl') else None
 
          # crawl today report
         weekno = datetime.today().weekday()
-        if weekno<5: # On weekends, the clinical server does not work, so the crawl passes
+        if weekno<5 and more_then_an_hour_passed(last_updated): # On weekends, the clinical server does not work, so the crawl passes
             update_today_crawl_mdcline()
+            save_crawl_time('clinic_text_crawl')
 
         if corpName:
             isExist = Mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()
             if not isExist:
                 return JsonResponse([], safe=False)
 
-            rows = Mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).order_by('-승인일').values()
+            rows = Mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).order_by(orderClause).values()
         else:
-            rows = Mdcin_clinc_test_info.objects.all().order_by('-승인일')[:100].values()            
+            rows = Mdcin_clinc_test_info.objects.all().order_by(orderClause)[:100].values()            
 
-        rows = list(rows)
-        result = [dict(row, **{
+        # Add offset limit
+        offset = pageIndex * pageSize
+        limit = pageSize
+
+        rowsCount = len(rows)
+        rows = sampling(list(rows), offset, limit)
+        # rows = list(rows)
+        res = [dict(row, **{
                 '신청자': row['신청자'],
                 '승인일': row['승인일'],
                 '제품명': row['제품명'],
@@ -52,40 +81,57 @@ def get_clinic_test(request):
                 '연구실명': row['연구실명'],
                 '임상단계': row['임상단계'],
             }) for row in rows]
-            
+        result = { 'rowsCount': rowsCount, 'rows': res }            
         return JsonResponse(result, safe=False) 
 
-def get_disclosure_report(request):
+def get_corp_report(request):
     ''' If there is no corpName, the last 100 rows are displayed '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        corpName = data['corpName']
+        corpName = data.get('corpName','')
+        pageIndex = data.get('pageIndex', 0)
+        pageSize = data.get('pageSize', 10)
+        sortBy = data.get('sortBy', [])  
+
+        # Add sort by
+        orderClause = ','.join('-'+ s['_id'] if s['desc'] else s['_id'] for s in sortBy) if sortBy else '-접수번호'        
+
+        # check one hour or more has passed from latest crawl
+        last_updated = cache.get('corp_report_crawl') if cache.get('corp_report_crawl') else None
 
         # crawl today report
         weekno = datetime.today().weekday()
-        if weekno<5: # On weekends, the opendart server does not work, so the crawl passes        
-            update_today_disclosure_report()
+        if weekno<5 and more_then_an_hour_passed(last_updated): # On weekends, the opendart server does not work, so the crawl passes        
+            update_today_corp_report()
+            save_crawl_time('corp_report_crawl')
 
         if corpName:
             isExist = Disclosure_report.objects.filter(종목명__contains=corpName).exists()
             if not isExist:
                 return JsonResponse([], safe=False)
 
-            rows = Disclosure_report.objects.filter(종목명__contains=corpName).order_by('-접수번호').values()
+            rows = Disclosure_report.objects.filter(종목명__contains=corpName).order_by(orderClause).values()
         else:
             # rows = Disclosure_report.objects.all().order_by('-접수일자')[:100].values()            
-            rows = Disclosure_report.objects.exclude(종목코드__exact='').order_by('-접수번호')[:100].values()            
+            rows = Disclosure_report.objects.exclude(종목코드__exact='').order_by(orderClause)[:100].values()            
 
-        rows = list(rows)
-        result = [dict(row, **{
+        # Add offset limit
+        offset = pageIndex * pageSize
+        limit = pageSize
+
+        rowsCount = len(rows)
+        rows = sampling(list(rows), offset, limit)            
+        # rows = list(rows)
+        res = [dict(row, **{
                 '공시대상회사': row['종목명'],
                 '보고서명': row['보고서명'],
                 '제출인': row['공시제출인명'],
                 '접수일자': row['접수일자'],
                 '비고': row['비고'],
             }) for row in rows]
-            
-        return JsonResponse(result, safe=False)         
+
+        result = { 'rowsCount': rowsCount, 'rows': res }            
+        return JsonResponse(result, safe=False)             
 
 def get_owned_patent(request, mode="begin"): # mode : begin, nlp 
     ''' If there is no corpName, the last 100 rows are displayed '''
@@ -129,8 +175,7 @@ def get_owned_patent(request, mode="begin"): # mode : begin, nlp
                     foo += s['_id']
                     foo += ' ASC, ' if s['desc'] else ' DESC, '
 
-                if foo.endswith(", "):
-                    foo = foo[:-2]
+                foo = remove_tail(foo,", ")
                 # query += f' order by {foo}'
 
             cursor.execute(
@@ -259,7 +304,7 @@ def get_nlp(request, analType):
     volume = subParams['menuOptions'][analType]['volume']
     unit = subParams['menuOptions'][analType]['unit']    
     try:
-        emergence = subParams['analysisOptions'][analType]['emergence']
+        emergence = subParams['menuOptions'][analType]['emergence']
     except KeyError:
         emergence = '빈도수'
 

@@ -60,14 +60,43 @@ def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
         yield date1 + timedelta(n)  
 
-def update_today_disclosure_report():
+def update_today_corp_report():
+    def crawl_corp_report(**kwargs):
+        keys = ['corp_code','bgn_de','end_de','last_reprt_at','pblntf_ty','pblntf_detail_ty','corp_cls','sort','sort_mth','page_no','page_count']
+        for key in kwargs.keys():
+            if not key in keys:
+                print("get_list() has no parameter \'"+key+"\'")
+                return False
+        # crtfc_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&bgn_de=20200816&end_de=20201016&corp_cls=Y&page_no=1&page_count=100
+        params = {**{'crtfc_key':DART['api_key']},**kwargs}
+        items = ['corp_cls','corp_name','corp_code','stock_code','report_nm','rcept_no','flr_nm','rcept_dt','rm']
+        item_names = ['법인구분','종목명','고유번호','종목코드','보고서명','접수번호','공시제출인명','접수일자','비고']
+        url = DART['dart_url'] + DART['oper_gong']
+        res = requests.get(url,params=params)
+        json_dict = json.loads(res.text)
+
+        data = []
+        if json_dict['status'] == "000":
+            for line in json_dict['list']:
+                data.append([])
+                for itm in items:
+                    if itm in line.keys():
+                        data[-1].append(line[itm])
+                    else: data[-1].append("")
+            df = pd.DataFrame(data,columns=item_names)
+            return json_dict['total_page'], df
+        elif json_dict['status'] == "013": # {"status":"013","message":"조회된 데이타가 없습니다."}
+            return 0, None
+        else:
+            return 0, df # TODO
+
     today = datetime.today().strftime('%Y%m%d')
-    total_page, df = crawl_disclosure_report(bgn_de=today, end_de=today, page_no='1', page_count = '100')
+    total_page, df = crawl_corp_report(bgn_de=today, end_de=today, page_no='1', page_count = '100')
     if total_page == 0: 
         return
     for i in range(1, total_page + 1):
         if i > 1: # df already have at first
-            _, df = crawl_disclosure_report(bgn_de=today, end_de=today, page_no=i, page_count = '100')
+            _, df = crawl_corp_report(bgn_de=today, end_de=today, page_no=i, page_count = '100')
 
         engine = create_engine(db_connection_url)
 
@@ -87,40 +116,53 @@ def update_today_disclosure_report():
 
             cn.execute(sql)
 
-def crawl_disclosure_report(**kwargs):
-    keys = ['corp_code','bgn_de','end_de','last_reprt_at','pblntf_ty','pblntf_detail_ty','corp_cls','sort','sort_mth','page_no','page_count']
-    for key in kwargs.keys():
-        if not key in keys:
-            print("get_list() has no parameter \'"+key+"\'")
-            return False
-    # crtfc_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&bgn_de=20200816&end_de=20201016&corp_cls=Y&page_no=1&page_count=100
-    params = {**{'crtfc_key':DART['api_key']},**kwargs}
-    items = ['corp_cls','corp_name','corp_code','stock_code','report_nm','rcept_no','flr_nm','rcept_dt','rm']
-    item_names = ['법인구분','종목명','고유번호','종목코드','보고서명','접수번호','공시제출인명','접수일자','비고']
-    url = DART['dart_url'] + DART['oper_gong']
-    res = requests.get(url,params=params)
-    # print(res.text)
-    json_dict = json.loads(res.text)
 
-    data = []
-    if json_dict['status'] == "000":
-        for line in json_dict['list']:
-            data.append([])
-            for itm in items:
-                if itm in line.keys():
-                    data[-1].append(line[itm])
-                else: data[-1].append("")
-        df = pd.DataFrame(data,columns=item_names)
-        return json_dict['total_page'], df
-    elif json_dict['status'] == "013": # {"status":"013","message":"조회된 데이타가 없습니다."}
-        return 0, None
-    else:
-        return 0, df # TODO
 
 
                                   
 def update_today_crawl_mdcline():
     ''' 2021년부터 이상하게 바뀐 api 적용 '''
+    def crawl_mdcline(pageNo):
+        ''' 임상정보 크롤링'''
+        # 2021년이후 stdt이 안먹힘 ;totalCount / numOfRows (ex. 8434 / 100 = 84)를 pageNo에 넣어 최신 정보 얻게 고침
+
+        # try:
+        html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=100&pageNo=" + str(pageNo))
+        # except requests.exceptions.Timeout: # 결과 없는 경우나 시간이 길어지면 stop
+            # return 0, {}
+
+        soup = BeautifulSoup(html.content, 'lxml')
+        totalCount = soup.find("totalcount").get_text()
+        if totalCount == '0':  # 결과 없으면
+            return 0, {}
+        items = ['apply_entp_name','approval_time','goods_name','lab_name','clinic_exam_title','clinic_step_name']
+        item_names = ['신청자','승인일','제품명','연구실명','시험제목','임상단계']
+
+        data = soup.find_all("item")
+        rawdata = []
+        for d in data:
+            if d:
+                res = {}
+                for (idx, key) in enumerate(items):
+                    if key == 'approval_time':
+                        foo = d.find(key).get_text()
+                        res[item_names[idx]] = foo[:-9]
+                    else:                    
+                        res[item_names[idx]] = d.find(key).get_text()
+
+                rawdata.append(res)    
+
+        df = pd.DataFrame(rawdata)            
+        return df    
+    
+
+    def get_mdcline_total_count():
+        ''' totalCount로 마지막 pageNo 얻기 '''
+        html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=1&pageNo=1")
+        soup = BeautifulSoup(html.content, 'lxml')
+        result = int(soup.find("totalcount").get_text())
+        return result
+
     foo = math.floor(get_mdcline_total_count() / 100)
 
     for pageNo in [foo, foo+1]: # 누락방지위해 전 pageNo도 크롤 ex. 8438 -> pageNo 84, 85
@@ -139,47 +181,6 @@ def update_today_crawl_mdcline():
                                 WHERE t.신청자 = f.신청자 and t.승인일::date = f.승인일 and t.제품명 = f.제품명 and t.임상단계 = f.임상단계)"""
                 cn.execute(sql) 
     return                                            
-
-def crawl_mdcline(pageNo):
-    ''' 임상정보 크롤링'''
-    # 2021년이후 stdt이 안먹힘 ;totalCount / numOfRows (ex. 8434 / 100 = 84)를 pageNo에 넣어 최신 정보 얻게 고침
-
-    # try:
-    html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=100&pageNo=" + str(pageNo))
-    # except requests.exceptions.Timeout: # 결과 없는 경우나 시간이 길어지면 stop
-        # return 0, {}
-
-    soup = BeautifulSoup(html.content, 'lxml')
-    totalCount = soup.find("totalcount").get_text()
-    if totalCount == '0':  # 결과 없으면
-        return 0, {}
-    items = ['apply_entp_name','approval_time','goods_name','lab_name','clinic_exam_title','clinic_step_name']
-    item_names = ['신청자','승인일','제품명','연구실명','시험제목','임상단계']
-
-    data = soup.find_all("item")
-    rawdata = []
-    for d in data:
-        if d:
-            res = {}
-            for (idx, key) in enumerate(items):
-                if key == 'approval_time':
-                    foo = d.find(key).get_text()
-                    res[item_names[idx]] = foo[:-9]
-                else:                    
-                    res[item_names[idx]] = d.find(key).get_text()
-
-            rawdata.append(res)    
-
-    df = pd.DataFrame(rawdata)            
-    return df    
-  
-
-def get_mdcline_total_count():
-    ''' totalCount로 마지막 pageNo 얻기 '''
-    html = requests.get(MFDS['url'] + MFDS['serviceKey'] + "&numOfRows=1&pageNo=1")
-    soup = BeautifulSoup(html.content, 'lxml')
-    result = int(soup.find("totalcount").get_text())
-    return result
 
 def get_stock_search_top(request):
     ''' 네이버 금융 > 국내증시 > 검색상위 종목'''
@@ -200,13 +201,13 @@ def get_stock_search_top(request):
     # add stockCode from model
     df['종목코드'] = [get_stockCode(corpName) for corpName in df['종목명']]
       
-    result = df.to_dict('records')
-
+    rows = df.to_dict('records')
+    result = { "rowsCount" : 30 , "rows": rows}
     return JsonResponse(result, safe=False)
 
 def get_stock_upper(request):
     ''' 네이버 금융 > 국내증시 > 상한가  + 상승'''
-    result = []
+    rows = []
     # 상한가
     df = pd.read_html(NAVER['stock_upper_url'], header=0, encoding = 'euc-kr')
     for i in [1,2]: # 2dn,3rd table
@@ -228,7 +229,7 @@ def get_stock_upper(request):
         # add stockCode from model
         mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
         
-        result += mydf.to_dict('records')
+        rows += mydf.to_dict('records')
         
     # 상승 - 기본탭 코스피
     df = pd.read_html(NAVER['stock_rise_url'], header=0, encoding = 'euc-kr')
@@ -249,7 +250,7 @@ def get_stock_upper(request):
     # add stockCode from model
     mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
     
-    result += mydf.to_dict('records')
+    rows += mydf.to_dict('records')
 
     # 상승 - 코스닥
     df = pd.read_html(NAVER['stock_rise_url']+ '?sosok=1', header=0, encoding = 'euc-kr')
@@ -269,16 +270,16 @@ def get_stock_upper(request):
 
     # add stockCode from model
     mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
-    result += mydf.to_dict('records')
+    rows += mydf.to_dict('records')
 
-    result = sorted(result, key=lambda k : k["등락률"], reverse=True)
+    rows = sorted(rows, key=lambda k : k["등락률"], reverse=True)
 
-
+    result = { "rowsCount" : len(rows) , "rows": rows}
     return JsonResponse(result, safe=False)    
 
 def get_stock_lower(request):
     ''' 네이버 금융 > 국내증시 > 하한가  + 하락'''
-    result = []
+    rows = []
     # 하한가
     df = pd.read_html(NAVER['stock_lower_url'], header=0, encoding = 'euc-kr')
     for i in [1,2]: # 2dn,3rd table
@@ -300,7 +301,7 @@ def get_stock_lower(request):
         # add stockCode from model
         mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
         
-        result += mydf.to_dict('records')
+        rows += mydf.to_dict('records')
     # 하락 - 기본탭 코스피 
     df = pd.read_html(NAVER['stock_fall_url'], header=0, encoding = 'euc-kr')
     mydf = df[1]
@@ -320,7 +321,7 @@ def get_stock_lower(request):
     # add stockCode from model
     mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
     
-    result += mydf.to_dict('records')
+    rows += mydf.to_dict('records')
 
     # 하락 - 코스닥 
     df = pd.read_html(NAVER['stock_fall_url'] + '?sosok=1', header=0, encoding = 'euc-kr')
@@ -342,10 +343,11 @@ def get_stock_lower(request):
     mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
     mydf = mydf.sort_values(by='등락률', ascending=False)
 
-    result += mydf.to_dict('records') 
-    result = sorted(result, key=lambda k : k["등락률"])
+    rows += mydf.to_dict('records') 
+    rows = sorted(rows, key=lambda k : k["등락률"])
 
-    return JsonResponse(result, safe=False)    
+    result = { "rowsCount" : len(rows) , "rows": rows}
+    return JsonResponse(result, safe=False)     
 
 def get_stockCode(corpName):
     listed = Listed_corp.objects.filter(회사명=corpName)
