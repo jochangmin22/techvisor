@@ -18,7 +18,6 @@ urlpatterns = [
     # news
     re_path(URL + "searchs/news$", csrf_exempt(views.news.get_news), name='get_news'),
     re_path(URL + "searchs/newssa$", csrf_exempt(views.news.get_news_sa), name='get_news_sa'),
-    re_path(URL + "searchs/newsnlp$", csrf_exempt(views.news.get_news_nlp), name='get_news_nlp'),
     re_path(URL + "searchs/relatedcompany$", csrf_exempt(views.news.get_related_company), name='get_related_company'),
     # matrix
     re_path(URL + "searchs/matrix$", csrf_exempt(views.matrix.get_matrix), name='get_matrix'),

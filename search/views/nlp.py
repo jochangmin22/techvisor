@@ -7,7 +7,7 @@ from operator import itemgetter
 from gensim.models import Word2Vec
 from gensim.models import FastText
 from .searchs import get_searchs, get_nlp
-from ..utils import get_redis_key, dictfetchall
+from ..utils import get_redis_key, dictfetchall, remove_tail
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
@@ -39,7 +39,7 @@ def get_wordcloud(request):
 
     #///////////////////////////////////
     try:
-        unitNumber = subParams['analysisOptions']['wordCloudOptions']['output']
+        unitNumber = subParams['menuOptions']['wordCloudOptions']['output']
     except:
         unitNumber = 50        
 
@@ -97,8 +97,8 @@ def get_wordcloud_dialog(request):
     # Redis }
 
     
-    # pageIndex = subParams['analysisOptions']['tableOptions']['wordCloud']['pageIndex']
-    # pageSize = subParams['analysisOptions']['tableOptions']['wordCloud']['pageSize']
+    # pageIndex = subParams['menuOptions']['tableOptions']['wordCloud']['pageIndex']
+    # pageSize = subParams['menuOptions']['tableOptions']['wordCloud']['pageSize']
     pageIndex = subParams.get('pageIndex', 0)
     pageSize = subParams.get('pageSize', 10)
     sortBy = subParams.get('sortBy', [])
@@ -113,8 +113,7 @@ def get_wordcloud_dialog(request):
             foo += s['_id']
             foo += ' ASC, ' if s['desc'] else ' DESC, '
 
-        if foo.endswith(", "):
-            foo = foo[:-2]
+        foo = remove_tail(foo, ", ")
         query += f' order by {foo}'
 
     # Add offset limit
@@ -145,17 +144,17 @@ def get_vec(request):
 
     #///////////////////////////////////
     try:
-        _modelType = subParams['analysisOptions']['keywordsOptions']['modelType']
+        _modelType = subParams['menuOptions']['keywordsOptions']['modelType']
     except:
         _modelType = None
 
     try:
-        _keywordsvec = subParams['analysisOptions']['keywordsOptions']['keywordsVec']
+        _keywordsvec = subParams['menuOptions']['keywordsOptions']['keywordsVec']
     except:
         _keywordsvec = None
 
     try:
-        unitNumber = subParams['analysisOptions']['keywordsOptions']['output']
+        unitNumber = subParams['menuOptions']['keywordsOptions']['output']
     except:
         unitNumber = 20            
 

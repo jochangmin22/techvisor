@@ -15,7 +15,7 @@ urlpatterns = [
     re_path(URL+ "searchs/financialinfo$", csrf_exempt(views.companies.get_financial_info), name='get_financial_info'),    
     # related_info
     re_path(URL+ "searchs/clinic$", csrf_exempt(views.related_info.get_clinic_test), name='get_clinic_test'),
-    re_path(URL+ "searchs/disclosurereport$", csrf_exempt(views.related_info.get_disclosure_report), name='get_disclosure_report'),
+    re_path(URL+ "searchs/corpreport$", csrf_exempt(views.related_info.get_corp_report), name='get_corp_report'),
     re_path(URL+ "searchs/ownedpatent$", csrf_exempt(views.related_info.get_owned_patent), name='get_owned_patent'),
     re_path(URL+ "searchs/wordcloud$", csrf_exempt(views.related_info.get_wordcloud), name='get_wordcloud'),
     # crawler

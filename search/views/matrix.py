@@ -1,7 +1,7 @@
 from django.db import connection
 from collections import Counter
 from django.http import JsonResponse, HttpResponse
-from ..utils import get_redis_key, dictfetchall, tokenizer, tokenizer_phrase
+from ..utils import get_redis_key, dictfetchall, tokenizer, tokenizer_phrase, remove_tail
 import json
 import re
 
@@ -33,7 +33,7 @@ def get_matrix(request):
     except:
         pass        
     # Redis }
-    foo = subParams['analysisOptions']['matrixOptions']
+    foo = subParams['menuOptions']['matrixOptions']
     category = foo.get('category','') # 연도별, 기술별, 기업별
     targetField = foo.get('volume','') # '요약', '청구항'
     # unit = foo.get('unit','') # '구분', '워드'
@@ -110,16 +110,16 @@ def get_matrix_dialog(request):
         pass        
     # Redis }
 
-    foo = subParams['analysisOptions']['matrixOptions']
+    foo = subParams['menuOptions']['matrixOptions']
     category = foo.get('category','') # 연도별, 기술별, 기업별
     targetField = foo.get('volume','') # '요약', '청구항'
 
-    bar = subParams['analysisOptions']['tableOptions']['matrixDialog']
+    bar = subParams['menuOptions']['tableOptions']['matrixDialog']
     sortBy = bar.get('sortBy', [])  
     pageIndex = bar.get('pageIndex', 0)
     pageSize = bar.get('pageSize', 10)
 
-    baz = subParams['analysisOptions']['matrixDialogOptions']
+    baz = subParams['menuOptions']['matrixDialogOptions']
     topic = baz.get('topic', [])  
     categoryValue = baz.get('categoryValue', [])  
 
@@ -162,8 +162,7 @@ def get_matrix_dialog(request):
             foo += s['_id']
             foo += ' ASC, ' if s['desc'] else ' DESC, '
 
-        if foo.endswith(", "):
-            foo = foo[:-2]
+        foo = remove_tail(foo, ", ")
         query += f' order by {foo}'
 
     # Add offset limit

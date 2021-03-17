@@ -85,13 +85,11 @@ def get_searchs(request, mode="begin"):
         if not sortBy:
             return ''
 
-        foo =', '
+        foo =' order by '
         for s in sortBy:
             foo += s['_id']
             foo += ' ASC, ' if s['desc'] else ' DESC, '
-
-        if foo.endswith(", "):
-            foo = foo[:-2]
+        foo = remove_tail(foo,", ")
         # return f' order by {foo}'          
         return f' {foo}'          
 
@@ -123,7 +121,7 @@ def get_searchs(request, mode="begin"):
         queryTextTerms = tsquery_keywords(params["searchText"], None, 'terms')
         whereTermsTerm = f'"{searchVolume}" @@ to_tsquery(\'{queryTextTerms}\')' if queryTextTerms else ""
 
-        orderClause = f' order by ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) desc '
+        # orderClause = f' order by ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) desc '
 
         queryTextInventor = tsquery_keywords(params["inventor"], None, 'person')
         whereInventor = f'"발명자tsv" @@ to_tsquery(\'{queryTextInventor}\')' if queryTextInventor else ""
@@ -162,12 +160,11 @@ def get_searchs(request, mode="begin"):
     # query = 'select count(*) over () as cnt, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE (' + \
     #     whereAll + ")"
     # select count(*) over () as cnt, ts_rank(search,to_tsquery('예방&치료&진단')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE (("search" @@ to_tsquery('예방&치료&진단')) and ("발명자tsv" @@ to_tsquery('조'))) order by ts_rank("search",to_tsquery('예방&치료&진단')) desc;-- offset 0 limit 10000;
-    query = f'select count(*) over () as cnt, ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE ({whereAll}){orderClause}'
-    print(query)
+    query = f'select count(*) over () as cnt, ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE ({whereAll})'
     if mode == "query":  # mode가 query면 여기서 분기
         return query
 
-    mainTable = subParams["analysisOptions"]["tableOptions"]["mainTable"]
+    mainTable = subParams["menuOptions"]["tableOptions"]["mainTable"]
     pageIndex = mainTable.get('pageIndex', 0)
     pageSize = mainTable.get('pageSize', 10)
     sortBy = mainTable.get('sortBy', [])
@@ -251,7 +248,7 @@ def get_nlp(request, analType):
     result = []
 
     # option
-    foo = subParams['analysisOptions'][analType + 'Options']
+    foo = subParams['menuOptions'][analType + 'Options']
     volume = foo.get('volume','')
     unit = foo.get('unit','')
     emergence = foo.get('emergence','빈도수')
@@ -333,8 +330,7 @@ def like_where(keyword="", fieldName=""):
     for k in temp:
         result += '"' + fieldName + "\" like '%" + k + "%' or "
 
-    if result.endswith(" or "):
-        result = result[:-4]
+    result = remove_tail(result, " or ")
 
     # append collect negative word
     result2 = ""
@@ -344,8 +340,7 @@ def like_where(keyword="", fieldName=""):
     for k in temp2:
         result2 += '"' + fieldName + "\" not like '%" + k + "%' and "
 
-    if result2.endswith(" and "):
-        result2 = result2[:-5]
+    result2 = remove_tail(result2, " and ")
 
     # merge result
     if result:
@@ -388,8 +383,8 @@ def get_Others(dateType, startDate, endDate, status, ipType):
             temp = " ("
             for k in re.split(r' and | or ', status): # 출원 or 공개 ...
                 temp += "등록사항 ='" + k + "' or "
-            if temp.endswith(" or "):
-                temp = temp[:-4]
+
+            temp = remove_tail(temp, " or ")
             
             # result += " 등록사항 = '" + ("공개" if status == "출원" else status) + "' and "
             result += temp + ") and "
@@ -406,15 +401,12 @@ def get_Others(dateType, startDate, endDate, status, ipType):
                 temp += "cast(출원번호 as text) LIKE '1%' or "
             if "실용" in ipType:
                 temp += "cast(출원번호 as text) LIKE '2%' or "
-            if temp.endswith(" or "):
-                temp = temp[:-4]
+
+            temp = remove_tail(temp, " or ")
 
             result += temp + ") and "
 
-    if result.endswith(" and "):
-        result = result[:-5]
-
-    return result
+    return remove_tail(result, " and ")
 
 def tsquery_keywords(keyword="", fieldName="", mode="terms"):
 
@@ -575,7 +567,7 @@ def make_vis_ipc(data):
 def make_vis_cla(data, subParams):
     ''' visual applicant classify '''
 
-    vis_cla = subParams["analysisOptions"]["tableOptions"]["vis_cla"]
+    vis_cla = subParams["menuOptions"]["tableOptions"]["vis_cla"]
     pageIndex = vis_cla.get('pageIndex', 0)
     pageSize = vis_cla.get('pageSize', 10)
     sortBy = vis_cla.get('sortBy', [])

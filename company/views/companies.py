@@ -26,7 +26,7 @@ import requests
 from copy import deepcopy
 import json
 
-from ..utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc, like_parse, str2int, str2round
+from ..utils import get_redis_key, dictfetchall, remove_tags, remove_brackets, remove_punc, str2int, str2round
 from .crawler import crawl_stock
 from ..models import Nice_corp, Stock_quotes, Stock_split, Mdcin_clinc_test_info, Financial_statements
 from search.models import Listed_corp, Disclosure
