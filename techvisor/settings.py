@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECRET_KEY = 'j!1-fhcs5rzl_kvr9+&m)71ci=#k)!=r)wzow9wqvcmte9-g4s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -55,6 +55,7 @@ CORS_ORIGIN_WHITELIST = [
 
     "http://btowin.synology.me:3555",
     "http://btowin.synology.me:3666",
+    "http://btowin.synology.me:3888",
     "http://v.techvisor.co.kr:8001",
     "https://v.techvisor.co.kr",
     

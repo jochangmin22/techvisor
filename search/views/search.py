@@ -12,7 +12,7 @@ import requests
 import json
 
 from django.db.models import Q
-from .models import Listed_corp
+from ..models import Listed_corp
 
 # caching with redis
 from django.core.cache import cache
@@ -34,7 +34,7 @@ KIPRIS = settings.KIPRIS
 # from itertools import repeat
 # for api }
 
-def parse_search(request):
+def get_search(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         appNo = data["appNo"]    
@@ -77,9 +77,9 @@ def parse_search(request):
         row = dictfetchall(cursor)
         # _row = row[0]
         # row[0].update({"독립항수": 99, "종속항수": 88})
-        # row[0].update(parse_claims(request, row[0]["청구항"]))
+        # row[0].update(get_claims(request, row[0]["청구항"]))
         res = (
-            parse_claims(request, row[0]["청구항"], row[0]["출원번호"])
+            get_claims(request, row[0]["청구항"], row[0]["출원번호"])
             if row[0]["청구항"] and row[0]["청구항"] != "<SDOCL></SDOCL>"
             # else {"독립항수": 0, "종속항수": 0, "청구항들": []}
             else {"청구항종류": [], "청구항들": []}
@@ -90,7 +90,7 @@ def parse_search(request):
         del row[0]['청구항']  # remove claims for memory save
 
         res = (
-            parse_abstract(request, row[0]["초록"])
+            get_abstract(request, row[0]["초록"])
             if row[0]["초록"] and row[0]["초록"] != "<SDOAB></SDOAB>"
             else {"초록": '', "키워드": ''}
         )
@@ -100,7 +100,7 @@ def parse_search(request):
         empty_res = {"기술분야": "", "배경기술": "", "해결과제": "",
                      "해결수단": "", "발명효과": "", "도면설명": "", "발명의실시예": ""}
         res = (
-            parse_description(request, row[0]["명세서"])
+            get_description(request, row[0]["명세서"])
             if row[0]["명세서"] and row[0]["명세서"] != "<SDODE></SDODE>"
             else empty_res
         )
@@ -122,7 +122,7 @@ def parse_search(request):
     return JsonResponse(row[0], safe=False)
     # return HttpResponse(row, content_type="text/plain; charset=utf-8")
 
-def parse_search_quote(request):
+def get_search_quote(request):
     """ 인용 검색 """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -280,7 +280,7 @@ def get_citing_info(appNo):
     res = [] if row == [] else row[0]
     return res
 
-def parse_search_rnd(request):
+def get_search_rnd(request):
     """ searchDetails RND """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -299,7 +299,7 @@ def parse_search_rnd(request):
     handleRedis(redisKey, 'rnd', row, mode='w')
     return JsonResponse(row, safe=False)
 
-def parse_search_family(request):
+def get_search_family(request):
     """ searchDetails용 패밀리 검색 """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -324,7 +324,7 @@ def parse_search_family(request):
 
     return JsonResponse(row, safe=False)
 
-def parse_search_ipc_cpc(request):
+def get_search_ipc_cpc(request):
     """ searchDetails IPC, CPC """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -350,7 +350,7 @@ def parse_search_ipc_cpc(request):
 
     return JsonResponse(row, safe=False)
 
-def parse_search_legal(request):
+def get_search_legal(request):
     """ searchDetails용 법적상태이력 검색 """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -376,7 +376,7 @@ def parse_search_legal(request):
 
     return JsonResponse(row, safe=False)
 
-def parse_search_registerfee(request):
+def get_search_registerfee(request):
     """ searchDetails용 등록료 검색 """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -400,7 +400,7 @@ def parse_search_registerfee(request):
 
     return JsonResponse(row, safe=False)
 
-def parse_search_rightfullorder(request):
+def get_search_rightfullorder(request):
     """ searchDetails용 권리순위 검색 """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -424,7 +424,7 @@ def parse_search_rightfullorder(request):
 
     return JsonResponse(row, safe=False)
 
-def parse_search_rightholder(request):
+def get_search_rightholder(request):
     """ searchDetails용 권리권자변동 검색 """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -448,7 +448,7 @@ def parse_search_rightholder(request):
 
     return JsonResponse(row, safe=False)
 
-def parse_search_applicant(request):
+def get_search_applicant(request):
     """ searchDetails용 출원인 법인, 출원동향, 보유기술 검색 """
     data = json.loads(request.body.decode('utf-8'))
     aCode = data['aCode']
@@ -503,7 +503,7 @@ def parse_search_applicant(request):
 
     return JsonResponse(res, safe=False)
 
-def parse_search_applicant_trend(request):
+def get_search_applicant_trend(request):
     """ searchDetails용 출원인 출원동향, 보유기술 검색 """
     """ 출원건수, 특허출원, 실용출원, 특허등록, 실용등록 """
     data = json.loads(request.body.decode('utf-8'))
@@ -536,7 +536,7 @@ def parse_search_applicant_trend(request):
     #
     return JsonResponse(row, safe=False)
 
-def parse_search_applicant_ipc(request):
+def get_search_applicant_ipc(request):
     """ searchDetails용 출원인 보유기술 검색 """
     data = json.loads(request.body.decode('utf-8'))
     aCode = data['aCode']
@@ -558,7 +558,7 @@ def parse_search_applicant_ipc(request):
     #
     return JsonResponse(row, safe=False)
 
-def similar(request):
+def get_similar(request):
     """ 유사 문서 목록 """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -625,7 +625,7 @@ def _move_jsonfield_to_top_level(result):
         del result[i]['재무']
     return result            
 
-def associate_corp(request):
+def get_associate_corp(request):
     ''' Search for a company name that matches the applicant and representative or company name '''
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -670,8 +670,7 @@ def handleRedis(redisKey, keys, data="", mode="r"):
         return JsonResponse(data, safe=False)
     return
 
-######################### 여기부분 사용 #########################
-def _parse_typo(xmlStr=""):
+def _get_typo(xmlStr=""):
     """ 오타 정리 """
     xmlStr = re.sub(r"<EMIID=", "<EMI ID=", xmlStr)  # tag 오타
     xmlStr = re.sub(
@@ -686,9 +685,9 @@ def _parse_typo(xmlStr=""):
     return xmlStr
 
 
-def parse_abstract(request, xmlStr=""):
+def get_abstract(request, xmlStr=""):
    
-    xmlStr = _parse_typo(xmlStr)  # typo
+    xmlStr = _get_typo(xmlStr)  # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
 
@@ -734,11 +733,11 @@ def abstract_type(bs, startTag, nextTag, keywordTag):
 
     return my_abstract, my_keyword
 
-######################### 여기부분 사용 #########################
-def parse_claims(request, xmlStr="", appNo=""):
+
+def get_claims(request, xmlStr="", appNo=""):
     """ 비정형 청구항을 bs를 이용하여 처리 """
 
-    xmlStr = _parse_typo(xmlStr) # typo
+    xmlStr = _get_typo(xmlStr) # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
     # tree = elemTree.fromstring(xmlStr)
@@ -922,8 +921,8 @@ def claims_c_type(bs):
     return my_claim_type, my_claim
 
 
-def parse_description(request, xmlStr=""):
-    xmlStr = _parse_typo(xmlStr) # typo
+def get_description(request, xmlStr=""):
+    xmlStr = _get_typo(xmlStr) # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
 
@@ -938,7 +937,7 @@ def parse_description(request, xmlStr=""):
         attrName = "n" if bs.find_all('p', {"n": True}) else ""
         # TODO : convert tabular tag to table tag - sample 1019970061654
         return description_type(bs, attrName, my_name, my_tag)
-    # TODO : 1019930701447 구분 태그없는 비정형 타입, 처리요망 (psdode)      
+    # TODO : 1019930701447 구분 태그없는 비정형 타입, 처리요망 (psdode) -- wips경우 구분안함     
     # TODO : 1019930700523 구분 태그없는 비정형 타입, 처리요망 (psdode)      
     # TODO : 1019900018250 구분 태그없는 비정형 타입, 처리요망 (sdode)      
     elif bs.find("psdode"):  # type psdode tag start
@@ -950,7 +949,7 @@ def parse_description(request, xmlStr=""):
             my_name = ["발명의 명칭","도면의 간단한 설명", "발명의 상세한 설명"]
             # my_tag = ["drdes", "invdes", "purinv", "bkgr", "tech", "config", "effect"]
             # my_tag = ["drdes", "", "", "bkgr", "tech", "config", "effect"]
-            my_tag = ["", ""]
+            my_tag = ["", "", ""]
             # 상위 제목 ; 내용 추출 안함 - invdes, purinv
 
         # p attribute 있는지 확인
@@ -1122,7 +1121,7 @@ def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
     # # return content
 
 
-# def parse_search_arr(request, keyword):
+# def get_search_arr(request, keyword):
 #     keyword = urllib.parse.quote_plus(urllib.parse.quote_plus(keyword))
 #     # source = requests.get('http://kpat.kipris.or.kr/kpat/thsrs.do?thsrs_srch=%25ED%2595%2598%25EC%259D%25B4%25EB%25B8%258C%25EB%25A6%25AC%25EB%2593%259C&s_flag=2').text
 #     source = requests.get(
@@ -1154,12 +1153,12 @@ def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
 #         safe=False,
 #     )  # 한글 먼저
 
-# def parse_searchs(request, keyword=""):
+# def get_searchs(request, keyword=""):
 #     with connection.cursor() as cursor:
 
 #         # keyword를 쿼리 형태로 parse ; like 방식
-#         # myWhere = parse_keywords(keyword, "출원인1")
-#         # myWhere2 = parse_keywords(keyword, "초록")
+#         # myWhere = get_keywords(keyword, "출원인1")
+#         # myWhere2 = get_keywords(keyword, "초록")
 
 #         # to_tsquery 형태로 parse
 #         myWhere = tsquery_keywords(keyword, "출원인1")

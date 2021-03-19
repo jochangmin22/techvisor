@@ -12,7 +12,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import random
 
-from .utils import dictfetchall, remove_tags, remove_brackets, remove_punc
+from ..utils import dictfetchall, remove_tags, remove_brackets, remove_punc
 
 
 # from .utils import get_redis_key, dictfetchall
@@ -138,7 +138,8 @@ def similarity(abstract, modelType, absList = []):
     # df_row = new_df.to_json(orient="records")
 
 
-    result = df_sim.to_json(orient="records")
+    # result = df_sim.to_json(orient="records")
+    result = df_sim.to_json("records")
     parsed = json.loads(result)
     res = json.dumps(parsed, indent=4) 
     return res

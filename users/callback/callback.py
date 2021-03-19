@@ -30,8 +30,12 @@ def get_token(request):
     key = data['key']
     type = data['type']
 
-    result = { 'token' : handleRedis(key, type)}
-    return JsonResponse(result, safe=False)
+    token = handleRedis(key, type)
+    if token:
+        return JsonResponse({ 'token' : token}, safe=False)
+    else:
+        return JsonResponse({ 'message' : 'TOKEN_CANT_RECEIVED'}, status = 401, safe=False)
+        # return JsonResponse({'message': 'WRONG_TOKEN'}, status=401,safe=False) 
 
 def redirect_google_login(request):
     next = request.GET.get('next', '/landing')
@@ -185,6 +189,56 @@ def kakao_callback(request):
 
         handleRedis(redisKey, 'kakao', access_token, mode="w")
         nextUrl = base_url + 'callback?type=kakao&key=' + redisKey
+
+        if next:
+            nextUrl += '&next=' + next
+
+        return redirect(nextUrl)
+
+def redirect_facebook_login(request):
+    next = request.GET.get('next', '/landing')
+
+    social_login_infos_exist(providers['facebook'])
+
+    # for csrf
+    token = generate_token({ 'next' : next })
+    redisKey = secrets.token_hex(16)
+    handleRedis(redisKey, 'facebook', token, mode="w")    
+
+    auth_uri = providers['facebook']['auth_uri'] + '?response_type=code&client_id=' + providers['facebook']['client_id'] + '&state=' + redisKey + '&redirect_uri=' + redirect_url + 'api/auth/callback/facebook&scope=email,public_profile'
+
+    return redirect(auth_uri)
+
+def facebook_callback(request):
+    if request.method == 'GET':
+        code = request.GET.get('code', None)
+        state = request.GET.get('state', None)
+
+        if not code:
+            return redirect(base_url + '?callback?error=1')
+
+        # csrf check
+        csrftoken = handleRedis(state, 'facebook')
+        if not csrftoken:
+            return redirect(base_url + '?callback?error=1')
+
+        # get next url
+        next = get_payload_from_token(csrftoken, 'next')
+
+        social_login_infos_exist(providers['facebook'])
+
+        is_success, token_infos = get_provider_access_token(state, code, 'facebook')
+
+        if not is_success:
+            content = { "Authentication has failed" }
+            return HttpResponse(content, content_type="text/plain; charset=utf-8")
+
+        access_token = token_infos.get('access_token')
+
+        redisKey = secrets.token_hex(16)
+
+        handleRedis(redisKey, 'facebook', access_token, mode="w")
+        nextUrl = base_url + 'callback?type=facebook&key=' + redisKey
 
         if next:
             nextUrl += '&next=' + next

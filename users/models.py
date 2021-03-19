@@ -22,10 +22,11 @@ class Users(models.Model):
     # profile!: UserProfile;
 
     def __str__(self):
-        return self.data['email']
+        return f"{self.data['displayName']} : {self.data['email']} - 가입 : {str(self.created_at)[:10]}  - 최근 접속 : {str(self.updated_at)[:10]}"
 
     class Meta:
         db_table = '"users"'
+        ordering = ['-created_at']
         verbose_name_plural = "users"
         
 #   @OneToOne(type => UserProfile, profile => profile.user)
@@ -107,8 +108,7 @@ class Social_accounts(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='"fk_user_id"')
 
     def __str__(self):
-        user_data = Users.objects.get(id = self.fk_user_id)
-        return user_data.data['email']
+        return f"{self.provider} : {self.user}"
 
     class Meta:
         db_table = '"social_accounts"'     

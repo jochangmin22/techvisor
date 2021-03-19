@@ -43,7 +43,8 @@ class Order(models.Model):
         db_table = 'orders'
 
     def __str__(self):
-        return 'Order {}'.format(self.id)
+        # return 'Order {}'.format(self.id)
+        return f"Order {self.id} : {self.user}"
 
     def get_total_price(self):
         return self.get_item_price() - self.discount
