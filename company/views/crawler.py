@@ -132,7 +132,12 @@ def update_today_crawl_mdcline():
             # return 0, {}
 
         soup = BeautifulSoup(html.content, 'lxml')
-        totalCount = soup.find("totalcount").get_text()
+        try:
+            totalCount = soup.find("totalcount").get_text()
+        except AttributeError:
+            print('api error')
+            return 0, {}
+
         if totalCount == '0':  # 결과 없으면
             return 0, {}
         items = ['apply_entp_name','approval_time','goods_name','lab_name','clinic_exam_title','clinic_step_name']
@@ -162,13 +167,15 @@ def update_today_crawl_mdcline():
         soup = BeautifulSoup(html.content, 'lxml')
         result = int(soup.find("totalcount").get_text())
         return result
-
-    foo = math.floor(get_mdcline_total_count() / 100)
+    try:
+        foo = math.floor(get_mdcline_total_count() / 100)
+    except AttributeError:
+        return        
 
     for pageNo in [foo, foo+1]: # 누락방지위해 전 pageNo도 크롤 ex. 8438 -> pageNo 84, 85
         df = crawl_mdcline(pageNo)
-
-        if not df.empty:
+  
+        if not df.empty and df['승인일'].ne('').values.all():
             engine = create_engine(db_connection_url)
             df.to_sql(name='mdcin_clinc_test_info_temp', con=engine, if_exists='replace')
             # note : need CREATE EXTENSION pgcrypto; psql >=12 , when using gen_random_uuid (),

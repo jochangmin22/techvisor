@@ -7,7 +7,7 @@ from operator import itemgetter
 from gensim.models import Word2Vec
 from gensim.models import FastText
 from .searchs import get_searchs, get_nlp
-from ..utils import get_redis_key, dictfetchall, remove_tail
+from utils import get_redis_key, dictfetchall, remove_tail, frequency_count
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
@@ -32,7 +32,7 @@ def get_wordcloud(request):
 
     try:
         if sub_context['wordcloud']:
-            return HttpResponse(sub_context['wordcloud'])
+            return JsonResponse(sub_context['wordcloud'], safe=False)
     except:
         pass        
     # Redis }
@@ -47,29 +47,40 @@ def get_wordcloud(request):
         taged_docs = get_nlp(request, analType="wordCloud")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
-            return HttpResponse( "[]", content_type="text/plain; charset=utf-8")
+            return JsonResponse([{ 'name' : [], 'value' : []}], safe=False)
     except Exception as e:
-        return HttpResponse(e, content_type="text/plain; charset=utf-8")
+        return JsonResponse([{ 'name' : [], 'value' : []}], safe=False)
+
     #///////////////////////////////////
 
-    sublist = dict()
+    def make_dic_to_list_of_dic(baz):
+        try:
+            return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
+        except AttributeError:
+            return { 'name' : [], 'value' : []}    
+    result = []
+    foo = frequency_count(taged_docs, unitNumber)
+    result.append(make_dic_to_list_of_dic(foo))
 
-    for word in taged_docs:
-        if word in sublist:
-            sublist[word] += 1
-        else:
-            sublist[word] = 1
+    # return JsonResponse(result, safe=False)
+    # sublist = dict()
 
-    sublist = sorted(
-        sublist.items(), key=operator.itemgetter(1), reverse=True)[:unitNumber]
+    # for word in taged_docs:
+    #     if word in sublist:
+    #         sublist[word] += 1
+    #     else:
+    #         sublist[word] = 1
 
-    fields = ["name", "value"]
-    result = [dict(zip(fields, d)) for d in sublist]
+    # sublist = sorted(
+    #     sublist.items(), key=operator.itemgetter(1), reverse=True)[:unitNumber]
+
+    # fields = ["name", "value"]
+    # result = [dict(zip(fields, d)) for d in sublist]
 
     # json 형태로 출력
-    result = json.dumps(result, ensure_ascii=False, indent="\t")
-    if not result:
-        return HttpResponse("[]", content_type="text/plain; charset=utf-8")
+    # result = json.dumps(result, ensure_ascii=False, indent="\t")
+    # if not result:
+    #     return HttpResponse("[]", content_type="text/plain; charset=utf-8")
 
     # Redis {
     try:
@@ -78,8 +89,8 @@ def get_wordcloud(request):
     except:
         pass        
     # Redis }
+    return JsonResponse(result, safe=False)
 
-    return HttpResponse(result)
 
 def get_wordcloud_dialog(request):
 

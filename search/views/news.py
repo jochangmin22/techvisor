@@ -104,7 +104,7 @@ def get_news(request):
     try:
         if context_paging and context_paging['news_nlp']:
             return JsonResponse(context_paging['news'], safe=False)
-    except (KeyError):
+    except (KeyError, UnboundLocalError):
         pass   
 
     newsTable = subParams["menuOptions"]["tableOptions"]["newsTable"]
@@ -136,7 +136,7 @@ def get_news_nlp(request):
     try:
         if context and context['news_nlp']:
             return news_nlp
-    except (KeyError):
+    except (KeyError, UnboundLocalError):
         pass            
 
     
@@ -171,7 +171,7 @@ def get_related_company(request):
     try:
         if context and context['company']:
             return JsonResponse(context['company'], safe=False)
-    except (KeyError):
+    except (KeyError, UnboundLocalError):
         pass
 
     def remove_duplicate(seq):
@@ -192,11 +192,11 @@ def get_related_company(request):
 
         listedCorp = Listed_corp.objects.filter(회사명__in=unique_news_nlp).exclude(회사명__in=EXCLUDE_COMPANY_NAME)
         myCorpName = list(listedCorp.values_list('회사명', flat=True).order_by('-종목코드','회사명'))[:10]
+        myCommonCorpName = list(listedCorp.values_list('정보__기업명', flat=True).order_by('-종목코드','회사명'))[:10]
         # myCorpCode = list(listedCorp.values_list('corp_code', flat=True).order_by('-종목코드','회사명'))[:10]
         myStockCode = list(listedCorp.values_list('종목코드', flat=True).order_by('-종목코드','회사명'))[:10]
 
-        result = { 'corpName': myCorpName, 'stockCode': myStockCode}
-
+        result = { 'stockCode': myStockCode, 'corpName': myCorpName, 'commonCorpName': myCommonCorpName }
         cache.set(mainKey, { 'company': result }, CACHE_TTL)
 
         return JsonResponse(result, status=200, safe=False)
@@ -215,7 +215,7 @@ def get_news_sa(request):
     try:
         if context and context['news_sa']:
             return JsonResponse(context['news_sa'], safe=False)
-    except (KeyError):
+    except (KeyError, UnboundLocalError):
         pass
 
     token= get_news_nlp(request)

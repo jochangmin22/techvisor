@@ -43,7 +43,6 @@ ALLOWED_HOSTS = [
     "v.techvisor.co.kr",
     "v2.techvisor.co.kr",
     "52.79.161.225",
-    "14.32.114.185"
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True # Credential true
