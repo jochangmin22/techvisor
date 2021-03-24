@@ -123,13 +123,6 @@ def get_matrix_dialog(request):
     topic = baz.get('topic', [])  
     categoryValue = baz.get('categoryValue', [])  
 
-    # pageIndex = subParams.get('pageIndex', 0)
-    # pageSize = subParams.get('pageSize', 10)
-    # sortBy = subParams.get('sortBy', [])    
-    # category = subParams.get('category', '')    
-    # targetField = subParams.get('volume', '')
-
-
     if category == '연도별':
         countField = 'left(출원일,4)'
     elif category == '기술별':

@@ -8,8 +8,11 @@ import json
 import operator
 from datetime import datetime, timedelta
 
-from ..utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase, remove_duplicates, sampling, remove_tail
+from utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase, remove_duplicates, sampling, remove_tail, frequency_count
+# from ..utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase, remove_duplicates, sampling, remove_tail
 from .crawler import update_today_corp_report, update_today_crawl_mdcline
+
+from search.views.nlp import get_wordcloud, get_nlp
 
 from ..models import Mdcin_clinc_test_info, Disclosure_report
 from search.models import Listed_corp, Disclosure
@@ -25,7 +28,7 @@ COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
 
 def save_crawl_time(key):
     now = datetime.utcnow()
-    return cache.set(key, now, CACHE_TTL)
+    return cache.set(key, now, 3600)
 
 def more_then_an_hour_passed(last_updated):    
     try:
@@ -60,7 +63,7 @@ def get_clinic_test(request):
         if corpName:
             isExist = Mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).exists()
             if not isExist:
-                return JsonResponse([], safe=False)
+                return JsonResponse({ 'rowsCount': 0, 'rows': [] } , safe=False)
 
             rows = Mdcin_clinc_test_info.objects.filter(신청자__contains=corpName).order_by(orderClause).values()
         else:
@@ -108,7 +111,7 @@ def get_corp_report(request):
         if corpName:
             isExist = Disclosure_report.objects.filter(종목명__contains=corpName).exists()
             if not isExist:
-                return JsonResponse([], safe=False)
+                return JsonResponse({ 'rowsCount': 0, 'rows': [] }, safe=False)
 
             rows = Disclosure_report.objects.filter(종목명__contains=corpName).order_by(orderClause).values()
         else:
@@ -133,7 +136,7 @@ def get_corp_report(request):
         result = { 'rowsCount': rowsCount, 'rows': res }            
         return JsonResponse(result, safe=False)             
 
-def get_owned_patent(request, mode="begin"): # mode : begin, nlp 
+def get_searchs(request, mode="begin"): # mode : begin, nlp 
     ''' If there is no corpName, the last 100 rows are displayed '''
     
     mainKey, subKey, params, subParams = get_redis_key(request)
@@ -141,12 +144,143 @@ def get_owned_patent(request, mode="begin"): # mode : begin, nlp
     context = cache.get(mainKey)
     context_paging = cache.get(subKey)
 
-    if mode == "begin":
+    redis_map = { 
+        'begin' : 'raw',
+        'nlp' : 'nlp_raw',
+        'visualNum' : 'visualNum',
+        'visualClassify' : 'visualClassify',
+        'visualIpc' : 'visualIpc',
+        'visualPerson' : 'visualPerson',        
+    }
+
+    try: 
+        if context and context[redis_map[mode]]:
+            return context[redis_map[mode]]
+        if context_paging and context_paging[redis_map[mode]]:
+            return context_paging[redis_map[mode]]                    
+    except (KeyError, NameError, UnboundLocalError):
+        pass    
+
+
+    def make_orderby_clause(aStr):
+        result ='order by '
+
+        if not sortBy:
+            return f'{result} {aStr}'
+
+        for s in sortBy:
+            result += s['_id']
+            result += ' ASC, ' if s['desc'] else ' DESC, '
+        result = remove_tail(result,", ")
+        return result
+
+    def make_paging_rows():
         try:
-            if context_paging['raw']:
-                return JsonResponse(context_paging['raw'], safe=False)
-        except:
-            pass    
+            rowsCount = rows[0]["cnt"]
+        except IndexError:        
+            rowsCount = 0
+
+        foo = [dict() for x in range(len(rows))]
+        for i in range(len(rows)):
+            foo[i]['id'] = rows[i]['출원번호'] # add id key for FE's ids
+            for key in ['출원번호','출원일','등록사항','발명의명칭','출원인1','발명자1','ipc코드']:
+                foo[i][key] = rows[i][key]
+
+        # Add offset limit
+        offset = pageIndex * pageSize
+        limit = pageSize
+
+        return { 'rowsCount': rowsCount, 'rows': sampling(foo, offset, limit)}
+
+    def make_nlp_raw():
+        # nlp는 요약, 청구항 만 사용
+        result = [dict() for x in range(len(rows))]
+        for i in range(len(rows)):
+            abstract = str(rows[i]['요약'])
+            claim = str(rows[i]['청구항'])
+            result[i]['요약'] = abstract
+            result[i]['청구항'] = claim
+            result[i]['요약·청구항'] = abstract + ' ' + claim
+        return result 
+
+    def make_vis_num():
+        ''' visual application number '''
+        if not rows:
+            return { 'mode' : 'visualNum', 'entities' : [{ 'data' : [], 'labels' : []}]}
+        _rows = [dict() for x in range(len(rows))]
+        for i in range(len(rows)):
+            _rows[i]['출원일'] = str(rows[i]['출원일'])[:-4]
+            _rows[i]['등록일'] = str(rows[i]['등록일'])[:-4]
+            _rows[i]['구분'] = str(rows[i]['출원번호'])[0]
+
+        def make_each_category_dict(flag):
+            if flag:
+                foo = [i[key] for i in _rows if i[key] and i['구분'] == flag]
+            else:            
+                foo = [i[key] for i in _rows if i[key]]
+            bar = frequency_count(foo)        
+            labels = [key for key in sorted(bar)]
+            data = [bar[key] for key in sorted(bar)]  
+            return { 'labels': labels, 'data' : data }         
+
+        key = '출원일'
+        PU = make_each_category_dict(flag=None)
+        PP = make_each_category_dict(flag='1')
+        UP = make_each_category_dict(flag='2')
+        key = '등록일'
+        PR = make_each_category_dict(flag='1')
+        UR = make_each_category_dict(flag='2')    
+
+        # entities = {'PU' : PU, 'PP' : PP,'UP' : UP, 'PR' : PR, 'UR' : UR}
+        entities = [ PU, PP, UP, PR, UR ]
+        result = { 'mode' : 'visualNum', 'entities' : entities }
+        return result
+
+    def make_vis_ipc():
+        ''' visual ipc '''
+        def make_dic_to_list_of_dic(baz):
+            try:
+                return {'name': list(baz.keys()), 'value': list(baz.values())}
+            except AttributeError:
+                return {'name': [], 'value': []}
+
+        foo = [i['ipc코드'][0:4] for i in rows if i['ipc코드']]
+        bar = frequency_count(foo,20)
+        entities = [make_dic_to_list_of_dic(bar)]
+        result = { 'mode' : 'visualIpc', 'entities' : entities }
+        return result
+
+    def make_vis_per():
+        ''' visual related person '''
+        # relatedperson는 ['출원인1','출원인국가코드1','발명자1','발명자국가코드1] 만 사용
+        
+        NATIONALITY = settings.TERMS['NATIONALITY']
+
+        entities = []
+        def nat_swap(x):
+            return NATIONALITY.get(x,x)
+
+        def make_dic_to_list_of_dic(baz):
+            try:
+                return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
+            except AttributeError:
+                return { 'name' : [], 'value' : []}
+
+        # caller
+        for key in ['출원인1','발명자1']:
+            foo = [i[key] for i in rows if i[key]]
+            bar = frequency_count(foo,20)
+            entities.append(make_dic_to_list_of_dic(bar))        
+
+        for key in ['출원인국가코드1','발명자국가코드1']:
+            foo = [nat_swap(i[key]) for i in rows if i[key]]
+            bar = frequency_count(foo,20)
+            entities.append(make_dic_to_list_of_dic(bar))   
+
+        result = { 'mode' : 'visualPerson', 'entities': entities }
+        return result  
+
+    # caller                          
 
     pageIndex = subParams.get('pageIndex', 0)
     pageSize = subParams.get('pageSize', 10)
@@ -154,267 +288,143 @@ def get_owned_patent(request, mode="begin"): # mode : begin, nlp
 
     selecting_columns = 'SELECT count(*) over () as cnt, A.등록사항, A."발명의명칭", A.출원번호, A.출원일, A.출원인1, A.출원인코드1, A.출원인국가코드1, A.발명자1, A.발명자국가코드1, A.등록일, A.공개일, A.ipc코드, A.요약, A.청구항 FROM '
 
-    try:
-        with connection.cursor() as cursor:
-            if params['commonCorpName']:
-                commonCorpName = params['commonCorpName']
-                for k, v in COMPANY_ASSIGNE_MATCHING.items():
-                    if k == params['commonCorpName']:
-                        commonCorpName = v
-                        break
+    orderby_clause = make_orderby_clause('A.출원일 desc')
 
-                foo =  '"성명" like $$%' + commonCorpName + '%$$'
-                query = f'{selecting_columns} ( SELECT 출원번호 FROM ( SELECT 출원번호 FROM 공개인명정보 WHERE {foo} ) K GROUP BY 출원번호 ) V, kr_text_view A WHERE V.출원번호 = A.출원번호 order by A.출원일 desc offset 0 rows fetch next 1001 rows only;' 
-            else:                    
-                query = f'{selecting_columns} where 출원일 is not null order by 출원일 desc limit 100'
+    if params['commonCorpName']:
+        commonCorpName = params['commonCorpName']
+        for k, v in COMPANY_ASSIGNE_MATCHING.items():
+            if k == params['commonCorpName']:
+                commonCorpName = v
+                break
 
-            # Add sort by
-            if sortBy:
-                foo =' '
-                for s in sortBy:
-                    foo += s['_id']
-                    foo += ' ASC, ' if s['desc'] else ' DESC, '
+        # commonCorpName = v for k, v in COMPANY_ASSIGNE_MATCHING.items() if k == params['commonCorpName'] else params['commonCorpName']
 
-                foo = remove_tail(foo,", ")
-                # query += f' order by {foo}'
+        foo =  '"성명" like $$%' + commonCorpName + '%$$'
+        query = f'{selecting_columns} ( SELECT 출원번호 FROM ( SELECT 출원번호 FROM 공개인명정보 WHERE {foo} ) K GROUP BY 출원번호 ) V, kr_text_view A WHERE V.출원번호 = A.출원번호 {orderby_clause} offset 0 rows fetch next 1001 rows only;' 
+    else:                    
+        query = f'{selecting_columns} where 출원일 is not null {orderby_clause} limit 100'
 
-            cursor.execute(
-                "SET work_mem to '100MB';"
-                + query
-            )
-            rows = dictfetchall(cursor)
-        # return HttpResponse(json.dumps(query, ensure_ascii=False))
-        # wordcloud에 쓰일 nlp 만들기
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SET work_mem to '100MB';"
+            + query
+        )
+        rows = dictfetchall(cursor)
 
-        # raw_abstract = ''
-        # raw_claims = ''
-        # total = data[0]["cnt"] if data[0]["cnt"] else 0
-        dropKeysCommon = ('cnt','등록사항','발명의명칭','출원인국가코드1','발명자1','발명자국가코드1','공개일')
-        dropKeysRows = ('cnt', '요약','청구항','출원인코드1','출원인국가코드1','발명자국가코드1','등록일','공개일')
-        dropKeysWordcloud = ('출원번호', '출원일', '출원인1', '출원인코드1', '등록일', 'ipc코드')
+    
+    res = {}
+    res_sub = {}
+    # if rows:
+    res['nlp_raw'] = make_nlp_raw()
+    res['visualNum'] = make_vis_num()
+    res['visualIpc'] = make_vis_ipc()
+    res['visualPerson'] = make_vis_per()
 
-        if rows:
-            # get rowsCount
-            try:
-                rowsCount = rows[0]["cnt"]
-            except IndexError:        
-                rowsCount = 0  
+    result = make_paging_rows()
+    res_sub['raw'] = result
+    # else:
+    #     res['nlp_raw'] = []
+    #     res['visualNum'] = []
+    #     res['visualIpc'] = []
+    #     res['visualPerson'] = []
 
-            # create common raw
-            com_raw = deepcopy(rows)
-            for i in range(len(rows)):
-                for k in dropKeysCommon:
-                    com_raw[i].pop(k, None)
+    #     result = { 'rowsCount': 0, 'rows': []} 
+    #     res_sub['raw'] = result
 
-            # copy
-            nlp_raw = deepcopy(com_raw)
+    cache.set(mainKey, res, CACHE_TTL)
+    cache.set(subKey, res_sub, CACHE_TTL)  
 
-            # row
-            for i in range(len(rows)):
-                rows[i]['id'] = rows[i]['출원번호'] # add id key for FE's ids
-                # row는 list of dictionaries 형태임
-                for k in dropKeysRows:
-                    rows[i].pop(k, None)
-                    
-            # Add offset limit
-            offset = pageIndex * pageSize
-            limit = pageSize
+    if mode == "begin":
+        return JsonResponse(result, safe=False)
+    return res[redis_map[mode]]  
 
-            rows = sampling(rows, offset, limit) 
-
-            # nlp
-            for i in range(len(nlp_raw)):
-                # nlp는 요약, 청구항 만 사용
-                for k in dropKeysWordcloud:
-                    nlp_raw[i].pop(k, None)
-
-                nlp_raw[i]['요약·청구항'] = ' '.join(str(x) for x in nlp_raw[i].values())
-
-        else:
-            rows = []
-            rowsCount = 0    
-
-        result = { 'rowsCount': rowsCount, 'rows': rows}                                                                            
-
-        # for i in range(len(data)):
-        #     raw_abstract += data[i]["요약token"] if data[i]["요약token"] else "" + " "
-        #     raw_claims += data[i]["전체항token"] if data[i]["전체항token"] else "" + " "   
-
-        #     del data[i]["요약token"]
-        #     del data[i]["전체항token"]
-        #     del data[i]["cnt"]
-
-        # result = { 'total': total, 'data': data}            
-
-        # redis 저장 {
-        new_context = {}
-        new_context['nlp_raw'] = nlp_raw
-        cache.set(mainKey, new_context, CACHE_TTL)
-
-        # new_context['raw'] = result
-        # new_context['raw_abstract'] = raw_abstract
-        # new_context['raw_claims'] = raw_claims            
-
-        new_context_paging = {}
-        new_context_paging['raw'] = result
-        cache.set(subKey, new_context_paging, CACHE_TTL)         
-        # redis 저장 }                
-
-        if mode == "begin":
-            return JsonResponse(result, safe=False)
-        elif mode == "nlp":
-            return nlp_raw
-            
-            # return raw_abstract, raw_claims
-    except:
-        if mode == "begin":
-            return JsonResponse([], safe=False)
-        elif mode == "nlp":
-            return []
-            # return '', ''
-
-def get_nlp(request, analType):
-    """
-       analType : wordCloud
-    """
-
+def get_visual(request):
+    ''' application_number, applicant_classify, ipc, related_person '''
+    
     _, subKey, _, subParams = get_redis_key(request)
 
-    #### Create a new SubKey to distinguish each analysis type 
-    newSubKey = subKey + '¶' + analType
+    # Redis {
+    sub_context = cache.get(subKey)
 
-    sub_context = cache.get(newSubKey)
+    key = subParams['mode'] # visualNum, visualClassify, visualIpc, visualPerson
 
     try:
-        if sub_context['nlp_token']:        
-            return sub_context['nlp_token']
+        if sub_context[key]:        
+            return HttpResponse(json.dumps(sub_context[key], ensure_ascii=False))
     except:
         pass
+    # Redis }    
 
-    # raw_abstract, raw_claims = get_owned_patent(request, mode="nlp")
-    nlp_raw = get_owned_patent(request, mode="nlp")
+    result = get_searchs(request, mode=key)
 
-
-    # nlp_raw = ''
-    # nlp_token = ''
-    result = []
-
-
-    analType = analType + 'Options'
-    volume = subParams['menuOptions'][analType]['volume']
-    unit = subParams['menuOptions'][analType]['unit']    
-    try:
-        emergence = subParams['menuOptions'][analType]['emergence']
-    except KeyError:
-        emergence = '빈도수'
-
-    nlp_list = [d[volume] for d in nlp_raw] # '요약·청구항', '요약', '청구항', 
-
-    nlp_str = ' '.join(nlp_list) if nlp_list else None            
-
-    # if subParams['menuOptions'][analType]['volume'] == '요약':
-    #     nlp_raw = raw_abstract
-    # elif subParams['menuOptions'][analType]['volume'] == '청구항':
-    #     nlp_raw = raw_claims 
-    
-    # tokenizer
-    if unit == '구문':
-        # try:
-        if emergence == '빈도수':            
-            result = tokenizer_phrase(nlp_str)
-        elif emergence =='건수':                
-            for foo in nlp_list:
-                bar = remove_duplicates(tokenizer_phrase(foo))
-                result.extend(bar) 
-        # except:
-            # result = []
-    elif unit == '워드':            
-        # try:
-        if emergence == '빈도수':
-            result = tokenizer(nlp_str)
-        elif emergence =='건수':                 
-            for foo in nlp_list:
-                bar = remove_duplicates(tokenizer(foo))
-                result.extend(bar)
-        # except:
-            # result = []              
-
-    new_sub_context = {}
-    new_sub_context['nlp_token'] = result
-    cache.set(newSubKey, new_sub_context, CACHE_TTL)
-
-    return result
-
-    # # tokenizer
-    # if subParams['menuOptions'][analType]['unit'] == '구문':
-    #     try:
-    #         nlp_token = tokenizer_phrase(nlp_raw)
-    #     except:
-    #         nlp_token = []
-    # elif subParams['menuOptions'][analType]['unit'] == '워드':            
-    #     try:
-    #         nlp_token = tokenizer(nlp_raw)
-    #     except:
-    #         nlp_token = []        
-
-    # new_sub_context = {}
-    # new_sub_context['nlp_token'] = nlp_token
-    # cache.set(newSubKey, new_sub_context, CACHE_TTL)
-
-    return nlp_token                            
-
-def get_wordcloud(request):
-    _, subKey, _, subParams = get_redis_key(request)
-
-    # Redis {
-    sub_context = cache.get(subKey)    
-
-    try:
-        if sub_context['wordcloud']:        
-            return HttpResponse(sub_context['wordcloud'])
-    except:
-        pass        
-    # Redis }
-
-
-    try:
-        unitNumber = subParams['menuOptions']['wordCloudOptions']['output']
-    except:
-        unitNumber = 50        
-
-    try:  # handle NoneType error
-        taged_docs = get_nlp(request, analType="wordCloud")
-        taged_docs = [w.replace('_', ' ') for w in taged_docs]
-        if taged_docs == [] or taged_docs == [[]]:  # result is empty
-            return HttpResponse( "[]", content_type="text/plain; charset=utf-8")
-    except Exception as e:
-        return HttpResponse("[]", content_type="text/plain; charset=utf-8")
-
-    sublist = dict()
-
-    for word in taged_docs:
-        if word in sublist:
-            sublist[word] += 1
-        else:
-            sublist[word] = 1
-
-    sublist = sorted(
-        sublist.items(), key=operator.itemgetter(1), reverse=True)[:unitNumber]
-
-    fields = ["name", "value"]
-    result = [dict(zip(fields, d)) for d in sublist]
-
-    # json 형태로 출력
-    result = json.dumps(result, ensure_ascii=False, indent="\t")
     if not result:
-        return HttpResponse("[]", content_type="text/plain; charset=utf-8")
-
+        return HttpResponse(json.dumps(result, ensure_ascii=False))
+        
     # Redis {
     try:
-        sub_context['wordcloud'] = result
+        sub_context[key] = result
         cache.set(subKey, sub_context, CACHE_TTL)
     except:
         pass        
     # Redis }
 
-    return HttpResponse(result)                            
+    return JsonResponse(result, safe=False)
+
+# def get_nlp(request, analType):
+#     """
+#        analType : wordCloud
+#     """
+
+#     _, subKey, _, subParams = get_redis_key(request)
+
+#     #### Create a new SubKey to distinguish each analysis type 
+#     newSubKey = subKey + '¶' + analType
+
+#     sub_context = cache.get(newSubKey)
+
+#     try:
+#         if sub_context['nlp_token']:        
+#             return sub_context['nlp_token']
+#     except:
+#         pass
+
+#     nlp_raw = get_searchs(request, mode="nlp")
+
+#     result = []
+
+#     # option
+#     foo = subParams['menuOptions'][analType + 'Options']
+#     volume = foo.get('volume','')
+#     unit = foo.get('unit','')
+#     emergence = foo.get('emergence','빈도수')    
+
+#     nlp_list = [d[volume] for d in nlp_raw] # '요약·청구항', '요약', '청구항', 
+
+#     nlp_str = ' '.join(nlp_list) if nlp_list else None            
+
+#     def phrase_frequncy_tokenizer():
+#         return tokenizer_phrase(nlp_str)
+
+#     def phrase_individual_tokenizer():
+#         for foo in nlp_list:
+#             bar = remove_duplicates(tokenizer_phrase(foo))
+#             result.extend(bar)
+#         return result            
+
+#     def word_frequncy_tokenizer():
+#         return tokenizer(nlp_str)
+
+#     def word_individual_tokenizer():
+#         for foo in nlp_list:
+#             bar = remove_duplicates(tokenizer(foo))
+#             result.extend(bar)
+#         return result   
+
+#     command = { '구문': { '빈도수':phrase_frequncy_tokenizer, '건수':phrase_individual_tokenizer }, '워드': { '빈도수' :word_frequncy_tokenizer, '건수':word_individual_tokenizer } }
+    
+#     result = command[unit][emergence]() 
+
+#     cache.set(newSubKey, { 'nlp_token' : result } , CACHE_TTL)
+
+#     return result                 
+                       

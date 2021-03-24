@@ -7,11 +7,12 @@ from operator import itemgetter
 from gensim.models import Word2Vec
 from gensim.models import FastText
 from .searchs import get_searchs, get_nlp
-from ..utils import get_redis_key, dictfetchall, remove_tail
+from utils import get_redis_key, dictfetchall, remove_tail, frequency_count
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
 from django.db import connection
+from decimal import Decimal
 
 # caching with redis
 from django.core.cache import cache
@@ -32,7 +33,7 @@ def get_wordcloud(request):
 
     try:
         if sub_context['wordcloud']:
-            return HttpResponse(sub_context['wordcloud'])
+            return JsonResponse(sub_context['wordcloud'], safe=False)
     except:
         pass        
     # Redis }
@@ -47,29 +48,40 @@ def get_wordcloud(request):
         taged_docs = get_nlp(request, analType="wordCloud")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
-            return HttpResponse( "[]", content_type="text/plain; charset=utf-8")
+            return JsonResponse([{ 'name' : [], 'value' : []}], safe=False)
     except Exception as e:
-        return HttpResponse(e, content_type="text/plain; charset=utf-8")
+        return JsonResponse([{ 'name' : [], 'value' : []}], safe=False)
+
     #///////////////////////////////////
 
-    sublist = dict()
+    def make_dic_to_list_of_dic(baz):
+        try:
+            return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
+        except AttributeError:
+            return { 'name' : [], 'value' : []}    
+    result = []
+    foo = frequency_count(taged_docs, unitNumber)
+    result.append(make_dic_to_list_of_dic(foo))
 
-    for word in taged_docs:
-        if word in sublist:
-            sublist[word] += 1
-        else:
-            sublist[word] = 1
+    # return JsonResponse(result, safe=False)
+    # sublist = dict()
 
-    sublist = sorted(
-        sublist.items(), key=operator.itemgetter(1), reverse=True)[:unitNumber]
+    # for word in taged_docs:
+    #     if word in sublist:
+    #         sublist[word] += 1
+    #     else:
+    #         sublist[word] = 1
 
-    fields = ["name", "value"]
-    result = [dict(zip(fields, d)) for d in sublist]
+    # sublist = sorted(
+    #     sublist.items(), key=operator.itemgetter(1), reverse=True)[:unitNumber]
+
+    # fields = ["name", "value"]
+    # result = [dict(zip(fields, d)) for d in sublist]
 
     # json 형태로 출력
-    result = json.dumps(result, ensure_ascii=False, indent="\t")
-    if not result:
-        return HttpResponse("[]", content_type="text/plain; charset=utf-8")
+    # result = json.dumps(result, ensure_ascii=False, indent="\t")
+    # if not result:
+    #     return HttpResponse("[]", content_type="text/plain; charset=utf-8")
 
     # Redis {
     try:
@@ -78,8 +90,8 @@ def get_wordcloud(request):
     except:
         pass        
     # Redis }
+    return JsonResponse(result, safe=False)
 
-    return HttpResponse(result)
 
 def get_wordcloud_dialog(request):
 
@@ -142,29 +154,20 @@ def get_vec(request):
     """ 빈도수 단어로 연관 단어 추출 (처음은 맨 앞단어로) """
     _, subKey, _, subParams = get_redis_key(request)
 
-    #///////////////////////////////////
-    try:
-        _modelType = subParams['menuOptions']['keywordsOptions']['modelType']
-    except:
-        _modelType = None
-
-    try:
-        _keywordsvec = subParams['menuOptions']['keywordsOptions']['keywordsVec']
-    except:
-        _keywordsvec = None
-
-    try:
-        unitNumber = subParams['menuOptions']['keywordsOptions']['output']
-    except:
-        unitNumber = 20            
+    #//////////////////////////////////
+    foo = subParams['menuOptions']['keywordsOptions']
+    _modelType = foo.get('modelType',None)
+    _keywordsvec = foo.get('keywordsVec',None)
+    unitNumber = foo.get('unitNumber',20)
+    
 
     # Redis {
     sub_context = cache.get(subKey)
 
     try:
-        if sub_context['vec']:        
-            return HttpResponse(json.dumps(sub_context['vec'], ensure_ascii=False))
-    except:
+        if sub_context['vec']:  
+            return JsonResponse(sub_context['vec'], safe=False)      
+    except (TypeError, KeyError, UnboundLocalError):
         pass
 
     # Redis }
@@ -175,9 +178,9 @@ def get_vec(request):
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         tuple_taged_docs = tuple(taged_docs)  # list to tuble
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
-            return HttpResponse("{topic: [], vec: []}" , content_type="text/plain; charset=utf-8")
+            return JsonResponse({'topic': [], 'vec': []}, safe=False)
     except:
-        return HttpResponse("{topic: [], vec: []}", content_type="text/plain; charset=utf-8")    
+        return JsonResponse({'topic': [], 'vec': []}, safe=False)
     #///////////////////////////////////
 
     # 빈도수 단어 
@@ -234,7 +237,7 @@ def get_vec(request):
         wordtovec_result = model.wv.most_similar(keywordsvec, topn=unitNumber)  # most_similar: 가장 유사한 단어를 출력
     except:
         # error handle "word '...' not in vocabulary"
-        return JsonResponse('sorry, halt at model most_similar', safe=False)
+        return JsonResponse({"topic": [], "vec": [], "error" : "sorry, halt at model most_similar"}, safe=False)
 
     # convert list of lists (wordtovec_result) to list of dictionaries
     keys = ["label", "value"]
@@ -283,7 +286,7 @@ def get_indicator(request):
     try:
         if sub_context['indicator']:
             return JsonResponse(sub_context['indicator'], safe=False)      
-    except:
+    except (KeyError, UnboundLocalError, TypeError):
         pass
     # Redis }    
 
@@ -291,7 +294,7 @@ def get_indicator(request):
 
     # Use fields : ['출원번호','출원인코드1','출원인1','등록일']
     if not d:
-        return JsonResponse({"error": 'error'}, status=202, safe=False)
+        return JsonResponse({ "name": [], "피인용수": [], "총등록건": [], "CPP": [], "PII": [], "TS": [], "PFS": [] }, status=200, safe=False)
 
     def get_granted_list():
         # 개별 등록건수 count
@@ -329,14 +332,15 @@ def get_indicator(request):
             .to_dict('r')
             )
         # TODO : list of dict 출원번호 sort desc로 자르기
-        return [{'name' : dic['출원인1'], 'code' : dic['출원인코드1'], 'appNo' : dic['출원번호']} for dic in df][:companyLimit]   
+        # return [{'name' : dic['출원인1'], 'code' : dic['출원인코드1'], 'appNo' : dic['출원번호']} for dic in df][:companyLimit]   
+        return [{'name' : dic['출원인1'], 'code' : dic['출원인코드1'], 'appNo' : dic['출원번호']} for dic in df]
 
-    def count_citing():
+    def count_citing(appNos):
         # citing count (using appNo)
         query= 'SELECT sum(피인용수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'
         return get_sum_query(query)
 
-    def count_granted():            
+    def count_granted(grantedList, code):            
         # granted count (using grantedList, code)            
         try:
             return [item['value'] for item in grantedList if item["code"] == code][0]
@@ -353,9 +357,9 @@ def get_indicator(request):
         except:
             return 0             
 
-    def count_family():                                                 
+    def count_family(appNos):                                                 
         # family count (using appNo)
-        query= 'SELECT sum(패밀리수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'                
+        query= 'SELECT sum(패밀리수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'
         return get_sum_query(query)   
 
     def get_pfs():
@@ -374,52 +378,94 @@ def get_indicator(request):
     grantedList = get_granted_list()
     total_granted, appNoList = get_total_granted_appno_list()
     total_citing = get_total_citing()
+    total_family_cnt = int(count_total_family())
 
     companyLimit = 1000 
     dataList = get_appno_list_of_applicant()
-        
 
-    dataLen = companyLimit if len(dataList) >= companyLimit else len(dataList)
-    l = []
-    for i in range(dataLen):
 
-        # 출원인1이 1000개 이상인 경우 출원건 1개인 출원인 제외 - 속도
-        if dataLen == 1000:
-            if len(dataList[i]['appNo']) == 1:
-                continue
+    xxresult = [dict() for x in range(len(dataList))]
+    for i in range(len(dataList)):
+        # if len(dataList[i]['appNo']) == 1:
+        #     continue
+        xxresult[i]['name'] = dataList[i]['name']
+        xxresult[i]['code'] = dataList[i]['code']
+        xxresult[i]['appNo'] = dataList[i]['appNo']
 
-        appNos = ', '.join(dataList[i]['appNo'])
-        code = dataList[i]['code']
-        name = dataList[i]['name']
+    xxappNos = [', '.join(item['appNo']) for item in xxresult]
+    xxname = [item['name'] for item in xxresult]
+    xxciting = [int(count_citing(appNos)) for appNos in xxappNos]   
+    xxgranted = []
+    for x in xxresult:
+        xxgranted.append([item['value'] for item in grantedList if item["code"] == x['code']][0])
+    xxcpp = [int(i) / int(j) for i, j in zip(xxciting, xxgranted)]
 
-        # CPP = 특정 주체의 등록특허의 피인용 횟수 / 해당 주체의 등록특허 수
+    # xxpii = [i / int(total_citing) / total_granted for i in xxcpp]
+    xxpii = []
+    for i in xxcpp:
+        try:  
+            xxpii.append(i / int(total_citing) / total_granted)
+        except ZeroDivisionError:
+            xxpii.append(0)
 
-        citing = count_citing()               
-        granted = count_granted()
-        cpp = get_cpp()
+    xxts = [i * j for i, j in zip(xxpii, xxgranted)]  
+
+    # xxpfs = [int(count_family(', '.join(item['appNo']))) /  int(total_family_cnt)  for item in xxresult]
+    xxpfs = []
+    for item in xxresult:
+        try:
+            xxpfs.append(int(count_family(', '.join(item['appNo']))) /  total_family_cnt)
+        except ZeroDivisionError:
+            xxpfs.append(0)
+
+    yycpp = [round(num,2) for num in xxcpp]
+    yypii = [round(num,2) for num in xxpii]
+    yyts = [round(num,2) for num in xxts]
+    yypfs = [round(num,2) for num in xxpfs]
+    result = { 'name': xxname, '피인용수' : xxciting, '총등록건': xxgranted, 'CPP' : yycpp, 'PII' : yypii, 'TS' : yyts, 'PFS' : yypfs }
+
+
+    # dataLen = companyLimit if len(dataList) >= companyLimit else len(dataList)
+    # l = []
+    # for i in range(dataLen):
+
+    #     # 출원인1이 1000개 이상인 경우 출원건 1개인 출원인 제외 - 속도
+    #     if dataLen == 1000:
+    #         if len(dataList[i]['appNo']) == 1:
+    #             continue
+
+    #     appNos = ', '.join(dataList[i]['appNo'])
+    #     code = dataList[i]['code']
+    #     name = dataList[i]['name']
+
+    #     # CPP = 특정 주체의 등록특허의 피인용 횟수 / 해당 주체의 등록특허 수
+
+    #     citing = count_citing(appNos)               
+    #     granted = count_granted(grantedList, code)
+    #     cpp = get_cpp()
        
 
-        # PII = 특정 주체의 등록특허의 피인용도[CPP] / 전체 등록특허의 피인용도
-        pii = get_pii()
+    #     # PII = 특정 주체의 등록특허의 피인용도[CPP] / 전체 등록특허의 피인용도
+    #     pii = get_pii()
 
-        # TS = 특정 주체의 영향력지수[PII] × 해당 주체의 등록특허 건수              
-        ts = pii * granted
+    #     # TS = 특정 주체의 영향력지수[PII] × 해당 주체의 등록특허 건수              
+    #     ts = pii * granted
 
-        # PFS = 특정 주체의 평균 패밀리 국가 수 / 전체 평균 패밀리 국가 수            
+    #     # PFS = 특정 주체의 평균 패밀리 국가 수 / 전체 평균 패밀리 국가 수            
 
-        family = count_family()
-        total_family = count_total_family()              
-        pfs = get_pfs()
+    #     family = count_family(appNos)
+    #     total_family = count_total_family()              
+    #     pfs = get_pfs()
 
-        cpp = round(cpp,2)
-        pii = round(pii,2)
-        ts = round(ts,2)
-        pfs = round(pfs,2)
-        # citing = int(citing)
+    #     cpp = round(cpp,2)
+    #     pii = round(pii,2)
+    #     ts = round(ts,2)
+    #     pfs = round(pfs,2)
+    #     # citing = int(citing)
                         
-        l.append({ 'name': name, 'citing' : citing, 'cnt': granted, 'cpp' : cpp, 'pii' : pii, 'ts' : ts, 'pfs' : pfs })
+    #     l.append({ 'name': name, 'citing' : citing, 'cnt': granted, 'cpp' : cpp, 'pii' : pii, 'ts' : ts, 'pfs' : pfs })
 
-    result = sorted(l, key=itemgetter('cnt'), reverse=True)
+    # result = sorted(l, key=itemgetter('cnt'), reverse=True)
 
     # Redis {
     try:
@@ -430,3 +476,5 @@ def get_indicator(request):
     # Redis }
 
     return JsonResponse(result, safe=False)
+
+

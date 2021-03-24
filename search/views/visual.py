@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
 from .searchs import get_searchs
-from ..utils import get_redis_key
+from utils import get_redis_key
 import json
 
 # caching with redis
@@ -13,12 +13,13 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 def get_visual(request):
     ''' application_number, applicant_classify, ipc, related_person '''
+    
     _, subKey, _, subParams = get_redis_key(request)
 
     # Redis {
     sub_context = cache.get(subKey)
 
-    key = subParams['mode'] # vis_num, vis_cla, vis_ipc, vis_per
+    key = subParams['mode'] # visualNum, visualClassify, visualIpc, visualPerson
 
     try:
         if sub_context[key]:        
