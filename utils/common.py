@@ -107,7 +107,7 @@ def frequency_count(data, n=None):
         count = Counter(tuple_data)
         foo = count.most_common(n)
         result = dict(foo)
-    except:
+    except AttributeError:
         result = []
 
     return result

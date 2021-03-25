@@ -35,7 +35,8 @@ def return_type(result, api):
 def get_naver_news(request):
 
     def clean_keyword(keyword):
-        result= re.sub(r' and | adj | adj\d+ | near | near\d+ |\(\@AD.*\d{8}\)|\([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).AP|\([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).INV', ' ', keyword, flags=re.IGNORECASE)
+        # result= re.sub(r' and | adj | adj\d+ | near | near\d+ |\(\@AD.*\d{8}\)|\([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).AP|\([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).INV', ' ', keyword, flags=re.IGNORECASE)
+        result= re.sub(r' and | or | adj | adj\d+ | near | near\d+ |\(\@[PRD|AD|RD|FD].*\d{8}\)|.AP|.INV', ' ', keyword, flags=re.IGNORECASE)
         result = re.sub('[\(\)]|["]', '', result, flags=re.IGNORECASE)
         return result
 
@@ -114,7 +115,7 @@ def get_news(request):
     res = get_naver_news(request)
 
     if res['status'] != 200:
-        return JsonResponse("Error Code:" + res['status'], safe=False)    
+        return JsonResponse({ "rowsCount": 0, "rows": [], "Error Code": res['status']}, safe=False)    
 
     result = { 'rowsCount': res['rowsCount'], 'rows': make_paging_rows(res['rows'])}
 
@@ -180,21 +181,18 @@ def get_related_company(request):
         return [x for x in seq if not (x in seen or seen_add(x))]    
    
     news_nlp = get_news_nlp(request)
-    
     unique_news_nlp= remove_duplicate(news_nlp)
     
     try:
         isExist = Listed_corp.objects.filter(회사명__in=unique_news_nlp).exists()
         if not isExist:
-            return JsonResponse({ 'stockCode': [], 'corpName': [], 'commonCorpName': [] }, safe=False)
-            # return HttpResponse([]'Not Found', status=404)
+            return JsonResponse({ 'stockCode': [], 'corpName': [], 'commonCorpName': [], 'error': 'Not Found' }, safe=False)
 
-        EXCLUDE_COMPANY_NAME = settings.TERMS['EXCLUDE_COMPANY_NAME']
+        # EXCLUDE_COMPANY_NAME = settings.TERMS['EXCLUDE_COMPANY_NAME']
 
-        listedCorp = Listed_corp.objects.filter(회사명__in=unique_news_nlp).exclude(회사명__in=EXCLUDE_COMPANY_NAME)
+        listedCorp = Listed_corp.objects.filter(회사명__in=unique_news_nlp) # .exclude(회사명__in=EXCLUDE_COMPANY_NAME)
         myCorpName = list(listedCorp.values_list('회사명', flat=True).order_by('-종목코드','회사명'))[:10]
         myCommonCorpName = list(listedCorp.values_list('정보__기업명', flat=True).order_by('-종목코드','회사명'))[:10]
-        # myCorpCode = list(listedCorp.values_list('corp_code', flat=True).order_by('-종목코드','회사명'))[:10]
         myStockCode = list(listedCorp.values_list('종목코드', flat=True).order_by('-종목코드','회사명'))[:10]
 
         result = { 'stockCode': myStockCode, 'corpName': myCorpName, 'commonCorpName': myCommonCorpName }
@@ -341,7 +339,7 @@ def _sensitive_analysis(news_token):
 
 # NNG일반명사 ,NNP고유명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
 # def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
-def tokenizer(raw, pos=["NNP","UNKNOWN"]):
+def tokenizer(raw, pos=["NNG","NNP","UNKNOWN"]):
     mecab = Mecab()
     STOPWORDS = settings.TERMS['STOPWORDS']
     try:
