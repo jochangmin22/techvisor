@@ -14,7 +14,7 @@ import requests
 from .models import Users, Social_accounts
 # from .serializers import UsersSerializer, EmailAuthSerializer
 
-from .utils import handleRedis, social_login_infos_exist, generate_token, find_user, getNamebyEmail, check_user_exists, sendmail, check_user_by_social_id, find_user_by_social_id
+from .utils import social_login_infos_exist, generate_token, find_user, getNamebyEmail, check_user_exists, sendmail, check_user_by_social_id, find_user_by_social_id
 
 secret_key = settings.SECRET_KEY
 algorithm = settings.JWT_AUTH['JWT_ALGORITHM']
@@ -22,7 +22,7 @@ expiresIn = settings.JWT_AUTH['JWT_EXPIRATION_DELTA']
 
 now = datetime.datetime.utcnow()
 
-providers = settings.SOCIAL_LOGIN['provider']
+providers = settings.SOCIAL_LOGIN['providers']
 
 google_scopes = ['https://www.googleapis.com/auth/userinfo.email','openid','https://www.googleapis.com/auth/userinfo.profile']
 naver_scopes = ['id', 'email', 'name', 'profile_image', 'nickname']

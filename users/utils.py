@@ -19,22 +19,32 @@ secret_key = settings.SECRET_KEY
 algorithm = settings.JWT_AUTH['JWT_ALGORITHM']
 expiresIn = settings.JWT_AUTH['JWT_EXPIRATION_DELTA']
 
-def handleRedis(redisKey, keys, result="", mode="r"):
-    """ read or write to redis """
-    context = cache.get(redisKey) 
-    if mode == 'r':
-        if context and context[keys]:
-            return context[keys]
-            # return JsonResponse(context[keys], safe=False)
-        else:            
-            return None          
-    if mode == 'w':
-        if context is None:
-            context = {}
-        context[keys] = result
-        cache.set(redisKey, context, 300)
-        return JsonResponse(result, safe=False)        
-    return
+def readRedis(redisKey, keys):
+    context = cache.get(redisKey)
+    if context and keys in context:
+        return context[keys]
+    else:
+        return None
+
+def writeRedis(redisKey, keys, data=""):
+    return cache.set(redisKey, { keys : data }, 300)
+
+# def handleRedis(redisKey, keys, result="", mode="r"):
+#     """ read or write to redis """
+#     context = cache.get(redisKey) 
+#     if mode == 'r':
+#         if context and context[keys]:
+#             return context[keys]
+#             # return JsonResponse(context[keys], safe=False)
+#         else:            
+#             return None          
+#     if mode == 'w':
+#         if context is None:
+#             context = {}
+#         context[keys] = result
+#         cache.set(redisKey, context, 300)
+#         return JsonResponse(result, safe=False)        
+#     return
     
 def social_login_infos_exist(client_json):    
     ''' does provider client_json information exist? '''
