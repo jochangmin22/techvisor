@@ -36,6 +36,16 @@ def get_redis_key(request):
 
     return mainKey, subKey, params, subParams
 
+def redisRead(redisKey, keys, data=""):
+    context = cache.get(redisKey)
+    if context and keys in context:
+        return context[keys]
+    else:
+        return None
+
+def writeRead(redisKey, keys, data=""):
+    return cache.set(redisKey, { keys : data }, 300)   
+
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
     columns = [col[0] for col in cursor.description]

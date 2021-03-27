@@ -16,21 +16,21 @@ from django.core.cache import cache
 
 import secrets
 
-from ..utils import handleRedis, social_login_infos_exist, generate_token, get_payload_from_token
+from ..utils import readRedis, writeRedis, social_login_infos_exist, generate_token, get_payload_from_token
 
 base_url = settings.SOCIAL_LOGIN['base_url']
 redirect_url = settings.SOCIAL_LOGIN['redirect_url']
-providers = settings.SOCIAL_LOGIN['provider']
+providers = settings.SOCIAL_LOGIN['providers']
 
 google_scopes = ['https://www.googleapis.com/auth/userinfo.email','openid','https://www.googleapis.com/auth/userinfo.profile']
 
 
 def get_token(request):
     data = json.loads(request.body.decode('utf-8'))
-    key = data['key']
-    type = data['type']
+    key = data.get('key','')
+    type = data.get('type','')
 
-    token = handleRedis(key, type)
+    token = readRedis(key, type)
     if token:
         return JsonResponse({ 'token' : token}, safe=False)
     else:
@@ -78,7 +78,8 @@ def google_callback(request):
         
         redisKey = secrets.token_hex(16)
 
-        handleRedis(redisKey, 'google', flow.credentials.token, mode="w")
+        # handleRedis(redisKey, 'google', flow.credentials.token, mode="w")
+        writeRedis(redisKey, 'google', flow.credentials.token)
         nextUrl = base_url + 'callback?type=google&key=' + redisKey
 
         if state:
@@ -95,7 +96,9 @@ def redirect_naver_login(request):
     # for csrf
     token = generate_token({ 'next' : next })
     redisKey = secrets.token_hex(16)
-    handleRedis(redisKey, 'naver', token, mode="w")    
+
+    writeRedis(redisKey, 'naver', token)
+    # handleRedis(redisKey, 'naver', token, mode="w")    
 
     auth_uri = providers['naver']['auth_uri'] + '?response_type=code&client_id=' + providers['naver']['client_id'] + '&state=' + redisKey + '&redirect_uri=' + redirect_url + 'api/auth/callback/naver'
 
@@ -110,7 +113,8 @@ def naver_callback(request):
             return redirect(base_url + '?callback?error=1')
 
         # csrf check
-        csrftoken = handleRedis(state, 'naver')
+        # csrftoken = handleRedis(state, 'naver')
+        csrftoken = readRedis(state, 'naver')
         if not csrftoken:
             return redirect(base_url + '?callback?error=1')
 
@@ -132,7 +136,8 @@ def naver_callback(request):
 
         redisKey = secrets.token_hex(16)
 
-        handleRedis(redisKey, 'naver', access_token, mode="w")
+        # handleRedis(redisKey, 'naver', access_token, mode="w")
+        writeRedis(redisKey, 'naver', access_token)
         nextUrl = base_url + 'callback?type=naver&key=' + redisKey
 
         if next:
@@ -153,7 +158,8 @@ def redirect_kakao_login(request):
     # for csrf
     token = generate_token({ 'next' : next })
     redisKey = secrets.token_hex(16)
-    handleRedis(redisKey, 'kakao', token, mode="w")    
+    # handleRedis(redisKey, 'kakao', token, mode="w")    
+    writeRedis(redisKey, 'kakao', token)    
 
     auth_uri = providers['kakao']['auth_uri'] + '?response_type=code&client_id=' + providers['kakao']['client_id'] + '&state=' + redisKey + '&redirect_uri=' + redirect_url + 'api/auth/callback/kakao'
 
@@ -168,7 +174,8 @@ def kakao_callback(request):
             return redirect(base_url + '?callback?error=1')
 
         # csrf check
-        csrftoken = handleRedis(state, 'kakao')
+        # csrftoken = handleRedis(state, 'kakao')
+        csrftoken = readRedis(state, 'kakao')
         if not csrftoken:
             return redirect(base_url + '?callback?error=1')
 
@@ -187,7 +194,8 @@ def kakao_callback(request):
 
         redisKey = secrets.token_hex(16)
 
-        handleRedis(redisKey, 'kakao', access_token, mode="w")
+        # handleRedis(redisKey, 'kakao', access_token, mode="w")
+        writeRedis(redisKey, 'kakao', access_token)
         nextUrl = base_url + 'callback?type=kakao&key=' + redisKey
 
         if next:
@@ -203,7 +211,8 @@ def redirect_facebook_login(request):
     # for csrf
     token = generate_token({ 'next' : next })
     redisKey = secrets.token_hex(16)
-    handleRedis(redisKey, 'facebook', token, mode="w")    
+    # handleRedis(redisKey, 'facebook', token, mode="w")    
+    writeRedis(redisKey, 'facebook', token)    
 
     auth_uri = providers['facebook']['auth_uri'] + '?response_type=code&client_id=' + providers['facebook']['client_id'] + '&state=' + redisKey + '&redirect_uri=' + redirect_url + 'api/auth/callback/facebook&scope=email,public_profile'
 
@@ -218,7 +227,8 @@ def facebook_callback(request):
             return redirect(base_url + '?callback?error=1')
 
         # csrf check
-        csrftoken = handleRedis(state, 'facebook')
+        # csrftoken = handleRedis(state, 'facebook')
+        csrftoken = readRedis(state, 'facebook')
         if not csrftoken:
             return redirect(base_url + '?callback?error=1')
 
@@ -237,7 +247,8 @@ def facebook_callback(request):
 
         redisKey = secrets.token_hex(16)
 
-        handleRedis(redisKey, 'facebook', access_token, mode="w")
+        # handleRedis(redisKey, 'facebook', access_token, mode="w")
+        writeRedis(redisKey, 'facebook', access_token)
         nextUrl = base_url + 'callback?type=facebook&key=' + redisKey
 
         if next:
