@@ -258,12 +258,11 @@ def get_search_quote(request):
     return JsonResponse(row, safe=False)
 
 def get_citing_info(appNo):
+    whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
+    query = "SELECT case when coalesce(등록일자::numeric::text, '') = '' then 'A' else 'B1' end 식별코드, 'KR' 국가, 출원번호, \"발명의명칭(국문)\" || case when coalesce(\"발명의명칭(영문)\", '') = '' then '' else ' (' || \"발명의명칭(영문)\" || ')' end 명칭, 출원인1 || case when coalesce(출원인2, '') = '' then '' else ', ' || 출원인2 end || case when coalesce(출원인3, '') = '' then '' else ', ' || 출원인3 end 출원인, to_char(to_date(case when coalesce(등록일자::numeric::text, '') = '' then case when coalesce(공개일자::numeric::text,'') = '' then 출원일자::text else 공개일자::text end else 등록일자::text end, 'YYYYMMDD'), 'YYYY.MM.DD') 일자, ipc코드 \"IPC코드\" FROM 공개공보 "
+    + whereAppNo
     with connection.cursor() as cursor:
-        whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
-        cursor.execute(
-            "SELECT case when coalesce(등록일자::numeric::text, '') = '' then 'A' else 'B1' end 식별코드, 'KR' 국가, 출원번호, \"발명의명칭(국문)\" || case when coalesce(\"발명의명칭(영문)\", '') = '' then '' else ' (' || \"발명의명칭(영문)\" || ')' end 명칭, 출원인1 || case when coalesce(출원인2, '') = '' then '' else ', ' || 출원인2 end || case when coalesce(출원인3, '') = '' then '' else ', ' || 출원인3 end 출원인, to_char(to_date(case when coalesce(등록일자::numeric::text, '') = '' then case when coalesce(공개일자::numeric::text,'') = '' then 출원일자::text else 공개일자::text end else 등록일자::text end, 'YYYYMMDD'), 'YYYY.MM.DD') 일자, ipc코드 \"IPC코드\" FROM 공개공보 "
-            + whereAppNo
-        )
+        cursor.execute(query)
         row = dictfetchall(cursor)
 
     res = [] if row == [] else row[0]
