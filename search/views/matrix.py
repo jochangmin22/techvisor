@@ -44,14 +44,6 @@ def get_matrix(request):
     # topic 가져오기
     topics = get_topic(nlp_token, output)
 
-    if category == '연도별':
-        countField = '출원일'
-    elif category == '기술별':
-        countField = 'ipc코드'
-    elif category == '기업별':
-        countField = '출원인1'
-
-
     mtx_raw = get_searchs(request, mode="matrix")
 
     ### mtx_raw의 [요약/청구항/요약·청구항]에서 topics N (output) 이 포함되는 [출원일, ipc코드, 출원인1] count 
@@ -62,6 +54,9 @@ def get_matrix(request):
     matrixMax = 0
     xData = []
     yData = []
+    
+    foo = { '연도별':'출원일', '기술별':'ipc코드', '기업별':'출원인1'}
+    countField = foo[category]    
     try:
         for j in range(len(topics)):  # topic 20
             topic = topics[j].replace("_"," ")

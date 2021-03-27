@@ -5,7 +5,6 @@ import re
 from itertools import permutations
 import operator
 import json
-from collections import defaultdict, Counter
 
 from utils import get_redis_key, dictfetchall, remove_duplicates, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags, remove_tail, frequency_count, sampling
 
@@ -339,7 +338,6 @@ def get_searchs(request, mode="begin"):
 
     # Add sort by
     query += make_orderby_clause()
-                     
     with connection.cursor() as cursor:
         cursor.execute(
             "SET work_mem to '100MB';"
@@ -352,7 +350,7 @@ def get_searchs(request, mode="begin"):
     res_sub = {}
 
     result = [dict() for x in range(len(rows))]
-    # if rows:
+
     res['nlp_raw'] = make_nlp_raw()
     res['mtx_raw'] = make_mtx_raw()
     res['ind_raw'] = make_ind_raw()
@@ -363,21 +361,6 @@ def get_searchs(request, mode="begin"):
     result_paging = make_paging_rows()
     res_sub['raw'] = result_paging
     res_sub['visualClassify'] = make_vis_cla()
-    # else:
-    #     res['nlp_raw'] = []
-    #     res['mtx_raw'] = []
-    #     res['ind_raw'] = []
-    #     res['visualNum'] = []
-    #     res['visualIpc'] = []
-    #     res['visualPerson'] = []
-
-    #     result = { 'rowsCount': 0, 'rows': []} 
-    #     res_sub['raw'] = result
-    #     res_sub['visualClassify'] = { 'mode' : 'visualClassify', 'entities' : {} }
-        
-    # ''' 유사도 처리 '''
-    # result=similarity(row)
-    # return JsonResponse(result, safe=False)
 
     # redis 저장 {
     cache.set(mainKey, res, CACHE_TTL)
@@ -447,88 +430,25 @@ def get_nlp(request, analType):
     
     result = command[unit][emergence]()    
 
-    # tokenizer
-    # if unit == '구문':
-    #     if emergence == '빈도수':            
-    #         result = tokenizer_phrase(nlp_str)
-    #     elif emergence =='건수':  
-    #         for foo in nlp_list:
-    #             bar = remove_duplicates(tokenizer_phrase(foo))
-    #             result.extend(bar) 
-    # elif unit == '워드':            
-    #     if emergence == '빈도수':
-    #         result = tokenizer(nlp_str)
-    #     elif emergence =='건수':
-    #         for foo in nlp_list:
-    #             bar = remove_duplicates(tokenizer(foo))
-    #             result.extend(bar)
-
     cache.set(newSubKey, { 'nlp_token' : result } , CACHE_TTL)
 
     return result
 
-def like_where(keyword="", fieldName=""):
-    """ 단순 like query 생성 """
-    # A and F LIKE "%A%"
-    # A or B_C ; F LIKE '%A%' or F LIKE '%B C%'
-    # A and B_C ; F LIKE '%A%' and F LIKE '%B C%'
-    # A or B and not C ; F LIKE '%A%' or F LIKE '%B%' and F !'C'
-
-    if not keyword:
-        return ""
-
-    # 전체 조합에서 + 기준으로 like query 만들기
-    items = []
-    notItems = []
-    mylength = 1
-    # for val in re.split("(\\W+)", keyword): #  not a word (\w)
-    for val in re.split(r' and | or ', keyword):  # and | or
-        val = val.replace("_", " ")
-        if "not " in val or "-" in val:  # collect negative word
-            val = val.replace("-", "").replace("not ", "")
-            notItems.append(val)
-        else:
-            items.append(val)
-
-    temp = list(map("%".join, permutations(items, mylength)))
-
-    result = ""
-    for k in temp:
-        result += '"' + fieldName + "\" like '%" + k + "%' or "
-
-    result = remove_tail(result, " or ")
-
-    # append collect negative word
-    result2 = ""
-    # if not notItems:
-    temp2 = list(map("%".join, permutations(notItems, mylength)))
-
-    for k in temp2:
-        result2 += '"' + fieldName + "\" not like '%" + k + "%' and "
-
-    result2 = remove_tail(result2, " and ")
-
-    # merge result
-    if result:
-        return ("(" + result + ") and " + result2) if result2 else result
-    else:
-        return result2 if result2 else ""
-
 def date_query(params):
 
-    if not params["dateType"] or not (params['startDate'] and params['endDate']):
+    if not params["dateType"] or not (params['startDate'] or params['endDate']):
         return ""
 
     result = ""
-    command = { 'PRD': '우선권주장출원일1', 'PD': '공개일' , 'FD': '등록일', 'AD': '출원일'
-    }
+    command = { 'PRD': '우선권주장출원일1', 'PD': '공개일' , 'FD': '등록일', 'AD': '출원일' }
     dateType = command[params['dateType']]
-
     startDate = params["startDate"]
     endDate = params["endDate"]
-    if startDate:
+    if startDate and endDate:
+        result += (dateType + " >= '" + startDate + "' and " + dateType + " <= '" + endDate + "' and ")
+    if startDate and not endDate:
         result += (dateType + " >= '" + startDate + "' and ")
-    elif endDate:
+    if not startDate and endDate:
         result += (dateType + " <= '" + endDate + "' and ")
 
     return remove_tail(result, " and ")
@@ -543,7 +463,7 @@ def status_query(params):
         result += "등록사항 ='" + k + "' or "
 
     result = remove_tail(result, " or ")
-    # result += " 등록사항 = '" + ("공개" if status == "출원" else status) + "' and "
+
     return result + ")"
 
 def iptype_query(params):     
@@ -628,7 +548,7 @@ def tsquery_keywords(keyword="", fieldName="", mode="terms"):
         keyword = re_sub(removeDate, r"", keyword)
         keyword = re_sub(_removeDate, r"", keyword)
 
-    strKeyword = ''
+    result = ''
     
     for v in re.split(" and ", keyword, flags=re.IGNORECASE):
         v = convert_symbols(v)
@@ -647,7 +567,7 @@ def tsquery_keywords(keyword="", fieldName="", mode="terms"):
                 _v = re_sub(' ', r"&", _v)
                 strOr += ("".join(str(_v)) + "|")
             strOr = remove_tail(strOr,"|")
-            strKeyword += ("".join(str(strOr)) + ")&")
+            result += ("".join(str(strOr)) + ")&")
         else:
             v = re_sub(adjZeroGroup, r"<->", v)
             v = re_sub(adjHaveNumberExecptZero, r"<\1>", v)
@@ -658,18 +578,14 @@ def tsquery_keywords(keyword="", fieldName="", mode="terms"):
             v = re_sub(adjSpace, r"\1<->\2", v)
             v = removeOuterParentheses(v) if not keepParantheses(v) else v
             v = re_sub(' ', r"&", v)
-            strKeyword += ("".join(str(v)) + "&")
+            result += ("".join(str(v)) + "&")
 
-    strKeyword = remove_tail(strKeyword,"&")
+    result = remove_tail(result,"&")
 
-    if not strKeyword:
+    if not result:
         return None
 
-    return strKeyword        
-
-    # result = f'"{fieldName}" @@ to_tsquery(\'{strKeyword}\')'
-    # result += f' order by ts_rank("{fieldName}",to_tsquery(\'{strKeyword}\') desc'
-    # return result
+    return result        
 
 def get_query(request):
     """ 쿼리 확인용 """

@@ -13,26 +13,11 @@ import json
 
 from django.db.models import Q
 from ..models import Listed_corp
+from utils import readRedis, writeRedis, dictfetchall
 
-# caching with redis
-from django.core.cache import cache
 from django.conf import settings
-from django.core.cache.backends.base import DEFAULT_TIMEOUT
-
 COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
-CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-
 KIPRIS = settings.KIPRIS
-
-# from urllib.parse import unquote
-# TODO : pynori 성능 확인
-# from pynori.korean_analyzer import KoreanAnalyzer
-
-# for api {
-# import urllib.parse
-# from collections import OrderedDict
-# from itertools import repeat
-# for api }
 
 def get_search(request):
     if request.method == 'POST':
@@ -41,7 +26,9 @@ def get_search(request):
 
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
-    handleRedis(redisKey, 'raw')
+    result = readRedis(redisKey, 'raw')
+    if result:
+        return JsonResponse(result, safe=False)
     # Redis }
 
     with connection.cursor() as cursor:
@@ -116,7 +103,7 @@ def get_search(request):
         row[0].update(res)
 
     # Redis {
-    handleRedis(redisKey, 'raw', row[0], mode="w")
+    writeRedis(redisKey, 'raw', row[0])
     # Redis }
 
     return JsonResponse(row[0], safe=False)
@@ -130,7 +117,9 @@ def get_search_quote(request):
 
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
-    handleRedis(redisKey, 'quote')
+    result = readRedis(redisKey, 'quote')
+    if result:
+        return JsonResponse(result, safe=False)        
     # Redis }
 
     with connection.cursor() as cursor:
@@ -263,7 +252,7 @@ def get_search_quote(request):
     #         r.update({'인용참증단계' : r['인용참증단계'].replace('발송문서','심사관 인용').replace('선행기술조사문헌','심사보고서').replace('선행기술조사보고서','선행기술조사').replace('출원서인용문헌이력정보','출원서 인용')})
 
     # Redis {
-    handleRedis(redisKey, 'quote', row, mode="w")
+    writeRedis(redisKey, 'quote', row)
     # Redis }
 
     return JsonResponse(row, safe=False)
@@ -286,7 +275,10 @@ def get_search_rnd(request):
         data = json.loads(request.body.decode('utf-8'))
     appNo = data["appNo"]    
     redisKey = appNo + "¶"
-    handleRedis(redisKey, 'rnd')
+
+    result = readRedis(redisKey, 'rnd')
+    if result:
+        return JsonResponse(result, safe=False)    
 
     with connection.cursor() as cursor:
         whereAppNo = 'WHERE "출원번호" = $$' + appNo + "$$"
@@ -296,7 +288,7 @@ def get_search_rnd(request):
             + " ORDER BY 연구개발사업일련번호 ASC"
             )
         row = dictfetchall(cursor)
-    handleRedis(redisKey, 'rnd', row, mode='w')
+    writeRedis(redisKey, 'rnd', row)
     return JsonResponse(row, safe=False)
 
 def get_search_family(request):
@@ -306,7 +298,9 @@ def get_search_family(request):
         appNo = data["appNo"]    
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
-    handleRedis(redisKey, 'family')
+    result = readRedis(redisKey, 'family')
+    if result:
+        return JsonResponse(result, safe=False)        
     # Redis }
     with connection.cursor() as cursor:
         whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
@@ -319,7 +313,7 @@ def get_search_family(request):
         row = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'family', row, mode="w")
+    writeRedis(redisKey, 'family', row)
     # Redis }
 
     return JsonResponse(row, safe=False)
@@ -331,8 +325,9 @@ def get_search_ipc_cpc(request):
         appNo = data["appNo"]    
     redisKey = appNo + "¶"
 
-    handleRedis(redisKey, 'ipccpc')
-
+    result = readRedis(redisKey, 'ipccpc')
+    if result:
+        return JsonResponse(result, safe=False)
     with connection.cursor() as cursor:
         whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
         cursor.execute(
@@ -346,7 +341,7 @@ def get_search_ipc_cpc(request):
         )
         row = dictfetchall(cursor)
 
-    handleRedis(redisKey, 'ipccpc', row, mode="w")
+    writeRedis(redisKey, 'ipccpc', row)
 
     return JsonResponse(row, safe=False)
 
@@ -357,7 +352,9 @@ def get_search_legal(request):
         appNo = data["appNo"]    
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
-    handleRedis(redisKey, 'legal')
+    result = readRedis(redisKey, 'legal')
+    if result:
+        return JsonResponse(result, safe=False)    
     # Redis }
     with connection.cursor() as cursor:
         whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
@@ -371,7 +368,7 @@ def get_search_legal(request):
         row = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'legal', row, mode="w")
+    writeRedis(redisKey, 'legal', row)
     # Redis }
 
     return JsonResponse(row, safe=False)
@@ -383,7 +380,9 @@ def get_search_registerfee(request):
         rgNo = data["rgNo"]    
     redisKey = rgNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
-    handleRedis(redisKey, 'registerfee')
+    result = readRedis(redisKey, 'registerfee')
+    if result:
+        return JsonResponse(result, safe=False)    
     # Redis }
     with connection.cursor() as cursor:
         whereRgNo = "" if rgNo == "" else 'WHERE "등록번호" = $$' + rgNo + "$$"
@@ -395,7 +394,7 @@ def get_search_registerfee(request):
         row = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'registerfee', row, mode="w")
+    writeRedis(redisKey, 'registerfee', row)
     # Redis }
 
     return JsonResponse(row, safe=False)
@@ -407,7 +406,9 @@ def get_search_rightfullorder(request):
         appNo = data["appNo"]    
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
-    handleRedis(redisKey, 'rightfullorder')
+    result = readRedis(redisKey, 'rightfullorder')
+    if result:
+        return JsonResponse(result, safe=False)    
     # Redis }
     with connection.cursor() as cursor:
         whereAppNo = "" if appNo == "" else 'WHERE "출원번호" = $$' + appNo + "$$"
@@ -419,7 +420,7 @@ def get_search_rightfullorder(request):
         row = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'rightfullorder', row, mode="w")
+    writeRedis(redisKey, 'rightfullorder', row)
     # Redis }
 
     return JsonResponse(row, safe=False)
@@ -431,7 +432,9 @@ def get_search_rightholder(request):
         rgNo = data["rgNo"]    
     redisKey = rgNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
-    handleRedis(redisKey, 'rightholder')
+    result = readRedis(redisKey, 'rightholder')
+    if result:
+        return JsonResponse(result, safe=False)
     # Redis }
     with connection.cursor() as cursor:
         whereRgNo = "" if rgNo == "" else 'WHERE "등록번호" = $$' + rgNo + "$$"
@@ -443,7 +446,7 @@ def get_search_rightholder(request):
         row = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'rightholder', row, mode="w")
+    writeRedis(redisKey, 'rightholder', row)
     # Redis }
 
     return JsonResponse(row, safe=False)
@@ -511,7 +514,9 @@ def get_search_applicant_trend(request):
     aCode = aCode.replace("-", "")
     redisKey = aCode + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
-    handleRedis(redisKey, 'applicant_trend')
+    result = readRedis(redisKey, 'applicant_trend')
+    if result:
+        return JsonResponse(result, safe=False)    
     # Redis }
     with connection.cursor() as cursor:
         whereACode = "" if aCode == "" else 'WHERE "출원인코드1" = $$' + aCode + "$$"
@@ -531,7 +536,7 @@ def get_search_applicant_trend(request):
         row = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'applicant_trend', row, mode="w")
+    writeRedis(redisKey, 'applicant_trend', row)
     # Redis }
     #
     return JsonResponse(row, safe=False)
@@ -543,7 +548,9 @@ def get_search_applicant_ipc(request):
     aCode = aCode.replace("-", "")
     redisKey = aCode + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
-    handleRedis(redisKey, 'applicant_ipc')
+    result = readRedis(redisKey, 'applicant_ipc')
+    if result:
+        return JsonResponse(result, safe=False)    
     # Redis }
     with connection.cursor() as cursor:
         whereACode = "" if aCode == "" else 'WHERE "출원인코드1" = $$' + aCode + "$$"
@@ -553,7 +560,7 @@ def get_search_applicant_ipc(request):
         row = dictfetchall(cursor)
 
     # Redis {
-    handleRedis(redisKey, 'applicant_ipc', row, mode="w")
+    writeRedis(redisKey, 'applicant_ipc', row)
     # Redis }
     #
     return JsonResponse(row, safe=False)
@@ -567,7 +574,9 @@ def get_similar(request):
 
     redisKey = appNo + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
-    handleRedis(redisKey, 'similar')
+    result = readRedis(redisKey, 'similar')
+    if result:
+        return JsonResponse(result, safe=False)    
     # Redis }
 
     # with connection.cursor() as cursor:
@@ -608,7 +617,7 @@ def get_similar(request):
     res = similarity(data, modelType, dataList) 
 
     # Redis {
-    # handleRedis(redisKey, 'similar', row, mode="w")
+    writeRedis(redisKey, 'similar', row)
     # Redis }
 
     return HttpResponse(res, content_type="application/json")
@@ -656,19 +665,6 @@ def get_associate_corp(request):
             return JsonResponse(result, safe=False)
 
     return JsonResponse(result, safe=False)
-
-def handleRedis(redisKey, keys, data="", mode="r"):
-    """ read or write to redis """
-    context = cache.get(redisKey)
-    if mode == 'r':
-        if context and keys in context:
-            return JsonResponse(context[keys], safe=False)
-    if mode == 'w':
-        if context is not None:
-            context[keys] = data
-            cache.set(redisKey, context, CACHE_TTL)
-        return JsonResponse(data, safe=False)
-    return
 
 def _get_typo(xmlStr=""):
     """ 오타 정리 """
@@ -1079,13 +1075,6 @@ def replace_with_newlines(element):
         elif elem.name == 'br':
             text += '\n'
     return text
-
-
-def dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
-    columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]
-
 
 # NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
 def tokenizer(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):

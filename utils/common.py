@@ -5,6 +5,7 @@ from itertools import islice
 from konlpy.tag import Mecab
 from django.conf import settings
 from collections import Counter
+from django.core.cache import cache
 
 def get_redis_key(request):
     "Return mainKey, subKey, params, subParams"
@@ -36,14 +37,14 @@ def get_redis_key(request):
 
     return mainKey, subKey, params, subParams
 
-def redisRead(redisKey, keys, data=""):
+def readRedis(redisKey, keys, data=""):
     context = cache.get(redisKey)
     if context and keys in context:
         return context[keys]
     else:
         return None
 
-def writeRead(redisKey, keys, data=""):
+def writeRedis(redisKey, keys, data=""):
     return cache.set(redisKey, { keys : data }, 300)   
 
 def dictfetchall(cursor):

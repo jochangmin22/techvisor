@@ -9,10 +9,8 @@ from gensim.models import FastText
 from .searchs import get_searchs, get_nlp
 from utils import get_redis_key, dictfetchall, remove_tail, frequency_count
 import pandas as pd
-from bs4 import BeautifulSoup
-import requests
+
 from django.db import connection
-from decimal import Decimal
 
 # caching with redis
 from django.core.cache import cache
@@ -39,18 +37,18 @@ def get_wordcloud(request):
     # Redis }
 
     #///////////////////////////////////
-    try:
-        unitNumber = subParams['menuOptions']['wordCloudOptions']['output']
-    except:
-        unitNumber = 50        
+    foo = subParams['menuOptions']['wordCloudOptions']
+    unitNumber = foo.get('output', 50)
+
+    emptyResult = [{ 'name' : [], 'value' : []}]
 
     try:  # handle NoneType error
         taged_docs = get_nlp(request, analType="wordCloud")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
-            return JsonResponse([{ 'name' : [], 'value' : []}], safe=False)
+            return JsonResponse(emptyResult, safe=False)
     except Exception as e:
-        return JsonResponse([{ 'name' : [], 'value' : []}], safe=False)
+        return JsonResponse(emptyResult, safe=False)
 
     #///////////////////////////////////
 
@@ -62,26 +60,6 @@ def get_wordcloud(request):
     result = []
     foo = frequency_count(taged_docs, unitNumber)
     result.append(make_dic_to_list_of_dic(foo))
-
-    # return JsonResponse(result, safe=False)
-    # sublist = dict()
-
-    # for word in taged_docs:
-    #     if word in sublist:
-    #         sublist[word] += 1
-    #     else:
-    #         sublist[word] = 1
-
-    # sublist = sorted(
-    #     sublist.items(), key=operator.itemgetter(1), reverse=True)[:unitNumber]
-
-    # fields = ["name", "value"]
-    # result = [dict(zip(fields, d)) for d in sublist]
-
-    # json 형태로 출력
-    # result = json.dumps(result, ensure_ascii=False, indent="\t")
-    # if not result:
-    #     return HttpResponse("[]", content_type="text/plain; charset=utf-8")
 
     # Redis {
     try:
@@ -278,7 +256,7 @@ def get_sum_query(query):
 def get_indicator(request):
     """ 지표분석, 출원인 CPP, PFS 추출 """
 
-    _, subKey, _, _ = get_redis_key(request)
+    _, subKey, params, _ = get_redis_key(request)
 
     # Redis {
     sub_context = cache.get(subKey)
@@ -290,11 +268,17 @@ def get_indicator(request):
         pass
     # Redis }    
 
+    emptyResult = { "name": [], "피인용수": [], "총등록건": [], "CPP": [], "PII": [], "TS": [], "PFS": [] }
+    
+    if not params["searchText"]:
+        return JsonResponse(emptyResult, safe=False)
+
     d = get_searchs(request, mode="indicator")
 
     # Use fields : ['출원번호','출원인코드1','출원인1','등록일']
     if not d:
-        return JsonResponse({ "name": [], "피인용수": [], "총등록건": [], "CPP": [], "PII": [], "TS": [], "PFS": [] }, status=200, safe=False)
+        return JsonResponse(emptyResult, safe=False)
+
 
     def get_granted_list():
         # 개별 등록건수 count

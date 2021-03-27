@@ -11,6 +11,8 @@ import json
 import os
 from konlpy.tag import Mecab
 
+from utils import dictfetchall
+
 # caching with redis
 from django.core.cache import cache
 from django.conf import settings
@@ -662,11 +664,6 @@ def replace_with_newlines(element):
         elif elem.name == 'br':
             result += '\n'
     return result                
-
-def dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
-    columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 def tokenizer( raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]): # NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
     mecab = Mecab()
