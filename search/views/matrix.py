@@ -5,7 +5,8 @@ from ..utils import get_redis_key, dictfetchall, tokenizer, tokenizer_phrase, re
 import json
 import re
 
-from .searchs import get_searchs, get_nlp
+from .searchs import kr_searchs
+from .nlp import get_nlp
 
 # caching with redis
 from django.core.cache import cache
@@ -44,7 +45,7 @@ def get_matrix(request):
     # topic 가져오기
     topics = get_topic(nlp_token, output)
 
-    mtx_raw = get_searchs(request, mode="matrix")
+    mtx_raw = kr_searchs(request, mode="matrix")
 
     ### mtx_raw의 [요약/청구항/요약·청구항]에서 topics N (output) 이 포함되는 [출원일, ipc코드, 출원인1] count 
     # 참고: mtx_raw는 출원번호, 출원일(년), 출원인1, ipc코드, 요약, 청구항, 요약·청구항 로 구성
@@ -138,7 +139,7 @@ def get_matrix_dialog(request):
     whereAll = ' and ' + countField + '= \'' + categoryValue + '\''
 
     # 3가지 필터된 목록 구하기 
-    query = get_searchs(request, mode="query")
+    query = kr_searchs(request, mode="query")
 
     # Add additional where phrase
     query += whereAll

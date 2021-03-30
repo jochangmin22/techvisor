@@ -8,10 +8,9 @@ URL = r'^api/search-app/'
 
 urlpatterns = [
     # searchs
-    re_path(URL + "query/$", views.searchs.get_query, name='get_query'),
     re_path(URL + "searchs/$", csrf_exempt(views.searchs.get_searchs), name='get_searchs'),
     # nlp
-    re_path(URL + "searchs/vec$", csrf_exempt(views.nlp.get_vec), name='get_vec'),
+    re_path(URL + "searchs/keywords$", csrf_exempt(views.nlp.get_keywords), name='get_keywords'),
     re_path(URL + "searchs/indicator$", csrf_exempt(views.nlp.get_indicator), name='get_indicator'),
     re_path(URL + "searchs/wordcloud$", csrf_exempt(views.nlp.get_wordcloud), name='get_wordcloud'),
     re_path(URL + "searchs/wordclouddialog$", csrf_exempt(views.nlp.get_wordcloud_dialog), name='get_wordcloud_dialog'),

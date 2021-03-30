@@ -6,11 +6,13 @@ import operator
 from operator import itemgetter
 from gensim.models import Word2Vec
 from gensim.models import FastText
-from .searchs import get_searchs, get_nlp
+from .searchs import kr_searchs
 from utils import get_redis_key, dictfetchall, remove_tail, frequency_count
 import pandas as pd
 
 from django.db import connection
+
+from classes import NlpToken, IpKeyword
 
 # caching with redis
 from django.core.cache import cache
@@ -21,7 +23,116 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 KIPRIS = settings.KIPRIS
 
+def get_nlp(request, analType):
+    _, _, params, _ = get_redis_key(request)
+    patentOffice = params.get('patentOffice','KR') or 'KR'    
+    command = { 'KR': kr_nlp, 'US': us_nlp, 'JP' : jp_nlp, 'CN' : cn_nlp, 'EP' : ep_nlp, 'PCT' : pct_nlp}
+    result = command[patentOffice](request, analType)
+    return JsonResponse(result, safe=False)
+
+def kr_nlp(request, analType):
+    foo = NlpToken(request, analType)
+    return foo.nlpToken()
+def us_nlp(request, analType):
+    foo = NlpToken(request, analType)
+    return foo.nlpToken()
+def jp_nlp(request, analType):
+    foo = NlpToken(request, analType)
+    foo.nlpToken()
+    return foo.nlpToken()
+def cn_nlp(request, analType):
+    foo = NlpToken(request, analType)
+    return foo.nlpToken()
+def ep_nlp(request, analType):
+    foo = NlpToken(request, analType)
+    return foo.nlpToken()
+def pct_nlp(request, analType):
+    foo = NlpToken(request, analType)
+    return foo.nlpToken()
+
 def get_wordcloud(request):
+    _, _, params, _ = get_redis_key(request)
+    patentOffice = params.get('patentOffice','KR') or 'KR'    
+    command = { 'KR': kr_wordcloud, 'US': us_wordcloud, 'JP' : jp_wordcloud, 'CN' : cn_wordcloud, 'EP' : ep_wordcloud, 'PCT' : pct_wordcloud}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)   
+
+def kr_wordcloud(request):
+    foo = IpKeyword(request)
+    foo.wordcloud_extract()
+    foo.wordcloud_output()
+    result = foo._wordcloud
+    return result
+def us_wordcloud(request):
+    foo = IpKeyword(request)
+    foo.wordcloud_extract()
+    foo.wordcloud_output()
+    result = foo._wordcloud
+    return result
+def jp_wordcloud(request):
+    foo = IpKeyword(request)
+    foo.wordcloud_extract()
+    foo.wordcloud_output()
+    result = foo._wordcloud
+    return result
+def cn_wordcloud(request):
+    foo = IpKeyword(request)
+    foo.wordcloud_extract()
+    foo.wordcloud_output()
+    result = foo._wordcloud
+    return result
+def ep_wordcloud(request):
+    foo = IpKeyword(request)
+    foo.wordcloud_extract()
+    foo.wordcloud_output()
+    result = foo._wordcloud
+    return result
+def pct_wordcloud(request):
+    foo = IpKeyword(request)
+    foo.wordcloud_extract()
+    foo.wordcloud_output()
+    result = foo._wordcloud
+    return result
+
+def get_keywords(request):
+    _, _, params, _ = get_redis_key(request)
+    patentOffice = params.get('patentOffice','KR') or 'KR'    
+    command = { 'KR': kr_keywords, 'US': us_keywords, 'JP' : jp_keywords, 'CN' : cn_keywords, 'EP' : ep_keywords, 'PCT' : pct_keywords}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)   
+
+def kr_keywords(request):
+    foo = IpKeyword(request)
+    foo.keyword_extract()
+    foo.sentence_similarity()
+    return foo._keywords
+def us_keywords(request):
+    foo = IpKeyword(request)
+    foo.keyword_extract()
+    foo.sentence_similarity()
+    return foo._keywords
+def jp_keywords(request):
+    foo = IpKeyword(request)
+    foo.keyword_extract()
+    foo.sentence_similarity()
+    return foo._keywords
+def cn_keywords(request):
+    foo = IpKeyword(request)
+    foo.keyword_extract()
+    foo.sentence_similarity()
+    return foo._keywords
+def ep_keywords(request):
+    foo = IpKeyword(request)
+    foo.keyword_extract()
+    foo.sentence_similarity()
+    return foo._keywords
+def pct_keywords(request):
+    foo = IpKeyword(request)
+    foo.keyword_extract()
+    foo.sentence_similarity()
+    return foo._keywords             
+
+def xxget_wordcloud(request):
     """ wordcloud 관련 기능 """
 
     _, subKey, _, subParams = get_redis_key(request)
@@ -94,7 +205,7 @@ def get_wordcloud_dialog(request):
     sortBy = subParams.get('sortBy', [])
 
     # 3가지 필터된 목록 구하기 
-    query = get_searchs(request, mode="query")
+    query = kr_searchs(request, mode="query")
 
     # Add sort by
     if sortBy:
@@ -273,7 +384,7 @@ def get_indicator(request):
     if not params["searchText"]:
         return JsonResponse(emptyResult, safe=False)
 
-    d = get_searchs(request, mode="indicator")
+    d = kr_searchs(request, mode="indicator")
 
     # Use fields : ['출원번호','출원인코드1','출원인1','등록일']
     if not d:

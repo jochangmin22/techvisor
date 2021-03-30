@@ -7,7 +7,7 @@ import operator
 import json
 
 from utils import get_redis_key, dictfetchall, remove_duplicates, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags, remove_tail, frequency_count, sampling
-
+from classes import IpSearchs, NlpToken
 # from .similarity import similarity
 
 # caching with redis
@@ -17,23 +17,40 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-# from urllib.parse import unquote
-# TODO: pynori 성능 확인필요
-# from pynori.korean_analyzer import KoreanAnalyzer
-
-# 사용 연산기호 - 추후
-# 명칭*요약*대표청구항(KEY)
-# 발명의 명칭 (TI)
-# 요약 (AB)
-# 대표청구항 (CL)
-# 전체청구항 (CLA)
-# 출원인 (AP)
-# 발명자 (INV)
-# IPC요약(IPCM)
-# 출원인 대표명화 코드(WAP)
-
-
 def get_searchs(request, mode="begin"):
+    _, _, params, _ = get_redis_key(request)
+    patentOffice = params.get('patentOffice','KR') or 'KR'
+    command = { 'KR': kr_searchs, 'US': us_searchs, 'JP' : jp_searchs, 'CN' : cn_searchs, 'EP' : ep_searchs, 'PCT' : pct_searchs}
+    result = command[patentOffice](request, mode)
+    return JsonResponse(result, safe=False)
+
+def kr_searchs(request, mode="begin"):
+    searchs = IpSearchs(request, mode)
+    searchs.query_execute()
+    searchs.create_empty_rows()            
+    searchs.generate_all_analysis_rows()
+    return searchs._pagingRows
+
+def us_searchs(request, mode="begin"):
+    searchs = IpSearchs(request, mode)
+    searchs.paging_rows()
+    result = searchs._pagingRows
+    return result
+
+def jp_searchs(request, mode="begin"):
+    return
+def cn_searchs(request, mode="begin"):
+    return
+def ep_searchs(request, mode="begin"):
+    return
+def pct_searchs(request, mode="begin"):
+    return
+
+
+
+ 
+
+def krr_searchs(request, mode="begin"):
     """ 쿼리 실행 및 결과 저장
         mode : begin, nlp, query, matrix, indicator
     """
@@ -282,7 +299,8 @@ def get_searchs(request, mode="begin"):
     #     elif params['searchVolume'] == 'SUM':
     #         searchVolume = 'search'
     # except:
-    searchVolume = 'search'
+    searchVolume = '요약·청구항tsv'
+
 
     # 번호검색
     if 'searchNum' in params and params['searchNum']:
@@ -326,8 +344,8 @@ def get_searchs(request, mode="begin"):
 
         whereAll = remove_tail(whereAll," and ")
 
-    # select count(*) over () as cnt, ts_rank(search,to_tsquery('예방&치료&진단')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE (("search" @@ to_tsquery('예방&치료&진단')) and ("발명자tsv" @@ to_tsquery('조'))) order by ts_rank("search",to_tsquery('예방&치료&진단')) desc;-- offset 0 limit 10000;
-    query = f'select count(*) over () as cnt, ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_text_view WHERE ({whereAll})'
+    # select count(*) over () as cnt, ts_rank(search,to_tsquery('예방&치료&진단')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_tsv_view WHERE (("search" @@ to_tsquery('예방&치료&진단')) and ("발명자tsv" @@ to_tsquery('조'))) order by ts_rank("search",to_tsquery('예방&치료&진단')) desc;-- offset 0 limit 10000;
+    query = f'select count(*) over () as cnt, ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_tsv_view WHERE ({whereAll})'
     if mode == "query":  # mode가 query면 여기서 분기
         return query
 
@@ -338,6 +356,7 @@ def get_searchs(request, mode="begin"):
 
     # Add sort by
     query += make_orderby_clause()
+    print('heh', query)
     with connection.cursor() as cursor:
         cursor.execute(
             "SET work_mem to '100MB';"
@@ -369,13 +388,13 @@ def get_searchs(request, mode="begin"):
     # redis 저장 }
 
     if mode == "begin":
-        return JsonResponse(result_paging, safe=False)
+        return result_paging
     if mode == "visualClassify":
         return res_sub[redis_map[mode]]
     return res[redis_map[mode]]
 
 
-def get_nlp(request, analType):
+def xxget_nlp(request, analType):
     """ 쿼리 실행 및 결과 저장
         analType : wordCloud, matrix, keywords
         option : volume, unit, emergence 개별적용
@@ -394,7 +413,7 @@ def get_nlp(request, analType):
     except:
         pass
 
-    nlp_raw = get_searchs(request, mode="nlp")
+    nlp_raw = kr_searchs(request, mode="nlp")
 
     result = []
 
@@ -458,8 +477,9 @@ def status_query(params):
     if not params["status"] or params["status"] == '전체':
         return ""
 
+    status = params['status']
     result = " ("
-    for k in re.split(r' and | or ', status): # 출원 or 공개 ...
+    for k in re.split(r' and | or ', params['status']): # 출원 or 공개 ...
         result += "등록사항 ='" + k + "' or "
 
     result = remove_tail(result, " or ")
@@ -471,6 +491,7 @@ def iptype_query(params):
     if not params["ipType"] or params["ipType"] == '전체':
         return ""    
 
+    ipType = params["ipType"]
     result = " ("
     # 등록db가 없으므로 공개로 통일
     if "특허" in ipType:
@@ -586,8 +607,3 @@ def tsquery_keywords(keyword="", fieldName="", mode="terms"):
         return None
 
     return result        
-
-def get_query(request):
-    """ 쿼리 확인용 """
-    return HttpResponse(get_searchs(request, mode="query"), content_type="text/plain; charset=utf-8")
-

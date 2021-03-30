@@ -18,8 +18,8 @@ from lxml import html
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "postgresql",
-#         "NAME": "ipgrim",
-#         "USER": "ipgrim",
+#         "NAME": "techvisor",
+#         "USER": "postgres",
 #         "PASSWORD": "btw*0302",
 #         "HOST": "localhost",
 #         "PORT": "5433"
@@ -78,7 +78,7 @@ def connect():
         # host="btowin.synology.me", database="techvisor", user="postgres", password="btw*0302", port="5433"
         host="192.168.0.40", database="techvisor", user="postgres", password="btw*0302", port="5433"
         # host="localhost", database="dj11000", user="postgres", password="btw160302*", port="5432"
-        # host="localhost", database="ipgrim", user="postgres", password="btw*0302", port="5433"        
+        # host="localhost", database="techvisor", user="postgres", password="btw*0302", port="5433"        
     )
     return connection
 # print('Connection : ', connect())

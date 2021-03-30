@@ -189,7 +189,7 @@ def dictfetchall(cursor):
 
 def connect():
     connection = psycopg2.connect(
-        host="btowin.synology.me", database="ipgrim", user="postgres", password="btw*0302", port="5433"
+        host="btowin.synology.me", database="techvisor", user="postgres", password="btw*0302", port="5433"
     )
     return connection    
 
@@ -314,7 +314,7 @@ DART = {
 DATABASES = {
     "default": {
         "ENGINE": "postgresql",
-        "NAME": "ipgrim",
+        "NAME": "techvisor",
         "USER": "postgres",
         "PASSWORD": "btw*0302",
         "HOST": "btowin.synology.me",

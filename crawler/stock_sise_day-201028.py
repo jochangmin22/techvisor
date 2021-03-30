@@ -92,8 +92,8 @@ def dictfetchall(cursor):
 
 def connect():
     connection = psycopg2.connect(
-        # host="btowin.synology.me", database="ipgrim", user="postgres", password="btw*0302", port="5433"
-        host="192.168.0.40", database="ipgrim", user="postgres", password="btw*0302", port="5433"
+        # host="btowin.synology.me", database="techvisor", user="postgres", password="btw*0302", port="5433"
+        host="192.168.0.40", database="techvisor", user="postgres", password="btw*0302", port="5433"
     )
     return connection    
 

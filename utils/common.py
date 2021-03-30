@@ -18,11 +18,9 @@ def get_redis_key(request):
         subParams = request.GET.get('subParams','')
         params = json.loads(params)
         subParams = json.loads(subParams)
-    try:
-        searchNum = params['searchNum']
-    except:
-        searchNum = ''    
-    # searchNum = params['searchNum'] if hasattr(params, 'searchNum') else ''
+    
+    searchNum = params.get('searchNum','')
+
     try:
         mainKey = "¶".join(params.values()) if searchNum == '' else searchNum
     except:

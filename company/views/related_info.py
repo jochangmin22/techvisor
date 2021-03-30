@@ -300,7 +300,7 @@ def get_searchs(request, mode="begin"): # mode : begin, nlp
         # commonCorpName = v for k, v in COMPANY_ASSIGNE_MATCHING.items() if k == params['commonCorpName'] else params['commonCorpName']
 
         foo =  '"성명" like $$%' + commonCorpName + '%$$'
-        query = f'{selecting_columns} ( SELECT 출원번호 FROM ( SELECT 출원번호 FROM 공개인명정보 WHERE {foo} ) K GROUP BY 출원번호 ) V, kr_text_view A WHERE V.출원번호 = A.출원번호 {orderby_clause} offset 0 rows fetch next 1001 rows only;' 
+        query = f'{selecting_columns} ( SELECT 출원번호 FROM ( SELECT 출원번호 FROM 공개인명정보 WHERE {foo} ) K GROUP BY 출원번호 ) V, kr_tsv_view A WHERE V.출원번호 = A.출원번호 {orderby_clause} offset 0 rows fetch next 1001 rows only;' 
     else:                    
         query = f'{selecting_columns} where 출원일 is not null {orderby_clause} limit 100'
 
