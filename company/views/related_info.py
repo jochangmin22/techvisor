@@ -372,7 +372,7 @@ def get_visual(request):
 
 # def get_nlp(request, analType):
 #     """
-#        analType : wordCloud
+#        analType : wordcloud
 #     """
 
 #     _, subKey, _, subParams = get_redis_key(request)

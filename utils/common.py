@@ -117,7 +117,7 @@ def frequency_count(data, n=None):
         foo = count.most_common(n)
         result = dict(foo)
     except AttributeError:
-        result = []
+        result = {}
 
     return result
 

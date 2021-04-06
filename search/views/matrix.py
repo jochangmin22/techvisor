@@ -1,12 +1,14 @@
 from django.db import connection
 from collections import Counter
 from django.http import JsonResponse, HttpResponse
-from ..utils import get_redis_key, dictfetchall, tokenizer, tokenizer_phrase, remove_tail
+# from ..utils import get_redis_key, dictfetchall, tokenizer, tokenizer_phrase, remove_tail
+from utils import get_redis_key, dictfetchall,  remove_tail
 import json
 import re
 
 from .searchs import kr_searchs
 from .nlp import get_nlp
+from classes import IpMatrix, IpMatrixDialog
 
 # caching with redis
 from django.core.cache import cache
@@ -17,6 +19,49 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 
 def get_matrix(request):
+    _, _, params, _ = get_redis_key(request)
+    patentOffice = params.get('patentOffice','KR') or 'KR'    
+    command = { 'KR': kr_matrix, 'US': us_matrix, 'JP' : jp_matrix, 'CN' : cn_matrix, 'EP' : ep_matrix, 'PCT' : pct_matrix}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_matrix(request):
+    foo = IpMatrix(request)
+    return foo.matrix()
+def us_matrix(request):
+    return
+def jp_matrix(request):
+    return
+def cn_matrix(request):
+    return
+def ep_matrix(request):
+    return
+def pct_matrix(request):
+    return
+
+def get_matrix_dialog(request):
+    _, _, params, _ = get_redis_key(request)
+    patentOffice = params.get('patentOffice','KR') or 'KR'    
+    command = { 'KR': kr_matrix_dialog, 'US': us_matrix_dialog, 'JP' : jp_matrix_dialog, 'CN' : cn_matrix_dialog, 'EP' : ep_matrix_dialog, 'PCT' : pct_matrix_dialog}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_matrix_dialog(request):
+    foo = IpMatrixDialog(request)
+    return foo.matrix_dialog()
+def us_matrix_dialog(request):
+    return
+def jp_matrix_dialog(request):
+    return
+def cn_matrix_dialog(request):
+    return
+def ep_matrix_dialog(request):
+    return
+def pct_matrix_dialog(request):
+    return
+
+
+def xxget_matrix(request):
     """ 
     토픽에 대한 국가별, 연도별, 기술별, 기업별 매트릭스
     1. topic, mtx_row 가져옴
@@ -89,7 +134,7 @@ def get_matrix(request):
 
     return JsonResponse(res, safe=False)
 
-def get_matrix_dialog(request):
+def xxget_matrix_dialog(request):
     """ 
     전체목록에서 3가지 필터 (topic, category, category value)
     """

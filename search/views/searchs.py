@@ -14,7 +14,6 @@ from classes import IpSearchs, NlpToken
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
-
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 def get_searchs(request, mode="begin"):
@@ -25,18 +24,11 @@ def get_searchs(request, mode="begin"):
     return JsonResponse(result, safe=False)
 
 def kr_searchs(request, mode="begin"):
-    searchs = IpSearchs(request, mode)
-    searchs.query_execute()
-    searchs.create_empty_rows()            
-    searchs.generate_all_analysis_rows()
-    return searchs._pagingRows
+    foo = IpSearchs(request, mode)
+    return foo.paging_rows()
 
 def us_searchs(request, mode="begin"):
-    searchs = IpSearchs(request, mode)
-    searchs.paging_rows()
-    result = searchs._pagingRows
-    return result
-
+    return
 def jp_searchs(request, mode="begin"):
     return
 def cn_searchs(request, mode="begin"):
@@ -45,10 +37,6 @@ def ep_searchs(request, mode="begin"):
     return
 def pct_searchs(request, mode="begin"):
     return
-
-
-
- 
 
 def krr_searchs(request, mode="begin"):
     """ 쿼리 실행 및 결과 저장
@@ -396,7 +384,7 @@ def krr_searchs(request, mode="begin"):
 
 def xxget_nlp(request, analType):
     """ 쿼리 실행 및 결과 저장
-        analType : wordCloud, matrix, keywords
+        analType : wordcloud, matrix, keywords
         option : volume, unit, emergence 개별적용
     """
 

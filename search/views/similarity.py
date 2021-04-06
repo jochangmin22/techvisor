@@ -1,6 +1,8 @@
 from django.db import connection
 from django.http import JsonResponse
 from django.http import HttpResponse
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 import pandas as pd
 import numpy as np
 import json

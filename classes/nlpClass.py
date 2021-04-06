@@ -8,48 +8,37 @@ from classes import IpSearchs
 
 class NlpToken:
     
-    def __init__(self, request, mode):
+    def __init__(self, request, menu):
         self._request = request
-        self._mode = mode
-        self._nlpToken = []
-        self._nlpRows = []
+        self._menu = menu
+        
         self.set_up()
 
     def set_up(self):
         mainKey, subKey, params, subParams = get_redis_key(self._request)
         
         #### Create a new SubKey to distinguish each analysis type 
-        newSubKey = subKey + '¶' + self._mode        
+        self._newSubKey = f'{subKey}¶{self._menu}_nlp'        
 
-        self._newSubKey = newSubKey
-
-        foo = IpSearchs(self._request, mode='nlp')
-        foo.query_execute()
-        foo.create_empty_rows()
-        bar = foo._emptyRows            
-        self._nlpRows = foo.make_nlp_rows(bar)
-
-        foo = subParams['menuOptions'][self._mode + 'Options']
+        foo = subParams['menuOptions'][self._menu + 'Options']
         self._volume = foo.get('volume','')
         self._unit = foo.get('unit','')
-        self._emergence = foo.get('emergence','빈도수')          
-
-        context = cache.get(newSubKey)
+        self._emergence = foo.get('emergence','빈도수') # wordcloud only         
+        self._output = foo.get('output','')          
+  
         try:
-            if context and context['nlpToken']:
-                self._nlpToken = context['nlpToken']
-                return
+            context = cache.get(self._newSubKey)
+            if context:
+                print('load Nlp redis', self._menu)
+                return context
         except (KeyError, NameError, UnboundLocalError):
             pass
 
-      
+    def load_nlp_rows(self):
+        foo = IpSearchs(self._request, mode='nlp')
+        return foo.nlp_rows()
 
-    def nlpToken(self):
-
-        result = []
-        nlp_list = [d[self._volume] for d in self._nlpRows] # '요약·청구항', '요약', '청구항', 
-
-        nlp_str = ' '.join(nlp_list) if nlp_list else None
+    def nlp_token(self):
 
         def phrase_frequncy_tokenizer():
             return tokenizer_phrase(nlp_str)
@@ -69,12 +58,15 @@ class NlpToken:
                 result.extend(bar)
             return result            
 
+        nlpRows = self.load_nlp_rows()
+        nlp_list = [d[self._volume] for d in nlpRows] # _voloume : '요약·청구항', '요약', '청구항', 
+        nlp_str = ' '.join(nlp_list) if nlp_list else None
+
+        result = []
         command = { '구문': { '빈도수':phrase_frequncy_tokenizer, '건수':phrase_individual_tokenizer }, '워드': { '빈도수' :word_frequncy_tokenizer, '건수':word_individual_tokenizer } }
-        result = command[self._unit][self._emergence]()    
-        result = [w.replace('_', ' ') for w in result]
-
-        cache.set(self._newSubKey, { 'nlpToken' : result } , CACHE_TTL)
-
-        self._nlpToken = result
-        return result
+        res = command[self._unit][self._emergence]()    
+        res = [w.replace('_', ' ') for w in res]
+ 
+        cache.set(self._newSubKey, res, CACHE_TTL)
+        return res
 

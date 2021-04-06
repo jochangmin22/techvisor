@@ -18,6 +18,9 @@ from urllib.request import urlopen
 # naver crawl
 from selenium.webdriver import Chrome
 from selenium import webdriver
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 import pandas as pd
 
 # dart

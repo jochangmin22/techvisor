@@ -11,7 +11,6 @@ urlpatterns = [
     re_path(URL + "searchs/$", csrf_exempt(views.searchs.get_searchs), name='get_searchs'),
     # nlp
     re_path(URL + "searchs/keywords$", csrf_exempt(views.nlp.get_keywords), name='get_keywords'),
-    re_path(URL + "searchs/indicator$", csrf_exempt(views.nlp.get_indicator), name='get_indicator'),
     re_path(URL + "searchs/wordcloud$", csrf_exempt(views.nlp.get_wordcloud), name='get_wordcloud'),
     re_path(URL + "searchs/wordclouddialog$", csrf_exempt(views.nlp.get_wordcloud_dialog), name='get_wordcloud_dialog'),
     # news
@@ -22,6 +21,7 @@ urlpatterns = [
     re_path(URL + "searchs/matrix$", csrf_exempt(views.matrix.get_matrix), name='get_matrix'),
     re_path(URL + "searchs/matrixdialog$", csrf_exempt(views.matrix.get_matrix_dialog), name='get_matrix_dialog'),
     # visual
+    re_path(URL + "searchs/indicator$", csrf_exempt(views.visual.get_indicator), name='get_indicator'),
     re_path(URL + "searchs/visual$", csrf_exempt(views.visual.get_visual), name='get_visual'),
     # search
     re_path(URL + "search/$", csrf_exempt(views.search.get_search), name='get_search'),

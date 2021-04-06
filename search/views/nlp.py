@@ -8,11 +8,14 @@ from gensim.models import Word2Vec
 from gensim.models import FastText
 from .searchs import kr_searchs
 from utils import get_redis_key, dictfetchall, remove_tail, frequency_count
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 import pandas as pd
 
 from django.db import connection
 
-from classes import NlpToken, IpKeyword
+from classes import NlpToken, IpKeywords, IpWordcloud, IpWordcloudDialog
 
 # caching with redis
 from django.core.cache import cache
@@ -31,24 +34,17 @@ def get_nlp(request, analType):
     return JsonResponse(result, safe=False)
 
 def kr_nlp(request, analType):
-    foo = NlpToken(request, analType)
-    return foo.nlpToken()
+    return NlpToken(request, analType)
 def us_nlp(request, analType):
-    foo = NlpToken(request, analType)
-    return foo.nlpToken()
+    return
 def jp_nlp(request, analType):
-    foo = NlpToken(request, analType)
-    foo.nlpToken()
-    return foo.nlpToken()
+    return
 def cn_nlp(request, analType):
-    foo = NlpToken(request, analType)
-    return foo.nlpToken()
+    return
 def ep_nlp(request, analType):
-    foo = NlpToken(request, analType)
-    return foo.nlpToken()
+    return
 def pct_nlp(request, analType):
-    foo = NlpToken(request, analType)
-    return foo.nlpToken()
+    return
 
 def get_wordcloud(request):
     _, _, params, _ = get_redis_key(request)
@@ -58,41 +54,18 @@ def get_wordcloud(request):
     return JsonResponse(result, safe=False)   
 
 def kr_wordcloud(request):
-    foo = IpKeyword(request)
-    foo.wordcloud_extract()
-    foo.wordcloud_output()
-    result = foo._wordcloud
-    return result
+    foo = IpWordcloud(request)
+    return foo.wordcloud()
 def us_wordcloud(request):
-    foo = IpKeyword(request)
-    foo.wordcloud_extract()
-    foo.wordcloud_output()
-    result = foo._wordcloud
-    return result
+    return
 def jp_wordcloud(request):
-    foo = IpKeyword(request)
-    foo.wordcloud_extract()
-    foo.wordcloud_output()
-    result = foo._wordcloud
-    return result
+    return
 def cn_wordcloud(request):
-    foo = IpKeyword(request)
-    foo.wordcloud_extract()
-    foo.wordcloud_output()
-    result = foo._wordcloud
-    return result
+    return
 def ep_wordcloud(request):
-    foo = IpKeyword(request)
-    foo.wordcloud_extract()
-    foo.wordcloud_output()
-    result = foo._wordcloud
-    return result
+    return
 def pct_wordcloud(request):
-    foo = IpKeyword(request)
-    foo.wordcloud_extract()
-    foo.wordcloud_output()
-    result = foo._wordcloud
-    return result
+    return
 
 def get_keywords(request):
     _, _, params, _ = get_redis_key(request)
@@ -102,35 +75,95 @@ def get_keywords(request):
     return JsonResponse(result, safe=False)   
 
 def kr_keywords(request):
-    foo = IpKeyword(request)
-    foo.keyword_extract()
-    foo.sentence_similarity()
-    return foo._keywords
+    foo = IpKeywords(request)
+    return foo.keywords()
 def us_keywords(request):
-    foo = IpKeyword(request)
-    foo.keyword_extract()
-    foo.sentence_similarity()
-    return foo._keywords
+    return
 def jp_keywords(request):
-    foo = IpKeyword(request)
-    foo.keyword_extract()
-    foo.sentence_similarity()
-    return foo._keywords
+    return
 def cn_keywords(request):
-    foo = IpKeyword(request)
-    foo.keyword_extract()
-    foo.sentence_similarity()
-    return foo._keywords
+    return
 def ep_keywords(request):
-    foo = IpKeyword(request)
-    foo.keyword_extract()
-    foo.sentence_similarity()
-    return foo._keywords
+    return
 def pct_keywords(request):
-    foo = IpKeyword(request)
-    foo.keyword_extract()
-    foo.sentence_similarity()
-    return foo._keywords             
+    return
+
+def get_wordcloud_dialog(request):
+    _, _, params, _ = get_redis_key(request)
+    patentOffice = params.get('patentOffice','KR') or 'KR'    
+    command = { 'KR': kr_wordcloud_dialog, 'US': us_wordcloud_dialog, 'JP' : jp_wordcloud_dialog, 'CN' : cn_wordcloud_dialog, 'EP' : ep_wordcloud_dialog, 'PCT' : pct_wordcloud_dialog}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_wordcloud_dialog(request):
+    foo = IpWordcloudDialog(request)
+    return foo.wordcloud_dialog()
+def us_wordcloud_dialog(request):
+    return
+def jp_wordcloud_dialog(request):
+    return
+def cn_wordcloud_dialog(request):
+    return
+def ep_wordcloud_dialog(request):
+    return
+def pct_wordcloud_dialog(request):
+    return    
+
+    _, subKey, params, subParams = get_redis_key(request)
+
+
+    # Redis {
+    sub_context = cache.get(subKey)    
+
+    try:
+        if sub_context['wordcloud_dialog']:
+            return JsonResponse(sub_context['wordcloud_dialog'], safe=False)
+    except:
+        pass        
+    # Redis }
+
+    
+    # pageIndex = subParams['menuOptions']['tableOptions']['wordcloud']['pageIndex']
+    # pageSize = subParams['menuOptions']['tableOptions']['wordcloud']['pageSize']
+    pageIndex = subParams.get('pageIndex', 0)
+    pageSize = subParams.get('pageSize', 10)
+    sortBy = subParams.get('sortBy', [])
+
+    # 3가지 필터된 목록 구하기 
+    query = kr_searchs(request, mode="query")
+
+    # Add sort by
+    if sortBy:
+        foo =' '
+        for s in sortBy:
+            foo += s['_id']
+            foo += ' ASC, ' if s['desc'] else ' DESC, '
+
+        foo = remove_tail(foo, ", ")
+        query += f' order by {foo}'
+
+    # Add offset limit
+    query += f' offset {pageIndex * pageSize} limit {pageSize}'
+
+    with connection.cursor() as cursor:    
+        cursor.execute(query)
+        rows = dictfetchall(cursor)
+    try:
+        rowsCount = rows[0]["cnt"]
+    except IndexError:        
+        rowsCount = 0
+        
+    result = { 'rowsCount': rowsCount, 'rows': rows}   
+    # Redis {
+    try:
+        sub_context['wordcloud_dialog'] = result
+        cache.set(subKey, sub_context, CACHE_TTL)
+    except:
+        pass        
+    # Redis }
+
+    return JsonResponse(result, safe=False)      
+
 
 def xxget_wordcloud(request):
     """ wordcloud 관련 기능 """
@@ -148,13 +181,13 @@ def xxget_wordcloud(request):
     # Redis }
 
     #///////////////////////////////////
-    foo = subParams['menuOptions']['wordCloudOptions']
+    foo = subParams['menuOptions']['wordcloudOptions']
     unitNumber = foo.get('output', 50)
 
     emptyResult = [{ 'name' : [], 'value' : []}]
 
     try:  # handle NoneType error
-        taged_docs = get_nlp(request, analType="wordCloud")
+        taged_docs = get_nlp(request, analType="wordcloud")
         taged_docs = [w.replace('_', ' ') for w in taged_docs]
         if taged_docs == [] or taged_docs == [[]]:  # result is empty
             return JsonResponse(emptyResult, safe=False)
@@ -182,7 +215,7 @@ def xxget_wordcloud(request):
     return JsonResponse(result, safe=False)
 
 
-def get_wordcloud_dialog(request):
+def xxget_wordcloud_dialog(request):
 
     _, subKey, params, subParams = get_redis_key(request)
 
@@ -198,8 +231,8 @@ def get_wordcloud_dialog(request):
     # Redis }
 
     
-    # pageIndex = subParams['menuOptions']['tableOptions']['wordCloud']['pageIndex']
-    # pageSize = subParams['menuOptions']['tableOptions']['wordCloud']['pageSize']
+    # pageIndex = subParams['menuOptions']['tableOptions']['wordcloud']['pageIndex']
+    # pageSize = subParams['menuOptions']['tableOptions']['wordcloud']['pageSize']
     pageIndex = subParams.get('pageIndex', 0)
     pageSize = subParams.get('pageSize', 10)
     sortBy = subParams.get('sortBy', [])

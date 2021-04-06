@@ -8,23 +8,31 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 import re
 import operator
 
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+import os
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
 class IpSearchs:
-    
+
     def __init__(self, request, mode):
         self._request = request
         self._mode = mode
-        self._rows = []
-        self._pagingRows = {}
         self._emptyRows = []
         self._queryCols = '등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항'  
+        
         self.set_up()
+        self._executor = ThreadPoolExecutor(1)
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        result = self.loop.run_until_complete(self.run_query())
+        self.loop.close()
 
     def set_up(self):
         mainKey, subKey, params, subParams = get_redis_key(self._request)
 
-        self._mainKey = mainKey
-        self._subKey = subKey
-
+        # load options
         self._searchVolume = params.get('searchVolume','요약·청구항') or '요약·청구항'
         for key in ['searchNum','searchText','inventor','assignee','dateType','startDate','endDate','status','ipType']:
             setattr(self, '_%s' % key, params.get(key,None) or None)        
@@ -39,71 +47,114 @@ class IpSearchs:
         self._cPageSize = bar.get('pageSize', 10)
         self._cSortBy = bar.get('sortBy', []) 
 
-        context = cache.get(mainKey)
-        context_paging = cache.get(subKey)                   
-
-        redis_map = { 
-            'begin' : 'rows',
+        self._redis_map = { 
+            'begin' : 'pagingRows',
+            'query' : 'query',
             'nlp' : 'nlpRows',
             'matrix' : 'mtxRows',
-            'indicator' : 'indicator',
+            'indicator' : 'indRows',
             'visualNum' : 'visualNum',
             'visualClassify' : 'visualClassify',
             'visualIpc' : 'visualIpc',
             'visualPerson' : 'visualPerson',
         }
-        print('searchsClass', redis_map[self._mode])
-        try: 
-            if context and context[redis_map[self._mode]]:
-                print('redis works!',self._mode )                
-                setattr(self, '_%s' % redis_map[self._mode], context[redis_map[self._mode]])
-                return
-            if context_paging and context_paging[redis_map[self._mode]]:
-                print('redis works! paging',self._mode )
-                setattr(self, '_%s' % redis_map[self._mode], context_paging[redis_map[self._mode]])
-                return
+        self._rowsKey = f'{mainKey}¶rows'
+        self._queryKey = f'{mainKey}¶query'
+        self.load_rows()
+
+        self._newMainKey = f'{mainKey}¶{self._redis_map[self._mode]}'
+        self._newSubKey = f'{subKey}¶{self._redis_map[self._mode]}'
+
+        try:
+            context = cache.get(self._newMainKey)
+            if context:
+                print('load mainkey redis', self._mode)
+                return context
+            _context = cache.get(self._newSubKey)
+            if _context:
+                print('load subkey redis', self._mode)
+                return _context
         except (KeyError, NameError, UnboundLocalError):
             pass
 
+    def load_rows(self):
+        context = cache.get(self._rowsKey)
+        if context:
+            print('rows redis exist')
+            self._rows = context
+
+    # async def run_query(self):
+    #     try:
+    #         getattr(self, '_rows')
+    #         print(' _rows exist', self._mode)
+    #         return self._rows                
+    #     except AttributeError: 
+    #         if not cache.get(self._queryKey):
+    #             cache.set(self._queryKey, True, CACHE_TTL)
+    #             results = await sync_to_async(self.query_execute)()
+    #             print('still execute query ', self._mode)
+    #             self._rows = result
+    #     finally:
+    #         return self._rows
+
+    async def run_query(self):
+        try:
+            getattr(self, '_rows')
+            print(' _rows exist', self._mode)
+        except AttributeError:
+            await self.loop.run_in_executor(self._executor, self.query_execute)
+            print('still execute query ', self._mode)
+            return 
+        else:
+            return                
+
+
     def paging_rows(self):
-        self.query_execute()
-        self.create_empty_rows()            
-        self.generate_all_analysis_rows()
+        # self.is_query_ever_been_run()
+        result = self.make_paging_rows(self.create_empty_rows()) 
+        return self.save_redis_sub(result)
 
-    # def nlp_rows(self):
-    #     self.query_execute()
-    #     self.create_empty_rows()            
-    #     self.generate_analysis_rows()        
+    def nlp_rows(self):
+        result = self.make_nlp_rows(self.create_empty_rows())
+        return self.save_redis_main(result)
 
+    def vis_num(self):
+        result = self.make_vis_num(self.create_empty_rows())          
+        return self.save_redis_main(result)
 
-    #     res = {}
-    #     res_sub = {}
+    def vis_ipc(self):
+        result = self.make_vis_ipc(self.create_empty_rows())          
+        return self.save_redis_main(result)
 
-    #     result = self._emptyRows
-    #     res['nlp_rows'] = self.make_nlp_rows(result)
-    #     res['mtx_rows'] = self.make_mtx_rows(result)
-    #     res['ind_rows'] = self.make_vis_ind(result)
-    #     res['visualNum'] = self.make_vis_num(result)
-    #     res['visualIpc'] = self.make_vis_ipc()
-    #     res['visualPerson'] = self.make_vis_per()
+    def vis_cla(self):
+        result = self.make_vis_cla(self.create_empty_rows())          
+        return self.save_redis_sub(result)
 
-    #     self._pagingRows = self.make_paging_rows(result)
-    #     res_sub['rows'] = self._pagingRows
-    #     res_sub['visualClassify'] = self.make_vis_cla(result)
+    def vis_per(self):
+        result = self.make_vis_per(self.create_empty_rows())          
+        return self.save_redis_main(result)
 
-    #     # redis 저장 {
-    #     cache.set(self._mainKey, res, CACHE_TTL)
-    #     cache.set(self._subKey, res_sub, CACHE_TTL)   
+    def mtx_rows(self):
+        result = self.make_mtx_rows(self.create_empty_rows())
+        return self.save_redis_main(result)
+
+    def vis_ind(self):
+        result = self.make_vis_ind(self.create_empty_rows())
+        return self.save_redis_main(result)
 
 
     def make_vis_num(self, result):
         ''' visual application number '''
         if not self._rows:
             return { 'mode' : 'visualNum', 'entities' : [{ 'data' : [], 'labels' : []}]}        
+
         for i in range(len(result)):
             result[i]['출원일'] = str(self._rows[i]['출원일'])[:-4]
+
             result[i]['등록일'] = str(self._rows[i]['등록일'])[:-4]
+
             result[i]['구분'] = str(self._rows[i]['출원번호'])[0]
+
 
         def make_each_category_dict(flag):
             if flag:
@@ -136,6 +187,7 @@ class IpSearchs:
                 return { 'name' : [], 'value' : []}
 
         foo = [i['ipc코드'][0:4] for i in self._rows if i['ipc코드']]
+
         bar = frequency_count(foo,20)
         entities = [make_dic_to_list_of_dic(bar)]
         result = { 'mode' : 'visualIpc', 'entities' : entities }
@@ -179,7 +231,9 @@ class IpSearchs:
     
         for i in range(len(result)):        
             name = str(self._rows[i]['출원인1'])
+
             code = str(self._rows[i]['출원인코드1'])[0]
+
 
             result[i]['이름'] = name
             result[i]['구분'] = classify_swap(name, code)
@@ -211,11 +265,13 @@ class IpSearchs:
         # caller
         for key in ['출원인1','발명자1']:
             foo = [i[key] for i in self._rows if i[key]]
+
             bar = frequency_count(foo,20)
             entities.append(make_dic_to_list_of_dic(bar))        
 
         for key in ['출원인국가코드1','발명자국가코드1']:
             foo = [nat_swap(i[key]) for i in self._rows if i[key]]
+
             bar = frequency_count(foo,20)
             entities.append(make_dic_to_list_of_dic(bar))        
 
@@ -226,7 +282,9 @@ class IpSearchs:
         # nlp는 요약, 청구항 만 사용
         for i in range(len(result)):
             abstract = str(self._rows[i]['요약'])
+
             claim = str(self._rows[i]['청구항'])
+
             result[i]['요약'] = abstract
             result[i]['청구항'] = claim
             result[i]['요약·청구항'] = abstract + ' ' + claim
@@ -237,7 +295,9 @@ class IpSearchs:
         for i in range(len(result)):
             for key in ['출원번호','출원인1','ipc코드']:
                 result[i][key] = self._rows[i][key]            
+
             result[i]['출원일'] =  str(self._rows[i]['출원일'])[:-4]
+
             abstract = str(self._rows[i]['요약'])
             claim = str(self._rows[i]['청구항'])
             result[i]['요약'] = abstract
@@ -467,13 +527,21 @@ class IpSearchs:
 
     def create_empty_rows(self):
         self._emptyRows = [dict() for x in range(len(self._rows))]
-        return
+        return self._emptyRows
 
-    def query_execute(self):
+    def query(self):
         if self._searchNum:
             query = self.generate_num_query()
-        else:
-            query = self.generate_text_query() + self.add_orderby()   
+        else:       
+            query = self.generate_text_query()           
+        return query            
+
+    def query_execute(self):
+        query = self.query()
+        cache.set(self._queryKey, query, CACHE_TTL)
+
+        if not self._searchNum:
+            query += self.add_orderby()   
 
         with connection.cursor() as cursor:
             cursor.execute(
@@ -481,26 +549,16 @@ class IpSearchs:
                 + query
             )
             self._rows = dictfetchall(cursor)
+        cache.set(self._rowsKey, self._rows, CACHE_TTL)
+        print('query execute: ', self._mode)
         return
+
+    def save_redis_main(self, result):
+        cache.set(self._newMainKey, result)
+        return result
+
+    def save_redis_sub(self, result):
+        cache.set(self._newSubKey, result)
+        return result
         
-    def generate_all_analysis_rows(self):
-        res = {}
-        res_sub = {}
-
-        result = self._emptyRows
-        self._nlpRows = self.make_nlp_rows(result)
-        self._mtxRows = self.make_mtx_rows(result)
-        self._indicator = self.make_vis_ind(result)
-        self._visualNum = self.make_vis_num(result)
-        self._visualIpc = self.make_vis_ipc(result)
-        self._visualPerson = self.make_vis_per(result)
-        self._pagingRows = self.make_paging_rows(result)
-        cache.set(self._mainKey, res, CACHE_TTL)
-
-        self._rows = self._pagingRows
-        self._visualClassify = self.make_vis_cla(result)
-        cache.set(self._subKey, res_sub, CACHE_TTL)    
-
-
-
    
