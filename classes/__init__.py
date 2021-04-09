@@ -1,3 +1,4 @@
+from .ipSearchsClass import *
 from .ipSearchClass import *
 from .nlpClass import *
 from .ipKeywordsClass import *

@@ -1,4 +1,4 @@
-from utils import get_redis_key, remove_tail, dictfetchall, frequency_count, sampling
+from utils import request_data, remove_tail, dictfetchall,  sampling, NestedDictValues
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -8,510 +8,113 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 import re
 import operator
 
+import json
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 import os
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
-class IpSearchs:
+class IpSearch:
 
     def __init__(self, request, mode):
         self._request = request
         self._mode = mode
         self._emptyRows = []
-        self._queryCols = '등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항'  
         
         self.set_up()
-        self._executor = ThreadPoolExecutor(1)
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
-        result = self.loop.run_until_complete(self.run_query())
-        self.loop.close()
+
+        # self._executor = ThreadPoolExecutor(1)
+        # self.loop = asyncio.new_event_loop()
+        # asyncio.set_event_loop(self.loop)
+        # result = self.loop.run_until_complete(self.run_query())
+        # self.loop.close()
 
     def set_up(self):
-        mainKey, subKey, params, subParams = get_redis_key(self._request)
+        self._params, self._subParams = request_data(self._request)
 
-        # load options
-        self._searchVolume = params.get('searchVolume','요약·청구항') or '요약·청구항'
-        for key in ['searchNum','searchText','inventor','assignee','dateType','startDate','endDate','status','ipType']:
-            setattr(self, '_%s' % key, params.get(key,None) or None)        
+        self._appNo = self._params.get('appNo','')  
+        self._whereAppNo = f'WHERE "출원번호" = $${self._appNo}$$'
+        mainKey, subKey = self.redis_key()
+        self._rowsKey = f'{mainKey}¶rows'
+        self._mainKey = f'{mainKey}¶{self._mode}'
+        self._subKey = f'{subKey}¶{self._mode}'
 
-        foo = subParams["menuOptions"]["tableOptions"]["mainTable"]
+        foo = self._subParams["menuOptions"]["tableOptions"]["legalStatus"]
         self._pageIndex = foo.get('pageIndex', 0)
         self._pageSize = foo.get('pageSize', 10)
-        self._sortBy = foo.get('sortBy', [])
-
-        bar = subParams["menuOptions"]["tableOptions"]["visualClassify"]
-        self._cPageIndex = bar.get('pageIndex', 0)
-        self._cPageSize = bar.get('pageSize', 10)
-        self._cSortBy = bar.get('sortBy', []) 
-
-        self._redis_map = { 
-            'begin' : 'pagingRows',
-            'query' : 'query',
-            'nlp' : 'nlpRows',
-            'matrix' : 'mtxRows',
-            'indicator' : 'indRows',
-            'visualNum' : 'visualNum',
-            'visualClassify' : 'visualClassify',
-            'visualIpc' : 'visualIpc',
-            'visualPerson' : 'visualPerson',
-        }
-        self._rowsKey = f'{mainKey}¶rows'
-        self._queryKey = f'{mainKey}¶query'
-        self.load_rows()
-
-        self._newMainKey = f'{mainKey}¶{self._redis_map[self._mode]}'
-        self._newSubKey = f'{subKey}¶{self._redis_map[self._mode]}'
+        self._sortBy = foo.get('sortBy', [])        
 
         try:
-            context = cache.get(self._newMainKey)
+            context = cache.get(self._rowsKey)
             if context:
-                print('load mainkey redis', self._mode)
+                print('load mainkey redis')
                 return context
-            _context = cache.get(self._newSubKey)
-            if _context:
-                print('load subkey redis', self._mode)
-                return _context
         except (KeyError, NameError, UnboundLocalError):
             pass
-
-    def load_rows(self):
-        context = cache.get(self._rowsKey)
-        if context:
-            print('rows redis exist')
-            self._rows = context
 
     # async def run_query(self):
     #     try:
     #         getattr(self, '_rows')
-    #         print(' _rows exist', self._mode)
-    #         return self._rows                
-    #     except AttributeError: 
-    #         if not cache.get(self._queryKey):
-    #             cache.set(self._queryKey, True, CACHE_TTL)
-    #             results = await sync_to_async(self.query_execute)()
-    #             print('still execute query ', self._mode)
-    #             self._rows = result
-    #     finally:
-    #         return self._rows
-
-    async def run_query(self):
-        try:
-            getattr(self, '_rows')
-            print(' _rows exist', self._mode)
-        except AttributeError:
-            await self.loop.run_in_executor(self._executor, self.query_execute)
-            print('still execute query ', self._mode)
-            return 
-        else:
-            return                
-
-
-    def paging_rows(self):
-        # self.is_query_ever_been_run()
-        result = self.make_paging_rows(self.create_empty_rows()) 
-        return self.save_redis_sub(result)
-
-    def nlp_rows(self):
-        result = self.make_nlp_rows(self.create_empty_rows())
-        return self.save_redis_main(result)
-
-    def vis_num(self):
-        result = self.make_vis_num(self.create_empty_rows())          
-        return self.save_redis_main(result)
-
-    def vis_ipc(self):
-        result = self.make_vis_ipc(self.create_empty_rows())          
-        return self.save_redis_main(result)
-
-    def vis_cla(self):
-        result = self.make_vis_cla(self.create_empty_rows())          
-        return self.save_redis_sub(result)
-
-    def vis_per(self):
-        result = self.make_vis_per(self.create_empty_rows())          
-        return self.save_redis_main(result)
-
-    def mtx_rows(self):
-        result = self.make_mtx_rows(self.create_empty_rows())
-        return self.save_redis_main(result)
-
-    def vis_ind(self):
-        result = self.make_vis_ind(self.create_empty_rows())
-        return self.save_redis_main(result)
-
-
-    def make_vis_num(self, result):
-        ''' visual application number '''
-        if not self._rows:
-            return { 'mode' : 'visualNum', 'entities' : [{ 'data' : [], 'labels' : []}]}        
-
-        for i in range(len(result)):
-            result[i]['출원일'] = str(self._rows[i]['출원일'])[:-4]
-
-            result[i]['등록일'] = str(self._rows[i]['등록일'])[:-4]
-
-            result[i]['구분'] = str(self._rows[i]['출원번호'])[0]
-
-
-        def make_each_category_dict(flag):
-            if flag:
-                foo = [i[key] for i in result if i[key] and i['구분'] == flag]
-            else:            
-                foo = [i[key] for i in result if i[key]]
-            bar = frequency_count(foo)        
-            labels = [key for key in sorted(bar)]
-            data = [bar[key] for key in sorted(bar)]  
-            return { 'labels': labels, 'data' : data }         
-
-        key = '출원일'
-        PU = make_each_category_dict(flag=None)
-        PP = make_each_category_dict(flag='1')
-        UP = make_each_category_dict(flag='2')
-        key = '등록일'
-        PR = make_each_category_dict(flag='1')
-        UR = make_each_category_dict(flag='2')    
-
-        entities = [ PU, PP, UP, PR, UR ]
-        res = { 'mode' : 'visualNum', 'entities' : entities }
-        return res
-
-    def make_vis_ipc(self, result):
-        ''' visual ipc '''
-        def make_dic_to_list_of_dic(baz):
-            try:
-                return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
-            except AttributeError:
-                return { 'name' : [], 'value' : []}
-
-        foo = [i['ipc코드'][0:4] for i in self._rows if i['ipc코드']]
-
-        bar = frequency_count(foo,20)
-        entities = [make_dic_to_list_of_dic(bar)]
-        result = { 'mode' : 'visualIpc', 'entities' : entities }
-        return result    
-
-    def make_vis_cla(self, result):
-        ''' visual applicant classify '''
-
-        GOVERNMENT = settings.TERMS['APPLICANT_CLASSIFY']['GOVERNMENT']
-
-        def classify_swap(x,c):
-            if c == '4':
-                return '개인'        
-            if any(s in x for s in GOVERNMENT):    
-                return '공공'        
-            else:
-                return '기업'
-
-        def make_dic_to_list_of_dict_cla(bar):
-            return [{ '출원인명' : k, '건수' : v} for k,v in bar.items()]          
-
-        def make_each_table_rows(flag):
-            foo = [i['이름'] for i in result if i['이름'] and i['구분'] == flag]
-            bar = frequency_count(foo)
-            baz = make_dic_to_list_of_dict_cla(bar)
-
-            # Add sort by
-            if self._cSortBy:
-                for s in self._cSortBy:
-                    reverse = True if s['desc'] else False
-                    baz.sort(key=operator.itemgetter(s['_id']), reverse=reverse)
-
-            # Add offset limit
-            offset = self._cPageIndex * self._cPageSize
-            limit = self._cPageSize
-
-            
-            result_paging = sampling(baz, offset, limit)       
-
-            return { 'rowsCount': len(bar), 'rows' : result_paging }                  
+    #     except AttributeError:
+    #         await self.loop.run_in_executor(self._executor, self.query_execute)
+    #         return 
+    #     else:
+    #         return  
     
-        for i in range(len(result)):        
-            name = str(self._rows[i]['출원인1'])
+    def redis_key(self):
+        result = self._appNo
+        additional_result = result + "¶".join(list(NestedDictValues(self._subParams)))
+        return result, additional_result
 
-            code = str(self._rows[i]['출원인코드1'])[0]
+    def query_execute(self, key):
 
-
-            result[i]['이름'] = name
-            result[i]['구분'] = classify_swap(name, code)
-
-        G = make_each_table_rows(flag='공공')
-        C = make_each_table_rows(flag='기업')
-        P = make_each_table_rows(flag='개인')
-
-        entities = [ G, C, P ]
-        res = { 'mode' : 'visualClassify', 'entities' : entities }
-        return res
-
-    def make_vis_per(self, result):
-        ''' visual related person '''
-        # relatedperson는 ['출원인1','출원인국가코드1','발명자1','발명자국가코드1] 만 사용
-        
-        NATIONALITY = settings.TERMS['NATIONALITY']
-
-        entities = []
-        def nat_swap(x):
-            return NATIONALITY.get(x,x)
-
-        def make_dic_to_list_of_dic(baz):
-            try:
-                return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
-            except AttributeError:
-                return { 'name' : [], 'value' : []}
-
-        # caller
-        for key in ['출원인1','발명자1']:
-            foo = [i[key] for i in self._rows if i[key]]
-
-            bar = frequency_count(foo,20)
-            entities.append(make_dic_to_list_of_dic(bar))        
-
-        for key in ['출원인국가코드1','발명자국가코드1']:
-            foo = [nat_swap(i[key]) for i in self._rows if i[key]]
-
-            bar = frequency_count(foo,20)
-            entities.append(make_dic_to_list_of_dic(bar))        
-
-        result = { 'mode' : 'visualPerson', 'entities': entities }
-        return result    
-
-    def make_nlp_rows(self, result):
-        # nlp는 요약, 청구항 만 사용
-        for i in range(len(result)):
-            abstract = str(self._rows[i]['요약'])
-
-            claim = str(self._rows[i]['청구항'])
-
-            result[i]['요약'] = abstract
-            result[i]['청구항'] = claim
-            result[i]['요약·청구항'] = abstract + ' ' + claim
-        return result        
-
-    def make_mtx_rows(self, result):
-        # matrix는 출원번호, 출원일, 출원인1, ipc코드, 요약, 청구항만 사용
-        for i in range(len(result)):
-            for key in ['출원번호','출원인1','ipc코드']:
-                result[i][key] = self._rows[i][key]            
-
-            result[i]['출원일'] =  str(self._rows[i]['출원일'])[:-4]
-
-            abstract = str(self._rows[i]['요약'])
-            claim = str(self._rows[i]['청구항'])
-            result[i]['요약'] = abstract
-            result[i]['청구항'] = claim
-            result[i]['요약·청구항'] = abstract + ' ' + claim      
+        command = { 'search': self.search_query, 'quote': self.quote_query, 'family' : self.family_query, 'legal' : self.legal_query, 'rnd' : self.rnd_query}
+        query = command[key]()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SET work_mem to '100MB';"
+                + query
+            )
+            rows = dictfetchall(cursor)
+        if key == 'search':
+            result = rows[0]
+        else:
+            result = rows            
+        setattr(self, '_%s' % key, result)
+        redisKey = f'{self._appNo}¶{key}'
+        cache.set(redisKey, result, CACHE_TTL)
+        print('query execute: ', key)
         return result
 
-    def make_vis_ind(self, result):
-        # indicater는 ['출원번호','출원인코드1','출원인1','등록일'] 만 사용
-        for i in range(len(result)):
-            for key in ['출원번호','출원인코드1','출원인1','등록일']:
-                result[i][key] = self._rows[i][key]
-        
-        return [i for i in result if not (i['등록일'] == None)] # 등록건만                
+    def query_execute_paging(self, key):
+        command = { 'legal' : self.legal_query}
+        query = command[key]()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SET work_mem to '100MB';"
+                + query
+            )
+            rows = dictfetchall(cursor)
 
-    def date_query(self):
+        result = self.make_paging_rows(rows)
 
-        if not self._dateType or not (self._startDate or self._endDate):
-            return ""
-
-        result = ""
-        foo = { 'PRD': '우선권주장출원일1', 'PD': '공개일' , 'FD': '등록일', 'AD': '출원일' }
-        dateType = foo[self._dateType]
-
-        if self._startDate and self._endDate:
-            result += (self._dateType + " >= '" + self._startDate + "' and " + self._dateType + " <= '" + self._endDate + "' and ")
-        if self._startDate and not self._endDate:
-            result += (self._dateType + " >= '" + self._startDate + "' and ")
-        if not self._startDate and self._endDate:
-            result += (self._dateType + " <= '" + self._endDate + "' and ")
-
+        cache.set(self._subKey, result, CACHE_TTL)
+        print('query execute: ', key)
         return result
-
-    def status_query(self):
-
-        if not self._status or self._status == '전체':
-            return ""
-
-        result = " ("
-        for k in re.split(r' and | or ', self._status): # 출원 or 공개 ...
-            result += "등록사항 ='" + k + "' or "
-
-        result = remove_tail(result, " or ")
-
-        return result + ") and "
-
-    def iptype_query(self):     
-        # 특허공개 or 특허등록
-        if not self._ipType or self._ipType == '전체':
-            return ""    
-
-        result = " ("
-        # 등록db가 없으므로 공개로 통일
-        if "특허" in self._ipType:
-            result += "cast(출원번호 as text) LIKE '1%' or "
-        if "실용" in self._ipType:
-            result += "cast(출원번호 as text) LIKE '2%' or "
-
-        result = remove_tail(result, " or ")
-
-        return result + ") and "        
-
-    def tsquery_keywords(self, keyword="", mode="terms"):
-
-        if not keyword:
-            return None    
-
-        adjHaveOnlyZero='( adj[0]\d* )'
-        adjOnly = '( adj )'
-        adjZeroGroup = r'|'.join((adjHaveOnlyZero,adjOnly))
-        adjHaveNumberExecptZero=r' adj([1-9]\d*) '
-        adjSpace = r'(\([-!:*ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+) ([-!:*ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\))'
-
-        nearHaveNumberExecptZero = '([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+) near([1-9]\d*) ([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+)'
-        nearHaveOnlyZero='([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+) near[0]\d* ([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+)'
-        nearOnly='([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+) near ([-!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+)' 
-
-        removeDate = r'( and \(\@[PRD|AD|PD|FD].*\d{8}\))'
-        removeAP = r'( and \([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).AP)'
-        removeINV = r'( and \([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).INV)'
-        removeGroup = r'|'.join((removeDate,removeAP,removeINV))
-
-        _removeDate = r'(\(\@[PRD|AD|PD|FD].*\d{8}\))'
-        _removeAP = r'(\([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).AP)'
-        _removeINV = r'(\([ -!:*|ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+\).INV)'
-        _removeGroup = r'|'.join((_removeDate,_removeAP,_removeINV))      
-
-        def convert_symbols(v):
-            result = v
-            if v.startswith("-") or ' or -' in v:
-                result = v.replace("-", "!")
-            # convert nagative not to !
-            if v.startswith("not ") or ' or not ' in v:
-                result = v.replace("not ", "!")
-            # convert wildcard * to :*
-            if v.endswith("*") or '*' in v:
-                result = v.replace("*", ":*")
-            return result
-
-        def re_sub(reg, to, val):
-            return re.sub(reg, to, val, flags=re.IGNORECASE)
-
-        def removeOuterParentheses(S: str) -> str:
-            stack = []
-            res = ''
-            for i in range(len(S)):
-                stack.append(S[i])
-                if stack.count('(') == stack.count(')'):
-                    res+=''.join(stack[1:-1])
-                    stack = []
-            if res == '':
-                return S               
-            return res
-
-        def keepParantheses(v):
-            pattern = re.compile("\||\<[\d+|-]\>")
-            return re.search(pattern, v)
-
-
-        # caller
-        if mode == 'terms':
-            keyword = re_sub(removeGroup, r"", keyword)
-            keyword = re_sub(_removeGroup, r"", keyword)
-
-        elif mode == 'person':
-            keyword = re_sub(removeDate, r"", keyword)
-            keyword = re_sub(_removeDate, r"", keyword)
-
-        result = ''
-        
-        for v in re.split(" and ", keyword, flags=re.IGNORECASE):
-            v = convert_symbols(v)
-            v = re_sub(' or ', r"|", v)
-            if '|' in v:
-                v = removeOuterParentheses(v)
-                strOr = '('
-                for _v in re.split("\|", v):
-                    _v = re_sub(adjZeroGroup, r"<->", _v)
-                    _v = re_sub(adjHaveNumberExecptZero, r"<\1>", _v)
-                    _v = re_sub(nearHaveNumberExecptZero, r"(\1<\2>\3|\3<\2>\1)", _v)
-                    _v = re_sub(nearHaveOnlyZero, r"(\1<->\2|\2<->\1)", _v)
-                    _v = re_sub(nearOnly, r"(\1<->\2|\2<->\1)", _v)
-                    _v = re_sub(adjSpace, r"\1<->\2", _v)
-                    _v = removeOuterParentheses(_v) if not keepParantheses(_v) else _v
-                    _v = re_sub(' ', r"&", _v)
-                    strOr += ("".join(str(_v)) + "|")
-                strOr = remove_tail(strOr,"|")
-                result += ("".join(str(strOr)) + ")&")
-            else:
-                v = re_sub(adjZeroGroup, r"<->", v)
-                v = re_sub(adjHaveNumberExecptZero, r"<\1>", v)
-                v = re_sub(nearHaveNumberExecptZero, r"(\1<\2>\3|\3<\2>\1)", v)
-                v = re_sub(nearHaveOnlyZero, r"(\1<->\2|\2<->\1)", v)
-                v = re_sub(nearOnly, r"(\1<->\2|\2<->\1)", v)                            
-        
-                v = re_sub(adjSpace, r"\1<->\2", v)
-                v = removeOuterParentheses(v) if not keepParantheses(v) else v
-                v = re_sub(' ', r"&", v)
-                result += ("".join(str(v)) + "&")
-
-        result = remove_tail(result,"&")
-
-        if not result:
-            return None
-
-        return result         
-  
-    def generate_num_query(self):
-        query = 'select count(*) over () as cnt, ' + self._queryCols + \
-        " FROM kr_tsv_view WHERE num_search like %'" + self._searchNum.replace("-","") + "%'"
-        return query
-
-    def generate_text_query(self): 
-        queryTextTerms = self.tsquery_keywords(self._searchText, 'terms')
-        whereTerms = f'"{self._searchVolume}tsv" @@ to_tsquery(\'{queryTextTerms}\') and ' if queryTextTerms else ""
-
-        queryTextInventor = self.tsquery_keywords(self._inventor, 'person')
-        whereInventor = f'"발명자tsv" @@ to_tsquery(\'{queryTextInventor}\') and ' if queryTextInventor else ""
-
-        queryTextAssignee = self.tsquery_keywords(self._assignee, 'person')
-        whereAssignee = f'"출원인tsv" @@ to_tsquery(\'{queryTextAssignee}\') and ' if queryTextAssignee else ""
-
-        whereDate = self.date_query()
-        whereStatus = self.status_query()
-        whereIptype = self.iptype_query()
-
-        whereAll = whereTerms
-        whereAll += whereDate
-        whereAll += whereInventor
-        whereAll += whereAssignee
-        whereAll += whereStatus
-        whereAll += whereIptype
-
-        whereAll = remove_tail(whereAll," and ")
-
-        query = f'select count(*) over () as cnt, ts_rank("{self._searchVolume}tsv",to_tsquery(\'{queryTextTerms}\')) AS rank, {self._queryCols} FROM kr_tsv_view WHERE ({whereAll})'
-
-        return query
 
     def make_paging_rows(self, result):
         try:
-            rowsCount = self._rows[0]["cnt"]
+            rowsCount = result[0]["cnt"]
         except IndexError:        
             rowsCount = 0
 
-        for i in range(len(result)):
-            result[i]['id'] = self._rows[i]['출원번호'] # add id key for FE's ids
-            for key in ['출원번호','출원일','등록사항','발명의명칭','출원인1','발명자1','ipc코드']:
-                result[i][key] = self._rows[i][key]
         # Add offset limit
         offset = self._pageIndex * self._pageSize
         limit = self._pageSize
 
         return { 'rowsCount': rowsCount, 'rows': sampling(result, offset, limit)}
+       
 
     def add_orderby(self):
   
@@ -523,42 +126,231 @@ class IpSearchs:
             result += s['_id']
             result += ' ASC, ' if s['desc'] else ' DESC, '
         result = remove_tail(result,", ")
+        return result        
+
+    def search_query(self):
+        result = f"""SELECT A.*,
+	    B."발명자", B."발명자국적",
+        D.요약, F."청구항"::JSON, G."명세서", H."존속기간만료일" AS "존속기간만료일", H."소멸일" AS "소멸일",
+        CASE
+            WHEN I."IPC코드" IS NULL
+            THEN ARRAY[]::text[]
+            ELSE I."IPC코드"
+        END "IPC코드",
+        CASE
+            WHEN I."IPC개정" IS NULL
+            THEN ARRAY[]::text[]
+            ELSE I."IPC개정"
+        END "IPC개정",
+        CASE
+            WHEN J."CPC코드" IS NULL
+            THEN ARRAY[]::text[]
+            ELSE J."CPC코드"
+        END "CPC코드",
+        CASE
+            WHEN J."CPC개정" IS NULL
+            THEN ARRAY[]::text[]
+            ELSE J."CPC개정"
+        END "CPC개정",
+        M."출원인", M."영문출원인", M."출원인코드", M."출원인국적", M."출원인주소" 
+        FROM 
+	    (
+	    SELECT
+		    "등록사항",
+		    "발명의명칭(국문)" AS 명칭,
+		    "발명의명칭(영문)" AS 영문명칭, 출원번호,
+		    "출원일자" AS 출원일, 공개번호,
+		    "공개일자" AS 공개일, 공고번호,
+		    "공고일자" AS 공고일, 등록번호,
+		    "등록일자" AS 등록일,
+		    청구항수 
+	    FROM
+		    공개서지정보 {self._whereAppNo} 
+	    )
+	    A INNER JOIN (
+        SELECT 출원번호, array_agg(성명 order by "RN2") 발명자, array_agg(국가코드 order by "RN2") 발명자국적 
+	    FROM 공개인명정보 
+        WHERE "RN2" is not null
+	    GROUP BY 출원번호            
+	    ) B ON A.출원번호 = B.출원번호
+        INNER JOIN ( SELECT 출원번호, 초록 AS 요약 FROM "공개초록") D ON A.출원번호 = D.출원번호
+	    INNER JOIN ( SELECT 출원번호, 청구항 FROM "공개청구항JSON") F ON A.출원번호 = F.출원번호	
+	    INNER JOIN ( SELECT 출원번호, 명세서 FROM "공개명세서") G ON A.출원번호 = G.출원번호
+	    LEFT JOIN ( SELECT 출원번호, 존속기간만료일자 AS 존속기간만료일, 소멸일자 AS 소멸일	FROM 등록 ) H ON A.출원번호 = H.출원번호
+        LEFT JOIN (
+            SELECT 출원번호, array_agg(ipc코드 order by "특허분류일련번호") AS "IPC코드",array_agg(substring(ipc개정일자,2,4) order by "특허분류일련번호") AS "IPC개정" FROM "공개IPC" GROUP BY 출원번호 ) I ON A.출원번호 = I.출원번호
+        LEFT JOIN ( 
+            SELECT 출원번호,array_agg(cpc코드 order by "특허분류일련번호") AS "CPC코드",array_agg(substring(cpc개정일자,2,4) order by "특허분류일련번호") AS "CPC개정" FROM "공개CPC" GROUP BY 출원번호 ) J ON A.출원번호 = J.출원번호
+        LEFT JOIN (
+            SELECT 출원번호, array_agg(성명 order by "RN1") 출원인, array_agg(영문성명 order by "RN1") 영문출원인, array_agg(관련인코드 order by "RN1") 출원인코드, array_agg(국가코드 order by "RN1") 출원인국적, array_agg(주소 order by "RN1") 출원인주소 
+	    FROM 공개인명정보 
+        WHERE "RN1" is not null
+	    GROUP BY 출원번호 ) M ON A.출원번호 = M.출원번호"""
         return result
 
-    def create_empty_rows(self):
-        self._emptyRows = [dict() for x in range(len(self._rows))]
-        return self._emptyRows
+    def quote_query(self):
+        result = f"""
+            SELECT
+                B.식별코드,
+                B.국가,
+                B.인용참증단계,
+                A.명칭,
+                A.출원인,
+            CASE
+                WHEN COALESCE ( B.일자, '' ) = '' THEN	format_date_fn(A.문헌일::TEXT) 
+                ELSE format_date_fn(B.일자 :: TEXT)
+                END 일자,
+                A.출원번호,
+                A."ipc코드" 
+            FROM
+                (
+                SELECT
+                    'B1' 식별코드, 
+                    표준인용문헌국가코드 국가,
+                    "표준인용문헌번호",
+                    string_agg (distinct(case when left(원인용문헌번호,2) = "표준인용문헌국가코드" then substring(원인용문헌번호,3) end), ', ' ) 문헌번호,
+                    string_agg ( 인용문헌구분코드명, ', ' ) 인용참증단계,
+                    표준인용문헌발행일자::TEXT AS 일자, 출원번호, split_part( "인용문헌출원번호_국내":: TEXT, ',', 1 )  AS "관련출원번호" 
+                FROM
+                    "특허실용심사인용문헌" {self._whereAppNo} 
+                GROUP BY
+                    "표준인용문헌번호", 국가, 일자, 출원번호, 관련출원번호 
+                UNION ALL
+                SELECT
+                    'F1' 식별코드,
+                    'KR' 국가,
+                    split_part( 출원번호:: TEXT, ',', 1 )  AS "출원번호1",
+                    string_agg ( 피인용문헌구분코드명, ', ' ) 피인용참증단계,
+                    '' 일자, 피인용문헌번호, 출원번호, "피인용문헌번호"::text 관련출원번호
+                FROM
+                    "특허실용심사피인용문헌" 
+                WHERE
+                    "피인용문헌번호" = $${self._appNo}$$ 
+                GROUP BY
+                    "출원번호1", 피인용문헌번호 , 출원번호, 관련출원번호
+                ) B LEFT JOIN 
+                (
+                    SELECT C.*, D.출원인, E.ipc코드
+                FROM (
+                SELECT
+                    출원번호,
+                    CASE
+                        WHEN COALESCE("발명의명칭(영문)", '') = '' THEN "발명의명칭(국문)"
+                        WHEN COALESCE("발명의명칭(국문)", '') = '' AND COALESCE("발명의명칭(영문)", '') <> '' THEN "발명의명칭(영문)"
+                        ELSE 
+                            CONCAT( "발명의명칭(국문)", ' (', "발명의명칭(영문)", ')')
+                    END AS "명칭",		
+                CASE
+                    WHEN COALESCE ( 등록일자:: TEXT, '' ) = '' THEN  출원일자 
+                    ELSE 등록일자 
+                    END 문헌일
+                FROM
+                "공개서지정보" 
+                ) C	
+                INNER JOIN ( SELECT 출원번호, string_agg(성명, ', 'order by "RN1") 출원인 
+                FROM 공개인명정보 WHERE "RN1" is not null GROUP BY 출원번호
+                ) D ON C.출원번호 = D.출원번호  
+                INNER JOIN ( SELECT 출원번호, ipc코드 
+                FROM "공개IPC" WHERE 특허분류일련번호 = 1 
+                ) E ON C.출원번호 = E.출원번호 ) A
+            ON B."관련출원번호" = A.출원번호::TEXT"""
+        return result        
 
-    def query(self):
-        if self._searchNum:
-            query = self.generate_num_query()
-        else:       
-            query = self.generate_text_query()           
-        return query            
+    def family_query(self):
+        result = f"""
+            SELECT 
+                B.국가코드, B.패밀리번호, B.문헌코드, B.문헌번호, A.명칭,
+                format_date_fn(A.일자::TEXT) AS 일자,
+                A.ipc코드 AS "IPC" 
+            FROM
+                (
+                SELECT
+                    출원번호, 패밀리국가코드 AS 국가코드, 패밀리번호, 문헌코드, 문헌번호,
+                CASE
+                    WHEN 패밀리국가코드 = 'KR' 
+                    THEN
+                        split_part( 패밀리출원번호, ',', 1 ) :: TEXT ELSE 문헌번호 
+                    END "연결출원번호"
+                FROM
+                    특허패밀리 {self._whereAppNo} 
+                ) B 
+                LEFT JOIN ( 
+                SELECT C.*, D.ipc코드 FROM (SELECT 출원번호::text,
+                CASE
+                    WHEN COALESCE("발명의명칭(영문)", '') = '' THEN "발명의명칭(국문)"
+                    WHEN COALESCE("발명의명칭(국문)", '') = '' AND COALESCE("발명의명칭(영문)", '') <> '' THEN "발명의명칭(영문)"
+                    ELSE CONCAT( "발명의명칭(국문)", ' (', "발명의명칭(영문)", ')')
+                END AS "명칭",
+                등록일자 AS 일자 FROM 공개서지정보) C 
+                INNER JOIN ( SELECT 출원번호::text, ipc코드 FROM "공개IPC" WHERE 특허분류일련번호 = 1 ) D ON C.출원번호 = D.출원번호
+                ) A ON B."연결출원번호"::text = A.출원번호
+        """                
+                # UNION ALL
+                # SELECT C1.*, D1."IPC코드" FROM (SELECT 문헌번호, "발명의명칭", 등록일자 
+                # FROM "CN_BIBLIO") C1 
+                # INNER JOIN ( SELECT 문헌번호, "IPC코드" FROM "CN_IPC" WHERE 일련번호 = 1 ) D1 ON C1.문헌번호 = D1.문헌번호
+                # UNION ALL
+                # SELECT C2.*, D2."IPC코드" FROM (SELECT 문헌번호, "발명의명칭", 등록일자 
+                # FROM "JP_BIBLIO") C2 
+                # INNER JOIN ( SELECT 문헌번호, "IPC코드" FROM "JP_IPC" WHERE 일련번호 = 1 ) D2 ON C2.문헌번호 = D2.문헌번호
+                # UNION ALL
+                # SELECT C3.*, D3."IPC코드" FROM (SELECT 문헌번호, "발명의명칭", 등록일자 
+                # FROM "EP_BIBLIO") C3 
+                # INNER JOIN ( SELECT 문헌번호, "IPC코드" FROM "EP_IPC" WHERE 일련번호 = 1 ) D3 ON C3.문헌번호 = D3.문헌번호
+                # UNION ALL
+                # SELECT C4.*, D4."IPC코드" FROM (SELECT 문헌번호, "발명의명칭", 등록일자 
+                # FROM "US_BIBLIO") C4 
+                # INNER JOIN ( SELECT 문헌번호, "IPC코드" FROM "US_IPC" WHERE 일련번호 = 1 ) D4 ON C4.문헌번호 = D4.문헌번호
+                # UNION ALL
+                # SELECT C5.*, D5."IPC코드" FROM (SELECT 문헌번호, "발명의명칭", 등록일자 
+                # FROM "WO_BIBLIO") C5 
+                # INNER JOIN ( SELECT 문헌번호, "IPC코드" FROM "WO_IPC" WHERE 일련번호 = 1 ) D5 ON C5.문헌번호 = D5.문헌번호		
+                # ) A ON B."연결출원번호"::text = A.출원번호
 
-    def query_execute(self):
-        query = self.query()
-        cache.set(self._queryKey, query, CACHE_TTL)
+        return result    
 
-        if not self._searchNum:
-            query += self.add_orderby()   
+    def rnd_query(self):
+        result = f"""SELECT 연구개발과제번호 과제번호, 연구부처명 부처명, 연구사업명 사업명, 연구과제명 과제명, 주관기관명 주관기관, 연구기간내용 연구기간, 연구관리전문기관명 전문기관, 연구과제기여율내용 기여율 FROM "공개RND" {self._whereAppNo} ORDER BY 연구개발사업일련번호 ASC"""
+        return result  
 
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SET work_mem to '100MB';"
-                + query
-            )
-            self._rows = dictfetchall(cursor)
-        cache.set(self._rowsKey, self._rows, CACHE_TTL)
-        print('query execute: ', self._mode)
-        return
+    # def ipc_cpc_query(self):
+    #     result = f"""(SELECT 'I' 구분, "ipc코드" 코드, "ipc개정일자" 일자 from "공개IPC" {self._whereAppNo} ORDER BY 특허분류일련번호 ASC )
+    #     UNION ALL 
+    #     (SELECT 'C' 구분, "cpc코드" 코드, "cpc개정일자" 일자 from "공개CPC" {self._whereAppNo} ORDER BY 특허분류일련번호 ASC)"""
+    #     return result  
 
-    def save_redis_main(self, result):
-        cache.set(self._newMainKey, result)
-        return result
+    def legal_query(self):
+        result = f"""SELECT count(*) over () as cnt, 법적상태명, format_date_fn(법적상태일자::text) 법적상태일, 법적상태영문명 FROM 법적상태이력 {self._whereAppNo} and not (법적상태명 in ('특허출원','출원공개','설정등록','등록공고'))"""
+        result += self.add_orderby()
+        # order by 법적상태일 DESC , 일련번호 DESC"""
+        return result                  
 
-    def save_redis_sub(self, result):
-        cache.set(self._newSubKey, result)
-        return result
+    # def registerfee_query(self):
+    #     result = f"""SELECT to_char(to_date(납부일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 납입일, concat(시작연차,'-',마지막년차) 납입년차, TO_CHAR(등록료,'FM999,999,999') as 납입금액 FROM 등록료 WHERE 등록료 = $${self._regNo} order by 시작연차 DESC"""
+    #     return result                  
+
+    # def rightfullorder_query(self):
+    #     result = f"""SELECT * FROM 권리순위 {self._whereAppNo} order by 순위번호 ASC"""
+    #     return result                  
+
+    # def rightholder_query(self):
+    #     result = f"""SELECT 순위번호, 권리자일련번호, concat(권리자명, ' (',주소,')') 권리자정보, to_char(to_date(등록일자::text, 'YYYYMMDD'), 'YYYY.MM.DD') 등록일 FROM 권리권자변동 WHERE 등록번호 = $${self.regNo} and 권리자구분 = $$권리자$$ order by 순위번호 ASC, 권리자일련번호 ASC"""
+    #     return result                  
+
+    # def applicant_trend_query(self):
+    #     foo = f"""SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) pyr, left(등록일자::text,4) ryr FROM kr_tsv_view WHERE "출원인코드1" = $${self._applicantCode}"""
+    #     result = f"""select pyr, null ryr, count(*) pp, null::int4 up, null::int4 pr, null::int4 ur from ({foo}) A WHERE 구분 = '1' GROUP BY pyr 
+    #     union all 
+    #     select pyr, null, null::int4, count(*), null::int4, null::int4 from ({foo}) A WHERE 구분 = '2' GROUP BY pyr
+    #     union all 
+    #     select null, ryr, null::int4, null::int4, count(*), null::int4 from ({foo}) A WHERE 구분 = '1' GROUP BY ryr
+    #     union all 
+    #     select null, ryr, null::int4, null::int4,  null::int4, count(*) from ({foo}) A  WHERE 구분 = '2' GROUP BY ryr"""
+    #     return result                  
+
+    # def applicant_ipc_query(self):
+    #     foo = f"""SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) pyr, left(등록일자::text,4) ryr FROM kr_tsv_view WHERE "출원인코드1" = $${self._applicantCode}"""
+    #     result = f"""SELECT ipc요약 "name", count(*) "value" FROM 공개공보 WHERE "출원인코드1" = $${self._applicantCode} GROUP BY ipc요약 order by "value" desc limit 15 offset 0"""
+    #     return result
         
    

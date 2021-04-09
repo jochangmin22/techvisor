@@ -35,6 +35,18 @@ def get_redis_key(request):
 
     return mainKey, subKey, params, subParams
 
+def request_data(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        result = data.get('params','')
+        additional_result = data.get('subParams','')
+    else:
+        result = json.loads(request.GET.get('params',''))
+        additional_result = json.loads(request.GET.get('subParams',''))
+    return result, additional_result         
+    
+    searchNum = params.get('searchNum','')
+
 def readRedis(redisKey, keys, data=""):
     context = cache.get(redisKey)
     if context and keys in context:

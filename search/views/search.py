@@ -19,7 +19,112 @@ from django.conf import settings
 COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
 KIPRIS = settings.KIPRIS
 
+from classes import IpSearch
+
 def get_search(request):
+    # patentOffice = params.get('patentOffice','KR') or 'KR'
+    patentOffice = 'KR'
+    command = { 'KR': kr_search, 'US': us_search, 'JP' : jp_search, 'CN' : cn_search, 'EP' : ep_search, 'PCT' : pct_search}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_search(request):
+    foo = IpSearch(request, mode = 'search')
+    return foo.query_execute(key = 'search')
+def us_search(request):
+    return
+def jp_search(request):
+    return
+def cn_search(request):
+    return
+def ep_search(request):
+    return
+def pct_search(request):
+    return    
+
+def get_quote(request):
+    # patentOffice = params.get('patentOffice','KR') or 'KR'
+    patentOffice = 'KR'
+    command = { 'KR': kr_quote, 'US': us_quote, 'JP' : jp_quote, 'CN' : cn_quote, 'EP' : ep_quote, 'PCT' : pct_quote}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_quote(request):
+    foo = IpSearch(request, mode = 'quote')
+    return foo.query_execute(key = 'quote')
+def us_quote(request):
+    return
+def jp_quote(request):
+    return
+def cn_quote(request):
+    return
+def ep_quote(request):
+    return
+def pct_quote(request):
+    return   
+
+def get_family(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_family, 'US': us_family, 'JP' : jp_family, 'CN' : cn_family, 'EP' : ep_family, 'PCT' : pct_family}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_family(request):
+    foo = IpSearch(request, mode = 'family')
+    return foo.query_execute(key = 'family')
+def us_family(request):
+    return
+def jp_family(request):
+    return
+def cn_family(request):
+    return
+def ep_family(request):
+    return
+def pct_family(request):
+    return         
+
+def get_legal(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_legal, 'US': us_legal, 'JP' : jp_legal, 'CN' : cn_legal, 'EP' : ep_legal, 'PCT' : pct_legal}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_legal(request):
+    foo = IpSearch(request, mode='legal')
+    return foo.query_execute_paging(key = 'legal')
+def us_legal(request):
+    return
+def jp_legal(request):
+    return
+def cn_legal(request):
+    return
+def ep_legal(request):
+    return
+def pct_legal(request):
+    return  
+
+def get_rnd(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_rnd, 'US': us_rnd, 'JP' : jp_rnd, 'CN' : cn_rnd, 'EP' : ep_rnd, 'PCT' : pct_rnd}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_rnd(request):
+    foo = IpSearch(request, mode = 'rnd')
+    return foo.query_execute(key = 'rnd')
+def us_rnd(request):
+    return
+def jp_rnd(request):
+    return
+def cn_rnd(request):
+    return
+def ep_rnd(request):
+    return
+def pct_rnd(request):
+    return         
+
+
+def xxxget_search(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         appNo = data["appNo"]    
