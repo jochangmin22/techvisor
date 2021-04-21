@@ -35,7 +35,8 @@ class IpKeywords:
 
     def keywords_extract(self):
         foo = NlpToken(self._request, menu='keywords')
-        self._nlpToken = foo.nlp_token()
+        nlpRows = foo.load_nlp_rows()
+        self._nlpToken = foo.nlp_token(nlpRows)
 
         # if not self._nlpToken:
         #     return self._keywordsEmpty

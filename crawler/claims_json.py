@@ -22,6 +22,8 @@ class ClaimJson:
     def __init__(self):
         self._chioce_server = 'main'
         self._limit_block = 1000
+        self._filepath = '/home/btowin/techvisor-backend/crawler/claim_number.txt'
+        
         self.set_up()
 
     def set_up(self):
@@ -63,12 +65,12 @@ class ClaimJson:
             connection.close()
 
     def load_appno_from_file(self):
-        f = open('/home/btowin/techvisor-backend/crawler/claim_number.txt', 'r')
+        f = open(self._filepath, 'r')
         self._appno = f.read()
         f.close()
 
     def save_appno_to_file(self):
-        f = open('/home/btowin/techvisor-backend/crawler/claim_number.txt', 'w')
+        f = open(self._filepath, 'w')
         f.write(str(self._last_appno))
         f.close()
 

@@ -1,5 +1,7 @@
 from .ipSearchsClass import *
 from .ipSearchClass import *
+from .ipSpecificationClass import *
+from .ipSimilarityClass import *
 from .nlpClass import *
 from .ipKeywordsClass import *
 from .ipWordcloudClass import *

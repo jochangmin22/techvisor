@@ -30,8 +30,6 @@ lam = lambda x: ['/'.join(t) for t in mecab.pos(x)
                  ]
 
 
-
-
 # def pos(text):
 #     return [token for token, tag in mecab.pos(text) if tag[:2] == 'NN' or tag[:2] == 'NP' or tag[:2] == 'SL']
 
@@ -94,7 +92,7 @@ def pos(text):
 
 #     return JsonResponse(row, safe=False)
 
-def similarity(abstract, modelType, absList = []):
+def xxsimilarity(abstract, modelType, absList = []):
     ''' Consists of df query based on the original Hanyang University '''
 
     # query = 'SELECT 등록사항, "발명의명칭(국문)", "발명의명칭(영문)", 출원번호, 출원일자, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일자, 공개일자, ipc요약, 요약token FROM 공개공보 WHERE ipc요약 = \'' + ipc + '\' limit 100'

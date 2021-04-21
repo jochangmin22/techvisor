@@ -139,5 +139,9 @@ def unescape(s):
     s = s.replace('&quot;', '\"')
     # this has to be last:
     s = s.replace("&amp;", "&")
-    return s  
+    return s 
+
+def snake_to_camel(snake_str):
+    components = snake_str.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])     
     

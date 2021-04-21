@@ -30,7 +30,7 @@ def save_claim():
     with connect(name = 'sub') as connection:
         with connection.cursor() as cursor:
             sql = ''' 
-            COPY claim
+            COPY copy_test
             FROM STDIN
             WITH DELIMITER ',' CSV HEADER
             '''
@@ -45,48 +45,59 @@ def dictfetchall(cursor):
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
     
 
-
+def _parse_typo(xmlStr=""):
+    """ 오타 정리 """
+    if xmlStr != None:
+        xmlStr = re.sub(r"<EMIID=", "<EMI ID=", xmlStr)  # tag 오타
+        xmlStr = re.sub(
+            r"<EMI .*?>", "", xmlStr
+        )  # attribute 에 따옴표 없는 tree 에러 방지 - <EMI ID=8 HE=24 WI=164 FILE="kpo00008.TIF">
+        xmlStr = re.sub(
+            r"(<SB>|</SB>|<SP>|</SP>|<AP>|<U>|</U>|<SB\.| >|<PS>|</Sb>|)", "", xmlStr
+        )  # <P></P> 사이에 문제되는 태그, 오타 태그 정리
+        xmlStr = re.sub(r"(</SB)", "", xmlStr)  # <P></P> 사이에 문제되는 태그, 오타 태그 정리 2
+        xmlStr = re.sub(r"</p>", "</P>", xmlStr)
+        xmlStr = re.sub(r".TIF<", '.TIF"><', xmlStr)  # FILE="kpo00001.TIF</P>
+        return xmlStr
+    else:
+        return ''
 
 
 def parse_claims(xmlStr=""):
     """ 비정형 청구항을 bs를 이용하여 처리 """
-
-    if not xmlStr:
-        return None
-
-    def parse_typo():
-        """ 오타 정리 """
-        xmlStr = re.sub(r"<EMIID=", "<EMI ID=", xmlStr)  # tag 오타
-        xmlStr = re.sub(r"<EMI .*?>", "", xmlStr)  # attribute 에 따옴표 없는 tree 에러 방지 - <EMI ID=8 HE=24 WI=164 FILE="kpo00008.TIF">
-        xmlStr = re.sub(r"(<SB>|</SB>|<SP>|</SP>|<AP>|<U>|</U>|<SB\.| >|<PS>|</Sb>|)", "", xmlStr)  # <P></P> 사이에 문제되는 태그, 오타 태그 정리
-        xmlStr = re.sub(r"(</SB)", "", xmlStr)  # <P></P> 사이에 문제되는 태그, 오타 태그 정리 2
-        xmlStr = re.sub(r"</p>", "</P>", xmlStr)
-        xmlStr = re.sub(r".TIF<", '.TIF"><', xmlStr)  # FILE="kpo00001.TIF</P>
-        return xmlStr    
     
-    newStr = parse_typo() # typo
-    bs = BeautifulSoup(newStr, "lxml")  # case-insensitive
+    xmlStr = _parse_typo(xmlStr) # typo
+    bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
+    # tree = elemTree.fromstring(xmlStr)
 
-    result = {"type": [], "claims": []}
+    # total = tree.findall("claim")
+    # my_dict = {"독립항수": 0, "종속항수": 0, "총청구항수": len(total), "청구항들": []}
+    # my_dict = {"독립항수": 0, "종속항수": 0, "청구항들": []}
+    my_dict = {"type": [], "claims": []}
+    new_my_claim = []
 
     try:
-        if bs.find("sdocl") and len(bs.find("sdocl")) != 0 and '참고사항' not in bs.find("sdocl").find("p").text:
-            result["type"], result["claims"] = claim_type_a(bs)
-            return result
-        elif bs.find("claims") and len(bs.find("claims")) != 0:
+        if bs.find("sdocl") and len(bs.find("sdocl")) != 0 and '참고사항' not in bs.find("sdocl").find("p").text:  # 청구항 타입 a
+            # my_dict["독립항수"], my_dict["종속항수"], my_dict["청구항들"] = claims_a_type(bs)
+            
+            # my_dict["type"], my_dict["claims"] = claims_a_type(bs)
+            # return my_dict
+            new_my_claim = claims_a_type(bs)
+            return new_my_claim
+        elif bs.find("claims") and len(bs.find("claims")) != 0:  # 청구항 타입 b
 
-            result["type"], result["claims"] = claim_type_b(bs)
-            return result
-        elif bs.find("claim") and len(bs.find("claim")) != 0:
+            my_dict["type"], my_dict["claims"] = claims_b_type(bs)
+            return my_dict
+        elif bs.find("claim") and len(bs.find("claim")) != 0:  # 청구항 타입 c
 
-            result["type"], result["claims"] = claim_type_c(bs)
-            return result
+            my_dict["type"], my_dict["claims"] = claims_c_type(bs)
+            return my_dict
         else:
-            return None
+            pass
     except AttributeError:
         return None
 
-def cliam_type_check(idx, val):
+def ClaimTypeCheck(idx, val):
     """ 독립항, 종속항, 삭제항 판단 """
 
     re_range = idx + 1
@@ -108,13 +119,12 @@ def cliam_type_check(idx, val):
     else:
         return "ind"
 
-def claim_type_a(bs):
+def claims_a_type(bs):
     """ 청구항 비정형타입 A """
+    claim_list = []
     my_claim = []
     my_claim_type = []
 
-    # jong = 0
-    # dok = 0
     # 청구항 타입 a-1 - <SDOCL><CLAIM N="1"><P INDENT="14" ALIGN="JUSTIFIED">입력되는</P><P INDENT="14" ALIGN="JUSTIFIED">신호를</P></CLAIM>
     # 청구항 타입 a-3 - <SDOCL><CLAIM N=1><P>분말 용성인비를 조립함에 있어 분말 용성인비
     # 청구항 타입 a-4 - <SDOCL><P>사각형의 시트, 특히 감광 인쇄지의 더미를 순  ---- 첫 p tag가 1항임
@@ -126,7 +136,7 @@ def claim_type_a(bs):
             p_txt = ""
             t_txt = ""
             soup_text = ""
-            t_txt = cliam_type_check(idx, soup.get_text())
+            t_txt = ClaimTypeCheck(idx, soup.get_text())
 
             for soup2 in soup.find_all("p"):
                 if '참고사항' not in soup2.text:
@@ -136,6 +146,11 @@ def claim_type_a(bs):
                         p_txt += soup2.get_text()
             my_claim.append(p_txt)
             my_claim_type.append(t_txt)
+            claim_list.append({
+                'no' : idx + 1,
+                'type' : t_txt,
+                'claim' : p_txt
+            })
     
     elif bs4:
         for idx, soup in enumerate(bs4):
@@ -143,7 +158,7 @@ def claim_type_a(bs):
             t_txt = ""
             soup_text = ""
             soup_text = soup.get_text()
-            t_txt = cliam_type_check(idx, soup_text)
+            t_txt = ClaimTypeCheck(idx, soup_text)
             if "참고사항" not in soup_text:
                 if p_txt:
                     p_txt += "\n" + soup_text
@@ -151,28 +166,26 @@ def claim_type_a(bs):
                     p_txt += soup_text
                 my_claim.append(p_txt)
                 my_claim_type.append(t_txt)
-    return my_claim_type, my_claim
+                claim_list.append({
+                'no' : idx + 1,
+                'type' : t_txt,
+                'claim' : p_txt
+            })
+    # return my_claim_type, my_claim
+    return claim_list
 
 
-def claim_type_b(bs):
+def claims_b_type(bs):
     """ 청구항 비정형타입 B """
     my_claim = []
     my_claim_type = []
-    # jong = 0
-    # dok = 0
 
     # 청구항 타입 2 - <Claims><Claim n="1"><P align="JUSTIFIED" indent="14">플립의 열림 동작과 닫힘
     bs1 = bs.find("claims").find_all("claim")
     for idx, soup in enumerate(bs1):
         p_txt = ""
         t_txt = ""
-        t_txt = cliam_type_check(idx, soup.get_text())
-
-        # if soup_text:
-        #     if p_txt:
-        #         p_txt += "\n" + soup_text
-        #     else:
-        #         p_txt += soup_text
+        t_txt = ClaimTypeCheck(idx, soup.get_text())
 
         for soup2 in soup.find_all("p"):
             if soup2:
@@ -186,12 +199,10 @@ def claim_type_b(bs):
     return my_claim_type, my_claim
 
 
-def claim_type_c(bs):
+def claims_c_type(bs):
     """ 청구항 비정형타입 C """
     my_claim = []
     my_claim_type = []
-    # jong = 0
-    # dok = 0
 
     # 청구항 타입 c-1 - <claim num="1"><claim-text>지면에 수직으로 설치되는
     #                 <claim num="12"><AmendStatus status="D">삭제</AmendStatus></claim>
@@ -213,11 +224,11 @@ def claim_type_c(bs):
 
             if bs_text:
                 my_claim.append(bs_text.get_text())
-                t_txt = cliam_type_check(idx, soup.get_text())
+                t_txt = ClaimTypeCheck(idx, soup.get_text())
                 my_claim_type.append(t_txt)
             elif bs_amend:
                 my_claim.append(bs_amend.get_text())
-                t_txt = cliam_type_check(idx, soup.get_text())
+                t_txt = ClaimTypeCheck(idx, soup.get_text())
                 my_claim_type.append(t_txt)
     elif bs2:
         for idx, soup in enumerate(bs_list):
@@ -234,15 +245,9 @@ def claim_type_c(bs):
                             p_txt += "\n" + soup2.get_text()
                         else:
                             p_txt += soup2.get_text()
-                t_txt = cliam_type_check(idx, p_txt)
+                t_txt = ClaimTypeCheck(idx, p_txt)
                 my_claim.append(p_txt)
                 my_claim_type.append(t_txt)
-                # for soup2 in soup.find_all("p"):
-                #     if soup2:
-                #         if p_txt:
-                #             p_txt += "\n" + soup2.get_text()
-                #         else:
-                #             p_txt += soup2.get_text()
             
             # p 태그가 청구항내 복수개
             else:
@@ -252,15 +257,9 @@ def claim_type_c(bs):
                             p_txt += "\n" + soup2.get_text()
                         else:
                             p_txt += soup2.get_text()
-                t_txt = cliam_type_check(idx, p_txt)
+                t_txt = ClaimTypeCheck(idx, p_txt)
                 my_claim.append(p_txt)
                 my_claim_type.append(t_txt)
-                # for soup2 in soup.find_all("amendstatus"):
-                #     if soup2:
-                #         if p_txt:
-                #             p_txt += "\n" + soup2.get_text()
-                #         else:
-                #             p_txt += soup2.get_text()
             
     elif bs3:
         for idx, soup in enumerate(bs_list):
@@ -277,15 +276,9 @@ def claim_type_c(bs):
                             p_txt += "\n" + soup2.get_text()
                         else:
                             p_txt += soup2.get_text()
-                        t_txt = cliam_type_check(idx, p_txt)            
+                        t_txt = ClaimTypeCheck(idx, p_txt)            
                 my_claim.append(p_txt)
                 my_claim_type.append(t_txt)
-                # for soup2 in soup.find_all("p"):
-                #     if soup2:
-                #         if p_txt:
-                #             p_txt += "\n" + soup2.get_text()
-                #         else:
-                #             p_txt += soup2.get_text()
             
             # p 태그가 청구항내 복수개
             else:
@@ -295,15 +288,10 @@ def claim_type_c(bs):
                             p_txt += "\n" + soup2.get_text()
                         else:
                             p_txt += soup2.get_text()
-                        t_txt = cliam_type_check(idx, p_txt)            
+                        t_txt = ClaimTypeCheck(idx, p_txt)            
                 my_claim.append(p_txt)
                 my_claim_type.append(t_txt)
-                # for soup2 in soup.find_all("amendstatus"):
-                #     if soup2:
-                #         if p_txt:
-                #             p_txt += "\n" + soup2.get_text()
-                #         else:
-                #             p_txt += soup2.get_text()                                            
+
     return my_claim_type, my_claim
 
 def csv_write(data):
@@ -312,18 +300,27 @@ def csv_write(data):
 
     csv_writer.writerow(('출원번호', '청구항'))
 
-    for i in data:
+    for i,v in enumerate(data):
         csv_writer.writerow((
-            str(i[0]),
-            json.dumps(parse_claims(i[-1]))
+            str(v[0]),
+            json.dumps(parse_claims(v[-1]))
         ))
+
     csv_open.close()
+
+    # for i,v in enumerate(data):
+    #     csv_writer.writerow((
+    #         str(i[0]),
+    #         json.dumps(parse_claims(i[-1]))
+    #     ))
+    # csv_open.close()
 
 def main_def(repeat_cnt = 0):
     start_time = time.time()
 
     # 시작 기준값 1009880005251
-    startNo = 1000
+    startNo = 10
+    # startNo = 1000
 
     f = open('./claim_number.txt', 'r')
     appNo = f.read()
@@ -351,14 +348,15 @@ def main_def(repeat_cnt = 0):
     # 종료    14:58           14:58             14:09
     # 개수  4,050,200       3,989,470         4,151,977
 
-    csv_write(rowdata)
+    csv_data = csv_write(rowdata)
+    # print('CSV RESULT : ', csv_data)
     save_claim()
 
-    f = open('./claim_number.txt', 'w')
-    f.write(str(lastAppNo))
-    f.close()
+    # f = open('./claim_number.txt', 'w')
+    # f.write(str(lastAppNo))
+    # f.close()
 
-    memoryUse = psutil.virtual_memory()[2]
+    # memoryUse = psutil.virtual_memory()[2]
 
     print(
         "{0}. {1} {2} {3} success --- {4} 초 ---".format(
@@ -367,10 +365,10 @@ def main_def(repeat_cnt = 0):
             str(lastAppNo), round(time.time() - start_time)
         )
     )
-    repeat_cnt += 1
+    # repeat_cnt += 1
 
-    time.sleep(0.2)
-    threading.Timer(1, main_def(repeat_cnt)).start()
+    # time.sleep(0.2)
+    # threading.Timer(1, main_def(repeat_cnt)).start()
             
     print('----------------------')
     print('done')

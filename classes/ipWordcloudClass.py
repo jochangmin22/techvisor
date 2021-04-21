@@ -33,7 +33,8 @@ class IpWordcloud:
 
     def wordcloud_extract(self):
         foo = NlpToken(self._request, menu='wordcloud')
-        bar = foo.nlp_token()
+        nlpRows = foo.load_nlp_rows()
+        bar = foo.nlp_token(nlpRows)
 
         baz = self._subParams['menuOptions']['wordcloudOptions']
         self._output = baz.get('output',50)   

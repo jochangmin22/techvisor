@@ -9,14 +9,12 @@ import operator
 from datetime import datetime, timedelta
 
 from utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase, remove_duplicates, sampling, remove_tail, frequency_count
-# from ..utils import dictfetchall, get_redis_key, tokenizer, tokenizer_phrase, remove_duplicates, sampling, remove_tail
 from .crawler import update_today_corp_report, update_today_crawl_mdcline
 
 from search.views.nlp import get_wordcloud, get_nlp
 
 from ..models import Mdcin_clinc_test_info, Disclosure_report
 from search.models import Listed_corp, Disclosure
-
 
 
 # caching with redis

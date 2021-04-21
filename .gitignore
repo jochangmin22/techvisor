@@ -33,3 +33,4 @@ conda_env.txt
 
 celerybeat-schedule.*
 dump.rdb
+claim_number.txt

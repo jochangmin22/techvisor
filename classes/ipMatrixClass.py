@@ -47,7 +47,8 @@ class IpMatrix:
                 result.append(key)        
             return result        
         foo = NlpToken(self._request, menu='matrix')
-        bar = foo.nlp_token()
+        nlpRows = foo.load_nlp_rows()
+        bar = foo.nlp_token(nlpRows)        
 
         # if not bar:
         #     return self._matrixEmpty

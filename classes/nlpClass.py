@@ -38,7 +38,7 @@ class NlpToken:
         foo = IpSearchs(self._request, mode='nlp')
         return foo.nlp_rows()
 
-    def nlp_token(self):
+    def nlp_token(self, nlpRows):
 
         def phrase_frequncy_tokenizer():
             return tokenizer_phrase(nlp_str)
@@ -58,7 +58,6 @@ class NlpToken:
                 result.extend(bar)
             return result            
 
-        nlpRows = self.load_nlp_rows()
         nlp_list = [d[self._volume] for d in nlpRows] # _voloume : '요약·청구항', '요약', '청구항', 
         nlp_str = ' '.join(nlp_list) if nlp_list else None
 

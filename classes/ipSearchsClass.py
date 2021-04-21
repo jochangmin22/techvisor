@@ -180,17 +180,23 @@ class IpSearchs:
 
     def make_vis_ipc(self, result):
         ''' visual ipc '''
-        def make_dic_to_list_of_dic(baz):
+        def make_dic_to_list_of_dic():
             try:
-                return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
+                return { 'name' : list(bar.keys()), 'value' : list(bar.values())}
             except AttributeError:
                 return { 'name' : [], 'value' : []}
 
+        entities = []
         foo = [i['ipc코드'][0:4] for i in self._rows if i['ipc코드']]
-
         bar = frequency_count(foo,20)
-        entities = [make_dic_to_list_of_dic(bar)]
+        entities.append(make_dic_to_list_of_dic())
+
+        foo = [i['ipc코드'][0:3] for i in self._rows if i['ipc코드']]
+        bar = frequency_count(foo,20)
+        entities.append(make_dic_to_list_of_dic())
+
         result = { 'mode' : 'visualIpc', 'entities' : entities }
+        print(result)
         return result    
 
     def make_vis_cla(self, result):

@@ -6,7 +6,7 @@ import re
 from konlpy.tag import Mecab
 from collections import Counter
 
-from .similarity import similarity
+# from .similarity import similarity
 
 import requests
 import json
@@ -19,7 +19,7 @@ from django.conf import settings
 COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
 KIPRIS = settings.KIPRIS
 
-from classes import IpSearch
+from classes import IpSearch, IpSpecification, IpSimilarity
 
 def get_search(request):
     # patentOffice = params.get('patentOffice','KR') or 'KR'
@@ -51,7 +51,7 @@ def get_quote(request):
 
 def kr_quote(request):
     foo = IpSearch(request, mode = 'quote')
-    return foo.query_execute(key = 'quote')
+    return foo.query_execute_paging(key = 'quote')
 def us_quote(request):
     return
 def jp_quote(request):
@@ -71,7 +71,7 @@ def get_family(request):
 
 def kr_family(request):
     foo = IpSearch(request, mode = 'family')
-    return foo.query_execute(key = 'family')
+    return foo.query_execute_paging(key = 'family')
 def us_family(request):
     return
 def jp_family(request):
@@ -111,7 +111,7 @@ def get_rnd(request):
 
 def kr_rnd(request):
     foo = IpSearch(request, mode = 'rnd')
-    return foo.query_execute(key = 'rnd')
+    return foo.query_execute_paging(key = 'rnd')
 def us_rnd(request):
     return
 def jp_rnd(request):
@@ -121,7 +121,208 @@ def cn_rnd(request):
 def ep_rnd(request):
     return
 def pct_rnd(request):
-    return         
+    return
+
+def get_description(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_description, 'US': us_description, 'JP' : jp_description, 'CN' : cn_description, 'EP' : ep_description, 'PCT' : pct_description}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_description(request):
+    foo = IpSpecification(request, mode = 'description')
+    return foo.setup_description()
+def us_description(request):
+    return
+def jp_description(request):
+    return
+def cn_description(request):
+    return
+def ep_description(request):
+    return
+def pct_description(request):
+    return    
+
+def get_wordcloud(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_wordcloud, 'US': us_wordcloud, 'JP' : jp_wordcloud, 'CN' : cn_wordcloud, 'EP' : ep_wordcloud, 'PCT' : pct_wordcloud}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_wordcloud(request):
+    foo = IpSpecification(request, mode = 'wordcloud')
+    return foo.setup_wordcloud()
+def us_wordcloud(request):
+    return
+def jp_wordcloud(request):
+    return
+def cn_wordcloud(request):
+    return
+def ep_wordcloud(request):
+    return
+def pct_wordcloud(request):
+    return    
+
+def get_applicant(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_applicant, 'US': us_applicant, 'JP' : jp_applicant, 'CN' : cn_applicant, 'EP' : ep_applicant, 'PCT' : pct_applicant}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_applicant(request):
+    foo = IpSearch(request, mode = 'applicant')
+    return foo.setup_applicant()
+def us_applicant(request):
+    return
+def jp_applicant(request):
+    return
+def cn_applicant(request):
+    return
+def ep_applicant(request):
+    return
+def pct_applicant(request):
+    return      
+
+def application_number(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_application_number, 'US': us_application_number, 'JP' : jp_application_number, 'CN' : cn_application_number, 'EP' : ep_application_number, 'PCT' : pct_application_number}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_application_number(request):
+    foo = IpSearch(request, mode = 'application_number')
+    return foo.setup_application_number()
+def us_application_number(request):
+    return
+def jp_application_number(request):
+    return
+def cn_application_number(request):
+    return
+def ep_application_number(request):
+    return
+def pct_application_number(request):
+    return    
+
+def get_ipc(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_ipc, 'US': us_ipc, 'JP' : jp_ipc, 'CN' : cn_ipc, 'EP' : ep_ipc, 'PCT' : pct_ipc}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_ipc(request):
+    foo = IpSearch(request, mode = 'ipc')
+    return foo.setup_ipc()
+def us_ipc(request):
+    return
+def jp_ipc(request):
+    return
+def cn_ipc(request):
+    return
+def ep_ipc(request):
+    return
+def pct_ipc(request):
+    return    
+
+def get_similar(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_similar, 'US': us_similar, 'JP' : jp_similar, 'CN' : cn_similar, 'EP' : ep_similar, 'PCT' : pct_similar}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_similar(request):
+    foo = IpSimilarity(request, mode = 'similar')
+    return foo.setup_similarity()
+def us_similar(request):
+    return
+def jp_similar(request):
+    return
+def cn_similar(request):
+    return
+def ep_similar(request):
+    return
+def pct_similar(request):
+    return 
+
+def right_holder(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_right_holder, 'US': us_right_holder, 'JP' : jp_right_holder, 'CN' : cn_right_holder, 'EP' : ep_right_holder, 'PCT' : pct_right_holder}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_right_holder(request):
+    foo = IpSearch(request, mode = 'right_holder')
+    return foo.query_execute_paging( key = 'right_holder')
+def us_right_holder(request):
+    return
+def jp_right_holder(request):
+    return
+def cn_right_holder(request):
+    return
+def ep_right_holder(request):
+    return
+def pct_right_holder(request):
+    return 
+
+def register_fee(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_register_fee, 'US': us_register_fee, 'JP' : jp_register_fee, 'CN' : cn_register_fee, 'EP' : ep_register_fee, 'PCT' : pct_register_fee}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_register_fee(request):
+    foo = IpSearch(request, mode = 'register_fee')
+    return foo.query_execute_paging( key = 'register_fee')
+def us_register_fee(request):
+    return
+def jp_register_fee(request):
+    return
+def cn_register_fee(request):
+    return
+def ep_register_fee(request):
+    return
+def pct_register_fee(request):
+    return     
+
+def rightfull_order(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_rightfull_order, 'US': us_rightfull_order, 'JP' : jp_rightfull_order, 'CN' : cn_rightfull_order, 'EP' : ep_rightfull_order, 'PCT' : pct_rightfull_order}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_rightfull_order(request):
+    foo = IpSearch(request, mode = 'rightfull_order')
+    return foo.query_execute_paging( key = 'rightfull_order')
+def us_rightfull_order(request):
+    return
+def jp_rightfull_order(request):
+    return
+def cn_rightfull_order(request):
+    return
+def ep_rightfull_order(request):
+    return
+def pct_rightfull_order(request):
+    return     
+
+def associate_corp(request):
+    patentOffice = 'KR'
+    command = { 'KR': kr_associate_corp, 'US': us_associate_corp, 'JP' : jp_associate_corp, 'CN' : cn_associate_corp, 'EP' : ep_associate_corp, 'PCT' : pct_associate_corp}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)
+
+def kr_associate_corp(request):
+    foo = IpSearch(request, mode = 'associate_corp')
+    return foo.setup_associate_corp()
+def us_associate_corp(request):
+    return
+def jp_associate_corp(request):
+    return
+def cn_associate_corp(request):
+    return
+def ep_associate_corp(request):
+    return
+def pct_associate_corp(request):
+    return     
+
 
 
 def xxxget_search(request):
@@ -555,15 +756,16 @@ def get_search_rightholder(request):
 
     return JsonResponse(row, safe=False)
 
-def get_search_applicant(request):
-    """ searchDetails용 출원인 법인, 출원동향, 보유기술 검색 """
+def xxxget_search_applicant(request):
+    """ 출원인 법인 kipris soap """
     data = json.loads(request.body.decode('utf-8'))
-    aCode = data['aCode']
-    aCode = aCode.replace("-", "")      
+    applicantCode = data['applicantCode']
+    print(applicantCode)
+    applicantCode = applicantCode.replace("-", "")      
 
     serviceParam = 'CorpBsApplicantService/'
     operationKey = 'corpBsApplicantInfo'
-    url = KIPRIS['rest_url'] + serviceParam + operationKey + '?ApplicantNumber=' + aCode + '&accessKey=' + KIPRIS['service_key']
+    url = KIPRIS['rest_url'] + serviceParam + operationKey + '?ApplicantNumber=' + applicantCode + '&accessKey=' + KIPRIS['service_key']
     # url = "http://plus.kipris.or.kr/openapi/rest/CorpBsApplicantService/corpBsApplicantInfo?ApplicantNumber=519980692724&accessKey=" + KIPRIS['service_key']
 
     html = requests.get(url)
@@ -614,16 +816,16 @@ def get_search_applicant_trend(request):
     """ searchDetails용 출원인 출원동향, 보유기술 검색 """
     """ 출원건수, 특허출원, 실용출원, 특허등록, 실용등록 """
     data = json.loads(request.body.decode('utf-8'))
-    aCode = data['aCode']
-    aCode = aCode.replace("-", "")
-    redisKey = aCode + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    applicantCode = data['applicantCode']
+    applicantCode = applicantCode.replace("-", "")
+    redisKey = applicantCode + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     result = readRedis(redisKey, 'applicant_trend')
     if result:
         return JsonResponse(result, safe=False)    
     # Redis }
     with connection.cursor() as cursor:
-        whereACode = "" if aCode == "" else 'WHERE "출원인코드1" = $$' + aCode + "$$"
+        whereACode = "" if applicantCode == "" else 'WHERE "출원인코드1" = $$' + applicantCode + "$$"
         # query = "SELECT 출원일자, 공개일자, 등록일자, 출원번호, ipc요약 FROM 공개공보 " + whereACode
         # query = "SELECT left(출원번호::text,1) 구분, left(출원일자::text,4) 출원년, left(공개일자::text,4) 공개년, left(등록일자::text,4) 등록년, ipc요약 FROM 공개공보 " + whereACode
 
@@ -648,16 +850,16 @@ def get_search_applicant_trend(request):
 def get_search_applicant_ipc(request):
     """ searchDetails용 출원인 보유기술 검색 """
     data = json.loads(request.body.decode('utf-8'))
-    aCode = data['aCode']
-    aCode = aCode.replace("-", "")
-    redisKey = aCode + "¶"  # Add delimiter to distinguish from searchs's searchNum
+    applicantCode = data['applicantCode']
+    applicantCode = applicantCode.replace("-", "")
+    redisKey = applicantCode + "¶"  # Add delimiter to distinguish from searchs's searchNum
     # Redis {
     result = readRedis(redisKey, 'applicant_ipc')
     if result:
         return JsonResponse(result, safe=False)    
     # Redis }
     with connection.cursor() as cursor:
-        whereACode = "" if aCode == "" else 'WHERE "출원인코드1" = $$' + aCode + "$$"
+        whereACode = "" if applicantCode == "" else 'WHERE "출원인코드1" = $$' + applicantCode + "$$"
         query = 'SELECT ipc요약 "name", count(*) "value" FROM 공개공보 ' + whereACode + ' GROUP BY ipc요약 order by "value" desc limit 15 offset 0'
 
         cursor.execute(query)
@@ -669,7 +871,7 @@ def get_search_applicant_ipc(request):
     #
     return JsonResponse(row, safe=False)
 
-def get_similar(request):
+def xxxget_similar(request):
     """ 유사 문서 목록 """
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -1021,7 +1223,7 @@ def claims_c_type(bs):
     return my_claim_type, my_claim
 
 
-def get_description(request, xmlStr=""):
+def xxget_description(request, xmlStr=""):
     xmlStr = _get_typo(xmlStr) # typo
 
     bs = BeautifulSoup(xmlStr, "lxml")  # case-insensitive
