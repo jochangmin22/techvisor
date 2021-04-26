@@ -1,4 +1,4 @@
-from utils import request_data, remove_tail, dictfetchall,  sampling, NestedDictValues, frequency_count, snake_to_camel
+from utils import request_data, remove_tail,add_orderby, dictfetchall, sampling, nested_dict_values, frequency_count, snake_to_camel
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -75,7 +75,7 @@ class IpSearch:
     
     def redis_key(self):
         result = self._appNo
-        additional_result = result + "¶".join(list(NestedDictValues(self._subParams)))
+        additional_result = result + "¶".join(list(nested_dict_values(self._subParams)))
         return result, additional_result
 
     def query_execute(self, key):
@@ -210,18 +210,6 @@ class IpSearch:
 
         return { 'rowsCount': rowsCount, 'rows': sampling(result, offset, limit)}
        
-    def add_orderby(self):
-  
-        if not self._sortBy:
-            return ''
-
-        result =' order by '
-        for s in self._sortBy:
-            result += s['_id']
-            result += ' ASC, ' if s['desc'] else ' DESC, '
-        result = remove_tail(result,", ")
-        return result
-
     def query_chioce(self, key):
         command = { 'search': self.search_query, 'quote': self.quote_query, 'family' : self.family_query, 'legal' : self.legal_query, 'rnd' : self.rnd_query, 'application_number' : self.application_number_query, 'ipc' : self.ipc_query, 'right_holder' : self.right_holder_query, 'register_fee' : self.register_fee_query, 'rightfull_order' : self.rightfull_order_query, 'associate_corp' : self.associate_corp_query}
         return command[key]()

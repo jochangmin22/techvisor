@@ -1,4 +1,4 @@
-from utils import get_redis_key, remove_tail, dictfetchall, frequency_count, sampling
+from utils import get_redis_key, remove_tail, add_orderby, dictfetchall, frequency_count, sampling
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -37,15 +37,7 @@ class IpSearchs:
         for key in ['searchNum','searchText','inventor','assignee','dateType','startDate','endDate','status','ipType']:
             setattr(self, '_%s' % key, params.get(key,None) or None)        
 
-        foo = subParams["menuOptions"]["tableOptions"]["mainTable"]
-        self._pageIndex = foo.get('pageIndex', 0)
-        self._pageSize = foo.get('pageSize', 10)
-        self._sortBy = foo.get('sortBy', [])
-
-        bar = subParams["menuOptions"]["tableOptions"]["visualClassify"]
-        self._cPageIndex = bar.get('pageIndex', 0)
-        self._cPageSize = bar.get('pageSize', 10)
-        self._cSortBy = bar.get('sortBy', []) 
+        self._subParams = subParams
 
         self._redis_map = { 
             'begin' : 'pagingRows',
@@ -196,7 +188,7 @@ class IpSearchs:
         entities.append(make_dic_to_list_of_dic())
 
         result = { 'mode' : 'visualIpc', 'entities' : entities }
-        print(result)
+
         return result    
 
     def make_vis_cla(self, result):
@@ -220,17 +212,21 @@ class IpSearchs:
             bar = frequency_count(foo)
             baz = make_dic_to_list_of_dict_cla(bar)
 
+            quux = self._subParams["menuOptions"]["tableOptions"]["visualClassify"]
+            pageIndex = quux.get('pageIndex', 0)
+            pageSize = quux.get('pageSize', 10)
+            sortBy = quux.get('sortBy', [])             
+
             # Add sort by
-            if self._cSortBy:
-                for s in self._cSortBy:
+            if sortBy:
+                for s in sortBy:
                     reverse = True if s['desc'] else False
                     baz.sort(key=operator.itemgetter(s['_id']), reverse=reverse)
 
             # Add offset limit
-            offset = self._cPageIndex * self._cPageSize
-            limit = self._cPageSize
+            offset = pageIndex * pageSize
+            limit = pageSize
 
-            
             result_paging = sampling(baz, offset, limit)       
 
             return { 'rowsCount': len(bar), 'rows' : result_paging }                  
@@ -509,27 +505,19 @@ class IpSearchs:
         except IndexError:        
             rowsCount = 0
 
+        foo = self._subParams["menuOptions"]["tableOptions"]["mainTable"]
+        pageIndex = foo.get('pageIndex', 0)
+        pageSize = foo.get('pageSize', 10)
+
         for i in range(len(result)):
             result[i]['id'] = self._rows[i]['출원번호'] # add id key for FE's ids
             for key in ['출원번호','출원일','등록사항','발명의명칭','출원인1','발명자1','ipc코드']:
                 result[i][key] = self._rows[i][key]
         # Add offset limit
-        offset = self._pageIndex * self._pageSize
-        limit = self._pageSize
+        offset = pageIndex * pageSize
+        limit = pageSize
 
         return { 'rowsCount': rowsCount, 'rows': sampling(result, offset, limit)}
-
-    def add_orderby(self):
-  
-        if not self._sortBy:
-            return ''
-
-        result =' order by '
-        for s in self._sortBy:
-            result += s['_id']
-            result += ' ASC, ' if s['desc'] else ' DESC, '
-        result = remove_tail(result,", ")
-        return result
 
     def create_empty_rows(self):
         self._emptyRows = [dict() for x in range(len(self._rows))]
@@ -547,7 +535,9 @@ class IpSearchs:
         cache.set(self._queryKey, query, CACHE_TTL)
 
         if not self._searchNum:
-            query += self.add_orderby()   
+            foo = self._subParams["menuOptions"]["tableOptions"]["mainTable"]
+            sortBy = foo.get('sortBy', [])  
+            query += add_orderby(sortBy)   
 
         with connection.cursor() as cursor:
             cursor.execute(

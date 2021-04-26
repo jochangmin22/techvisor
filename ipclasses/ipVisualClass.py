@@ -1,7 +1,7 @@
 from utils import get_redis_key 
 from django.core.cache import cache
 
-from classes import IpSearchs
+from ipclasses import IpSearchs
 
 class IpVisual:
     

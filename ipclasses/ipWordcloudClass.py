@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-from classes import NlpToken
+from ipclasses import NlpToken
 
 class IpWordcloud:
     

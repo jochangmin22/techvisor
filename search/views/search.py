@@ -19,7 +19,7 @@ from django.conf import settings
 COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
 KIPRIS = settings.KIPRIS
 
-from classes import IpSearch, IpSpecification, IpSimilarity
+from ipclasses import IpSearch, IpSpecification, IpSimilarity
 
 def get_search(request):
     # patentOffice = params.get('patentOffice','KR') or 'KR'

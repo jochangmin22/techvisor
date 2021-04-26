@@ -1,4 +1,4 @@
-from utils import request_data, remove_tail, dictfetchall,  sampling, NestedDictValues, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags, frequency_count
+from utils import request_data, remove_tail, dictfetchall,  sampling, nested_dict_values, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags, frequency_count
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -43,7 +43,7 @@ class IpSimilarity:
 
     def redis_key(self):
         result = self._appNo
-        additional_result = result + "¶".join(list(NestedDictValues(self._subParams)))
+        additional_result = result + "¶".join(list(nested_dict_values(self._subParams)))
         return result, additional_result        
 
     def query_execute(self, key):
@@ -134,7 +134,7 @@ class IpSimilarity:
 
     def similarity_query(self):
         result = f"""
-        SELECT count(*) over () as cnt, ts_rank( 요약tsv, to_tsquery('korean', $${self._abstract}$$ ) ) AS rank, "등록사항", "발명의명칭", "출원번호", "출원일", "출원인1", "출원인코드1", "출원인국가코드1", "발명자1", "발명자국가코드1", "등록일", "공개일", "ipc코드", "요약" FROM "kr_tsv_view" WHERE 요약tsv @@ to_tsquery('korean', $${self._abstract}$$) order by ts_rank( 요약tsv, to_tsquery('korean', $${self._abstract}$$ ) ) DESC  LIMIT 100;        
+        SELECT count(*) over () as cnt, ts_rank( 요약tsv, to_tsquery('korean', $${self._abstract}$$ ) ) AS rank, "등록사항", "발명의명칭", "출원번호", "출원일", "출원인1", "출원인코드1", "출원인국가코드1", "발명자1", "발명자국가코드1", "등록일", "공개일", "ipc코드", "요약" FROM "kr_tsv_view" WHERE 요약tsv @@ to_tsquery('korean', $${self._abstract}$$) order by ts_rank( 요약tsv, to_tsquery('korean', $${self._abstract}$$ ) ) DESC  LIMIT 10;        
         """
         # SELECT set_limit(0.8);
         # SELECT count(*) over () as cnt, similarity("요약", $${self._abstract}$$) AS similarity, "등록사항", "발명의명칭", "출원번호", "출원일", "출원인1", "출원인코드1", "출원인국가코드1", "발명자1", "발명자국가코드1", "등록일", "공개일", "ipc코드", "요약" FROM "kr_tsv_view" WHERE "요약" % $${self._abstract}$$ limit 100  

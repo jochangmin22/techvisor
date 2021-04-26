@@ -6,8 +6,8 @@ from itertools import permutations
 import operator
 import json
 
-from utils import get_redis_key, dictfetchall, remove_duplicates, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags, remove_tail, frequency_count, sampling
-from classes import IpSearchs, NlpToken
+from utils import get_redis_key, dictfetchall, remove_duplicates, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags, remove_tail, add_orderby, frequency_count, sampling
+from ipclasses import IpSearchs, NlpToken
 # from .similarity import similarity
 
 # caching with redis
@@ -38,408 +38,397 @@ def ep_searchs(request, mode="begin"):
 def pct_searchs(request, mode="begin"):
     return
 
-def krr_searchs(request, mode="begin"):
-    """ 쿼리 실행 및 결과 저장
-        mode : begin, nlp, query, matrix, indicator
-    """
+# def krr_searchs(request, mode="begin"):
+#     """ 쿼리 실행 및 결과 저장
+#         mode : begin, nlp, query, matrix, indicator
+#     """
 
-    mainKey, subKey, params, subParams = get_redis_key(request)
+#     mainKey, subKey, params, subParams = get_redis_key(request)
 
-    context = cache.get(mainKey)
-    context_paging = cache.get(subKey)
+#     context = cache.get(mainKey)
+#     context_paging = cache.get(subKey)
 
-    redis_map = { 
-        'begin' : 'raw',
-        'nlp' : 'nlp_raw',
-        'matrix' : 'mtx_raw',
-        'indicator' : 'ind_raw',
-        'visualNum' : 'visualNum',
-        'visualClassify' : 'visualClassify',
-        'visualIpc' : 'visualIpc',
-        'visualPerson' : 'visualPerson',
-    }
+#     redis_map = { 
+#         'begin' : 'raw',
+#         'nlp' : 'nlp_raw',
+#         'matrix' : 'mtx_raw',
+#         'indicator' : 'ind_raw',
+#         'visualNum' : 'visualNum',
+#         'visualClassify' : 'visualClassify',
+#         'visualIpc' : 'visualIpc',
+#         'visualPerson' : 'visualPerson',
+#     }
 
-    try: 
-        if context and context[redis_map[mode]]:
-            return context[redis_map[mode]]
-        if context_paging and context_paging[redis_map[mode]]:
-            return context_paging[redis_map[mode]]                    
-    except (KeyError, NameError, UnboundLocalError):
-        pass
+#     try: 
+#         if context and context[redis_map[mode]]:
+#             return context[redis_map[mode]]
+#         if context_paging and context_paging[redis_map[mode]]:
+#             return context_paging[redis_map[mode]]                    
+#     except (KeyError, NameError, UnboundLocalError):
+#         pass
 
-    def make_paging_rows():
-        try:
-            rowsCount = rows[0]["cnt"]
-        except IndexError:        
-            rowsCount = 0
+#     def make_paging_rows():
+#         try:
+#             rowsCount = rows[0]["cnt"]
+#         except IndexError:        
+#             rowsCount = 0
 
-        # foo = [dict() for x in range(len(data))]
-        for i in range(len(rows)):
-            result[i]['id'] = rows[i]['출원번호'] # add id key for FE's ids
-            for key in ['출원번호','출원일','등록사항','발명의명칭','출원인1','발명자1','ipc코드']:
-                result[i][key] = rows[i][key]
+#         # foo = [dict() for x in range(len(data))]
+#         for i in range(len(rows)):
+#             result[i]['id'] = rows[i]['출원번호'] # add id key for FE's ids
+#             for key in ['출원번호','출원일','등록사항','발명의명칭','출원인1','발명자1','ipc코드']:
+#                 result[i][key] = rows[i][key]
 
-        # Add offset limit
-        offset = pageIndex * pageSize
-        limit = pageSize
+#         # Add offset limit
+#         offset = pageIndex * pageSize
+#         limit = pageSize
 
-        return { 'rowsCount': rowsCount, 'rows': sampling(result, offset, limit)}
+#         return { 'rowsCount': rowsCount, 'rows': sampling(result, offset, limit)}
 
-    def make_orderby_clause():
-        if not sortBy:
-            return ''
+#     def make_vis_num():
+#         ''' visual application number '''
+#         if not rows:
+#             return { 'mode' : 'visualNum', 'entities' : [{ 'data' : [], 'labels' : []}]}        
+#         # rows = [dict() for x in range(len(data))]
+#         for i in range(len(rows)):
+#             result[i]['출원일'] = str(rows[i]['출원일'])[:-4]
+#             result[i]['등록일'] = str(rows[i]['등록일'])[:-4]
+#             result[i]['구분'] = str(rows[i]['출원번호'])[0]
 
-        result =' order by '
-        for s in sortBy:
-            result += s['_id']
-            result += ' ASC, ' if s['desc'] else ' DESC, '
-        result = remove_tail(result,", ")
-        return result
+#         def make_each_category_dict(flag):
+#             if flag:
+#                 foo = [i[key] for i in result if i[key] and i['구분'] == flag]
+#             else:            
+#                 foo = [i[key] for i in result if i[key]]
+#             bar = frequency_count(foo)        
+#             labels = [key for key in sorted(bar)]
+#             data = [bar[key] for key in sorted(bar)]  
+#             return { 'labels': labels, 'data' : data }         
 
-    def make_vis_num():
-        ''' visual application number '''
-        if not rows:
-            return { 'mode' : 'visualNum', 'entities' : [{ 'data' : [], 'labels' : []}]}        
-        # rows = [dict() for x in range(len(data))]
-        for i in range(len(rows)):
-            result[i]['출원일'] = str(rows[i]['출원일'])[:-4]
-            result[i]['등록일'] = str(rows[i]['등록일'])[:-4]
-            result[i]['구분'] = str(rows[i]['출원번호'])[0]
+#         key = '출원일'
+#         PU = make_each_category_dict(flag=None)
+#         PP = make_each_category_dict(flag='1')
+#         UP = make_each_category_dict(flag='2')
+#         key = '등록일'
+#         PR = make_each_category_dict(flag='1')
+#         UR = make_each_category_dict(flag='2')    
 
-        def make_each_category_dict(flag):
-            if flag:
-                foo = [i[key] for i in result if i[key] and i['구분'] == flag]
-            else:            
-                foo = [i[key] for i in result if i[key]]
-            bar = frequency_count(foo)        
-            labels = [key for key in sorted(bar)]
-            data = [bar[key] for key in sorted(bar)]  
-            return { 'labels': labels, 'data' : data }         
-
-        key = '출원일'
-        PU = make_each_category_dict(flag=None)
-        PP = make_each_category_dict(flag='1')
-        UP = make_each_category_dict(flag='2')
-        key = '등록일'
-        PR = make_each_category_dict(flag='1')
-        UR = make_each_category_dict(flag='2')    
-
-        entities = [ PU, PP, UP, PR, UR ]
-        res = { 'mode' : 'visualNum', 'entities' : entities }
-        return res
+#         entities = [ PU, PP, UP, PR, UR ]
+#         res = { 'mode' : 'visualNum', 'entities' : entities }
+#         return res
 
 
-    # { A01K 13/00: 1, A01K 67/027: 9, A01K 67/033: 1, ...}
-    #  [{ name: '', value: 0 }],
-    # {data: [11, 1, 7, …], labels: ["A01K", …}
+#     # { A01K 13/00: 1, A01K 67/027: 9, A01K 67/033: 1, ...}
+#     #  [{ name: '', value: 0 }],
+#     # {data: [11, 1, 7, …], labels: ["A01K", …}
 
-    def make_vis_ipc():
-        ''' visual ipc '''
-        def make_dic_to_list_of_dic(baz):
-            try:
-                return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
-            except AttributeError:
-                return { 'name' : [], 'value' : []}
+#     def make_vis_ipc():
+#         ''' visual ipc '''
+#         def make_dic_to_list_of_dic(baz):
+#             try:
+#                 return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
+#             except AttributeError:
+#                 return { 'name' : [], 'value' : []}
 
-        foo = [i['ipc코드'][0:4] for i in rows if i['ipc코드']]
-        bar = frequency_count(foo,20)
-        entities = [make_dic_to_list_of_dic(bar)]
-        result = { 'mode' : 'visualIpc', 'entities' : entities }
-        return result    
+#         foo = [i['ipc코드'][0:4] for i in rows if i['ipc코드']]
+#         bar = frequency_count(foo,20)
+#         entities = [make_dic_to_list_of_dic(bar)]
+#         result = { 'mode' : 'visualIpc', 'entities' : entities }
+#         return result    
 
-    # [{출원인명: "바이랄테크놀로지스인코포레이티드", 건수: 1},{}]
+#     # [{출원인명: "바이랄테크놀로지스인코포레이티드", 건수: 1},{}]
 
-    def make_vis_cla():
-        ''' visual applicant classify '''
+#     def make_vis_cla():
+#         ''' visual applicant classify '''
 
-        visualClassify = subParams["menuOptions"]["tableOptions"]["visualClassify"]
-        pageIndex = visualClassify.get('pageIndex', 0)
-        pageSize = visualClassify.get('pageSize', 10)
-        sortBy = visualClassify.get('sortBy', [])
+#         visualClassify = subParams["menuOptions"]["tableOptions"]["visualClassify"]
+#         pageIndex = visualClassify.get('pageIndex', 0)
+#         pageSize = visualClassify.get('pageSize', 10)
+#         sortBy = visualClassify.get('sortBy', [])
 
-        GOVERNMENT = settings.TERMS['APPLICANT_CLASSIFY']['GOVERNMENT']
+#         GOVERNMENT = settings.TERMS['APPLICANT_CLASSIFY']['GOVERNMENT']
 
-        def classify_swap(x,c):
-            if c == '4':
-                return '개인'        
-            if any(s in x for s in GOVERNMENT):    
-                return '공공'        
-            else:
-                return '기업'
+#         def classify_swap(x,c):
+#             if c == '4':
+#                 return '개인'        
+#             if any(s in x for s in GOVERNMENT):    
+#                 return '공공'        
+#             else:
+#                 return '기업'
 
-        def make_dic_to_list_of_dict_cla(bar):
-            return [{ '출원인명' : k, '건수' : v} for k,v in bar.items()]          
+#         def make_dic_to_list_of_dict_cla(bar):
+#             return [{ '출원인명' : k, '건수' : v} for k,v in bar.items()]          
 
-        def make_each_table_rows(flag):
-            foo = [i['이름'] for i in result if i['이름'] and i['구분'] == flag]
-            bar = frequency_count(foo)
-            baz = make_dic_to_list_of_dict_cla(bar)
+#         def make_each_table_rows(flag):
+#             foo = [i['이름'] for i in result if i['이름'] and i['구분'] == flag]
+#             bar = frequency_count(foo)
+#             baz = make_dic_to_list_of_dict_cla(bar)
 
-            # Add sort by
-            if sortBy:
-                for s in sortBy:
-                    reverse = True if s['desc'] else False
-                    baz.sort(key=operator.itemgetter(s['_id']), reverse=reverse)
+#             # Add sort by
+#             if sortBy:
+#                 for s in sortBy:
+#                     reverse = True if s['desc'] else False
+#                     baz.sort(key=operator.itemgetter(s['_id']), reverse=reverse)
 
-            # Add offset limit
-            offset = pageIndex * pageSize
-            limit = pageSize
+#             # Add offset limit
+#             offset = pageIndex * pageSize
+#             limit = pageSize
 
             
-            result_paging = sampling(baz, offset, limit)       
+#             result_paging = sampling(baz, offset, limit)       
 
-            return { 'rowsCount': len(bar), 'rows' : result_paging }                  
+#             return { 'rowsCount': len(bar), 'rows' : result_paging }                  
     
-        # rows = [dict() for x in range(len(data))]
-        for i in range(len(rows)):        
-            name = str(rows[i]['출원인1'])
-            code = str(rows[i]['출원인코드1'])[0]
+#         # rows = [dict() for x in range(len(data))]
+#         for i in range(len(rows)):        
+#             name = str(rows[i]['출원인1'])
+#             code = str(rows[i]['출원인코드1'])[0]
 
-            result[i]['이름'] = name
-            result[i]['구분'] = classify_swap(name, code)
+#             result[i]['이름'] = name
+#             result[i]['구분'] = classify_swap(name, code)
 
-        G = make_each_table_rows(flag='공공')
-        C = make_each_table_rows(flag='기업')
-        P = make_each_table_rows(flag='개인')
+#         G = make_each_table_rows(flag='공공')
+#         C = make_each_table_rows(flag='기업')
+#         P = make_each_table_rows(flag='개인')
 
-        entities = [ G, C, P ]
-        res = { 'mode' : 'visualClassify', 'entities' : entities }
-        return res
+#         entities = [ G, C, P ]
+#         res = { 'mode' : 'visualClassify', 'entities' : entities }
+#         return res
 
-    # {	출원인: { A: [{ name: '', value: '' }], B: [{ name: '', value: '' }] },
-    #	발명자: { A: [{ name: '', value: '' }], B: [{ name: '', value: '' }] },
-    # }
+#     # {	출원인: { A: [{ name: '', value: '' }], B: [{ name: '', value: '' }] },
+#     #	발명자: { A: [{ name: '', value: '' }], B: [{ name: '', value: '' }] },
+#     # }
 
-    def make_vis_per():
-        ''' visual related person '''
-        # relatedperson는 ['출원인1','출원인국가코드1','발명자1','발명자국가코드1] 만 사용
+#     def make_vis_per():
+#         ''' visual related person '''
+#         # relatedperson는 ['출원인1','출원인국가코드1','발명자1','발명자국가코드1] 만 사용
         
-        NATIONALITY = settings.TERMS['NATIONALITY']
+#         NATIONALITY = settings.TERMS['NATIONALITY']
 
-        entities = []
-        def nat_swap(x):
-            return NATIONALITY.get(x,x)
+#         entities = []
+#         def nat_swap(x):
+#             return NATIONALITY.get(x,x)
 
-        def make_dic_to_list_of_dic(baz):
-            try:
-                return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
-            except AttributeError:
-                return { 'name' : [], 'value' : []}
+#         def make_dic_to_list_of_dic(baz):
+#             try:
+#                 return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
+#             except AttributeError:
+#                 return { 'name' : [], 'value' : []}
 
-        # caller
-        for key in ['출원인1','발명자1']:
-            foo = [i[key] for i in rows if i[key]]
-            bar = frequency_count(foo,20)
-            entities.append(make_dic_to_list_of_dic(bar))        
+#         # caller
+#         for key in ['출원인1','발명자1']:
+#             foo = [i[key] for i in rows if i[key]]
+#             bar = frequency_count(foo,20)
+#             entities.append(make_dic_to_list_of_dic(bar))        
 
-        for key in ['출원인국가코드1','발명자국가코드1']:
-            foo = [nat_swap(i[key]) for i in rows if i[key]]
-            bar = frequency_count(foo,20)
-            entities.append(make_dic_to_list_of_dic(bar))        
+#         for key in ['출원인국가코드1','발명자국가코드1']:
+#             foo = [nat_swap(i[key]) for i in rows if i[key]]
+#             bar = frequency_count(foo,20)
+#             entities.append(make_dic_to_list_of_dic(bar))        
 
-        result = { 'mode' : 'visualPerson', 'entities': entities }
-        return result    
+#         result = { 'mode' : 'visualPerson', 'entities': entities }
+#         return result    
 
-    def make_nlp_raw():
-        # nlp는 요약, 청구항 만 사용
-        for i in range(len(rows)):
-            abstract = str(rows[i]['요약'])
-            claim = str(rows[i]['청구항'])
-            result[i]['요약'] = abstract
-            result[i]['청구항'] = claim
-            result[i]['요약·청구항'] = abstract + ' ' + claim
-        return result        
+#     def make_nlp_raw():
+#         # nlp는 요약, 청구항 만 사용
+#         for i in range(len(rows)):
+#             abstract = str(rows[i]['요약'])
+#             claim = str(rows[i]['청구항'])
+#             result[i]['요약'] = abstract
+#             result[i]['청구항'] = claim
+#             result[i]['요약·청구항'] = abstract + ' ' + claim
+#         return result        
 
-    def make_mtx_raw():
-        # matrix는 출원번호, 출원일, 출원인1, ipc코드, 요약, 청구항만 사용
-        # result = [dict() for x in range(len(rows))]
-        for i in range(len(rows)):
-            result[i]['출원번호'] = rows[i]['출원번호']
-            result[i]['출원일'] =  str(rows[i]['출원일'])[:-4]
-            result[i]['출원인1'] = rows[i]['출원인1']
-            result[i]['ipc코드'] = rows[i]['ipc코드']
-            abstract = str(rows[i]['요약'])
-            claim = str(rows[i]['청구항'])
-            result[i]['요약'] = abstract
-            result[i]['청구항'] = claim
-            result[i]['요약·청구항'] = abstract + ' ' + claim      
-        return result
+#     def make_mtx_raw():
+#         # matrix는 출원번호, 출원일, 출원인1, ipc코드, 요약, 청구항만 사용
+#         # result = [dict() for x in range(len(rows))]
+#         for i in range(len(rows)):
+#             result[i]['출원번호'] = rows[i]['출원번호']
+#             result[i]['출원일'] =  str(rows[i]['출원일'])[:-4]
+#             result[i]['출원인1'] = rows[i]['출원인1']
+#             result[i]['ipc코드'] = rows[i]['ipc코드']
+#             abstract = str(rows[i]['요약'])
+#             claim = str(rows[i]['청구항'])
+#             result[i]['요약'] = abstract
+#             result[i]['청구항'] = claim
+#             result[i]['요약·청구항'] = abstract + ' ' + claim      
+#         return result
 
-    def make_ind_raw():
-        # indicater는 ['출원번호','출원인코드1','출원인1','등록일'] 만 사용
-        # result = [dict() for x in range(len(rows))]
-        for i in range(len(rows)):
-            for key in ['출원번호','출원인코드1','출원인1','등록일']:
-                result[i][key] = rows[i][key]
+#     def make_ind_raw():
+#         # indicater는 ['출원번호','출원인코드1','출원인1','등록일'] 만 사용
+#         # result = [dict() for x in range(len(rows))]
+#         for i in range(len(rows)):
+#             for key in ['출원번호','출원인코드1','출원인1','등록일']:
+#                 result[i][key] = rows[i][key]
         
-        return [i for i in result if not (i['등록일'] == None)] # 등록건만
+#         return [i for i in result if not (i['등록일'] == None)] # 등록건만
             
 
 
-    # get_searchs caller 
+#     # get_searchs caller 
     
-    # TODO: 검색범위 선택
-    # try:
-    #     if params['searchVolume'] == 'ALL':
-    #         searchVolume = 'search'
-    #     elif params['searchVolume'] == 'SUMA':
-    #         searchVolume = 'search'
-    #     elif params['searchVolume'] == 'SUM':
-    #         searchVolume = 'search'
-    # except:
-    searchVolume = '요약·청구항tsv'
+#     # TODO: 검색범위 선택
+#     # try:
+#     #     if params['searchVolume'] == 'ALL':
+#     #         searchVolume = 'search'
+#     #     elif params['searchVolume'] == 'SUMA':
+#     #         searchVolume = 'search'
+#     #     elif params['searchVolume'] == 'SUM':
+#     #         searchVolume = 'search'
+#     # except:
+#     searchVolume = '요약·청구항tsv'
 
 
-    # 번호검색
-    if 'searchNum' in params and params['searchNum']:
-        # whereAll = ""
-        whereAll = "num_search like '%" + \
-            params['searchNum'].replace("-","") + "%'"
+#     # 번호검색
+#     if 'searchNum' in params and params['searchNum']:
+#         # whereAll = ""
+#         whereAll = "num_search like '%" + \
+#             params['searchNum'].replace("-","") + "%'"
 
     
-    # 키워드 검색
-    else: 
-        # to_tsquery 형태로 parse
-    # result = f'"{fieldName}" @@ to_tsquery(\'{strKeyword}\')'
-    # result += f' order by ts_rank("{fieldName}",to_tsquery(\'{strKeyword}\') desc'
+#     # 키워드 검색
+#     else: 
+#         # to_tsquery 형태로 parse
+#     # result = f'"{fieldName}" @@ to_tsquery(\'{strKeyword}\')'
+#     # result += f' order by ts_rank("{fieldName}",to_tsquery(\'{strKeyword}\') desc'
 
-        queryTextTerms = tsquery_keywords(params["searchText"], None, 'terms')
-        whereTerms = f'"{searchVolume}" @@ to_tsquery(\'{queryTextTerms}\')' if queryTextTerms else ""
+#         queryTextTerms = tsquery_keywords(params["searchText"], None, 'terms')
+#         whereTerms = f'"{searchVolume}" @@ to_tsquery(\'{queryTextTerms}\')' if queryTextTerms else ""
 
-        # orderClause = f' order by ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) desc '
+#         # orderClause = f' order by ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) desc '
 
-        queryTextInventor = tsquery_keywords(params["inventor"], None, 'person')
-        whereInventor = f'"발명자tsv" @@ to_tsquery(\'{queryTextInventor}\')' if queryTextInventor else ""
+#         queryTextInventor = tsquery_keywords(params["inventor"], None, 'person')
+#         whereInventor = f'"발명자tsv" @@ to_tsquery(\'{queryTextInventor}\')' if queryTextInventor else ""
 
-        queryTextAssignee = tsquery_keywords(params["assignee"], None, 'person')
-        whereAssignee = f'"출원인tsv" @@ to_tsquery(\'{queryTextAssignee}\')' if queryTextAssignee else ""
+#         queryTextAssignee = tsquery_keywords(params["assignee"], None, 'person')
+#         whereAssignee = f'"출원인tsv" @@ to_tsquery(\'{queryTextAssignee}\')' if queryTextAssignee else ""
 
-        whereDate = date_query(params)
-        whereStatus = status_query(params)
-        whereIptype = iptype_query(params)
+#         whereDate = date_query(params)
+#         whereStatus = status_query(params)
+#         whereIptype = iptype_query(params)
 
-        whereAll = whereTerms
-        whereAll += ' and ' if whereTerms else ''
-        whereAll += whereDate
-        whereAll += ' and ' if whereDate else ''
-        whereAll += whereInventor
-        whereAll += ' and ' if whereInventor else ''
-        whereAll += whereAssignee
-        whereAll += ' and ' if whereAssignee else ''
-        whereAll += whereStatus
-        whereAll += ' and ' if whereStatus else ''
-        whereAll += whereIptype
+#         whereAll = whereTerms
+#         whereAll += ' and ' if whereTerms else ''
+#         whereAll += whereDate
+#         whereAll += ' and ' if whereDate else ''
+#         whereAll += whereInventor
+#         whereAll += ' and ' if whereInventor else ''
+#         whereAll += whereAssignee
+#         whereAll += ' and ' if whereAssignee else ''
+#         whereAll += whereStatus
+#         whereAll += ' and ' if whereStatus else ''
+#         whereAll += whereIptype
 
-        whereAll = remove_tail(whereAll," and ")
+#         whereAll = remove_tail(whereAll," and ")
 
-    # select count(*) over () as cnt, ts_rank(search,to_tsquery('예방&치료&진단')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_tsv_view WHERE (("search" @@ to_tsquery('예방&치료&진단')) and ("발명자tsv" @@ to_tsquery('조'))) order by ts_rank("search",to_tsquery('예방&치료&진단')) desc;-- offset 0 limit 10000;
-    query = f'select count(*) over () as cnt, ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_tsv_view WHERE ({whereAll})'
-    if mode == "query":  # mode가 query면 여기서 분기
-        return query
+#     # select count(*) over () as cnt, ts_rank(search,to_tsquery('예방&치료&진단')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_tsv_view WHERE (("search" @@ to_tsquery('예방&치료&진단')) and ("발명자tsv" @@ to_tsquery('조'))) order by ts_rank("search",to_tsquery('예방&치료&진단')) desc;-- offset 0 limit 10000;
+#     query = f'select count(*) over () as cnt, ts_rank("{searchVolume}",to_tsquery(\'{queryTextTerms}\')) AS rank, 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항 FROM kr_tsv_view WHERE ({whereAll})'
+#     if mode == "query":  # mode가 query면 여기서 분기
+#         return query
 
-    mainTable = subParams["menuOptions"]["tableOptions"]["mainTable"]
-    pageIndex = mainTable.get('pageIndex', 0)
-    pageSize = mainTable.get('pageSize', 10)
-    sortBy = mainTable.get('sortBy', [])
+#     mainTable = subParams["menuOptions"]["tableOptions"]["mainTable"]
+#     pageIndex = mainTable.get('pageIndex', 0)
+#     pageSize = mainTable.get('pageSize', 10)
+#     sortBy = mainTable.get('sortBy', [])
 
-    # Add sort by
-    query += make_orderby_clause()
-    print('heh', query)
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "SET work_mem to '100MB';"
-            + query
-        )
+#     # Add sort by
+#     query += add_orderby(sortBy)
+#     print('heh', query)
+#     with connection.cursor() as cursor:
+#         cursor.execute(
+#             "SET work_mem to '100MB';"
+#             + query
+#         )
 
-        rows = dictfetchall(cursor)
+#         rows = dictfetchall(cursor)
 
-    res = {}
-    res_sub = {}
+#     res = {}
+#     res_sub = {}
 
-    result = [dict() for x in range(len(rows))]
+#     result = [dict() for x in range(len(rows))]
 
-    res['nlp_raw'] = make_nlp_raw()
-    res['mtx_raw'] = make_mtx_raw()
-    res['ind_raw'] = make_ind_raw()
-    res['visualNum'] = make_vis_num()
-    res['visualIpc'] = make_vis_ipc()
-    res['visualPerson'] = make_vis_per()
+#     res['nlp_raw'] = make_nlp_raw()
+#     res['mtx_raw'] = make_mtx_raw()
+#     res['ind_raw'] = make_ind_raw()
+#     res['visualNum'] = make_vis_num()
+#     res['visualIpc'] = make_vis_ipc()
+#     res['visualPerson'] = make_vis_per()
 
-    result_paging = make_paging_rows()
-    res_sub['raw'] = result_paging
-    res_sub['visualClassify'] = make_vis_cla()
+#     result_paging = make_paging_rows()
+#     res_sub['raw'] = result_paging
+#     res_sub['visualClassify'] = make_vis_cla()
 
-    # redis 저장 {
-    cache.set(mainKey, res, CACHE_TTL)
-    cache.set(subKey, res_sub, CACHE_TTL)    
+#     # redis 저장 {
+#     cache.set(mainKey, res, CACHE_TTL)
+#     cache.set(subKey, res_sub, CACHE_TTL)    
 
-    # redis 저장 }
+#     # redis 저장 }
 
-    if mode == "begin":
-        return result_paging
-    if mode == "visualClassify":
-        return res_sub[redis_map[mode]]
-    return res[redis_map[mode]]
+#     if mode == "begin":
+#         return result_paging
+#     if mode == "visualClassify":
+#         return res_sub[redis_map[mode]]
+#     return res[redis_map[mode]]
 
 
-def xxget_nlp(request, analType):
-    """ 쿼리 실행 및 결과 저장
-        analType : wordcloud, matrix, keywords
-        option : volume, unit, emergence 개별적용
-    """
+# def xxget_nlp(request, analType):
+#     """ 쿼리 실행 및 결과 저장
+#         analType : wordcloud, matrix, keywords
+#         option : volume, unit, emergence 개별적용
+#     """
 
-    _, subKey, _, subParams = get_redis_key(request)
+#     _, subKey, _, subParams = get_redis_key(request)
 
-    #### Create a new SubKey to distinguish each analysis type 
-    newSubKey = subKey + '¶' + analType
+#     #### Create a new SubKey to distinguish each analysis type 
+#     newSubKey = subKey + '¶' + analType
 
-    sub_context = cache.get(newSubKey)
+#     sub_context = cache.get(newSubKey)
 
-    try:
-        if sub_context['nlp_token']:
-            return sub_context['nlp_token']
-    except:
-        pass
+#     try:
+#         if sub_context['nlp_token']:
+#             return sub_context['nlp_token']
+#     except:
+#         pass
 
-    nlp_raw = kr_searchs(request, mode="nlp")
+#     nlp_raw = kr_searchs(request, mode="nlp")
 
-    result = []
+#     result = []
 
-    # option
-    foo = subParams['menuOptions'][analType + 'Options']
-    volume = foo.get('volume','')
-    unit = foo.get('unit','')
-    emergence = foo.get('emergence','빈도수')
+#     # option
+#     foo = subParams['menuOptions'][analType + 'Options']
+#     volume = foo.get('volume','')
+#     unit = foo.get('unit','')
+#     emergence = foo.get('emergence','빈도수')
 
-    nlp_list = [d[volume] for d in nlp_raw] # '요약·청구항', '요약', '청구항', 
+#     nlp_list = [d[volume] for d in nlp_raw] # '요약·청구항', '요약', '청구항', 
 
-    nlp_str = ' '.join(nlp_list) if nlp_list else None
+#     nlp_str = ' '.join(nlp_list) if nlp_list else None
 
-    def phrase_frequncy_tokenizer():
-        return tokenizer_phrase(nlp_str)
+#     def phrase_frequncy_tokenizer():
+#         return tokenizer_phrase(nlp_str)
 
-    def phrase_individual_tokenizer():
-        for foo in nlp_list:
-            bar = remove_duplicates(tokenizer_phrase(foo))
-            result.extend(bar)
-        return result            
+#     def phrase_individual_tokenizer():
+#         for foo in nlp_list:
+#             bar = remove_duplicates(tokenizer_phrase(foo))
+#             result.extend(bar)
+#         return result            
 
-    def word_frequncy_tokenizer():
-        return tokenizer(nlp_str)
+#     def word_frequncy_tokenizer():
+#         return tokenizer(nlp_str)
 
-    def word_individual_tokenizer():
-        for foo in nlp_list:
-            bar = remove_duplicates(tokenizer(foo))
-            result.extend(bar)
-        return result            
+#     def word_individual_tokenizer():
+#         for foo in nlp_list:
+#             bar = remove_duplicates(tokenizer(foo))
+#             result.extend(bar)
+#         return result            
 
-    command = { '구문': { '빈도수':phrase_frequncy_tokenizer, '건수':phrase_individual_tokenizer }, '워드': { '빈도수' :word_frequncy_tokenizer, '건수':word_individual_tokenizer } }
+#     command = { '구문': { '빈도수':phrase_frequncy_tokenizer, '건수':phrase_individual_tokenizer }, '워드': { '빈도수' :word_frequncy_tokenizer, '건수':word_individual_tokenizer } }
     
-    result = command[unit][emergence]()    
+#     result = command[unit][emergence]()    
 
-    cache.set(newSubKey, { 'nlp_token' : result } , CACHE_TTL)
+#     cache.set(newSubKey, { 'nlp_token' : result } , CACHE_TTL)
 
-    return result
+#     return result
 
 def date_query(params):
 

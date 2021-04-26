@@ -7,7 +7,7 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 from gensim.models import Word2Vec
 from gensim.models import FastText
 
-from classes import NlpToken
+from ipclasses import NlpToken
 
 class IpKeywords:
     

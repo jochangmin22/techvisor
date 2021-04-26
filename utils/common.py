@@ -28,7 +28,7 @@ def get_redis_key(request):
 
     # one more key to be used for a separated from searchParams
     try:
-        subKey = mainKey + "¶".join(list(NestedDictValues(subParams))) if searchNum == '' else searchNum   
+        subKey = mainKey + "¶".join(list(nested_dict_values(subParams))) if searchNum == '' else searchNum   
     except:
         subKey = mainKey + "¶"    
 
@@ -62,10 +62,10 @@ def dictfetchall(cursor):
     columns = [col[0] for col in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]    
 
-def NestedDictValues(d):
+def nested_dict_values(d):
     for v in d.values():
         if isinstance(v, dict):
-            yield from NestedDictValues(v)
+            yield from nested_dict_values(v)
         else:
             yield str(v)
 
@@ -91,7 +91,18 @@ def remove_tail(result, tail):
     if result.endswith(tail):
         tail = -len(tail)
         result = result[:tail]
-    return result    
+    return result
+
+def add_orderby(sortBy):
+    if not sortBy:
+        return ''
+
+    result =' order by '
+    for s in sortBy:
+        result += s['_id']
+        result += ' ASC, ' if s['desc'] else ' DESC, '
+    result = remove_tail(result,", ")
+    return result        
 
 def str2round(value, num=1):
     try:

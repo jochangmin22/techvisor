@@ -4,7 +4,7 @@ from .searchs import kr_searchs
 from utils import get_redis_key
 import json
 
-from classes import IpVisual, IpIndicator
+from ipclasses import IpVisual, IpIndicator
 
 # caching with redis
 from django.core.cache import cache

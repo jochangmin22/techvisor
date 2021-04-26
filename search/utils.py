@@ -25,7 +25,7 @@ def get_redis_key(request):
     mainKey = "¶".join(params.values()) if searchNum == '' else searchNum
 
     # one more key to be used for a separated from searchParams
-    subKey = mainKey + "¶".join(list(NestedDictValues(subParams))) if searchNum == '' else searchNum   
+    subKey = mainKey + "¶".join(list(nested_dict_values(subParams))) if searchNum == '' else searchNum   
 
     return mainKey, subKey, params, subParams
 
@@ -34,10 +34,10 @@ def dictfetchall(cursor):
     columns = [col[0] for col in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]    
 
-def NestedDictValues(d):
+def nested_dict_values(d):
     for v in d.values():
         if isinstance(v, dict):
-            yield from NestedDictValues(v)
+            yield from nested_dict_values(v)
         else:
             yield str(v)
 

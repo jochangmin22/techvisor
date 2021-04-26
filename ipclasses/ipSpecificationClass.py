@@ -1,4 +1,4 @@
-from utils import request_data, remove_tail, dictfetchall,  sampling, NestedDictValues, tokenizer, tokenizer_phrase, frequency_count
+from utils import request_data, remove_tail, dictfetchall,  sampling, nested_dict_values, tokenizer, tokenizer_phrase, frequency_count
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -10,7 +10,7 @@ import operator
 
 from bs4 import BeautifulSoup
 
-from classes import IpSearch
+from ipclasses import IpSearch
 
 class IpSpecification:
 
@@ -40,7 +40,7 @@ class IpSpecification:
 
     def redis_key(self):
         result = self._appNo
-        additional_result = result + "¶".join(list(NestedDictValues(self._subParams)))
+        additional_result = result + "¶".join(list(nested_dict_values(self._subParams)))
         return result, additional_result        
 
     def query_execute(self, key):

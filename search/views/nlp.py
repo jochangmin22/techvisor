@@ -15,7 +15,7 @@ import pandas as pd
 
 from django.db import connection
 
-from classes import NlpToken, IpKeywords, IpWordcloud, IpWordcloudDialog
+from ipclasses import NlpToken, IpKeywords, IpWordcloud, IpWordcloudDialog
 
 # caching with redis
 from django.core.cache import cache

@@ -2,7 +2,7 @@ from django.urls import path, re_path
 from django.views.decorators.csrf import csrf_exempt  # post일 경우 필요
 
 from . import views
-from search.views import get_wordcloud
+# from search.views import get_wordcloud
 
 URL = r"^api/company-app/"
 
@@ -17,9 +17,10 @@ urlpatterns = [
     # related_info
     re_path(URL+ "searchs/clinic$", csrf_exempt(views.related_info.get_clinic_test), name='get_clinic_test'),
     re_path(URL+ "searchs/corpreport$", csrf_exempt(views.related_info.get_corp_report), name='get_corp_report'),
-    re_path(URL+ "searchs/ownedpatent$", csrf_exempt(views.related_info.get_searchs), name='get_searchs'),
-    re_path(URL+ "searchs/wordcloud$", csrf_exempt(get_wordcloud), name='get_wordcloud'),
-    re_path(URL + "searchs/visual$", csrf_exempt(views.related_info.get_visual), name='get_visual' ),
+    # visual
+    re_path(URL+ "searchs/ownedpatent$", csrf_exempt(views.visual.get_owned_patent), name='get_owned_patent'),
+    re_path(URL+ "searchs/wordcloud$", csrf_exempt(views.visual.get_wordcloud), name='get_wordcloud'),
+    re_path(URL+ "searchs/visual$", csrf_exempt(views.visual.get_visual), name='get_visual' ),
 
     # crawler
     re_path(URL+ "searchs/stocksearchtop$", csrf_exempt(views.crawler.get_stock_search_top), name='get_stock_search_top'),

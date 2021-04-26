@@ -8,7 +8,7 @@ import re
 
 from .searchs import kr_searchs
 from .nlp import get_nlp
-from classes import IpMatrix, IpMatrixDialog
+from ipclasses import IpMatrix, IpMatrixDialog
 
 # caching with redis
 from django.core.cache import cache

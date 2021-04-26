@@ -5,7 +5,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 from collections import Counter
 
-from classes import IpSearchs, NlpToken
+from ipclasses import IpSearchs, NlpToken
 
 class IpMatrix:
     

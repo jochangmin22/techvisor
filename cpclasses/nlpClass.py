@@ -4,8 +4,6 @@ from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-from classes import IpSearchs
-
 class NlpToken:
     
     def __init__(self, request, menu):
@@ -33,10 +31,6 @@ class NlpToken:
                 return context
         except (KeyError, NameError, UnboundLocalError):
             pass
-
-    def load_nlp_rows(self):
-        foo = IpSearchs(self._request, mode='nlp')
-        return foo.nlp_rows()
 
     def nlp_token(self, nlpRows):
 

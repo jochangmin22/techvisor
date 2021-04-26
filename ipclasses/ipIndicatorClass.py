@@ -10,7 +10,7 @@ import pandas as pd
 
 from django.db import connection
 
-from classes import IpSearchs
+from ipclasses import IpSearchs
 
 class IpIndicator:
     

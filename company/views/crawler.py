@@ -207,6 +207,7 @@ def get_stock_search_top(request):
 
     # add stockCode from model
     df['종목코드'] = [get_stockCode(corpName) for corpName in df['종목명']]
+    df['회사명'] = [get_commonCorpName(corpName) for corpName in df['종목명']]
       
     rows = df.to_dict('records')
     result = { "rowsCount" : 30 , "rows": rows}
@@ -235,6 +236,8 @@ def get_stock_upper(request):
 
         # add stockCode from model
         mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+        mydf['회사명'] = [get_commonCorpName(corpName) for corpName in mydf['종목명']]
+
         
         rows += mydf.to_dict('records')
         
@@ -256,6 +259,7 @@ def get_stock_upper(request):
 
     # add stockCode from model
     mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    mydf['회사명'] = [get_commonCorpName(corpName) for corpName in mydf['종목명']]
     
     rows += mydf.to_dict('records')
 
@@ -277,6 +281,8 @@ def get_stock_upper(request):
 
     # add stockCode from model
     mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    mydf['회사명'] = [get_commonCorpName(corpName) for corpName in mydf['종목명']]
+
     rows += mydf.to_dict('records')
 
     rows = sorted(rows, key=lambda k : k["등락률"], reverse=True)
@@ -307,6 +313,7 @@ def get_stock_lower(request):
 
         # add stockCode from model
         mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+        mydf['회사명'] = [get_commonCorpName(corpName) for corpName in mydf['종목명']]
         
         rows += mydf.to_dict('records')
     # 하락 - 기본탭 코스피 
@@ -327,6 +334,7 @@ def get_stock_lower(request):
 
     # add stockCode from model
     mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    mydf['회사명'] = [get_commonCorpName(corpName) for corpName in mydf['종목명']]
     
     rows += mydf.to_dict('records')
 
@@ -348,6 +356,8 @@ def get_stock_lower(request):
 
     # add stockCode from model
     mydf['종목코드'] = [get_stockCode(corpName) for corpName in mydf['종목명']]
+    mydf['회사명'] = [get_commonCorpName(corpName) for corpName in mydf['종목명']]
+
     mydf = mydf.sort_values(by='등락률', ascending=False)
 
     rows += mydf.to_dict('records') 
@@ -362,6 +372,15 @@ def get_stockCode(corpName):
         rows = list(listed.values())
         row = rows[0]
         return row['종목코드']   
+    else:
+        return None      
+
+def get_commonCorpName(corpName):
+    listed = Listed_corp.objects.filter(회사명=corpName)
+    if listed.exists():
+        rows = list(listed.values())
+        row = rows[0]
+        return row['정보']['기업명']   
     else:
         return None      
 
