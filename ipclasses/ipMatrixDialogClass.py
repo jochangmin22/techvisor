@@ -1,4 +1,4 @@
-from utils import get_redis_key, frequency_count, dictfetchall, remove_tail, add_orderby
+from utils import request_data, redis_key, frequency_count, dictfetchall, remove_tail, add_orderby
 from django.db import connection
 from django.core.cache import cache
 from django.conf import settings
@@ -17,38 +17,39 @@ class IpMatrixDialog:
         self.set_up()
 
     def set_up(self):
-        _, subKey, params, subParams = get_redis_key(self._request)
-        
-        self._newSubKey = f'{subKey}matrix_dialog'
+        self._params, self._subParams = request_data(self._request)
+        _, subKey = redis_key(self._request)
 
-        foo = subParams['menuOptions']['matrixOptions']
+        self._subKey = f'{subKey}matrix_dialog'
+
+        foo = self._subParams['menuOptions']['matrixOptions']
         self._category = foo.get('category','')
         self._volume = foo.get('volume','')
         self._output = foo.get('output','') 
 
-        bar = subParams['menuOptions']['tableOptions']['matrixDialog']
+        bar = self._subParams['menuOptions']['tableOptions']['matrixDialog']
         self._sortBy = bar.get('sortBy', [])  
         self._pageIndex = bar.get('pageIndex', 0)
         self._pageSize = bar.get('pageSize', 10)
 
-        baz = subParams['menuOptions']['matrixDialogOptions']
+        baz = self._subParams['menuOptions']['matrixDialogOptions']
         self._topic = baz.get('topic', [])  
         self._categoryValue = baz.get('categoryValue', [])                      
 
         try:
-            context = cache.get(self._newSubKey)
+            context = cache.get(self._subKey)
             if context:
                 print('load matrixDialog redis')
                 return context
         except (KeyError, NameError, UnboundLocalError):
             pass
 
-        if not params.get('searchText',None):
+        if not self._params.get('searchText',None):
             return self._matrixEmpty            
 
     def load_query(self):
         foo = IpSearchs(self._request, mode='query')
-        return foo.query() 
+        return foo.query_chioce() 
 
     def matrix_dialog(self):
         foo = { '연도별':'출원일', '기술별':'ipc코드', '기업별':'출원인1'}
@@ -71,5 +72,5 @@ class IpMatrixDialog:
             rowsCount = 0        
 
         result = { 'rowsCount': rowsCount, 'rows': rows}   
-        cache.set(self._newSubKey, {'matrix_dialog' : result}, CACHE_TTL)
+        cache.set(self._subKey, {'matrix_dialog' : result}, CACHE_TTL)
         return result

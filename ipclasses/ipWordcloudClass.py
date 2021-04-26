@@ -1,4 +1,4 @@
-from utils import get_redis_key, frequency_count
+from utils import request_data, redis_key, frequency_count
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -15,20 +15,20 @@ class IpWordcloud:
         self.set_up()
 
     def set_up(self):
-        _, subKey, params, subParams = get_redis_key(self._request)
-        
-        self._newSubKey = f'{subKey}¶wordcloud'
-        self._subParams = subParams
+        self._params, self._subParams = request_data(self._request)
+        _, subKey = redis_key(self._request)
+
+        self._subKey = f'{subKey}¶wordcloud'
 
         try:
-            context = cache.get(self._newSubKey)
+            context = cache.get(self._subKey)
             if context:
                 print('load wordcloud redis')
                 return context
         except (KeyError, NameError, UnboundLocalError):
             pass
 
-        if not params.get('searchText',None):
+        if not self._params.get('searchText',None):
             return self._wordcloudEmpty        
 
     def wordcloud_extract(self):
@@ -50,5 +50,5 @@ class IpWordcloud:
         foo = self.wordcloud_extract()
         result = []
         result.append(make_dic_to_list_of_dic())
-        cache.set(self._newSubKey, result , CACHE_TTL)
+        cache.set(self._subKey, result , CACHE_TTL)
         return result

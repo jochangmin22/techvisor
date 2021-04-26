@@ -1,4 +1,4 @@
-from utils import request_data, remove_tail, dictfetchall,  sampling, nested_dict_values, tokenizer, tokenizer_phrase, frequency_count
+from utils import request_data, redis_key, remove_tail, dictfetchall,  sampling, tokenizer, tokenizer_phrase, frequency_count
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -26,7 +26,7 @@ class IpSpecification:
         self._appNo = self._params.get('appNo','')  
         self._whereAppNo = f'WHERE "출원번호" = $${self._appNo}$$'
 
-        mainKey, subKey = self.redis_key()
+        mainKey, subKey = redis_key(self._request)
         self._mainKey = f'{mainKey}¶{self._mode}'
 
         try:
@@ -37,11 +37,6 @@ class IpSpecification:
                 return context
         except (KeyError, NameError, UnboundLocalError):
             pass
-
-    def redis_key(self):
-        result = self._appNo
-        additional_result = result + "¶".join(list(nested_dict_values(self._subParams)))
-        return result, additional_result        
 
     def query_execute(self, key):
         command = { 'description': self.description_query, 'wordcloud': self.wordcloud_query}
@@ -194,115 +189,3 @@ class IpSpecification:
             elif elem.name == 'br':
                 result += '\n'
         return result  
-
-    # def parse_description(self, text=""):
-    #     text = self.typo_handle(text) # typo
-
-    #     bs = BeautifulSoup(text, "lxml")  # case-insensitive
-
-    #     desc_dict = [
-    #     {
-    #     "id" : ["sdode"],
-    #     # "sample" : ["1019970061654"],
-    #     "name" : ["발명의 명칭", "도면의 간단한 설명", "발명의 상세한 설명", "발명의 목적",
-    #             "발명이 속하는 기술 및 그 분야의 종래기술", "발명이 이루고자 하는 기술적 과제", "발명의 구성 및 작동", "발명의 효과"], 
-    #     "tag" : ["", "drdes", "", "", "bkgr", "tech", "config", "effect"]
-    #     },{
-    #     "id" : ["psdode"],
-    #     # "sample" : ["1019930701447","1019930700523", "1019900018250"],
-    #     "name" : ["발명의 명칭","발명의 상세한 설명"], 
-    #     "tag" : ["", "pinvdes"]
-    #     },{
-    #     "id" : ["applicationbody"],
-    #     "name" : ["도면의 간단한 설명", "발명의 상세한 설명", "발명의 목적",
-    #             "발명이 속하는 기술 및 그 분야의 종래기술", "발명이 이루고자 하는 기술적 과제", "발명의 구성 및 작용", "발명의 효과"], 
-    #     "tag" : ['descriptiondrawings', '', '', 'backgroundart',
-    #             'abstractproblem', 'inventionconfiguration', 'advantageouseffects']
-    #     },{
-    #     "id" : ["invention-title"],
-    #     "name" : ["기술분야", "배경기술", "발명의 내용", "해결 하고자하는 과제", 
-    #             "과제 해결수단", "효과", "도면의 간단한 설명", "발명의 실시를 위한 구체적인 내용", "부호의 설명"], 
-    #     "tag" : ['technical-field', 'background-art', '', 'tech-problem', 'tech-solution', 'advantageous-effects', 'description-of-drawings', 'description-of-embodiments', 'reference-signs-list']
-    #     },{
-    #     "id" : ["pctapplicationbody"],
-    #     # "sample" : ["1020047002564"],
-    #     "name" : ["기술분야", "배경기술", "발명의 상세한 설명",
-    #             "도면의 간단한 설명", "실시예", "산업상 이용 가능성"], 
-    #     "tag" : ['pcttechnicalfield', 'pctbackgroundart', 'pctdisclosure',
-    #             'pctdescriptiondrawings', 'pctexample', 'pctindustrialapplicability']
-    #     },{
-    #     "id" : ["pctinventiontitle"],
-    #     # "sample" : ["1020097019662"],
-    #     "name" : ["기술분야", "배경기술", "발명의 상세한 설명",
-    #             "도면의 간단한 설명", "실시예", "산업상 이용 가능성"],
-    #     "tag" : ['pcttechnicalfield', 'pctbackgroundart', 'pctdisclosure',
-    #             'pctdescriptiondrawings', 'pctexample', 'pctindustrialapplicability']
-    #     },{
-    #     "id" : ["inventiontitle","backgroundtech"],
-    #     # "sample" : ["1020080045418"],
-    #     "name" : ["발명의 상세한 설명", "기술분야", "배경기술", "발명의 내용",
-    #             "해결 하고자하는 과제", "과제 해결수단", "효과", "발명의 실시를 위한 구체적인 내용", '실시 예'],
-    #     "tag" : ['', 'technicalfield', 'backgroundtech', '', 'solutionproblem',
-    #             'meansproblemsolution', 'effectiveness', 'inventdetailcontent', 'practiceexample']
-    #         },{
-    #     "id" : ["inventiontitle","backgroundart"],
-    #     # "sample" : ["1020050081479"],
-    #     "name" : ["도면의 간단한 설명", "발명의 상세한 설명", "발명의 목적",
-    #             "발명이 속하는 기술 및 그 분야의 종래기술", "발명이 이루고자 하는 기술적 과제", "발명의 구성 및 작용", "발명의 효과"],
-    #     "tag" : ['descriptiondrawings', '', '', 'backgroundart',
-    #             'abstractproblem', 'inventionconfiguration', 'advantageouseffects']
-    #         },{
-    #     "id" : ["invti", "invdes"],
-    #     # "sample" : ["1019850007359"],
-    #     "name" : ["발명의 명칭", "도면의 간단한 설명", "청구의 범위",
-    #             "발명의 목적", "배경기술", "기술분야", "발명의 구성 및 작용","발명의 효과"],
-    #     "tag" : ['invti', 'drdes', '', '','bkgr', '', '', '']
-    #     }
-    #     ]
-    #     print(bs)
-    #     for foo in desc_dict:
-    #         if all(bs.find(bar) for bar in foo['id']):
-    #             print(foo['id'], foo['name'], foo['tag'])
-                
-    #             if bs.find_all('p', {"n": True}):
-    #                 attrName = 'n'
-    #             elif bs.find_all('p', {"num": True}):                  
-    #                 attrName = 'num'
-    #             else:
-    #                 attrName = ""
-    #             if attrName:
-    #                 # return self.description_attr_type(bs, attrName, foo['name'], foo['tag'])
-    #                 return self.description_no_attr_type(bs, foo['name'])
-    #             else:                    
-    #                 return self.description_no_attr_type(bs, foo['name'])
-    #     print('none')
-    #     return { bs.text }
-
-
-    # def description_attr_type(self, bs, attrName, name, tag):
-    #     def bs_desc(txt, attrName):
-    #         if txt:
-    #             result = ""
-    #             n_txt = ""
-    #             for soup in txt:
-    #                 if soup:
-    #                     for soup2 in soup.find_all("p"):
-    #                         if soup2:
-                                
-    #                             if attrName:
-    #                                 if soup2[attrName]:
-    #                                     n_txt = '[' + soup2[attrName].zfill(4) + '] '
-    #                             else:
-    #                                 n_txt = ''
-    #                             s = self.replace_with_newlines(soup2)
-    #                             if result:
-    #                                 result = result + "\n" + n_txt + s
-    #                             else:
-    #                                 result = n_txt + s
-    #             return result
-    #         else:
-    #             return txt        
-    #     result = {}
-    #     for idx, val in enumerate(tag):
-    #         result[name[idx]] = bs_desc(bs.find_all(val), attrName)
-    #     return result         

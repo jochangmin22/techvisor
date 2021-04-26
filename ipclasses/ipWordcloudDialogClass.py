@@ -1,4 +1,4 @@
-from utils import get_redis_key, frequency_count, dictfetchall, remove_tail, add_orderby
+from utils import request_data, redis_key, frequency_count, dictfetchall, remove_tail, add_orderby
 from django.db import connection
 from django.core.cache import cache
 from django.conf import settings
@@ -16,28 +16,30 @@ class IpWordcloudDialog:
         self.set_up()
 
     def set_up(self):
-        _, subKey, params, subParams = get_redis_key(self._request)
-        
-        self._newSubKey = f'{subKey}¶wordcloud_dialog'
-        foo = subParams['menuOptions']['wordcloudOptions']
+        self._params, self._subParams = request_data(self._request)
+        _, subKey = redis_key(self._request)
+
+       
+        self._subKey = f'{subKey}¶wordcloud_dialog'
+        foo = self._subParams['menuOptions']['wordcloudOptions']
         self._category = foo.get('category','')
         self._volume = foo.get('volume','')
         self._output = foo.get('output','') 
 
-        bar = subParams['menuOptions']['tableOptions']['wordcloudDialog']
+        bar = self._subParams['menuOptions']['tableOptions']['wordcloudDialog']
         self._sortBy = bar.get('sortBy', [])  
         self._pageIndex = bar.get('pageIndex', 0)
         self._pageSize = bar.get('pageSize', 10)
 
         try:
-            context = cache.get(self._newSubKey)
+            context = cache.get(self._subKey)
             if context:
                 print('load wordcloudDialog redis')
                 return context
         except (KeyError, NameError, UnboundLocalError):
             pass
 
-        if not params.get('searchText',None):
+        if not self._params.get('searchText',None):
             return self._wordcloudDialogEmpty        
 
     def load_query(self):
@@ -62,5 +64,5 @@ class IpWordcloudDialog:
             rowsCount = 0        
 
         result = { 'rowsCount': rowsCount, 'rows': rows}   
-        cache.set(self._newSubKey, {'wordcloud_dialog' : result}, CACHE_TTL)
+        cache.set(self._subKey, {'wordcloud_dialog' : result}, CACHE_TTL)
         return result

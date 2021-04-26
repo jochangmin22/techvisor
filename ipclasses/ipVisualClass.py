@@ -1,4 +1,4 @@
-from utils import get_redis_key 
+from utils import request_data, redis_key
 from django.core.cache import cache
 
 from ipclasses import IpSearchs
@@ -15,26 +15,27 @@ class IpVisual:
         self.set_up()
 
     def set_up(self):
-        mainKey, subKey, params, subParams = get_redis_key(self._request)
+        self._params, self._subParams = request_data(self._request)
+        mainKey, subKey = redis_key(self._request)
 
-        self._mode = subParams.get('mode',None)
+        self._mode = self._subParams.get('mode',None)
 
-        self._newMainKey = f'{mainKey}¶{self._mode}'
-        self._newSubKey = f'{subKey}¶{self._mode}'
+        self._mainKey = f'{mainKey}¶{self._mode}'
+        self._subKey = f'{subKey}¶{self._mode}'
 
         try:
-            context = cache.get(self._newMainKey)
+            context = cache.get(self._mainKey)
             if context:
                 print('load main visual redis', self._mode)
                 return context
-            _context = cache.get(self._newSubKey)
+            _context = cache.get(self._subKey)
             if _context:
                 print('load sub visual redis', self._mode)
                 return _context
         except (KeyError, NameError, UnboundLocalError):
             pass        
 
-        if not params.get('searchText',None):
+        if not self._params.get('searchText',None):
             return getattr(self, '_%sEmpty' % self._mode)
 
     def visual(self):            

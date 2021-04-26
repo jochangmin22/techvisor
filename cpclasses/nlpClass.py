@@ -1,4 +1,4 @@
-from utils import get_redis_key, tokenizer_phrase, remove_duplicates, tokenizer
+from utils import request_data, redis_key, enrich_common_corp_name, tokenizer_phrase, remove_duplicates, tokenizer
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -13,19 +13,23 @@ class NlpToken:
         self.set_up()
 
     def set_up(self):
-        mainKey, subKey, params, subParams = get_redis_key(self._request)
-        
-        #### Create a new SubKey to distinguish each analysis type 
-        self._newSubKey = f'{subKey}¶{self._menu}_nlp'        
+        self._params, self._subParams = request_data(self._request)        
+        foo = self._params.get('commonCorpName','')  
+        self._commonCorpName = enrich_common_corp_name(foo)
 
-        foo = subParams['menuOptions'][self._menu + 'Options']
+
+        _, subKey = redis_key(self._request)        
+
+        self._subKey = f'{subKey}¶{self._menu}_nlp'        
+
+        foo = self._subParams['menuOptions'][self._menu + 'Options']
         self._volume = foo.get('volume','')
         self._unit = foo.get('unit','')
         self._emergence = foo.get('emergence','빈도수') # wordcloud only         
         self._output = foo.get('output','')          
   
         try:
-            context = cache.get(self._newSubKey)
+            context = cache.get(self._subKey)
             if context:
                 print('load Nlp redis', self._menu)
                 return context
@@ -60,6 +64,6 @@ class NlpToken:
         res = command[self._unit][self._emergence]()    
         res = [w.replace('_', ' ') for w in res]
  
-        cache.set(self._newSubKey, res, CACHE_TTL)
+        cache.set(self._subKey, res, CACHE_TTL)
         return res
 

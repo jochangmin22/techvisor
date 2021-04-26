@@ -1,4 +1,4 @@
-from utils import request_data, snake_to_camel, sampling, nested_dict_values
+from utils import request_data, redis_key, snake_to_camel, sampling 
 
 from django.core.cache import cache
 
@@ -22,7 +22,7 @@ class CpRelatedInfo:
         self._params, self._subParams = request_data(self._request)
         self._corpName = self._params.get('corpName','')  
         
-        mainKey, subKey = self.redis_key()
+        mainKey, subKey = redis_key(self._request)
         self._searchKey = f'{mainKey}¶search'
         self._mainKey = f'{mainKey}¶{self._mode}'
         self._subKey = f'{subKey}¶{self._mode}'
@@ -40,11 +40,6 @@ class CpRelatedInfo:
                 return _context
         except (KeyError, NameError, UnboundLocalError):
             pass
-
-    def redis_key(self):
-        result = self._corpName
-        additional_result = result + "¶".join(list(nested_dict_values(self._subParams)))
-        return result, additional_result
 
     def more_then_an_hour_passed(self, last_updated):    
         try:

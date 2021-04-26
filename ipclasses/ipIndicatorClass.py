@@ -1,4 +1,4 @@
-from utils import get_redis_key, dictfetchall
+from utils import request_data, redis_key, dictfetchall
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -21,19 +21,20 @@ class IpIndicator:
         self.set_up()
 
     def set_up(self):
-        _, subKey, params, _ = get_redis_key(self._request)
+        self._params, _ = request_data(self._request)
+        _, subKey = redis_key(self._request)        
 
-        self._newSubKey = f'{subKey}¶indicator'
+        self._subKey = f'{subKey}¶indicator'
 
         try:
-            context = cache.get(self._newSubKey)
+            context = cache.get(self._subKey)
             if context:
                 print('load ind redis')
                 return context
         except (KeyError, NameError, UnboundLocalError):
             pass        
 
-        if not params.get('searchText',None):
+        if not self._params.get('searchText',None):
             return self._indicatorEmpty
 
     def load_ind_rows(self):
@@ -180,7 +181,7 @@ class IpIndicator:
         _ts = [round(num,2) for num in ts]
         _pfs = [round(num,2) for num in pfs]
         result = { 'name': name, '피인용수' : citing, '총등록건': granted, 'CPP' : _cpp, 'PII' : _pii, 'TS' : _ts, 'PFS' : _pfs }
-        cache.set(self._newSubKey, result , CACHE_TTL)
+        cache.set(self._subKey, result , CACHE_TTL)
 
         return result
 

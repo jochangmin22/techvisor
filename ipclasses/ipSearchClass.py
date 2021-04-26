@@ -1,4 +1,4 @@
-from utils import request_data, remove_tail,add_orderby, dictfetchall, sampling, nested_dict_values, frequency_count, snake_to_camel
+from utils import request_data, redis_key, remove_tail,add_orderby, dictfetchall, sampling, frequency_count, snake_to_camel
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -45,7 +45,7 @@ class IpSearch:
             bar += f'출원인코드1 = $${foo}$$ or '
         self._whereApplicantCode = 'WHERE ' + remove_tail(bar, ' or ')
 
-        mainKey, subKey = self.redis_key()
+        mainKey, subKey = redis_key(self._request)
         self._searchKey = f'{mainKey}¶search'
         self._mainKey = f'{mainKey}¶{self._mode}'
         self._subKey = f'{subKey}¶{self._mode}'
@@ -73,11 +73,6 @@ class IpSearch:
     #     else:
     #         return  
     
-    def redis_key(self):
-        result = self._appNo
-        additional_result = result + "¶".join(list(nested_dict_values(self._subParams)))
-        return result, additional_result
-
     def query_execute(self, key):
         query = self.query_chioce(key)
 

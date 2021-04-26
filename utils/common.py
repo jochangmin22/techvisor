@@ -45,7 +45,11 @@ def request_data(request):
         additional_result = json.loads(request.GET.get('subParams',''))
     return result, additional_result         
     
-    searchNum = params.get('searchNum','')
+def redis_key(request):
+    params, subParams = request_data(request)
+    result = "¶".join(list(nested_dict_values(params)))
+    additional_result = result + "¶".join(list(nested_dict_values(subParams)))
+    return result, additional_result  
 
 def readRedis(redisKey, keys, data=""):
     context = cache.get(redisKey)
@@ -155,4 +159,11 @@ def unescape(s):
 def snake_to_camel(snake_str):
     components = snake_str.split('_')
     return components[0] + ''.join(x.title() for x in components[1:])     
+
+def enrich_common_corp_name(result):
+    COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
+    for k, v in COMPANY_ASSIGNE_MATCHING.items():
+        if k == result:
+            return v
+    return result    
     

@@ -1,4 +1,4 @@
-from utils import get_redis_key, remove_tail, add_orderby, dictfetchall, frequency_count, sampling
+from utils import request_data, redis_key, remove_tail, add_orderby, dictfetchall, frequency_count, sampling
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -30,50 +30,86 @@ class IpSearchs:
         self.loop.close()
 
     def set_up(self):
-        mainKey, subKey, params, subParams = get_redis_key(self._request)
+        self._params, self._subParams = request_data(self._request)
+        mainKey, subKey = redis_key(self._request)
 
-        # load options
-        self._searchVolume = params.get('searchVolume','요약·청구항') or '요약·청구항'
-        for key in ['searchNum','searchText','inventor','assignee','dateType','startDate','endDate','status','ipType']:
-            setattr(self, '_%s' % key, params.get(key,None) or None)        
+        self.load_params() 
 
-        self._subParams = subParams
-
-        self._redis_map = { 
-            'begin' : 'pagingRows',
-            'query' : 'query',
-            'nlp' : 'nlpRows',
-            'matrix' : 'mtxRows',
-            'indicator' : 'indRows',
-            'visualNum' : 'visualNum',
-            'visualClassify' : 'visualClassify',
-            'visualIpc' : 'visualIpc',
-            'visualPerson' : 'visualPerson',
-        }
+        # self._redis_map = { 
+        #     'searchs' : 'pagingRows',
+        #     'query' : 'query',
+        #     'nlp' : 'nlpRows',
+        #     'matrix' : 'mtxRows',
+        #     'indicator' : 'indRows',
+        #     'visualNum' : 'visualNum',
+        #     'visualClassify' : 'visualClassify',
+        #     'visualIpc' : 'visualIpc',
+        #     'visualPerson' : 'visualPerson',
+        # }
         self._rowsKey = f'{mainKey}¶rows'
         self._queryKey = f'{mainKey}¶query'
-        self.load_rows()
+        self._mainKey = f'{mainKey}¶{self._mode}'
+        self._subKey = f'{subKey}¶{self._mode}'
+        # self._mainKey = f'{mainKey}¶{self._redis_map[self._mode]}'
+        # self._subKey = f'{subKey}¶{self._redis_map[self._mode]}'
 
-        self._newMainKey = f'{mainKey}¶{self._redis_map[self._mode]}'
-        self._newSubKey = f'{subKey}¶{self._redis_map[self._mode]}'
+        self.redis_rows()
+        print('mode is ...', self._mode)
+        command = {
+            'searchs' : self.redis_rows,
+            'query' : self.redis_visual,
+            'nlp' : self.redis_visual,
+            'matrix' : self.redis_visual,
+            'indicator' : self.redis_visual,            
+            'visualNum' : self.redis_visual,
+            'visualIpc' : self.redis_visual,
+            'visualPerson' : self.redis_visual,
+            'visualClassify' : self.redis_visual,
+            # 'wordcloud' : self.redis_wordcloud,
+        }   
+        return command[self._mode]()          
 
+        # try:
+        #     context = cache.get(self._mainKey)
+        #     if context:
+        #         print(f'load {self.__class__.__name__} mainkey redis', self._mode)
+        #         return context
+        #     _context = cache.get(self._subKey)
+        #     if _context:
+        #         print(f'load {self.__class__.__name__} subkey redis', self._mode)
+        #         return _context
+        # except (KeyError, NameError, UnboundLocalError):
+        #     pass
+
+    def load_params(self):
+        self._searchVolume = self._params.get('searchVolume','요약·청구항') or '요약·청구항'
+        for key in ['searchNum','searchText','inventor','assignee','dateType','startDate','endDate','status','ipType']:
+            setattr(self, '_%s' % key, self._params.get(key,None) or None)
+        return    
+
+    def load_rows(self):
+        ''' deprecated ...'''
+        self.redis_rows()
+
+    def redis_rows(self):
         try:
-            context = cache.get(self._newMainKey)
+            context = cache.get(self._rowsKey)            
             if context:
-                print('load mainkey redis', self._mode)
-                return context
-            _context = cache.get(self._newSubKey)
-            if _context:
-                print('load subkey redis', self._mode)
-                return _context
+                print(f'load {self.__class__.__name__} rowsKey redis')
+                self._rows = context
         except (KeyError, NameError, UnboundLocalError):
             pass
 
-    def load_rows(self):
-        context = cache.get(self._rowsKey)
-        if context:
-            print('rows redis exist')
-            self._rows = context
+    def redis_visual(self):
+        try:
+            context = cache.get(self._subKey)
+            if context:
+                print(f'load {self.__class__.__name__} subKey redis', self._mode)
+                setattr(self, '_%s' % self._mode, context)
+        except (KeyError, NameError, UnboundLocalError):
+            pass                       
+
+
 
     # async def run_query(self):
     #     try:
@@ -98,8 +134,106 @@ class IpSearchs:
             print('still execute query ', self._mode)
             return 
         else:
-            return                
+            return 
 
+    
+
+
+    def generate_num_query(self):
+        query = 'select count(*) over () as cnt, ' + self._queryCols + \
+        " FROM kr_tsv_view WHERE num_search like '%" + self._searchNum.replace("-","") + "%'"
+        return query
+
+    def generate_text_query(self): 
+        queryTextTerms = self.tsquery_keywords(self._searchText, 'terms')
+        whereTerms = f'"{self._searchVolume}tsv" @@ to_tsquery(\'{queryTextTerms}\') and ' if queryTextTerms else ""
+
+        queryTextInventor = self.tsquery_keywords(self._inventor, 'person')
+        whereInventor = f'"발명자tsv" @@ to_tsquery(\'{queryTextInventor}\') and ' if queryTextInventor else ""
+
+        queryTextAssignee = self.tsquery_keywords(self._assignee, 'person')
+        whereAssignee = f'"출원인tsv" @@ to_tsquery(\'{queryTextAssignee}\') and ' if queryTextAssignee else ""
+
+        whereDate = self.date_query()
+        whereStatus = self.status_query()
+        whereIptype = self.iptype_query()
+
+        whereAll = whereTerms
+        whereAll += whereDate
+        whereAll += whereInventor
+        whereAll += whereAssignee
+        whereAll += whereStatus
+        whereAll += whereIptype
+
+        whereAll = remove_tail(whereAll," and ")
+
+        query = f'select count(*) over () as cnt, ts_rank("{self._searchVolume}tsv",to_tsquery(\'{queryTextTerms}\')) AS rank, {self._queryCols} FROM kr_tsv_view WHERE ({whereAll})'
+
+        return query
+
+    def create_empty_rows(self):
+        self._emptyRows = [dict() for x in range(len(self._rows))]
+        return self._emptyRows
+
+    def make_paging_rows(self, result):
+        try:
+            rowsCount = self._rows[0]["cnt"]
+        except (KeyError, IndexError):        
+            rowsCount = 0
+
+        for i in range(len(result)):
+            result[i]['id'] = self._rows[i]['출원번호'] # add id key for FE's ids
+            for key in ['출원번호','출원일','등록사항','발명의명칭','출원인1','발명자1','ipc코드']:
+                result[i][key] = self._rows[i][key]
+
+        return { 'rowsCount': rowsCount, 'rows': sampling(result, self._offset, self._limit)}
+
+    def table_options(self):
+        # mode = snake_to_camel(self._mode)
+        foo = self._subParams["menuOptions"]["tableOptions"]["mainTable"]
+        pageIndex = foo.get('pageIndex', 0)
+        pageSize = foo.get('pageSize', 10)
+        self._sortBy = foo.get('sortBy', [])    
+
+        # Add offset limit
+        self._offset = pageIndex * pageSize
+        self._limit = pageSize        
+        return 
+
+    def query_chioce(self):
+        result = self.generate_num_querykey() if self._searchNum else self.generate_text_query()
+        return result      
+
+    def query_execute(self):
+        query = self.query_chioce()  
+
+        cache.set(self._queryKey, query, CACHE_TTL)
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SET work_mem to '100MB';"
+                + query
+            )
+            self._rows = dictfetchall(cursor)
+
+        cache.set(self._rowsKey, self._rows, CACHE_TTL)
+        print('query execute: ', self._mode)
+        return
+
+    def searchs(self):
+
+        self.table_options()
+
+        self._orderby_clause = add_orderby(self._sortBy)
+
+        try:
+            getattr(self, '_rows')
+            print('_rows exist')
+        except AttributeError:
+            self._rows = self.query_execute()  
+            print('_rows not exist to execute query')        
+
+        return self.paging_rows()
 
     def paging_rows(self):
         # self.is_query_ever_been_run()
@@ -142,11 +276,8 @@ class IpSearchs:
 
         for i in range(len(result)):
             result[i]['출원일'] = str(self._rows[i]['출원일'])[:-4]
-
             result[i]['등록일'] = str(self._rows[i]['등록일'])[:-4]
-
             result[i]['구분'] = str(self._rows[i]['출원번호'])[0]
-
 
         def make_each_category_dict(flag):
             if flag:
@@ -250,7 +381,6 @@ class IpSearchs:
 
     def make_vis_per(self, result):
         ''' visual related person '''
-        # relatedperson는 ['출원인1','출원인국가코드1','발명자1','발명자국가코드1] 만 사용
         
         NATIONALITY = settings.TERMS['NATIONALITY']
 
@@ -314,6 +444,16 @@ class IpSearchs:
                 result[i][key] = self._rows[i][key]
         
         return [i for i in result if not (i['등록일'] == None)] # 등록건만                
+
+
+
+    def save_redis_main(self, result):
+        cache.set(self._mainKey, result)
+        return result
+
+    def save_redis_sub(self, result):
+        cache.set(self._subKey, result)
+        return result
 
     def date_query(self):
 
@@ -466,95 +606,6 @@ class IpSearchs:
             return None
 
         return result         
-  
-    def generate_num_query(self):
-        query = 'select count(*) over () as cnt, ' + self._queryCols + \
-        " FROM kr_tsv_view WHERE num_search like '%" + self._searchNum.replace("-","") + "%'"
-        return query
-
-    def generate_text_query(self): 
-        queryTextTerms = self.tsquery_keywords(self._searchText, 'terms')
-        whereTerms = f'"{self._searchVolume}tsv" @@ to_tsquery(\'{queryTextTerms}\') and ' if queryTextTerms else ""
-
-        queryTextInventor = self.tsquery_keywords(self._inventor, 'person')
-        whereInventor = f'"발명자tsv" @@ to_tsquery(\'{queryTextInventor}\') and ' if queryTextInventor else ""
-
-        queryTextAssignee = self.tsquery_keywords(self._assignee, 'person')
-        whereAssignee = f'"출원인tsv" @@ to_tsquery(\'{queryTextAssignee}\') and ' if queryTextAssignee else ""
-
-        whereDate = self.date_query()
-        whereStatus = self.status_query()
-        whereIptype = self.iptype_query()
-
-        whereAll = whereTerms
-        whereAll += whereDate
-        whereAll += whereInventor
-        whereAll += whereAssignee
-        whereAll += whereStatus
-        whereAll += whereIptype
-
-        whereAll = remove_tail(whereAll," and ")
-
-        query = f'select count(*) over () as cnt, ts_rank("{self._searchVolume}tsv",to_tsquery(\'{queryTextTerms}\')) AS rank, {self._queryCols} FROM kr_tsv_view WHERE ({whereAll})'
-
-        return query
-
-    def make_paging_rows(self, result):
-        try:
-            rowsCount = self._rows[0]["cnt"]
-        except IndexError:        
-            rowsCount = 0
-
-        foo = self._subParams["menuOptions"]["tableOptions"]["mainTable"]
-        pageIndex = foo.get('pageIndex', 0)
-        pageSize = foo.get('pageSize', 10)
-
-        for i in range(len(result)):
-            result[i]['id'] = self._rows[i]['출원번호'] # add id key for FE's ids
-            for key in ['출원번호','출원일','등록사항','발명의명칭','출원인1','발명자1','ipc코드']:
-                result[i][key] = self._rows[i][key]
-        # Add offset limit
-        offset = pageIndex * pageSize
-        limit = pageSize
-
-        return { 'rowsCount': rowsCount, 'rows': sampling(result, offset, limit)}
-
-    def create_empty_rows(self):
-        self._emptyRows = [dict() for x in range(len(self._rows))]
-        return self._emptyRows
-
-    def query(self):
-        if self._searchNum:
-            query = self.generate_num_query()
-        else:       
-            query = self.generate_text_query()           
-        return query            
-
-    def query_execute(self):
-        query = self.query()
-        cache.set(self._queryKey, query, CACHE_TTL)
-
-        if not self._searchNum:
-            foo = self._subParams["menuOptions"]["tableOptions"]["mainTable"]
-            sortBy = foo.get('sortBy', [])  
-            query += add_orderby(sortBy)   
-
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SET work_mem to '100MB';"
-                + query
-            )
-            self._rows = dictfetchall(cursor)
-        cache.set(self._rowsKey, self._rows, CACHE_TTL)
-        print('query execute: ', self._mode)
-        return
-
-    def save_redis_main(self, result):
-        cache.set(self._newMainKey, result)
-        return result
-
-    def save_redis_sub(self, result):
-        cache.set(self._newSubKey, result)
-        return result
+         
         
    

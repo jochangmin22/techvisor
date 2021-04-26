@@ -1,17 +1,7 @@
-from django.http import HttpResponse
 from django.http import JsonResponse
-from .searchs import kr_searchs
 from utils import get_redis_key
-import json
 
 from ipclasses import IpVisual, IpIndicator
-
-# caching with redis
-from django.core.cache import cache
-from django.conf import settings
-from django.core.cache.backends.base import DEFAULT_TIMEOUT
-
-CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 def get_visual(request):
     _, _, params, subParams = get_redis_key(request)

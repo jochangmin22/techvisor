@@ -1,4 +1,4 @@
-from utils import get_redis_key, frequency_count
+from utils import request_data, redis_key, frequency_count
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -16,24 +16,25 @@ class IpMatrix:
         self.set_up()
 
     def set_up(self):
-        _, subKey, params, subParams = get_redis_key(self._request)
+        self._params, self._subParams = request_data(self._request)
+        _, subKey = redis_key(self._request)
         
-        self._newSubKey = r'{subKey}¶matrix'
+        self._subKey = f'{subKey}¶matrix'
 
-        foo = subParams['menuOptions']['matrixOptions']
+        foo = self._subParams['menuOptions']['matrixOptions']
         self._category = foo.get('category','')
         self._volume = foo.get('volume','')
         self._output = foo.get('output','')           
 
         try:
-            context = cache.get(self._newSubKey)
+            context = cache.get(self._subKey)
             if context:
                 print('load matrix redis')
                 return context
         except (KeyError, NameError, UnboundLocalError):
             pass
 
-        if not params.get('searchText',None):
+        if not self._params.get('searchText',None):
             return self._matrixEmpty            
 
     def load_mtx_rows(self):
@@ -90,6 +91,6 @@ class IpMatrix:
 
         res =  {"entities": all_list, "max": matrixMax, "xData": xData, "yData" : yData}
 
-        cache.set(self._newSubKey, res , CACHE_TTL)
+        cache.set(self._subKey, res , CACHE_TTL)
         return res
     
