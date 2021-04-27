@@ -28,16 +28,16 @@ class CpRelatedInfo:
         self._subKey = f'{subKey}¶{self._mode}'
 
         try:
-            context = cache.get(self._searchKey)
-            if context:
+            result = cache.get(self._searchKey)
+            if result:
                 print(f'load {self.__class__.__name__} searchKey redis')
-                self._rows = context
-                return context
-            _context = cache.get(self._subKey)
-            if _context:
+                self._rows = result
+                return result
+            res = cache.get(self._subKey)
+            if res:
                 print(f'load {self.__class__.__name__} subKey redis')
-                setattr(self, '_%s' % self._mode, _context)
-                return _context
+                setattr(self, '_%s' % self._mode, res)
+                return res
         except (KeyError, NameError, UnboundLocalError):
             pass
 

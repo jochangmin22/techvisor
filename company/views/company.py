@@ -20,16 +20,6 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-# from urllib.parse import unquote
-# pynori python 3.6과 호환되는지 확인해야함
-# from pynori.korean_analyzer import KoreanAnalyzer
-
-# for api {
-# import urllib.parse
-# from collections import OrderedDict
-# from itertools import repeat
-# for api }
-
 def get_company(request, companyId=""):
     """ searchDetails용 검색 """
     companyId = companyId.replace("-", "")
