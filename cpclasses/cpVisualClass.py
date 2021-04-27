@@ -1,4 +1,4 @@
-from utils import request_data, snake_to_camel, sampling, nested_dict_values, add_orderby, dictfetchall, frequency_count
+from utils import request_data, redis_key, snake_to_camel, sampling, add_orderby, dictfetchall, frequency_count, enrich_common_corp_name
 
 from django.core.cache import cache
 from django.conf import settings
@@ -22,34 +22,65 @@ class CpVisual:
 
         self.set_up()
 
+        self.default_orderby()  
+
     def set_up(self):
         self._params, self._subParams = request_data(self._request)
-        self._corpName = self._params.get('corpName','')  
-        foo = self._params.get('commonCorpName','')  
-        self._commonCorpName = self.enrich_common_corp_name(foo)
+        mainKey, subKey = redis_key(self._request)
 
-        mainKey, subKey = self.redis_key()
+        foo = self._params.get('commonCorpName','')  
+        self._commonCorpName = enrich_common_corp_name(foo)
+
+        self._rowsKey = f'{mainKey}¶owned_patent'
         self._mainKey = f'{mainKey}¶{self._mode}'
         self._subKey = f'{subKey}¶{self._mode}'
 
-        try:
-            context = cache.get(self._mainKey)
-            if context:
-                print(f'load {self.__class__.__name__} mainKey redis')
-                self._rows = context
-                return context
-            _context = cache.get(self._subKey)
-            if _context:
-                print(f'load {self.__class__.__name__} subKey redis')
-                setattr(self, '_%s' % self._mode, _context)
-                return _context
-        except (KeyError, NameError, UnboundLocalError):
-            pass
+        self.redis_rows()
 
-    def redis_key(self):
-        result = self._corpName
-        additional_result = result + "¶".join(list(nested_dict_values(self._subParams)))
-        return result, additional_result
+        command = {
+            'owned_patent' : self.redis_rows,
+            'visualNum' : self.redis_visual,
+            'visualIpc' : self.redis_visual,
+            'visualPerson' : self.redis_visual,
+            'wordcloud' : self.redis_wordcloud,
+        }   
+        return command[self._mode]()          
+
+    def redis_rows(self):
+        try:
+            result = cache.get(self._rowsKey)            
+            if result:
+                print(f'load {self.__class__.__name__} rowsKey redis')
+                self._rows = result
+        except (KeyError, NameError, UnboundLocalError):
+            pass        
+
+    def redis_visual(self):
+        try:
+            result = cache.get(self._mainKey)
+            if result:
+                print(f'load {self.__class__.__name__} mainKey redis')
+                setattr(self, '_%s' % self._mode, result)
+        except (KeyError, NameError, UnboundLocalError):
+            pass        
+
+    def redis_wordcloud(self):
+        try:
+            result = cache.get(self._subKey)            
+            if result:
+                print(f'load {self.__class__.__name__} subKey redis')
+                self._wordcloud = result
+        except (KeyError, NameError, UnboundLocalError):
+            pass        
+
+    def redis_wordcloud_nlp_rows(self):
+        try:
+            result = cache.get(f'{self._subKey}_nlp_rows')            
+            if result:
+                print(f'load {self.__class__.__name__} subKey_nlp_rows redis')
+                self._wordcloud_nlp_rows = result
+        except (KeyError, NameError, UnboundLocalError):
+            pass        
 
     def save_redis_main(self, result):
         cache.set(self._mainKey, result)
@@ -59,6 +90,10 @@ class CpVisual:
         cache.set(self._subKey, result)
         return result                
 
+    def save_redis_sub_nlp_rows(self, result):
+        cache.set(f'{self._subKey}_nlp_rows', result)
+        return result                
+
     def create_empty_rows(self):
         self._emptyRows = [dict() for x in range(len(self._rows))]
         return self._emptyRows
@@ -66,7 +101,7 @@ class CpVisual:
     def make_paging_rows(self, result):
         try:
             rowsCount = self._rows[0]["cnt"]
-        except IndexError:        
+        except (KeyError, IndexError):        
             rowsCount = 0
 
         for i in range(len(result)):
@@ -88,16 +123,16 @@ class CpVisual:
         self._limit = pageSize        
         return
 
-    def enrich_common_corp_name(self, result):
-        COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
-        for k, v in COMPANY_ASSIGNE_MATCHING.items():
-            if k == result:
-                return v
-        return result
-
     def query_chioce(self, key):
         command = { 'owned_patent': self.owned_patent_query, 'hundred_patents_lastest': self.hundred_patents_lastest_query }
-        return command[key]()        
+        return command[key]()
+
+    def default_orderby(self):
+        try:
+            getattr(self, '_sortBy')
+            self._orderby_clause = add_orderby(self._sortBy)
+        except AttributeError:
+            self._orderby_clause = ' order by A.출원일 desc'              
 
     def query_execute(self):
         key = 'owned_patent' if self._commonCorpName else 'hundred_patents_lastest'
@@ -108,36 +143,61 @@ class CpVisual:
                 "SET work_mem to '100MB';"
                 + query
             )
-            rows = dictfetchall(cursor)
+            self._rows = dictfetchall(cursor)
 
-        result = rows
-        cache.set(self._mainKey, result, CACHE_TTL)
-        setattr(self, '_%s' % key, result)
+        cache.set(self._rowsKey, self._rows, CACHE_TTL)
         print('query execute: ', key)
-        return result
+        return self._rows
+
+    def load_rows_first(self):
+        try:
+            getattr(self, '_rows')
+            print('_rows exist')
+        except AttributeError:
+            self._rows = self.query_execute()  
+            print('_rows not exist to execute query')
 
     def owned_patent(self):
         ''' If there is no corpName, the last 100 rows are displayed instead'''
 
         self.table_options()
 
-        self._orderby_clause = add_orderby(self._sortBy)
-        if not self._orderby_clause:
-            self._orderby_clause = ' order by A.출원일 desc'        
+        self.default_orderby()        
 
-        self._rows = self.query_execute()            
+        self.load_rows_first()
+
         return self.paging_rows()
 
     def visual(self):
-        self._orderby_clause = ' order by A.출원일 desc'        
-        self._rows = self.query_execute()            
+        self.load_rows_first()
+
+        try:
+            print(f'_{self._mode} exist')
+            return getattr(self, '_%s' % self._mode)
+        except AttributeError:
+            pass
+
         command = {
-            'wordcloud' : self.nlp_rows, 
             'visualNum' : self.vis_num,
             'visualIpc' : self.vis_ipc,
             'visualPerson' : self.vis_per
         }   
         return command[self._mode]()       
+
+    def wordcloud(self):
+        self.load_rows_first()
+
+        self.redis_wordcloud_nlp_rows()
+
+        try:
+            getattr(self, '_wordcloud_nlp_rows')
+            print('_nlp_rows exist')
+        except AttributeError:
+            print('nlp_rows execute')
+            return self.nlp_rows()           
+        else:
+            return self._wordcloud_nlp_rows        
+
 
     def paging_rows(self):
         # self.is_query_ever_been_run()
@@ -146,7 +206,7 @@ class CpVisual:
 
     def nlp_rows(self):
         result = self.make_nlp_rows(self.create_empty_rows())
-        return self.save_redis_main(result)
+        return self.save_redis_sub_nlp_rows(result)
 
     def vis_num(self):
         result = self.make_vis_num(self.create_empty_rows())          

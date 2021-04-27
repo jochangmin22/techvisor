@@ -1,4 +1,4 @@
-from utils import request_data, remove_tail, dictfetchall,  sampling, nested_dict_values, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags, frequency_count
+from utils import request_data, redis_key, remove_tail, dictfetchall,  sampling, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags, frequency_count
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -29,7 +29,7 @@ class IpSimilarity:
         self._appNo = self._params.get('appNo','')  
         self._whereAppNo = f'WHERE "출원번호" = $${self._appNo}$$'
 
-        mainKey, subKey = self.redis_key()
+        mainKey, subKey = redis_key(self._request)
         self._mainKey = f'{mainKey}¶{self._mode}'
 
         try:
@@ -40,11 +40,6 @@ class IpSimilarity:
                 return context
         except (KeyError, NameError, UnboundLocalError):
             pass
-
-    def redis_key(self):
-        result = self._appNo
-        additional_result = result + "¶".join(list(nested_dict_values(self._subParams)))
-        return result, additional_result        
 
     def query_execute(self, key):
         command = { 'abstract': self.abstract_query, 'similar': self.similarity_query}
@@ -65,25 +60,6 @@ class IpSimilarity:
         # setattr(self, '_%s' % key, result)
         print('query execute: ', key)
         return result
-
-    # def setup_query(self, key):
-    #     command = { 'abstract': self.abstract_query, 'similar': self.similarity_query}
-    #     query = command[key]()
-    #     print(query)
-    #     try:
-    #         context = cache.get(self._mainKey)
-    #         if context:
-    #             print('load mainKey redis', key)
-    #             setattr(self, '_%s' % self._mode, context)
-    #             return context
-    #         else:
-    #             result = self.query_execute(key)
-    #     except (KeyError, NameError, UnboundLocalError):
-    #         result = self.query_execute(key)
-
-    #     # setattr(self, '_%s' % key, result)
-    #     cache.set(self._mainKey, result, CACHE_TTL)
-    #     return result
 
     def setup_similarity(self):
         rows = self.query_execute(key = 'abstract')

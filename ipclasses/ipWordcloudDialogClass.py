@@ -1,60 +1,61 @@
-from utils import get_redis_key, frequency_count, dictfetchall, remove_tail, add_orderby
+from utils import request_data, redis_key, frequency_count, dictfetchall, remove_tail, add_orderby
 from django.db import connection
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-from ipclasses import IpSearchs
 
 class IpWordcloudDialog:
     
-    def __init__(self, request):
+    def __init__(self, request, query):
         self._request = request
+        self._query = query
         self._wordcloudDialogEmpty = { 'rows': [], 'rowsCount': 0 }
 
         self.set_up()
 
     def set_up(self):
-        _, subKey, params, subParams = get_redis_key(self._request)
-        
-        self._newSubKey = f'{subKey}¶wordcloud_dialog'
-        foo = subParams['menuOptions']['wordcloudOptions']
+        self._params, self._subParams = request_data(self._request)
+        _, subKey = redis_key(self._request)
+
+        if not self._params.get('searchText',None):
+            return self._wordcloudDialogEmpty          
+
+        self._subKey = f'{subKey}¶wordcloud_dialog'
+
+        self.menu_option()
+
+        try:
+            result = cache.get(self._subKey)
+            if result:
+                print('load wordcloudDialog redis')
+                return result
+        except (KeyError, NameError, UnboundLocalError):
+            pass
+
+   
+    def menu_option(self):
+        foo = self._subParams['menuOptions']['wordcloudOptions']
         self._category = foo.get('category','')
         self._volume = foo.get('volume','')
         self._output = foo.get('output','') 
 
-        bar = subParams['menuOptions']['tableOptions']['wordcloudDialog']
+        bar = self._subParams['menuOptions']['tableOptions']['wordcloudDialog']
         self._sortBy = bar.get('sortBy', [])  
         self._pageIndex = bar.get('pageIndex', 0)
-        self._pageSize = bar.get('pageSize', 10)
-
-        try:
-            context = cache.get(self._newSubKey)
-            if context:
-                print('load wordcloudDialog redis')
-                return context
-        except (KeyError, NameError, UnboundLocalError):
-            pass
-
-        if not params.get('searchText',None):
-            return self._wordcloudDialogEmpty        
-
-    def load_query(self):
-        foo = IpSearchs(self._request, mode='query')
-        return foo.query() 
+        self._pageSize = bar.get('pageSize', 10)               
 
     def wordcloud_dialog(self):
-        query = self.load_query()
 
         # add sort
-        query += add_orderby(self._sortBy)  
+        self._query += add_orderby(self._sortBy)  
         # add offset limit
-        query += f' offset {self._pageIndex * self._pageSize} limit {self._pageSize}'    
+        self._query += f' offset {self._pageIndex * self._pageSize} limit {self._pageSize}'    
 
 
         with connection.cursor() as cursor:    
-            cursor.execute(query)
+            cursor.execute(self._query)
             rows = dictfetchall(cursor)
         try:
             rowsCount = rows[0]["cnt"]
@@ -62,5 +63,5 @@ class IpWordcloudDialog:
             rowsCount = 0        
 
         result = { 'rowsCount': rowsCount, 'rows': rows}   
-        cache.set(self._newSubKey, {'wordcloud_dialog' : result}, CACHE_TTL)
+        cache.set(self._subKey, {'wordcloud_dialog' : result}, CACHE_TTL)
         return result

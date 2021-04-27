@@ -1,4 +1,4 @@
-from utils import get_redis_key, dictfetchall
+from utils import request_data, redis_key, dictfetchall
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -14,31 +14,29 @@ from ipclasses import IpSearchs
 
 class IpIndicator:
     
-    def __init__(self, request):
+    def __init__(self, request, indRow):
         self._request = request
+        self._indRow = indRow
         self._indicatorEmpty = { "name": [], "피인용수": [], "총등록건": [], "CPP": [], "PII": [], "TS": [], "PFS": [] }
 
         self.set_up()
 
     def set_up(self):
-        _, subKey, params, _ = get_redis_key(self._request)
+        self._params, _ = request_data(self._request)
+        _, subKey = redis_key(self._request)        
 
-        self._newSubKey = f'{subKey}¶indicator'
+        if not self._params.get('searchText',None):
+            return self._indicatorEmpty        
+
+        self._subKey = f'{subKey}¶indicator'
 
         try:
-            context = cache.get(self._newSubKey)
-            if context:
+            result = cache.get(self._subKey)
+            if result:
                 print('load ind redis')
-                return context
+                self._indicator = result
         except (KeyError, NameError, UnboundLocalError):
             pass        
-
-        if not params.get('searchText',None):
-            return self._indicatorEmpty
-
-    def load_ind_rows(self):
-        foo = IpSearchs(self._request, mode='indicator')
-        return foo.vis_ind()
 
     def get_sum_query(self, query):
         try:
@@ -130,7 +128,7 @@ class IpIndicator:
             query= 'SELECT sum(패밀리수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNoList + ')'                                
             return self.get_sum_query(query)        
 
-        d = self.load_ind_rows()            
+        d = self._indRow           
             
         grantedList = get_granted_list()
         total_granted, appNoList = get_total_granted_appno_list()
@@ -180,7 +178,7 @@ class IpIndicator:
         _ts = [round(num,2) for num in ts]
         _pfs = [round(num,2) for num in pfs]
         result = { 'name': name, '피인용수' : citing, '총등록건': granted, 'CPP' : _cpp, 'PII' : _pii, 'TS' : _ts, 'PFS' : _pfs }
-        cache.set(self._newSubKey, result , CACHE_TTL)
+        cache.set(self._subKey, result , CACHE_TTL)
 
         return result
 

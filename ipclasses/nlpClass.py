@@ -1,10 +1,8 @@
-from utils import get_redis_key, tokenizer_phrase, remove_duplicates, tokenizer
+from utils import request_data, redis_key, tokenizer_phrase, remove_duplicates, tokenizer
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-
-from ipclasses import IpSearchs
 
 class NlpToken:
     
@@ -15,28 +13,29 @@ class NlpToken:
         self.set_up()
 
     def set_up(self):
-        mainKey, subKey, params, subParams = get_redis_key(self._request)
+        self._params, self._subParams = request_data(self._request)
+        mainKey, subKey = redis_key(self._request)        
         
         #### Create a new SubKey to distinguish each analysis type 
-        self._newSubKey = f'{subKey}¶{self._menu}_nlp'        
+        self._subKey = f'{subKey}¶{self._menu}_nlp'        
 
-        foo = subParams['menuOptions'][self._menu + 'Options']
-        self._volume = foo.get('volume','')
-        self._unit = foo.get('unit','')
-        self._emergence = foo.get('emergence','빈도수') # wordcloud only         
-        self._output = foo.get('output','')          
+        self.menu_option()         
   
         try:
-            context = cache.get(self._newSubKey)
+            context = cache.get(self._subKey)
             if context:
                 print('load Nlp redis', self._menu)
-                return context
+                setattr(self, '_%s_nlp' % self._menu, context)
         except (KeyError, NameError, UnboundLocalError):
             pass
 
-    def load_nlp_rows(self):
-        foo = IpSearchs(self._request, mode='nlp')
-        return foo.nlp_rows()
+    def menu_option(self):
+        foo = self._subParams['menuOptions']['wordcloudOptions']
+        self._volume = foo.get('volume','')
+        self._unit = foo.get('unit','')
+        self._emergence = foo.get('emergence','빈도수')
+        self._output = foo.get('output','')         
+        return
 
     def nlp_token(self, nlpRows):
 
@@ -56,6 +55,13 @@ class NlpToken:
             for foo in nlp_list:
                 bar = remove_duplicates(tokenizer(foo))
                 result.extend(bar)
+            return result 
+
+        try:
+            result = getattr(self, '_%s_nlp' % self._menu)
+        except AttributeError:
+            pass
+        else:
             return result            
 
         nlp_list = [d[self._volume] for d in nlpRows] # _voloume : '요약·청구항', '요약', '청구항', 
@@ -66,6 +72,6 @@ class NlpToken:
         res = command[self._unit][self._emergence]()    
         res = [w.replace('_', ' ') for w in res]
  
-        cache.set(self._newSubKey, res, CACHE_TTL)
+        cache.set(self._subKey, res, CACHE_TTL)
         return res
 
