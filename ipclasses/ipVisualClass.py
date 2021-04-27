@@ -24,14 +24,14 @@ class IpVisual:
         self._subKey = f'{subKey}¶{self._mode}'
 
         try:
-            context = cache.get(self._mainKey)
-            if context:
+            result = cache.get(self._mainKey)
+            if result:
                 print('load main visual redis', self._mode)
-                return context
-            _context = cache.get(self._subKey)
-            if _context:
+                return result
+            res = cache.get(self._subKey)
+            if res:
                 print('load sub visual redis', self._mode)
-                return _context
+                return res
         except (KeyError, NameError, UnboundLocalError):
             pass        
 

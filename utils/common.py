@@ -52,9 +52,9 @@ def redis_key(request):
     return result, additional_result  
 
 def readRedis(redisKey, keys, data=""):
-    context = cache.get(redisKey)
-    if context and keys in context:
-        return context[keys]
+    result = cache.get(redisKey)
+    if result and keys in result:
+        return result[keys]
     else:
         return None
 

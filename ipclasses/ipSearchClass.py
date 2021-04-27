@@ -51,16 +51,16 @@ class IpSearch:
         self._subKey = f'{subKey}¶{self._mode}'
 
         try:
-            context = cache.get(self._searchKey)
-            if context:
+            result = cache.get(self._searchKey)
+            if result:
                 print('load searchKey redis')
-                self._rows = context
-                return context
-            _context = cache.get(self._subKey)
-            if _context:
+                self._rows = result
+                return result
+            res = cache.get(self._subKey)
+            if res:
                 print('load subKey redis')
-                setattr(self, '_%s' % self._mode, _context)
-                return _context
+                setattr(self, '_%s' % self._mode, res)
+                return res
         except (KeyError, NameError, UnboundLocalError):
             pass
 
@@ -171,11 +171,11 @@ class IpSearch:
         query = self.query_chioce(key)
 
         try:
-            context = cache.get(self._mainKey)
-            if context:
+            result = cache.get(self._mainKey)
+            if result:
                 print('load mainKey redis', key, self._mainKey)
-                # setattr(self, '_%s' % self._mode, context)
-                rows = context
+                # setattr(self, '_%s' % self._mode, result)
+                rows = result
             else:
                 rows = self.query_execute(key)
         except (KeyError, NameError, UnboundLocalError):

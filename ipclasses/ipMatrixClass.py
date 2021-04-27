@@ -29,10 +29,10 @@ class IpMatrix:
         self.menu_option()
 
         try:
-            context = cache.get(self._subKey)
-            if context:
+            result = cache.get(self._subKey)
+            if result:
                 print('load matrix redis')
-                return context
+                return result
         except (KeyError, NameError, UnboundLocalError):
             pass
 

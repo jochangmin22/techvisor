@@ -37,10 +37,10 @@ class IpMatrixDialog:
         self._categoryValue = baz.get('categoryValue', [])                      
 
         try:
-            context = cache.get(self._subKey)
-            if context:
+            result = cache.get(self._subKey)
+            if result:
                 print('load matrixDialog redis')
-                return context
+                return result
         except (KeyError, NameError, UnboundLocalError):
             pass
 

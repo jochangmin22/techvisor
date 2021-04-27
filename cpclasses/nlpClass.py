@@ -28,11 +28,11 @@ class NlpToken:
         self._output = foo.get('output','')          
   
         try:
-            context = cache.get(self._subKey)
-            if context:
+            result = cache.get(self._subKey)
+            if result:
                 print('load Nlp redis', self._menu)
-                # return context
-                setattr(self, '_%s_nlp' % self._menu, context)
+                # return result
+                setattr(self, '_%s_nlp' % self._menu, result)
         except (KeyError, NameError, UnboundLocalError):
             pass
 

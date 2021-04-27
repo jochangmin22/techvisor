@@ -30,11 +30,11 @@ class IpSpecification:
         self._mainKey = f'{mainKey}¶{self._mode}'
 
         try:
-            context = cache.get(self._mainKey)
-            if context:
+            result = cache.get(self._mainKey)
+            if result:
                 print('load mainKey redis', self._mode)
-                self._rows = context
-                return context
+                self._rows = result
+                return result
         except (KeyError, NameError, UnboundLocalError):
             pass
 

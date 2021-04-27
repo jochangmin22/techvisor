@@ -22,10 +22,10 @@ class NlpToken:
         self.menu_option()         
   
         try:
-            context = cache.get(self._subKey)
-            if context:
+            result = cache.get(self._subKey)
+            if result:
                 print('load Nlp redis', self._menu)
-                setattr(self, '_%s_nlp' % self._menu, context)
+                setattr(self, '_%s_nlp' % self._menu, result)
         except (KeyError, NameError, UnboundLocalError):
             pass
 
