@@ -18,7 +18,12 @@ def kr_matrix(request):
     return bar.matrix() 
 
 def us_matrix(request):
-    return
+    foo = IpSearchs(request, mode="matrix")
+    mtxRows = foo.matrix()
+
+    bar = IpMatrix(request, mtxRows)
+    return bar.matrix() 
+
 def jp_matrix(request):
     return
 def cn_matrix(request):
@@ -39,7 +44,8 @@ def kr_matrix_dialog(request):
     foo = IpMatrixDialog(request)
     return foo.matrix_dialog()
 def us_matrix_dialog(request):
-    return
+    foo = IpMatrixDialog(request)
+    return foo.matrix_dialog()
 def jp_matrix_dialog(request):
     return
 def cn_matrix_dialog(request):

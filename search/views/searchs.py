@@ -8,6 +8,7 @@ import json
 
 from utils import request_data
 from ipclasses import IpSearchs
+from usclasses import UsSearchs
 
 def get_searchs(request, mode="searchs"):
     params, _ = request_data(request)
@@ -21,7 +22,9 @@ def kr_searchs(request, mode="searchs"):
     return foo.searchs()
 
 def us_searchs(request, mode="searchs"):
-    return
+    foo = UsSearchs(request, mode)
+    return foo.searchs()
+    
 def jp_searchs(request, mode="searchs"):
     return
 def cn_searchs(request, mode="searchs"):

@@ -1,4 +1,4 @@
-from utils import request_data, redis_key, dictfetchall
+from utils import request_data, menu_redis_key, dictfetchall, sampling
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -17,26 +17,37 @@ class IpIndicator:
     def __init__(self, request, indRow):
         self._request = request
         self._indRow = indRow
-        self._indicatorEmpty = { "name": [], "피인용수": [], "총등록건": [], "CPP": [], "PII": [], "TS": [], "PFS": [] }
+        self._indicatorEmpty = { "name": [], "피인용수": [], "총등록건": [], "CPP": [], "PII": [], "TS": [], "PFS": [], "table" : { 'rowsCount': 0, 'rows': [] }}
 
         self.set_up()
 
     def set_up(self):
-        self._params, _ = request_data(self._request)
-        _, subKey = redis_key(self._request)        
+        self._params, self._subParams = request_data(self._request)
 
         if not self._params.get('searchText',None):
             return self._indicatorEmpty        
 
-        self._subKey = f'{subKey}¶indicator'
+        self._menuKey = menu_redis_key(self._request, 'indicator')        
+
+        self.table_options()
 
         try:
-            result = cache.get(self._subKey)
+            result = cache.get(self._menuKey)
             if result:
                 print('load ind redis')
                 self._indicator = result
         except (KeyError, NameError, UnboundLocalError):
-            pass        
+            pass
+
+    def table_options(self):
+        foo = self._subParams["menuOptions"]["tableOptions"]['indicatorTable']
+        pageIndex = foo.get('pageIndex', 0)
+        pageSize = foo.get('pageSize', 10)
+        self._sortBy = foo.get('sortBy', [])            
+
+        self._offset = pageIndex * pageSize
+        self._limit = pageSize
+        return                
 
     def get_sum_query(self, query):
         try:
@@ -178,7 +189,20 @@ class IpIndicator:
         _ts = [round(num,2) for num in ts]
         _pfs = [round(num,2) for num in pfs]
         result = { 'name': name, '피인용수' : citing, '총등록건': granted, 'CPP' : _cpp, 'PII' : _pii, 'TS' : _ts, 'PFS' : _pfs }
-        cache.set(self._subKey, result , CACHE_TTL)
+
+        rows = []
+        for (idx, foo) in enumerate(result['name']):
+            rows.append({ 'name': result["name"][idx], '피인용수' : result['피인용수'][idx] , '총등록건' : result['총등록건'][idx], 'CPP': result["CPP"][idx], 'PII' : result['PII'][idx], 'TS' : result['TS'][idx], 'PFS' : result['PFS'][idx]})
+        try:
+            rowsCount = len(rows)
+        except IndexError:        
+            rowsCount = 0                  
+
+        tableData = { 'rowsCount': rowsCount, 'rows': sampling(rows, self._offset, self._limit)}           
+
+        result.update({ "table" : tableData})
+
+        cache.set(self._menuKey, result , CACHE_TTL)
 
         return result
 

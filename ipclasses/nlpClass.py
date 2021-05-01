@@ -1,4 +1,4 @@
-from utils import request_data, redis_key, tokenizer_phrase, remove_duplicates, tokenizer
+from utils import request_data, menu_redis_key, tokenizer_phrase, remove_duplicates, tokenizer
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -14,15 +14,13 @@ class NlpToken:
 
     def set_up(self):
         self._params, self._subParams = request_data(self._request)
-        mainKey, subKey = redis_key(self._request)        
-        
-        #### Create a new SubKey to distinguish each analysis type 
-        self._subKey = f'{subKey}¶{self._menu}_nlp'        
+        self._nlpKey = menu_redis_key(self._request, self._menu)        
+
 
         self.menu_option()         
   
         try:
-            result = cache.get(self._subKey)
+            result = cache.get(f'{self._nlpKey}_nlp')
             if result:
                 print('load Nlp redis', self._menu)
                 setattr(self, '_%s_nlp' % self._menu, result)
@@ -71,7 +69,6 @@ class NlpToken:
         command = { '구문': { '빈도수':phrase_frequncy_tokenizer, '건수':phrase_individual_tokenizer }, '워드': { '빈도수' :word_frequncy_tokenizer, '건수':word_individual_tokenizer } }
         res = command[self._unit][self._emergence]()    
         res = [w.replace('_', ' ') for w in res]
- 
-        cache.set(self._subKey, res, CACHE_TTL)
+        cache.set(f'{self._nlpKey}_nlp', res, CACHE_TTL)  
         return res
 

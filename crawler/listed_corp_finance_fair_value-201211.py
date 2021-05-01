@@ -30,6 +30,9 @@ import psycopg2
 from psycopg2.extensions import AsIs
 from datetime import datetime
 
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
 # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'techvisor.settings')
 

@@ -253,14 +253,15 @@ class CpVisual:
             return { 'labels': labels, 'data' : data }         
 
         key = '출원일'
-        PU = make_each_category_dict(flag=None)
+        PN = make_each_category_dict(flag=None)
         PP = make_each_category_dict(flag='1')
         UP = make_each_category_dict(flag='2')
         key = '등록일'
+        RN = make_each_category_dict(flag=None)
         PR = make_each_category_dict(flag='1')
         UR = make_each_category_dict(flag='2')    
 
-        entities = [ PU, PP, UP, PR, UR ]
+        entities = [ PN, RN, PP, UP, PR, UR ]
         res = { 'mode' : 'visualNum', 'entities' : entities }
         return res
 

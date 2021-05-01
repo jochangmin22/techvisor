@@ -1,4 +1,4 @@
-from utils import request_data, redis_key, frequency_count
+from utils import request_data, menu_redis_key, frequency_count, sampling 
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -14,24 +14,25 @@ class IpKeywords:
     def __init__(self, request, nlpRows):
         self._request = request
         self._nlpRows = nlpRows
-        self._keywordsEmpty = {'topic': [], 'vec': []}
+        self._keywordsEmpty = {'topic': [], 'vec': [], 'table': { 'rowsCount': 0, 'rows' :[]}}
 
         self.set_up()
 
     def set_up(self):
         self._params, self._subParams = request_data(self._request)
-        _, subKey = redis_key(self._request)
 
         if not self._params.get('searchText',None):
             self._keywords = self._keywordsEmpty           
-            return       
-        
-        self._subKey = f'{subKey}keywords'
+            return 
+
+        self._menuKey = menu_redis_key(self._request, 'keywords')        
 
         self.menu_option()
 
+        self.table_options()
+
         try:
-            result = cache.get(self._subKey)
+            result = cache.get(self._menuKey)
             if result:
                 print('load keywords redis')
                 self._keywords = result
@@ -43,7 +44,18 @@ class IpKeywords:
         self._modelType = foo.get('modelType',"word2vec")
         self._keywordsvec = foo.get('keywordsVec',None)
         self._output = foo.get('output',50)          
-        return          
+        return 
+
+    def table_options(self):
+        foo = self._subParams["menuOptions"]["tableOptions"]['keywordsTable']
+        pageIndex = foo.get('pageIndex', 0)
+        pageSize = foo.get('pageSize', 10)
+        self._sortBy = foo.get('sortBy', [])            
+
+        self._offset = pageIndex * pageSize
+        self._limit = pageSize
+        return
+         
     
     def keywords_extract(self):
         foo = NlpToken(self._request, menu='keywords')
@@ -58,10 +70,16 @@ class IpKeywords:
         # sentence_similarity
 
         def dict_keys_as_a_list():
+
             result = []
             for key in topics.keys():
                 result.append(key)        
-            return result         
+
+                keys = ["title", ""]
+            return result
+
+        def float_format(value, precision):
+            return float("{:.{precision}f}".format(value, precision=precision))         
 
         topics = self.keywords_extract()
 
@@ -110,17 +128,30 @@ class IpKeywords:
 
         try:
             word_to_vec_result = model.wv.most_similar(selectedTopic, topn=self._output)
-        except:
+        except KeyError:
             return self._keywordsEmpty
-
-        # convert list of lists (word_to_vec_result) to list of dictionaries
-        keys = ["label", "value"]
-        d = [dict(zip(keys, l)) for l in word_to_vec_result] if word_to_vec_result != [] else [{"label": "", "value": 0}]
 
         newTopics = dict_keys_as_a_list()
 
-        res = {"topic": newTopics, "vec": d}
+        # convert list of lists (word_to_vec_result) to list of dictionaries
+        keys = ["label", "value"]
+        chartData = [dict(zip(keys, l)) for l in word_to_vec_result] if word_to_vec_result != [] else [{"label": "", "value": 0}]
 
-        cache.set(self._subKey, res , CACHE_TTL)
+        rows = []
+        for foo in chartData:
+            bar = float_format(foo['value'],3)
+            baz = float_format(foo['value']*100,0)
+            # quux = [baz, 100 - baz]
+            rows.append({ '단어': foo["label"], '수' : bar , '확률' : baz})
+        try:
+            rowsCount = len(rows)
+        except IndexError:        
+            rowsCount = 0                  
+
+        tableData = { 'rowsCount': rowsCount, 'rows': sampling(rows, self._offset, self._limit)}              
+
+        res = {"topic": newTopics, "vec": chartData, "table": tableData}
+
+        cache.set(self._menuKey, res , CACHE_TTL)
         return res
         

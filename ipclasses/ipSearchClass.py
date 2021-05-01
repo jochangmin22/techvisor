@@ -140,14 +140,15 @@ class IpSearch:
             return { 'labels': labels, 'data' : data }         
 
         key = '출원일'
-        PU = make_each_category_dict(flag=None)
+        PN = make_each_category_dict(flag=None)
         PP = make_each_category_dict(flag='1')
         UP = make_each_category_dict(flag='2')
         key = '등록일'
+        RN = make_each_category_dict(flag=None)
         PR = make_each_category_dict(flag='1')
-        UR = make_each_category_dict(flag='2')    
+        UR = make_each_category_dict(flag='2')
 
-        return [ PU, PP, UP, PR, UR ]
+        return [ PN, RN, PP, UP, PR, UR ]
 
     def make_vis_ipc(self, res):
         ''' visual ipc '''

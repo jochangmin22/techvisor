@@ -15,7 +15,8 @@ def kr_visual(request):
     return foo.visual()
 
 def us_visual(request):
-    return
+    foo = IpVisual(request)
+    return foo.visual()
 
 def jp_visual(request):
     return

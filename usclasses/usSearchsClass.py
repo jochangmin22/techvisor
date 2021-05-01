@@ -1,4 +1,4 @@
-from utils import request_data, redis_key, menu_redis_key, remove_tail, add_orderby, dictfetchall, frequency_count, sampling
+from utils import request_data, redis_key, remove_tail, add_orderby, dictfetchall, frequency_count, sampling
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -14,13 +14,13 @@ from concurrent.futures import ThreadPoolExecutor
 import os
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
-class IpSearchs:
+class UsSearchs:
 
     def __init__(self, request, mode):
         self._request = request
         self._mode = mode
         self._emptyRows = []
-        self._queryCols = '등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인코드1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, ipc코드, 요약, 청구항'  
+        self._queryCols = f"""'' AS 등록사항, 발명의명칭, 출원번호, 출원일, 출원인1, 출원인국가코드1, 발명자1, 발명자국가코드1, 등록일, 공개일, "IPC코드", 요약, 청구항"""
         
         self.set_up()
         self._executor = ThreadPoolExecutor(1)
@@ -39,7 +39,6 @@ class IpSearchs:
         self._queryKey = f'{mainKey}¶query'
         self._mainKey = f'{mainKey}¶{self._mode}'
         self._subKey = f'{subKey}¶{self._mode}'
-      
 
         self.redis_rows()
 
@@ -48,7 +47,7 @@ class IpSearchs:
         command = {
             'searchs' : self.redis_rows,
             'query' : self.redis_query,
-            'nlp' : self.redis_mode,
+            'nlp' : self.redis_sub,
             'wordcloud' : self.redis_sub,
             'keywords' : self.redis_sub,
             'matrix' : self.redis_sub,
@@ -84,16 +83,11 @@ class IpSearchs:
         except (KeyError, NameError, UnboundLocalError):
             pass
 
-    def redis_mode(self):
+    def redis_nlp(self):
         try:
-            getattr(self, '_nlpKey')
-        except AttributeError:
-            self._nlpKey = menu_redis_key(self._request, self._mode) 
-
-        try:
-            result = cache.get(f'{self._nlpKey}_nlp_rows')            
+            result = cache.get(f'{self._subKey}_nlp_rows')            
             if result:
-                print(f'load {self.__class__.__name__} modeKey_nlp_rows redis', self._mode)
+                print(f'load {self.__class__.__name__} subKey_nlp_rows redis', self._mode)
                 self._nlp_rows = result
         except (KeyError, NameError, UnboundLocalError):
             pass                               
@@ -127,38 +121,6 @@ class IpSearchs:
         else:
             return 
 
-    def generate_num_query(self):
-        query = 'select count(*) over () as cnt, ' + self._queryCols + \
-        " FROM kr_tsv_view WHERE num_search like '%" + self._searchNum.replace("-","") + "%'"
-        return query
-
-    def generate_text_query(self): 
-        queryTextTerms = self.tsquery_keywords(self._searchText, 'terms')
-        whereTerms = f'"{self._searchVolume}tsv" @@ to_tsquery(\'{queryTextTerms}\') and ' if queryTextTerms else ""
-
-        queryTextInventor = self.tsquery_keywords(self._inventor, 'person')
-        whereInventor = f'"발명자tsv" @@ to_tsquery(\'{queryTextInventor}\') and ' if queryTextInventor else ""
-
-        queryTextAssignee = self.tsquery_keywords(self._assignee, 'person')
-        whereAssignee = f'"출원인tsv" @@ to_tsquery(\'{queryTextAssignee}\') and ' if queryTextAssignee else ""
-
-        whereDate = self.date_query()
-        whereStatus = self.status_query()
-        whereIptype = self.iptype_query()
-
-        whereAll = whereTerms
-        whereAll += whereDate
-        whereAll += whereInventor
-        whereAll += whereAssignee
-        whereAll += whereStatus
-        whereAll += whereIptype
-
-        whereAll = remove_tail(whereAll," and ")
-
-        query = f'select count(*) over () as cnt, ts_rank("{self._searchVolume}tsv",to_tsquery(\'{queryTextTerms}\')) AS rank, {self._queryCols} FROM kr_tsv_view WHERE ({whereAll})'
-
-        return query
-
     def create_empty_rows(self):
         self._emptyRows = [dict() for x in range(len(self._rows))]
         return self._emptyRows
@@ -180,18 +142,17 @@ class IpSearchs:
         foo = self._subParams["menuOptions"]["tableOptions"]["mainTable"]
         pageIndex = foo.get('pageIndex', 0)
         pageSize = foo.get('pageSize', 10)
-        self._sortBy = foo.get('sortBy', [])    
         self._offset = pageIndex * pageSize
         self._limit = pageSize        
+        self._sortBy = foo.get('sortBy', [])    
         return 
 
     def query_chioce(self):
-        result = self.generate_num_query() if self._searchNum else self.generate_text_query()
-        return result      
+        return self.generate_num_query() if self._searchNum else self.generate_text_query()
 
     def query_execute(self):
         query = self.query_chioce()  
-
+        print(query)
         cache.set(self._queryKey, query, CACHE_TTL)
 
         with connection.cursor() as cursor:
@@ -226,7 +187,7 @@ class IpSearchs:
     def wordcloud(self):
         self.load_rows_first()
 
-        self.redis_mode()
+        self.redis_nlp()
 
         try:
             getattr(self, '_nlp_rows')
@@ -240,7 +201,7 @@ class IpSearchs:
     def keywords(self):
         self.load_rows_first()
 
-        self.redis_mode()
+        self.redis_nlp()
 
         try:
             getattr(self, '_nlp_rows')
@@ -271,7 +232,7 @@ class IpSearchs:
 
     def nlp_rows(self):
         result = self.make_nlp_rows(self.create_empty_rows())
-        return self.save_redis_nlp_rows(result)
+        return self.save_redis_sub_nlp_rows(result)
 
     def mtx_rows(self):
         result = self.make_mtx_rows(self.create_empty_rows())
@@ -325,7 +286,7 @@ class IpSearchs:
         key = '등록일'
         RN = make_each_category_dict(flag=None)
         PR = make_each_category_dict(flag='1')
-        UR = make_each_category_dict(flag='2')    
+        UR = make_each_category_dict(flag='2')   
 
         entities = [ PN, RN, PP, UP, PR, UR ]
         res = { 'mode' : 'visualNum', 'entities' : entities }
@@ -485,18 +446,84 @@ class IpSearchs:
         cache.set(self._subKey, result)
         return result
 
-    def save_redis_nlp_rows(self, result):
-        try:
-            getattr(self, '_nlpKey')
-        except AttributeError:
-            self._nlpKey = menu_redis_key(self._request, self._mode) 
-
-        cache.set(f'{self._nlpKey}_nlp_rows', result)
+    def save_redis_sub_nlp_rows(self, result):
+        cache.set(f'{self._subKey}_nlp_rows', result)
         return result
 
     def save_redis_sub_mtx_rows(self, result):
         cache.set(f'{self._subKey}_mtx_rows', result)
         return result
+
+    def generate_num_query(self):
+        query = 'select count(*) over () as cnt, ' + self._queryCols + \
+        " FROM kr_tsv_view WHERE num_search like '%" + self._searchNum.replace("-","") + "%'"
+        return query
+
+    def generate_text_query(self): 
+        queryTextTerms = self.tsquery_keywords(self._searchText, 'terms')
+        whereTerms = f'"{self._searchVolume}tsv" @@ to_tsquery(\'{queryTextTerms}\') and ' if queryTextTerms else ""
+
+        queryTextInventor = self.tsquery_keywords(self._inventor, 'person')
+        whereInventor = f'"발명자tsv" @@ to_tsquery(\'{queryTextInventor}\') and ' if queryTextInventor else ""
+
+        queryTextAssignee = self.tsquery_keywords(self._assignee, 'person')
+        whereAssignee = f'"출원인tsv" @@ to_tsquery(\'{queryTextAssignee}\') and ' if queryTextAssignee else ""
+
+        whereDate = self.date_query()
+        whereStatus = self.status_query()
+        whereIptype = self.iptype_query()
+
+        whereAll = whereTerms
+        whereAll += whereDate
+        whereAll += whereInventor
+        whereAll += whereAssignee
+        whereAll += whereStatus
+        whereAll += whereIptype
+
+        whereAll = remove_tail(whereAll," and ")
+
+        query = f'select count(*) over () as cnt, ts_rank("{self._searchVolume}tsv",to_tsquery(\'{queryTextTerms}\')) AS rank, {self._queryCols} FROM ({self.searchs_query()}) AS us_tsv_view WHERE ({whereAll})'
+
+        return query
+
+    def searchs_query(self):
+        result = f"""
+        SELECT
+        A.출원번호,
+        'Live' AS 상태,
+        A.문헌번호,
+        A.출원일자 AS 출원일,
+        A.등록일자 AS 등록일,
+        A.공개일자 AS 공개일,
+        A.발명의명칭,
+        K.우번1 AS 우선권주장출원일1,
+        trim(regexp_replace(regexp_replace(regexp_replace(regexp_replace(B.요약, '<[^>]+>', '', 'g'), '[\(\[].*?[\)\]]','', 'g'), '[^[:alnum:],/.;:]',' ','g'),'\s+',' ','g')) AS 요약,
+        trim(regexp_replace(regexp_replace(regexp_replace(regexp_replace(C.청구항, '<[^>]+>', '', 'g'), '[\(\[].*?[\)\]]','', 'g'), '[^[:alnum:],/.;:]',' ','g'),'\s+',' ','g')) AS 청구항,
+        D."출원인1", D."출원인국가코드1", F."발명자1", F."발명자국가코드1",
+        H."IPC코드",
+        "요약tsv",
+        "청구항tsv",
+        ( 'english', coalesce(D.출원인1,'')) || to_tsvector ( 'simple', coalesce(D.출원인1,'')) || to_tsvector ( 'english', coalesce(E.출원인2,'')) || to_tsvector ( 'simple', coalesce(E.출원인2,'')) AS "출원인tsv", 
+        to_tsvector ( 'english', coalesce(F.발명자1,'')) || to_tsvector ( 'english', coalesce(G.발명자2,'')) || to_tsvector ( 'simple', coalesce(F.발명자1,'')) || to_tsvector ( 'simple', coalesce(G.발명자2,'')) AS "발명자tsv", 
+        요약·청구항tsv, 
+        concat_ws(' ', A.문헌번호, A.공보번호,  A.등록번호, A.공개번호, A.출원번호,  A.국제공개번호, K.우번1, K.우번2, K.우번3, K.우번4, K.우번5, K.우번6, K.우번7, K.우번8, K.우번9, K.우번10) AS NUM_SEARCH 
+        FROM
+           "US_BIBLIO" 
+            A LEFT JOIN ( SELECT 문헌번호, 초록 AS 요약 FROM "US_ABSTRACT") B ON A.문헌번호 = B.문헌번호
+            LEFT JOIN ( SELECT 문헌번호, 청구항 FROM "US_CLAIM") C ON A.문헌번호 = C.문헌번호
+            LEFT JOIN ( SELECT 문헌번호, 이름 AS "출원인1", 국적 AS "출원인국가코드1" FROM "US_REL_PSN" WHERE "구분" = '출원인' AND "일련번호" = 1 ) D ON A.문헌번호 = D.문헌번호
+            LEFT JOIN ( SELECT 문헌번호, 이름 AS "출원인2", 국적 AS "출원인국적2" FROM "US_REL_PSN" WHERE "구분" = '출원인' AND "일련번호" = 2 ) E ON A.문헌번호 = E.문헌번호	
+            LEFT JOIN ( SELECT 문헌번호, 이름 AS "발명자1", 국적 AS "발명자국가코드1" FROM "US_REL_PSN" WHERE "구분" = '발명자' AND "일련번호" = 1 ) F ON A.문헌번호 = F.문헌번호
+            LEFT JOIN ( SELECT 문헌번호, 이름 AS "발명자2", 국적 AS "발명자국적2" FROM "US_REL_PSN" WHERE "구분" = '발명자' AND "일련번호" = 2 ) G ON A.문헌번호 = G.문헌번호
+            LEFT JOIN ( SELECT 문헌번호, "IPC코드" FROM "US_IPC" WHERE 일련번호 = 1 ) H ON A.문헌번호 = H.문헌번호
+            LEFT JOIN ( SELECT 문헌번호, "CPC코드" FROM "US_CPC" WHERE 일련번호 = 1 ) I ON A.문헌번호 = I.문헌번호
+            LEFT JOIN ( SELECT 문헌번호, "UPC코드" FROM "US_UPC" WHERE 일련번호 = 1 ) J ON A.문헌번호 = J.문헌번호
+            LEFT JOIN "US_TSV" I ON A.문헌번호 = I.문헌번호
+            LEFT JOIN ( select * from crosstab(
+        'SELECT 문헌번호, 일련번호, 우선권주장출원번호 FROM "US_PRIR" order by 1,2'
+        ) as ct(문헌번호 varchar, 우번1 varchar, 우번2 varchar, 우번3 varchar, 우번4 varchar, 우번5 varchar, 우번6 varchar, 우번7 varchar, 우번8 varchar, 우번9 varchar, 우번10 varchar) ) K ON A.문헌번호 = K.문헌번호        
+        """
+        return result        
 
     def date_query(self):
 
@@ -508,11 +535,11 @@ class IpSearchs:
         dateType = foo[self._dateType]
 
         if self._startDate and self._endDate:
-            result += (dateType + " >= '" + self._startDate + "' and " + dateType + " <= '" + self._endDate + "' and ")
+            result += (self._dateType + " >= '" + self._startDate + "' and " + self._dateType + " <= '" + self._endDate + "' and ")
         if self._startDate and not self._endDate:
-            result += (dateType + " >= '" + self._startDate + "' and ")
+            result += (self._dateType + " >= '" + self._startDate + "' and ")
         if not self._startDate and self._endDate:
-            result += (dateType + " <= '" + self._endDate + "' and ")
+            result += (self._dateType + " <= '" + self._endDate + "' and ")
 
         return result
 
