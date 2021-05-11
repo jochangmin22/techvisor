@@ -1,7 +1,8 @@
-from utils import request_data, redis_key, frequency_count
-from django.core.cache import cache
 from django.conf import settings
+from django.core.cache import cache
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from utils import frequency_count, redis_key, request_data, sampling
+
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 from collections import Counter
 
@@ -28,6 +29,8 @@ class IpMatrix:
 
         self.menu_option()
 
+        self.table_options()        
+
         try:
             result = cache.get(self._subKey)
             if result:
@@ -38,10 +41,22 @@ class IpMatrix:
 
     def menu_option(self):
         foo = self._subParams['menuOptions']['matrixOptions']
-        self._category = foo.get('category','')
+        self._categoryX = foo.get('categoryX','')
+        self._categoryY = foo.get('categoryY','')
         self._volume = foo.get('volume','')
+        self._unit = foo.get('unit','')
         self._output = foo.get('output','')     
-        return          
+        return
+
+    def table_options(self):
+        foo = self._subParams["menuOptions"]["tableOptions"]['matrixTable']
+        self._sortBy = foo.get('sortBy', [])            
+
+        pageIndex = foo.get('pageIndex', 0)
+        pageSize = foo.get('pageSize', 10)
+        self._offset = pageIndex * pageSize
+        self._limit = pageSize
+        return                   
 
     def matrix_extract(self):
         def dict_keys_as_a_list():
@@ -51,7 +66,7 @@ class IpMatrix:
             return result
 
         foo = NlpToken(self._request, menu='matrix')
-        bar = foo.nlp_token(self._mtxRows)        
+        bar = foo.nlp_token(self._mtxRowsNew)        
 
         # if not bar:
         #     return self._matrixEmpty
@@ -65,20 +80,49 @@ class IpMatrix:
         matrixMax = 0
         xData = []
         yData = []
+
+        def max_val():
+            baz = max(list(bar.values()), default=0)
+            return baz if matrixMax < baz else matrixMax
+
+        def applicantExcludePerson():
+            return [d for d in self._mtxRows if d['출원인주체']]
+
+        def groupBy():
+            keys = xData
+            result = {}
+            acc = {}
+            for k in keys:
+                for item in all_list[k]:
+                    for yearKey in item.keys():
+                        try:
+                            acc[yearKey]
+                        except KeyError:
+                            acc[yearKey] = { self._categoryY : yearKey }
+
+                        try:
+                            acc[yearKey][k]
+                        except KeyError:
+                            acc[yearKey][k] = 0 + item[yearKey]
+                        else:
+                            acc[yearKey][k] = acc[yearKey][k] + item[yearKey]
+                result.update(acc)
+            return result.values()            
         
         foo = { '연도별':'출원일', '기술별':'ipc코드', '기업별':'출원인1'}
-        category = foo[self._category]  
+        categoryY = foo[self._categoryY]
+
+        self._mtxRowsNew = applicantExcludePerson() if categoryY == '출원인1' else self._mtxRows 
 
         topics = self.matrix_extract()
 
         try:
-            for j in range(len(topics)):  # topic 20
+            for j in range(len(topics)):
                 topic = topics[j].replace("_"," ")
-                temp = [d for d in self._mtxRows if topic in d[self._volume]]
-                temp2 = Counter(c[category] for c in temp)
-                max_value = max(list(temp2.values()), default=0)
-                matrixMax = max_value if matrixMax < max_value else matrixMax
-                mlist.append(temp2)
+                foo = [d for d in self._mtxRowsNew if topic in d[self._volume]]
+                bar = Counter(c[categoryY] for c in foo)
+                matrixMax = max_val()
+                mlist.append(bar)
                 _yData = list(set().union(*mlist))
                 yData = list(set(yData + _yData))
                 all_list[topic] = mlist
@@ -88,10 +132,20 @@ class IpMatrix:
 
         xData = list(set().union(all_list.keys()))
         yData.sort(reverse=True)
-        yData = yData[:15]
+        yData = yData[0:30]
 
-        res =  {"entities": all_list, "max": matrixMax, "xData": xData, "yData" : yData}
+        res =  {"entities": all_list, "max": matrixMax, "xData": xData, "yData" : yData} # "table" : {rowsCount : 0 , rows : []}}
+        
+        rows = groupBy()
+
+        try:
+            rowsCount = len(rows)
+        except IndexError:        
+            rowsCount = 0  
+
+        tableData = { 'rowsCount': rowsCount, 'rows': sampling(rows, self._offset, self._limit)}           
+
+        res.update({ 'table' : tableData})
 
         cache.set(self._subKey, res , CACHE_TTL)
         return res
-    
