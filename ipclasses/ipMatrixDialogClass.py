@@ -1,12 +1,11 @@
-from utils import request_data, redis_key, frequency_count, dictfetchall, remove_tail, add_orderby
+from utils import request_data, redis_key, dictfetchall, add_orderby
 from django.db import connection
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-from collections import Counter
 
-from ipclasses import IpSearchs, NlpToken
+from ipclasses import IpSearchs 
 
 class IpMatrixDialog:
     
@@ -22,19 +21,11 @@ class IpMatrixDialog:
 
         self._subKey = f'{subKey}matrix_dialog'
 
-        foo = self._subParams['menuOptions']['matrixOptions']
-        self._category = foo.get('category','')
-        self._volume = foo.get('volume','')
-        self._output = foo.get('output','') 
+        self.menu_option()
 
-        bar = self._subParams['menuOptions']['tableOptions']['matrixDialog']
-        self._sortBy = bar.get('sortBy', [])  
-        self._pageIndex = bar.get('pageIndex', 0)
-        self._pageSize = bar.get('pageSize', 10)
+        self.table_options()
 
-        baz = self._subParams['menuOptions']['matrixDialogOptions']
-        self._topic = baz.get('topic', [])  
-        self._categoryValue = baz.get('categoryValue', [])                      
+        self.dialog_options()
 
         try:
             result = cache.get(self._subKey)
@@ -47,21 +38,47 @@ class IpMatrixDialog:
         if not self._params.get('searchText',None):
             return self._matrixEmpty            
 
+    def menu_option(self):
+        foo = self._subParams['menuOptions']['matrixOptions']
+        self._categoryX = foo.get('categoryX','')
+        self._categoryY = foo.get('categoryY','')
+        self._volume = foo.get('volume','')
+        self._unit = foo.get('unit','')
+        self._output = foo.get('output','')     
+        return
+
+    def table_options(self):
+        foo = self._subParams["menuOptions"]["tableOptions"]['matrixDialog']
+        pageIndex = foo.get('pageIndex', 0)
+        pageSize = foo.get('pageSize', 10)
+        self._sortBy = foo.get('sortBy', [])            
+
+        self._offset = pageIndex * pageSize
+        self._limit = pageSize
+        return 
+
+    def dialog_options(self):
+        foo = self._subParams['menuOptions']['matrixDialogOptions']
+        self._topic = foo.get('topic', [])  
+        self._categoryValue = foo.get('categoryValue', [])
+        return      
+
+
     def load_query(self):
         foo = IpSearchs(self._request, mode='query')
         return foo.query_chioce() 
 
     def matrix_dialog(self):
         foo = { '연도별':'출원일', '기술별':'ipc코드', '기업별':'출원인1'}
-        category = foo[self._category]  
+        categoryY = foo[self._categoryY]  
 
         query = self.load_query()
         # add rest where
-        query += ' and ' + category + '= \'' + self._categoryValue + '\''
+        query += ' and ' + categoryY + '= \'' + self._categoryValue + '\''
         # add sort
         query += add_orderby(self._sortBy)  
         # add offset limit
-        query += f' offset {self._pageIndex * self._pageSize} limit {self._pageSize}'    
+        query += f' offset {self._offset} limit {self._limit}'    
 
         with connection.cursor() as cursor:    
             cursor.execute(query)

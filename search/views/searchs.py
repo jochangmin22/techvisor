@@ -1,10 +1,4 @@
-from django.db import connection
 from django.http import JsonResponse
-from django.http import HttpResponse
-import re
-from itertools import permutations
-import operator
-import json
 
 from utils import request_data
 from ipclasses import IpSearchs

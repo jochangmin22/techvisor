@@ -10,8 +10,6 @@ import pandas as pd
 
 from django.db import connection
 
-from ipclasses import IpSearchs
-
 class IpIndicator:
     
     def __init__(self, request, indRow):
@@ -23,9 +21,6 @@ class IpIndicator:
 
     def set_up(self):
         self._params, self._subParams = request_data(self._request)
-
-        if not self._params.get('searchText',None):
-            return self._indicatorEmpty        
 
         self._menuKey = menu_redis_key(self._request, 'indicator')        
 
@@ -105,34 +100,13 @@ class IpIndicator:
             # citing count (using appNo)
             query= 'SELECT sum(피인용수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'
             return self.get_sum_query(query)
-
-        def count_granted(grantedList, code):            
-            # granted count (using grantedList, code)            
-            try:
-                return [item['value'] for item in grantedList if item["code"] == code][0]
-            except:
-                return 0
-        def get_cpp():
-            try:
-                return citing / granted
-            except:
-                return 0              
-        def get_pii():
-            try:
-                return  cpp / total_citing / total_granted
-            except:
-                return 0             
+ 
 
         def count_family(appNos):                                                 
             # family count (using appNo)
             query= 'SELECT sum(패밀리수) cnt from 특허실용심사피인용수패밀리수 where 출원번호 IN (' + appNos + ')'
             return self.get_sum_query(query)   
 
-        def get_pfs():
-            try:
-                return family / total_family             
-            except:
-                return 0
 
         def count_total_family():                                                 
             # total family count (using appNo)
@@ -205,4 +179,3 @@ class IpIndicator:
         cache.set(self._menuKey, result , CACHE_TTL)
 
         return result
-

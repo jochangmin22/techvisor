@@ -10,3 +10,4 @@ from .ipVisualClass import IpVisual
 from .ipIndicatorClass import IpIndicator
 from .ipMatrixClass import IpMatrix
 from .ipMatrixDialogClass import IpMatrixDialog
+from .ipNewsClass import IpNews

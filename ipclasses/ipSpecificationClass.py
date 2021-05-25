@@ -1,16 +1,12 @@
-from utils import request_data, redis_key, remove_tail, dictfetchall,  sampling, tokenizer, tokenizer_phrase, frequency_count
+from utils import request_data, redis_key, dictfetchall, tokenizer, tokenizer_phrase, frequency_count, remove_duplicates
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
-from django.http import JsonResponse
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 import re
-import operator
 
 from bs4 import BeautifulSoup
-
-from ipclasses import IpSearch
 
 class IpSpecification:
 

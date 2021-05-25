@@ -3,44 +3,27 @@
 from __future__ import print_function
 import argparse 
 
-import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import pandas as pd
 import time
-import urllib.request
-from selenium.webdriver import Chrome
 from selenium import webdriver
 import json
 import re     
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-import datetime as dt
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 import psutil
-import threading
 import sys
-import os
+
 
 import psycopg2
-from psycopg2.extensions import AsIs
 from datetime import datetime
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
-
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'techvisor.settings')
-
-# import django
-# django.setup()
-
-# from company.models import Corp_intrinsic_value, Preferred_stock
-# from search.models import Listed_corp
 
 dt = datetime.utcnow()
 
@@ -127,8 +110,7 @@ def backupAndEmptyTable():
                 cursor.execute(query)
                 connection.commit()
     except (Exception, psycopg2.Error) as error :
-        if(connection):
-            print("Failed to backup and empty listed_corp table", error)
+        print("Failed to backup and empty listed_corp table", error)
 
     finally:
         if(connection):
@@ -146,8 +128,7 @@ def missingCrawlCheck():
                 row = dictfetchall(cursor)
                 return [d['종목코드']for d in row]
     except (Exception, psycopg2.Error) as error :
-        if(connection):
-            print("Failed to backup and empty listed_corp table", error)
+        print("Failed to backup and empty listed_corp table", error)
 
     finally:
         if(connection):
@@ -165,8 +146,7 @@ def getPreferredStockList():
                 row = dictfetchall(cursor)
                 return row
     except (Exception, psycopg2.Error) as error :
-        if(connection):
-            print("Failed to backup and empty preferred_stock table", error)
+        print("Failed to backup and empty preferred_stock table", error)
 
     finally:
         if(connection):
@@ -183,8 +163,7 @@ def duplicateInfo(data):
                 cursor.execute(query)
                 connection.commit()
     except (Exception, psycopg2.Error) as error :
-        if(connection):
-            print("Failed to backup and empty listed_corp table", error)
+        print("Failed to backup and empty listed_corp table", error)
 
     finally:
         if(connection):
@@ -202,8 +181,7 @@ def updateInfo(data, res):
                 cursor.execute(query)
                 connection.commit()
     except (Exception, psycopg2.Error) as error :
-        if(connection):
-            print("Failed to backup and empty preferred_stock table", error)
+        print("Failed to backup and empty listed_corp table", error)
 
     finally:
         if(connection):
@@ -228,8 +206,7 @@ def insertTable(no, stockcode, info, financial_res, name, upjong, product, liste
                 # print (no, stockcode, "Record inserted successfully" )
 
     except (Exception, psycopg2.Error) as error :
-        if(connection):
-            print(no, "Failed to insert record into mobile table", error)
+        print(no, "Failed to insert record into listed_corp table", error)
 
     finally:
         #closing database connection.
@@ -416,7 +393,10 @@ def qPrice(df):
 
     # jjbun = df[jcols[2]].fillna(0).to_list() # 3번째 cols
     # 최근분기만 사용
-    jbun = df[jcols[3]].fillna(0).to_list() # 4번째 cols
+    try:
+        jbun = df[jcols[3]].fillna(0).to_list() # 4번째 cols
+    except KeyError:
+        return {'영업이익(Y/Y)' : str2round(0),'당기순이익(Y/Y)' : str2round(0), '영업이익(Q/Q)' : str2round(0),'당기순이익(Q/Q)' : str2round(0)}        
   
     return {'영업이익(Y/Y)' : str2round(jbun[3]),'당기순이익(Y/Y)' : str2round(jbun[8]), '영업이익(Q/Q)' : str2round(jbun[4]),'당기순이익(Q/Q)' : str2round(jbun[9])}
 
@@ -889,9 +869,14 @@ def now_price_stock_volume_crawl(acode):
     df = pd.read_html(browser.page_source, header=0, encoding = 'euc-kr')[1]
 
     df.columns = ['A','B','C','D'][:len(df.columns)]
-
-    foo = df.loc[df['A'] == '시가총액', 'B'].str.replace('억원','').str.replace(',', '').fillna(0).astype(int).to_list()[0]
-    bar = df.loc[df['C'] == '전일가', 'D'].str.replace(',', '').fillna(0).astype(int).to_list()[0]
+    try:
+        foo = df.loc[df['A'] == '시가총액', 'B'].astype(str).str.replace('억원','').astype(str).str.replace(',', '').fillna(0).astype(int).to_list()[0]
+    except IndexError:
+        foo = 0        
+    try:        
+        bar = df.loc[df['C'] == '전일가', 'D'].astype(str).str.replace(',', '').fillna(0).astype(int).to_list()[0]
+    except IndexError:
+        bar = 0
 
     result['시가총액(억)'] = foo
     result['전일종가'] = bar
@@ -911,8 +896,7 @@ def backup_to_corp_intrinsic_value():
                 cursor.execute(query)
                 connection.commit()
     except (Exception, psycopg2.Error) as error :
-        if(connection):
-            print("Failed to backup and empty corp_intrinsic_value table", error)
+        print("Failed to backup and empty corp_intrinsic_value table", error)
 
     finally:
         if(connection):

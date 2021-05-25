@@ -1,14 +1,10 @@
-from utils import request_data, redis_key, remove_tail,add_orderby, dictfetchall, sampling, frequency_count, snake_to_camel
+from utils import request_data, redis_key, remove_tail, dictfetchall, sampling, frequency_count, snake_to_camel
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
-from django.http import JsonResponse
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
-
-import re
-import operator
 
 import json
 import asyncio
@@ -298,14 +294,14 @@ class IpSearch:
             WHEN COALESCE ( B.일자, '' ) = '' THEN	format_date_fn(A.문헌일::TEXT) 
         ELSE format_date_fn(B.일자 :: TEXT)
         END 일자,
-            A.출원번호,
+            B.관련출원번호 AS 출원번호,
             A."ipc코드" 
         FROM
             (
             SELECT
                 'B1' 식별코드, 
                 표준인용문헌국가코드 국가,
-                split_part( "인용문헌출원번호_국내":: TEXT, ',', 1 )  AS "관련출원번호", 
+                case when 표준인용문헌국가코드 = 'KR' then split_part( "인용문헌출원번호_국내":: TEXT, ',', 1 ) else 원인용문헌번호 end "관련출원번호", 
                 string_agg (distinct(case when left(원인용문헌번호,2) = "표준인용문헌국가코드" then substring(원인용문헌번호,3) end), ', ' ) 문헌번호,
                 string_agg ( 인용문헌구분코드명, ', ' ) 인용참증단계,
                 표준인용문헌발행일자::TEXT AS 일자, 출원번호  

@@ -21,9 +21,6 @@ class IpMatrix:
         self._params, self._subParams = request_data(self._request)
         _, subKey = redis_key(self._request)
 
-        if not self._params.get('searchText',None):
-            self.matrix = self._matrixEmpty           
-            return
 
         self._subKey = f'{subKey}¶matrix'
 

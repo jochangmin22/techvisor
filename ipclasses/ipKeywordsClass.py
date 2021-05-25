@@ -21,10 +21,6 @@ class IpKeywords:
     def set_up(self):
         self._params, self._subParams = request_data(self._request)
 
-        if not self._params.get('searchText',None):
-            self._keywords = self._keywordsEmpty           
-            return 
-
         self._menuKey = menu_redis_key(self._request, 'keywords')        
 
         self.menu_option()

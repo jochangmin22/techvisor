@@ -18,13 +18,9 @@ class IpWordcloud:
     def set_up(self):
         self._params, self._subParams = request_data(self._request)
 
-        if not self._params.get('searchText',None):
-            self._wordcloud = self._wordcloudEmpty           
-            return
-
         self._menuKey = menu_redis_key(self._request, 'wordcloud')
 
-        self.menu_option()        
+        self.menu_option()
 
         try:
             result = cache.get(self._menuKey)

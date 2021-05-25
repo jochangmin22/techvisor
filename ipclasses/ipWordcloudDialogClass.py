@@ -1,4 +1,4 @@
-from utils import request_data, redis_key, frequency_count, dictfetchall, remove_tail, add_orderby
+from utils import request_data, redis_key, dictfetchall, add_orderby
 from django.db import connection
 from django.core.cache import cache
 from django.conf import settings

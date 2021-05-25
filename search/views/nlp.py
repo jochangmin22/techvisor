@@ -2,7 +2,8 @@ from django.http import JsonResponse
 
 from utils import request_data
 
-from ipclasses import NlpToken, IpSearchs, IpKeywords, IpWordcloud, IpWordcloudDialog
+from ipclasses import IpSearchs, IpKeywords, IpWordcloud, IpWordcloudDialog
+from usclasses import UsSearchs, UsKeywords, UsWordcloud, UsWordcloudDialog
 
 def get_wordcloud(request):
     params, _ = request_data(request)
@@ -19,10 +20,10 @@ def kr_wordcloud(request):
     return bar.wordcloud()  
 
 def us_wordcloud(request):
-    foo = IpSearchs(request, mode="wordcloud")
+    foo = UsSearchs(request, mode="wordcloud")
     nlpRows = foo.wordcloud()
 
-    bar = IpWordcloud(request, nlpRows)
+    bar = UsWordcloud(request, nlpRows)
     return bar.wordcloud()
 
 def jp_wordcloud(request):
@@ -49,10 +50,10 @@ def kr_keywords(request):
     return bar.keywords() 
 
 def us_keywords(request):
-    foo = IpSearchs(request, mode="keywords")
+    foo = UsSearchs(request, mode="keywords")
     nlpRows = foo.keywords()
 
-    bar = IpKeywords(request, nlpRows)
+    bar = UsKeywords(request, nlpRows)
     return bar.keywords() 
 
 def jp_keywords(request):
@@ -77,12 +78,14 @@ def kr_wordcloud_dialog(request):
 
     foo = IpWordcloudDialog(request, query)
     return foo.wordcloud_dialog()
+    
 def us_wordcloud_dialog(request):
-    foo = IpSearchs(request, mode="query")
+    foo = UsSearchs(request, mode="query")
     query = foo.query_chioce()
 
-    foo = IpWordcloudDialog(request, query)
+    foo = UsWordcloudDialog(request, query)
     return foo.wordcloud_dialog()
+
 def jp_wordcloud_dialog(request):
     return
 def cn_wordcloud_dialog(request):

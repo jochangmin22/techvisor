@@ -2,7 +2,6 @@ from utils import request_data, redis_key, menu_redis_key, remove_tail, add_orde
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
-from django.http import JsonResponse
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 import re
@@ -186,8 +185,7 @@ class IpSearchs:
         return 
 
     def query_chioce(self):
-        result = self.generate_num_query() if self._searchNum else self.generate_text_query()
-        return result      
+        return self.generate_num_query() if self._searchNum else self.generate_text_query()    
 
     def query_execute(self):
         query = self.query_chioce()  
@@ -455,9 +453,11 @@ class IpSearchs:
     def make_mtx_rows(self, result):
         # matrix는 출원번호, 출원일, 출원인1, ipc코드, 요약, 청구항만 사용
         for i in range(len(result)):
-            for key in ['출원번호','출원인1','ipc코드']:
+            for key in ['출원번호','출원인1']:
                 result[i][key] = self._rows[i][key]            
 
+            result[i]['출원인주체'] = False if str(self._rows[i]['출원인코드1'])[0] == '4' else True
+            result[i]['ipc코드'] = str(self._rows[i]['ipc코드'])[0:4]            
             result[i]['출원일'] =  str(self._rows[i]['출원일'])[:-4]
 
             abstract = str(self._rows[i]['요약'])

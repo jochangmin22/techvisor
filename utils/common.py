@@ -56,6 +56,11 @@ def menu_redis_key(request, menu):
     result = "¶".join(list(nested_dict_values(params)))
     return result + "¶".join(list(nested_dict_values(subParams['menuOptions'][f'{menu}Options']))) + f'¶{menu}'
 
+def table_redis_key(request, table):
+    params, subParams = request_data(request)
+    result = "¶".join(list(nested_dict_values(params)))
+    return result + "¶".join(list(nested_dict_values(subParams['menuOptions']['tableOptions'][f'{table}Table']))) + f'¶{table}'
+
 def readRedis(redisKey, keys, data=""):
     result = cache.get(redisKey)
     if result and keys in result:

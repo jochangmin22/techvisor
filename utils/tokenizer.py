@@ -1,6 +1,3 @@
-import json
-import re
-
 from konlpy.tag import Mecab
 from django.conf import settings
 
@@ -39,10 +36,10 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
             return '_' + word if saving and close else word
         def belong_to_stopword_phrase(word):
             return True if word in STOPWORDS_PHRASE else False              
-        def rejoin_by_index(arr, alist):
-            return '_'.join([i for i, x in enumerate(arr) if i in alist])
-        def condition(alist):
-            return '_'.join([idx for idx, element in enumerate(a_list) if idx not in aList])
+        # def rejoin_by_index(arr, alist):
+        #     return '_'.join([i for i, x in enumerate(arr) if i in alist])
+        # def condition(alist):
+        #     return '_'.join([idx for idx, element in enumerate(a_list) if idx not in aList])
 
         # 조성물_청구_항, 조성물_삭제_삭제, 발현_벡터_발현_벡터
         def two_pair_remove_redundant():
@@ -122,4 +119,15 @@ def tokenizer_phrase(raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]):
         foo = _tokenizer(raw[i:i+raw_len_limit])
         result.extend(foo)
     return result
+
+def tokenizer_sa(raw, pos=['VA','NNG','NNB','NNP','VCP','VCN','MAG','VV','XR','IC']):
+    # 품사사용 참고 https://projectlog-eraser.tistory.com/19
+    mecab = Mecab()
+    try:
+        return [
+            word
+            for word, tag in mecab.pos(raw[:raw_len_limit]) if tag in pos and word not in STOPWORDS # and len(word) > 1
+        ]
+    except:
+        return []    
         

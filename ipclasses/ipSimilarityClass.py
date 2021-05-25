@@ -1,18 +1,31 @@
-from utils import request_data, redis_key, remove_tail, dictfetchall,  sampling, tokenizer, tokenizer_phrase, remove_punc, remove_brackets, remove_tags, frequency_count
+#
+# https://github.com/labihem/Patents
+#
+# based by 한양대 김영민 교수님
+
+from utils import request_data, redis_key, dictfetchall,  tokenizer_phrase, frequency_count
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
-from django.http import JsonResponse
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-import re
-import operator
+
+import pandas as pd
+import numpy as np
+from konlpy.tag import Mecab
 
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-import json
+mecab = Mecab()
+
+lam = lambda x: ['/'.join(t) for t in mecab.pos(x)
+                  if 'NN' in t
+                  or 'NP' in t
+                  or 'SL' in t
+                 ]
+
 
 class IpSimilarity:
 
@@ -84,26 +97,26 @@ class IpSimilarity:
         result = { 'rowsCount': rowsCount, 'rows': rows}   
         return result
 
-    def calcuate_similarity(self, rows):
-        # sents_sim = [remove_punc(remove_brackets(remove_tags(sent))) for sent in self._abstract['요약'] if type(sent) == str]
+    # def calcuate_similarity(self, rows):
+    #     # sents_sim = [remove_punc(remove_brackets(remove_tags(sent))) for sent in self._abstract['요약'] if type(sent) == str]
         
-        # new_sents_sim = tokenizer(sents_sim) or []
+    #     # new_sents_sim = tokenizer(sents_sim) or []
 
-        documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(sents_sim)]
+    #     documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(sents_sim)]
         
-        topn = len(sents_sim)
+    #     topn = len(sents_sim)
 
-        foo = self._subParams["menuOptions"]["similarOptions"]
-        self._modelType = foo.get('modelType', 'doc2vec')
+    #     foo = self._subParams["menuOptions"]["similarOptions"]
+    #     self._modelType = foo.get('modelType', 'doc2vec')
           
-        if self._modelType == 'doc2vec':
-            sims = self.w2b_value(documents, topn, sents_sim)
-            df_sim['유사도'] = sims
-            result = df_sim.to_json("records")
-            res = json.dumps(json.loads(result), indent=4) 
-            return res
-        else:
-            return self.cosine_value(documents, topn, sents_sim, absList)        
+    #     if self._modelType == 'doc2vec':
+    #         sims = self.w2b_value(documents, topn, sents_sim)
+    #         df_sim['유사도'] = sims
+    #         result = df_sim.to_json("records")
+    #         res = json.dumps(json.loads(result), indent=4) 
+    #         return res
+    #     else:
+    #         return self.cosine_value(documents, topn, sents_sim, absList)        
        
     def abstract_query(self):
         return f"""select COALESCE(trim(regexp_replace(regexp_replace(regexp_replace(regexp_replace(초록, '<[^>]+>', '', 'g'), '[\(\[].*?[\)\]]','', 'g'), '[^[:alnum:],/.;:]',' ','g'),'\s+',' ','g')),'') AS 요약 from 공개초록 {self._whereAppNo}"""
@@ -116,8 +129,6 @@ class IpSimilarity:
         # SELECT count(*) over () as cnt, similarity("요약", $${self._abstract}$$) AS similarity, "등록사항", "발명의명칭", "출원번호", "출원일", "출원인1", "출원인코드1", "출원인국가코드1", "발명자1", "발명자국가코드1", "등록일", "공개일", "ipc코드", "요약" FROM "kr_tsv_view" WHERE "요약" % $${self._abstract}$$ limit 100  
         return result
 
-
-        
 
     def w2b_value(self, documents, topn, abstract):
         '''단순 doc2vec'''
@@ -134,10 +145,23 @@ class IpSimilarity:
                         min_count=min_word_count,
                         window=context)
 
+        # modelDocRaw = Doc2Vec(documentsRaw,
+        #                     workers=num_workers,
+        #                     vector_size=num_features,
+        #                     min_count=min_word_count,
+        #                     window=context)                        
+
         # 가장 비슷한 문서 프린팅 (명사 모델)
         # i=100
         new_vector = modelDoc.infer_vector(abstract)
         sims = modelDoc.docvecs.most_similar([new_vector], topn=topn)
+
+        # 가장 비슷한 문서 프린팅
+        # new_vectorRaw = modelDocRaw.infer_vector(newSentsRaw_sim[0])
+        # simsRaw = modelDocRaw.docvecs.most_similar([new_vectorRaw])
+        # print(sents_sim[0])
+        # for s, w in simsRaw:
+            # print(sents_sim[s])        
 
         # sort a list of tuples by 1st item
         sorted_sims = sorted(sims, key=lambda x: x[0])
@@ -161,9 +185,9 @@ class IpSimilarity:
             return sort_index[-topn:][::-1]
 
         # 가장 비슷한 문서 프린팅
-        # i=100
-        # print(sents_sim[i])
-        for idx in most_similar(cos_sims, i, topn):
+        i=100
+        print(sents_sim[i])
+        for idx in most_similar(cos_sims, i, 20):
             print(sents_sim[idx])
 
         return sents_sim[idx]

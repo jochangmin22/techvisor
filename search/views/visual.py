@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from utils import request_data
 
 from ipclasses import IpSearchs, IpVisual, IpIndicator
+from usclasses import UsSearchs, UsVisual, UsIndicator
 
 def get_visual(request):
     params, _ = request_data(request)
@@ -45,7 +46,11 @@ def kr_indicator(request):
     return bar.indicator()
 
 def us_indicator(request):
-    return    
+    foo = UsSearchs(request, mode='indicator')
+    indRow = foo.vis_ind()
+
+    bar = UsIndicator(request, indRow)
+    return bar.indicator()
 
 def jp_indicator(request):
     return 
