@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 
-from ipclasses import IpSearch, IpSpecification, IpSimilarity
+from ipclasses import IpSearch, IpSpecification, IpSimilar
 
 def get_search(request):
     # patentOffice = params.get('patentOffice','KR') or 'KR'
@@ -211,8 +211,8 @@ def get_similar(request):
     return JsonResponse(result, safe=False)
 
 def kr_similar(request):
-    foo = IpSimilarity(request, mode = 'similar')
-    return foo.setup_similarity()
+    foo = IpSimilar(request, mode = 'similar')
+    return foo.similar()
 def us_similar(request):
     return
 def jp_similar(request):

@@ -3,7 +3,7 @@
 #
 # based by 한양대 김영민 교수님
 
-from utils import request_data, redis_key, dictfetchall,  tokenizer_phrase, frequency_count
+from utils import request_data, redis_key, dictfetchall,  tokenizer_phrase, frequency_count, snake_to_camel, table_redis_key, add_orderby
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
@@ -27,7 +27,7 @@ lam = lambda x: ['/'.join(t) for t in mecab.pos(x)
                  ]
 
 
-class IpSimilarity:
+class IpSimilar:
 
     def __init__(self, request, mode):
         self._request = request
@@ -42,40 +42,72 @@ class IpSimilarity:
         self._appNo = self._params.get('appNo','')  
         self._whereAppNo = f'WHERE "출원번호" = $${self._appNo}$$'
 
-        mainKey, subKey = redis_key(self._request)
-        self._mainKey = f'{mainKey}¶{self._mode}'
+        mainKey, _ = redis_key(self._request)
+        self._abstractKey = f'{mainKey}¶{self._mode}'
+        self._similarKey = table_redis_key(self._request, 'similar')
 
+        self.table_options()
+
+        command = {'abstract' : 'abstract', 'similar': 'similar'}
+
+        for k, v in command.items():
+            self.load_redis(k, v)        
+
+    def load_redis(self, key, name):
         try:
-            result = cache.get(self._mainKey)
+            result = cache.get(getattr(self, '_%sKey' % key))            
             if result:
-                print('load mainKey redis', self._mode)
-                self._rows = result
-                return result
-        except (KeyError, NameError, UnboundLocalError):
-            pass
+                print(f'load {self.__class__.__name__} {name} redis')
+                setattr(self, '_%s' % name, result)
+        except (KeyError, NameError, UnboundLocalError, AttributeError):
+            pass           
 
-    def query_execute(self, key):
-        command = { 'abstract': self.abstract_query, 'similar': self.similarity_query}
-        query = command[key]()
+    def table_options(self):
+        foo = self._subParams["menuOptions"]["tableOptions"]["similarTable"]
+        pageIndex = foo.get('pageIndex', 0)
+        pageSize = foo.get('pageSize', 10)
+        self._sortBy = foo.get('sortBy', [])    
+
+        # Add offset limit
+        self._offset = pageIndex * pageSize
+        self._limit = pageSize        
+        return        
+
+    def query_abstract(self):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SET work_mem to '100MB';"
+                + self.abstract_query()
+            )
+            rows = dictfetchall(cursor)
+        try:
+            result = rows[0]
+        except IndexError:
+            result = rows    
+        print('query execute: ', 'abstract')
+        cache.set(self._abstractKey, result, CACHE_TTL)
+        self._abstract = result
+        return result
+
+    def query_execute(self):
+        query = self.similar_query()
+        # add sort
+        query += add_orderby(self._sortBy)  
+        # add offset limit
+        query += f' offset {self._offset} limit {self._limit}'
         with connection.cursor() as cursor:
             cursor.execute(
                 "SET work_mem to '100MB';"
                 + query
             )
             rows = dictfetchall(cursor)
-        if key == 'abstract':
-            try:
-                result = rows[0]
-            except IndexError:
-                result = rows    
-        else:
-            result = rows
-        # setattr(self, '_%s' % key, result)
-        print('query execute: ', key)
+        result = rows
+        print('query execute: ', 'similar')
         return result
 
-    def setup_similarity(self):
-        rows = self.query_execute(key = 'abstract')
+    def similar(self):
+
+        rows = self.query_abstract()
 
         try:
             foo = tokenizer_phrase(rows['요약']) or []
@@ -85,16 +117,17 @@ class IpSimilarity:
         except IndexError:        
             self._abstract = None
 
-        print('abstract is ...',self._abstract)
+        # print('abstract is ...',self._abstract)
 
-        rows = self.query_execute(key = 'similar')
+        rows = self.query_execute()
 
         try:
             rowsCount = rows[0]["cnt"]
         except IndexError:        
-            rowsCount = 0         
-
+            rowsCount = 0 
+            
         result = { 'rowsCount': rowsCount, 'rows': rows}   
+        cache.set(self._similarKey, result, CACHE_TTL)
         return result
 
     # def calcuate_similarity(self, rows):
@@ -121,9 +154,9 @@ class IpSimilarity:
     def abstract_query(self):
         return f"""select COALESCE(trim(regexp_replace(regexp_replace(regexp_replace(regexp_replace(초록, '<[^>]+>', '', 'g'), '[\(\[].*?[\)\]]','', 'g'), '[^[:alnum:],/.;:]',' ','g'),'\s+',' ','g')),'') AS 요약 from 공개초록 {self._whereAppNo}"""
 
-    def similarity_query(self):
+    def similar_query(self):
         result = f"""
-        SELECT count(*) over () as cnt, ts_rank( 요약tsv, to_tsquery('korean', $${self._abstract}$$ ) ) AS rank, "등록사항", "발명의명칭", "출원번호", "출원일", "출원인1", "출원인코드1", "출원인국가코드1", "발명자1", "발명자국가코드1", "등록일", "공개일", "ipc코드", "요약" FROM "kr_tsv_view" WHERE 요약tsv @@ to_tsquery('korean', $${self._abstract}$$) order by ts_rank( 요약tsv, to_tsquery('korean', $${self._abstract}$$ ) ) DESC  LIMIT 10;        
+        SELECT count(*) over () as cnt, ts_rank( 요약tsv, to_tsquery('korean', $${self._abstract}$$ ) ) AS rank, "등록사항", "발명의명칭", "출원번호", "출원일", "출원인1", "출원인코드1", "출원인국가코드1", "발명자1", "발명자국가코드1", "등록일", "공개일", "ipc코드", "요약" FROM "kr_tsv_view" WHERE 요약tsv @@ to_tsquery('korean', $${self._abstract}$$) order by ts_rank( 요약tsv, to_tsquery('korean', $${self._abstract}$$ ) ) DESC         
         """
         # SELECT set_limit(0.8);
         # SELECT count(*) over () as cnt, similarity("요약", $${self._abstract}$$) AS similarity, "등록사항", "발명의명칭", "출원번호", "출원일", "출원인1", "출원인코드1", "출원인국가코드1", "발명자1", "발명자국가코드1", "등록일", "공개일", "ipc코드", "요약" FROM "kr_tsv_view" WHERE "요약" % $${self._abstract}$$ limit 100  
