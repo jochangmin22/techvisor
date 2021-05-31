@@ -7,7 +7,7 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 from gensim.models import Word2Vec
 from gensim.models import FastText
 
-from ipclasses import NlpToken
+from ipclasses import IpNlpToken
 
 class IpKeywords:
     
@@ -54,7 +54,7 @@ class IpKeywords:
          
     
     def keywords_extract(self):
-        foo = NlpToken(self._request, menu='keywords')
+        foo = IpNlpToken(self._request, menu='keywords')
         self._nlp_token = foo.nlp_token(self._nlpRows)
 
         # if not bar:
@@ -96,7 +96,7 @@ class IpKeywords:
         if self._modelType == 'word2vec':
             model = Word2Vec(sentences=[self._nlp_token],
                             workers=num_workers,
-                            size=num_features,
+                            vector_size=num_features,
                             min_count=min_word_count,
                             # iter=100,
                             window=window_context, sg=0)
@@ -106,7 +106,7 @@ class IpKeywords:
         elif self._modelType == 'fasttext':
             model = FastText(sentences=[self._nlp_token],
                             workers=num_workers,
-                            size=num_features-200,
+                            vector_size=num_features-200,
                             min_count=min_word_count,
                             # iter=100,
                             window=window_context, sg=0)
@@ -116,7 +116,7 @@ class IpKeywords:
             min_word_count = 5 if len(self._nlp_token) > 30 else 1
             model = Word2Vec(sentences=[self._nlp_token],
                             workers=4,
-                            size=100,  # 500,
+                            vector_size=100,  # 500,
                             min_count=min_word_count,  # 2,
                             iter=100,  # 300,
                             window=3, sg=1

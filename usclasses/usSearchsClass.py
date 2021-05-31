@@ -1,11 +1,5 @@
 from utils import remove_tail
 from django.core.cache import cache
-from django.conf import settings
-from django.core.cache.backends.base import DEFAULT_TIMEOUT
-CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-
-import os
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 from ipclasses import IpSearchs
 
@@ -59,6 +53,7 @@ class UsSearchs(IpSearchs):
                 result[i][key] = self._rows[i][key]            
 
             result[i]['출원일'] =  str(self._rows[i]['출원일'])[:-4]
+            result[i]['출원인주체'] = True
 
             abstract = str(self._rows[i]['요약'])
             claim = str(self._rows[i]['청구항'])
@@ -104,6 +99,7 @@ class UsSearchs(IpSearchs):
         return query
 
     def searchs_query(self, queryTextTerms):
+        ''' 특허문헌코드 B only ; 'Live' '''
         return f"""
         SELECT
         A.출원번호,
@@ -116,13 +112,13 @@ class UsSearchs(IpSearchs):
         K.우번1 AS 우선권주장출원일1,
         trim(regexp_replace(regexp_replace(regexp_replace(regexp_replace(B.요약, '<[^>]+>', '', 'g'), '[\(\[].*?[\)\]]','', 'g'), '[^[:alnum:],/.;:]',' ','g'),'\s+',' ','g')) AS 요약,
         trim(regexp_replace(regexp_replace(regexp_replace(regexp_replace(C.청구항, '<[^>]+>', '', 'g'), '[\(\[].*?[\)\]]','', 'g'), '[^[:alnum:],/.;:]',' ','g'),'\s+',' ','g')) AS 청구항,
-        D."출원인1", D."출원인국가코드1", '' AS "출원인코드1",
+        D."출원인1", D."출원인국가코드1", '1' AS "출원인코드1",
         F."발명자1", F."발명자국가코드1", 
         H.ipc코드,
         concat_ws(' ', A.문헌번호, A.공보번호,  A.등록번호, A.공개번호, A.출원번호,  A.국제공개번호, K.우번1, L.우번2) AS NUM_SEARCH
         FROM
-           ( select 문헌번호 from us_view WHERE "search" @@ to_tsquery(\'{queryTextTerms}\') GROUP BY 문헌번호) Z 
-            LEFT JOIN "US_BIBLIO" A ON Z.문헌번호 = A.문헌번호
+           ( select 문헌번호 from us_view WHERE "search" @@ to_tsquery(\'{queryTextTerms}\') and 문헌번호 like '____________B_' GROUP BY 문헌번호) Z 
+            LEFT JOIN "US_BIBLIO" A  ON Z.문헌번호 = A.문헌번호
             LEFT JOIN ( SELECT 문헌번호, 요약 FROM "US_ABSTRACT") B ON Z.문헌번호 = B.문헌번호 
             LEFT JOIN ( SELECT 문헌번호, 청구항 FROM "US_CLAIM") C ON Z.문헌번호 = C.문헌번호
             LEFT JOIN ( SELECT 문헌번호, 이름 AS "출원인1", 국적 AS "출원인국가코드1" FROM "US_REL_PSN" WHERE "구분" = '출원인' AND "일련번호" = 1 ) D ON Z.문헌번호 = D.문헌번호
@@ -131,21 +127,3 @@ class UsSearchs(IpSearchs):
             LEFT JOIN ( SELECT 문헌번호, 우선권주장출원번호 AS "우번1" FROM "US_PRIR" WHERE "일련번호" = 1 ) K ON Z.문헌번호 = K.문헌번호
             LEFT JOIN ( SELECT 문헌번호, 우선권주장출원번호 AS "우번2" FROM "US_PRIR" WHERE "일련번호" = 2 ) L ON Z.문헌번호 = L.문헌번호                  
         """
-
-    def date_query(self):
-
-        if not self._dateType or not (self._startDate or self._endDate):
-            return ""
-
-        result = ""
-        foo = { 'PRD': '우선권주장출원일1', 'PD': '공개일' , 'FD': '등록일', 'AD': '출원일' }
-        dateType = foo[self._dateType]
-
-        if self._startDate and self._endDate:
-            result += (self._dateType + " >= '" + self._startDate + "' and " + self._dateType + " <= '" + self._endDate + "' and ")
-        if self._startDate and not self._endDate:
-            result += (self._dateType + " >= '" + self._startDate + "' and ")
-        if not self._startDate and self._endDate:
-            result += (self._dateType + " <= '" + self._endDate + "' and ")
-
-        return result

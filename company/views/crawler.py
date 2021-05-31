@@ -338,7 +338,55 @@ def get_stock_lower(request):
     rows = sorted(rows, key=lambda k : k["등락률"])
 
     result = { "rowsCount" : len(rows) , "rows": rows}
-    return JsonResponse(result, safe=False)     
+    return JsonResponse(result, safe=False)
+
+def get_stock_sector(request):
+    ''' 네이버 금융 > 국내증시 > 검색상위 종목'''
+    df = pd.read_html(NAVER['stock_search_top_url'], match = '종목명', header=0, encoding = 'euc-kr')[0]
+
+    # remove null row
+    df = df.iloc[1:]
+    
+    # convert values to numeric
+    df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']] = df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    df[['PER', 'ROE']] = df[['PER', 'ROE']].fillna("0").astype(float).round(2)
+    df['검색비율'] = df['검색비율'].str.replace('%', '').fillna("0").astype(float).round(2)
+    df['등락률'] = df['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
+
+    # remove null row
+    df = df[df.순위 != 0]
+
+    # add stockCode from model
+    df['종목코드'] = [get_stockCode(corpName) for corpName in df['종목명']]
+    df['회사명'] = [get_commonCorpName(corpName) for corpName in df['종목명']]
+      
+    rows = df.to_dict('records')
+    result = { "rowsCount" : 30 , "rows": rows}
+    return JsonResponse(result, safe=False)
+
+def get_stock_theme(request):
+    ''' 네이버 금융 > 국내증시 > 검색상위 종목'''
+    df = pd.read_html(NAVER['stock_search_top_url'], match = '종목명', header=0, encoding = 'euc-kr')[0]
+
+    # remove null row
+    df = df.iloc[1:]
+    
+    # convert values to numeric
+    df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']] = df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    df[['PER', 'ROE']] = df[['PER', 'ROE']].fillna("0").astype(float).round(2)
+    df['검색비율'] = df['검색비율'].str.replace('%', '').fillna("0").astype(float).round(2)
+    df['등락률'] = df['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
+
+    # remove null row
+    df = df[df.순위 != 0]
+
+    # add stockCode from model
+    df['종목코드'] = [get_stockCode(corpName) for corpName in df['종목명']]
+    df['회사명'] = [get_commonCorpName(corpName) for corpName in df['종목명']]
+      
+    rows = df.to_dict('records')
+    result = { "rowsCount" : 30 , "rows": rows}
+    return JsonResponse(result, safe=False)             
 
 def get_stockCode(corpName):
     listed = Listed_corp.objects.filter(회사명=corpName)

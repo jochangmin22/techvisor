@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from utils import request_data
 
 from ipclasses import IpSearchs, IpMatrix, IpMatrixDialog
+from usclasses import UsSearchs, UsMatrix, UsMatrixDialog
 
 def get_matrix(request):
     params, _ = request_data(request)
@@ -18,10 +19,10 @@ def kr_matrix(request):
     return bar.matrix() 
 
 def us_matrix(request):
-    foo = IpSearchs(request, mode="matrix")
+    foo = UsSearchs(request, mode="matrix")
     mtxRows = foo.matrix()
 
-    bar = IpMatrix(request, mtxRows)
+    bar = UsMatrix(request, mtxRows)
     return bar.matrix() 
 
 def jp_matrix(request):
@@ -44,7 +45,7 @@ def kr_matrix_dialog(request):
     foo = IpMatrixDialog(request)
     return foo.matrix_dialog()
 def us_matrix_dialog(request):
-    foo = IpMatrixDialog(request)
+    foo = UsMatrixDialog(request)
     return foo.matrix_dialog()
 def jp_matrix_dialog(request):
     return

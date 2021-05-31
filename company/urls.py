@@ -26,6 +26,8 @@ urlpatterns = [
     re_path(URL+ "searchs/stocksearchtop$", csrf_exempt(views.crawler.get_stock_search_top), name='get_stock_search_top'),
     re_path(URL+ "searchs/stockupper$", csrf_exempt(views.crawler.get_stock_upper), name='get_stock_upper'),
     re_path(URL+ "searchs/stocklower$", csrf_exempt(views.crawler.get_stock_lower), name='get_stock_lower'),
+    re_path(URL+ "searchs/stocksector$", csrf_exempt(views.crawler.get_stock_sector), name='get_stock_sector'),
+    re_path(URL+ "searchs/stocktheme$", csrf_exempt(views.crawler.get_stock_theme), name='get_stock_theme'),
 
     # favorite
     re_path(URL+ "toggle-starred$", csrf_exempt(views.favorite.toggle_searchs_starred), name='toggle_searchs_starred'),

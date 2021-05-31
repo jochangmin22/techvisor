@@ -1,4 +1,4 @@
-from utils import request_data, redis_key, snake_to_camel, sampling, add_orderby, dictfetchall, frequency_count, enrich_common_corp_name
+from utils import request_data, redis_key, snake_to_camel, add_orderby, dictfetchall, enrich_common_corp_name
 
 from django.core.cache import cache
 from django.conf import settings
@@ -6,14 +6,9 @@ from django.db import connection
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
+from ipclasses import IpSearchs
 
-import os
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
-
-
-class CpVisual:
+class CpVisual(IpSearchs):
 
     def __init__(self, request, mode):
         self._request = request
@@ -46,14 +41,6 @@ class CpVisual:
         }   
         return command[self._mode]()          
 
-    def redis_rows(self):
-        try:
-            result = cache.get(self._rowsKey)            
-            if result:
-                print(f'load {self.__class__.__name__} rowsKey redis')
-                self._rows = result
-        except (KeyError, NameError, UnboundLocalError):
-            pass        
 
     def redis_visual(self):
         try:
@@ -82,34 +69,10 @@ class CpVisual:
         except (KeyError, NameError, UnboundLocalError):
             pass        
 
-    def save_redis_main(self, result):
-        cache.set(self._mainKey, result)
-        return result
-
-    def save_redis_sub(self, result):
-        cache.set(self._subKey, result)
-        return result                
-
+      
     def save_redis_sub_nlp_rows(self, result):
         cache.set(f'{self._subKey}_nlp_rows', result)
         return result                
-
-    def create_empty_rows(self):
-        self._emptyRows = [dict() for x in range(len(self._rows))]
-        return self._emptyRows
-
-    def make_paging_rows(self, result):
-        try:
-            rowsCount = self._rows[0]["cnt"]
-        except (KeyError, IndexError):        
-            rowsCount = 0
-
-        for i in range(len(result)):
-            result[i]['id'] = self._rows[i]['출원번호'] # add id key for FE's ids
-            for key in ['출원번호','출원일','등록사항','발명의명칭','출원인1','발명자1','ipc코드']:
-                result[i][key] = self._rows[i][key]
-
-        return { 'rowsCount': rowsCount, 'rows': sampling(result, self._offset, self._limit)}                
 
     def table_options(self):
         mode = snake_to_camel(self._mode)
@@ -148,14 +111,6 @@ class CpVisual:
         cache.set(self._rowsKey, self._rows, CACHE_TTL)
         print('query execute: ', key)
         return self._rows
-
-    def load_rows_first(self):
-        try:
-            getattr(self, '_rows')
-            print('_rows exist')
-        except AttributeError:
-            self._rows = self.query_execute()  
-            print('_rows not exist to execute query')
 
     def owned_patent(self):
         ''' If there is no corpName, the last 100 rows are displayed instead'''
@@ -199,123 +154,9 @@ class CpVisual:
             return self._wordcloud_nlp_rows        
 
 
-    def paging_rows(self):
-        # self.is_query_ever_been_run()
-        result = self.make_paging_rows(self.create_empty_rows()) 
-        return self.save_redis_sub(result)        
-
     def nlp_rows(self):
         result = self.make_nlp_rows(self.create_empty_rows())
         return self.save_redis_sub_nlp_rows(result)
-
-    def vis_num(self):
-        result = self.make_vis_num(self.create_empty_rows())          
-        return self.save_redis_main(result)
-
-    def vis_ipc(self):
-        result = self.make_vis_ipc()          
-        return self.save_redis_main(result)
-
-    def vis_per(self):
-        result = self.make_vis_per()          
-        return self.save_redis_main(result)                
-
-    def make_nlp_rows(self, result):
-        # nlp는 요약, 청구항 만 사용
-        for i in range(len(result)):
-            abstract = str(self._rows[i]['요약'])
-
-            claim = str(self._rows[i]['청구항'])
-
-            result[i]['요약'] = abstract
-            result[i]['청구항'] = claim
-            result[i]['요약·청구항'] = abstract + ' ' + claim
-        return result
-
-    def make_vis_num(self, result):
-        ''' visual application number '''
-        if not self._rows:
-            return { 'mode' : 'visualNum', 'entities' : [{ 'data' : [], 'labels' : []}]}        
-
-        for i in range(len(result)):
-            result[i]['출원일'] = str(self._rows[i]['출원일'])[:-4]
-            result[i]['등록일'] = str(self._rows[i]['등록일'])[:-4]
-            result[i]['구분'] = str(self._rows[i]['출원번호'])[0]
-
-        def make_each_category_dict(flag):
-            if flag:
-                foo = [i[key] for i in result if i[key] and i['구분'] == flag]
-            else:            
-                foo = [i[key] for i in result if i[key]]
-            bar = frequency_count(foo)        
-            labels = [key for key in sorted(bar)]
-            data = [bar[key] for key in sorted(bar)]  
-            return { 'labels': labels, 'data' : data }         
-
-        key = '출원일'
-        PN = make_each_category_dict(flag=None)
-        PP = make_each_category_dict(flag='1')
-        UP = make_each_category_dict(flag='2')
-        key = '등록일'
-        RN = make_each_category_dict(flag=None)
-        PR = make_each_category_dict(flag='1')
-        UR = make_each_category_dict(flag='2')    
-
-        entities = [ PN, RN, PP, UP, PR, UR ]
-        res = { 'mode' : 'visualNum', 'entities' : entities }
-        return res
-
-    def make_vis_ipc(self):
-        ''' visual ipc '''
-        def make_dic_to_list_of_dic():
-            try:
-                return { 'name' : list(bar.keys()), 'value' : list(bar.values())}
-            except AttributeError:
-                return { 'name' : [], 'value' : []}
-
-        entities = []
-        foo = [i['ipc코드'][0:4] for i in self._rows if i['ipc코드']]
-        bar = frequency_count(foo,20)
-        entities.append(make_dic_to_list_of_dic())
-
-        foo = [i['ipc코드'][0:3] for i in self._rows if i['ipc코드']]
-        bar = frequency_count(foo,20)
-        entities.append(make_dic_to_list_of_dic())
-
-        result = { 'mode' : 'visualIpc', 'entities' : entities }
-
-        return result
-
-    def make_vis_per(self):
-        ''' visual related person '''
-        
-        NATIONALITY = settings.TERMS['NATIONALITY']
-
-        entities = []
-        def nat_swap(x):
-            return NATIONALITY.get(x,x)
-
-        def make_dic_to_list_of_dic(baz):
-            try:
-                return { 'name' : list(baz.keys()), 'value' : list(baz.values())}
-            except AttributeError:
-                return { 'name' : [], 'value' : []}
-
-        # caller
-        for key in ['출원인1','발명자1']:
-            foo = [i[key] for i in self._rows if i[key]]
-
-            bar = frequency_count(foo,20)
-            entities.append(make_dic_to_list_of_dic(bar))        
-
-        for key in ['출원인국가코드1','발명자국가코드1']:
-            foo = [nat_swap(i[key]) for i in self._rows if i[key]]
-
-            bar = frequency_count(foo,20)
-            entities.append(make_dic_to_list_of_dic(bar))        
-
-        result = { 'mode' : 'visualPerson', 'entities': entities }
-        return result                                         
 
     def owned_patent_query(self):
         selecting_columns = 'SELECT count(*) over () as cnt, A.등록사항, A."발명의명칭", A.출원번호, A.출원일, A.출원인1, A.출원인코드1, A.출원인국가코드1, A.발명자1, A.발명자국가코드1, A.등록일, A.공개일, A.ipc코드, A.요약, A.청구항 FROM '

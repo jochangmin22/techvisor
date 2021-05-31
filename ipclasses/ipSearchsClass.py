@@ -159,7 +159,7 @@ class IpSearchs:
         return query
 
     def create_empty_rows(self):
-        self._emptyRows = [dict() for x in range(len(self._rows))]
+        self._emptyRows = [{} for x in range(len(self._rows))]
         return self._emptyRows
 
     def make_paging_rows(self, result):
@@ -280,7 +280,7 @@ class IpSearchs:
         return self.save_redis_main(result)
 
     def vis_ipc(self):
-        result = self.make_vis_ipc(self.create_empty_rows())          
+        result = self.make_vis_ipc()          
         return self.save_redis_main(result)
 
     def vis_cla(self):
@@ -288,13 +288,12 @@ class IpSearchs:
         return self.save_redis_sub(result)
 
     def vis_per(self):
-        result = self.make_vis_per(self.create_empty_rows())          
+        result = self.make_vis_per()          
         return self.save_redis_main(result)
 
     def vis_ind(self):
         result = self.make_vis_ind(self.create_empty_rows())
         return self.save_redis_main(result)
-
 
     def make_vis_num(self, result):
         ''' visual application number '''
@@ -329,7 +328,7 @@ class IpSearchs:
         res = { 'mode' : 'visualNum', 'entities' : entities }
         return res
 
-    def make_vis_ipc(self, result):
+    def make_vis_ipc(self):
         ''' visual ipc '''
         def make_dic_to_list_of_dic():
             try:
@@ -407,7 +406,7 @@ class IpSearchs:
         res = { 'mode' : 'visualClassify', 'entities' : entities }
         return res
 
-    def make_vis_per(self, result):
+    def make_vis_per(self):
         ''' visual related person '''
         
         NATIONALITY = settings.TERMS['NATIONALITY']
@@ -455,7 +454,6 @@ class IpSearchs:
         for i in range(len(result)):
             for key in ['출원번호','출원인1']:
                 result[i][key] = self._rows[i][key]            
-
             result[i]['출원인주체'] = False if str(self._rows[i]['출원인코드1'])[0] == '4' else True
             result[i]['ipc코드'] = str(self._rows[i]['ipc코드'])[0:4]            
             result[i]['출원일'] =  str(self._rows[i]['출원일'])[:-4]
@@ -474,8 +472,6 @@ class IpSearchs:
                 result[i][key] = self._rows[i][key]
         
         return [i for i in result if not (i['등록일'] == None)] # 등록건만                
-
-
 
     def save_redis_main(self, result):
         cache.set(self._mainKey, result)
@@ -648,7 +644,5 @@ class IpSearchs:
         if not result:
             return None
 
-        return result         
-         
-        
+        return result               
    

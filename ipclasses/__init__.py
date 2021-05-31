@@ -2,7 +2,7 @@ from .ipSearchsClass import IpSearchs
 from .ipSearchClass import IpSearch
 from .ipSpecificationClass import IpSpecification
 from .ipSimilarClass import IpSimilar
-from .nlpClass import NlpToken
+from .ipNlpClass import IpNlpToken
 from .ipKeywordsClass import IpKeywords
 from .ipWordcloudClass import IpWordcloud
 from .ipWordcloudDialogClass import IpWordcloudDialog

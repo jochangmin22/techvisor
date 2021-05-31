@@ -867,5 +867,9 @@
     "001465": { "001460": "BYC우" },
     "08537M": { "085370": "루트로닉3우C" },
     "004365": { "004360": "세방우" }
+  },
+  "ENG_TERMS": {
+    "STOPWORDS": ["herein", "wherein"],
+    "STOPWORDS_PHRASE": ["Step_A", "Step_B", "Step_C", "U.S._Pat"]
   }
 }

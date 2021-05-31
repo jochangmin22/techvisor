@@ -124,7 +124,7 @@ class IpIndicator:
         dataList = get_appno_list_of_applicant()
 
 
-        res = [dict() for x in range(len(dataList))]
+        res = [{} for x in range(len(dataList))]
         for i in range(len(dataList)):
             # if len(dataList[i]['appNo']) == 1:
             #     continue

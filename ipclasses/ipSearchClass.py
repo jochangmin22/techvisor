@@ -443,7 +443,7 @@ class IpSearch:
             ) B4
 						CROSS JOIN ( 
 						SELECT C4.*, D4."IPC코드" FROM (SELECT 문헌번호, 발명의명칭 AS 명칭,
-						등록일자 AS 일자 FROM "US_BIBLIO") C4 
+						등록일 AS 일자 FROM "US_BIBLIO") C4 
 						INNER JOIN ( SELECT 문헌번호, "IPC코드" FROM "US_IPC" WHERE 일련번호 = 1
 						) D4 ON C4.문헌번호 = D4.문헌번호
 						) A4

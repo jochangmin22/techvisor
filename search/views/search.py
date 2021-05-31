@@ -1,8 +1,10 @@
 from django.http import JsonResponse
 
 from ipclasses import IpSearch, IpSpecification, IpSimilar
+from usclasses import UsSearch, UsSpecification, UsSimilar
 
 def get_search(request):
+    # params, _ = request_data(request)    
     # patentOffice = params.get('patentOffice','KR') or 'KR'
     patentOffice = 'KR'
     command = { 'KR': kr_search, 'US': us_search, 'JP' : jp_search, 'CN' : cn_search, 'EP' : ep_search, 'PCT' : pct_search}
@@ -12,8 +14,11 @@ def get_search(request):
 def kr_search(request):
     foo = IpSearch(request, mode = 'search')
     return foo.query_execute(key = 'search')
+
 def us_search(request):
-    return
+    foo = UsSearch(request, mode = 'search')
+    return foo.query_execute(key = 'search')
+
 def jp_search(request):
     return
 def cn_search(request):
@@ -33,8 +38,11 @@ def get_quote(request):
 def kr_quote(request):
     foo = IpSearch(request, mode = 'quote')
     return foo.query_execute_paging(key = 'quote')
+
 def us_quote(request):
-    return
+    foo = UsSearch(request, mode = 'quote')
+    return foo.query_execute_paging(key = 'quote')
+
 def jp_quote(request):
     return
 def cn_quote(request):
@@ -53,8 +61,11 @@ def get_family(request):
 def kr_family(request):
     foo = IpSearch(request, mode = 'family')
     return foo.query_execute_paging(key = 'family')
+
 def us_family(request):
-    return
+    foo = UsSearch(request, mode = 'family')
+    return foo.query_execute_paging(key = 'family')
+
 def jp_family(request):
     return
 def cn_family(request):
@@ -73,8 +84,11 @@ def get_legal(request):
 def kr_legal(request):
     foo = IpSearch(request, mode='legal')
     return foo.query_execute_paging(key = 'legal')
+
 def us_legal(request):
-    return
+    foo = UsSearch(request, mode='legal')
+    return foo.query_execute_paging(key = 'legal')
+
 def jp_legal(request):
     return
 def cn_legal(request):
@@ -93,8 +107,11 @@ def get_rnd(request):
 def kr_rnd(request):
     foo = IpSearch(request, mode = 'rnd')
     return foo.query_execute_paging(key = 'rnd')
+
 def us_rnd(request):
-    return
+    foo = UsSearch(request, mode = 'rnd')
+    return foo.query_execute_paging(key = 'rnd')
+
 def jp_rnd(request):
     return
 def cn_rnd(request):
@@ -113,8 +130,11 @@ def get_description(request):
 def kr_description(request):
     foo = IpSpecification(request, mode = 'description')
     return foo.setup_description()
+
 def us_description(request):
-    return
+    foo = UsSpecification(request, mode = 'description')
+    return foo.setup_description()
+
 def jp_description(request):
     return
 def cn_description(request):
@@ -133,8 +153,11 @@ def get_wordcloud(request):
 def kr_wordcloud(request):
     foo = IpSpecification(request, mode = 'wordcloud')
     return foo.setup_wordcloud()
+
 def us_wordcloud(request):
-    return
+    foo = UsSpecification(request, mode = 'wordcloud')
+    return foo.setup_wordcloud()
+
 def jp_wordcloud(request):
     return
 def cn_wordcloud(request):
@@ -153,8 +176,11 @@ def get_applicant(request):
 def kr_applicant(request):
     foo = IpSearch(request, mode = 'applicant')
     return foo.setup_applicant()
+
 def us_applicant(request):
-    return
+    foo = UsSearch(request, mode = 'applicant')
+    return foo.setup_applicant()
+    
 def jp_applicant(request):
     return
 def cn_applicant(request):
@@ -173,8 +199,11 @@ def application_number(request):
 def kr_application_number(request):
     foo = IpSearch(request, mode = 'application_number')
     return foo.setup_application_number()
+
 def us_application_number(request):
-    return
+    foo = UsSearch(request, mode = 'application_number')
+    return foo.setup_application_number()
+
 def jp_application_number(request):
     return
 def cn_application_number(request):
@@ -193,8 +222,11 @@ def get_ipc(request):
 def kr_ipc(request):
     foo = IpSearch(request, mode = 'ipc')
     return foo.setup_ipc()
+
 def us_ipc(request):
-    return
+    foo = UsSearch(request, mode = 'ipc')
+    return foo.setup_ipc()
+
 def jp_ipc(request):
     return
 def cn_ipc(request):
@@ -213,8 +245,11 @@ def get_similar(request):
 def kr_similar(request):
     foo = IpSimilar(request, mode = 'similar')
     return foo.similar()
+
 def us_similar(request):
-    return
+    foo = UsSimilar(request, mode = 'similar')
+    return foo.similar()
+
 def jp_similar(request):
     return
 def cn_similar(request):
@@ -233,8 +268,11 @@ def right_holder(request):
 def kr_right_holder(request):
     foo = IpSearch(request, mode = 'right_holder')
     return foo.query_execute_paging( key = 'right_holder')
+
 def us_right_holder(request):
-    return
+    foo = UsSearch(request, mode = 'right_holder')
+    return foo.query_execute_paging( key = 'right_holder')
+
 def jp_right_holder(request):
     return
 def cn_right_holder(request):
@@ -253,8 +291,11 @@ def register_fee(request):
 def kr_register_fee(request):
     foo = IpSearch(request, mode = 'register_fee')
     return foo.query_execute_paging( key = 'register_fee')
+
 def us_register_fee(request):
-    return
+    foo = UsSearch(request, mode = 'register_fee')
+    return foo.query_execute_paging( key = 'register_fee')
+
 def jp_register_fee(request):
     return
 def cn_register_fee(request):
@@ -273,8 +314,11 @@ def rightfull_order(request):
 def kr_rightfull_order(request):
     foo = IpSearch(request, mode = 'rightfull_order')
     return foo.query_execute_paging( key = 'rightfull_order')
+
 def us_rightfull_order(request):
-    return
+    foo = UsSearch(request, mode = 'rightfull_order')
+    return foo.query_execute_paging( key = 'rightfull_order')
+
 def jp_rightfull_order(request):
     return
 def cn_rightfull_order(request):
@@ -293,8 +337,11 @@ def associate_corp(request):
 def kr_associate_corp(request):
     foo = IpSearch(request, mode = 'associate_corp')
     return foo.setup_associate_corp()
+
 def us_associate_corp(request):
-    return
+    foo = UsSearch(request, mode = 'associate_corp')
+    return foo.setup_associate_corp()
+
 def jp_associate_corp(request):
     return
 def cn_associate_corp(request):

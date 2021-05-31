@@ -6,7 +6,7 @@ from utils import frequency_count, redis_key, request_data, sampling
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 from collections import Counter
 
-from ipclasses import NlpToken
+from ipclasses import IpNlpToken
 
 class IpMatrix:
     
@@ -62,7 +62,7 @@ class IpMatrix:
                 result.append(key)        
             return result
 
-        foo = NlpToken(self._request, menu='matrix')
+        foo = IpNlpToken(self._request, menu='matrix')
         bar = foo.nlp_token(self._mtxRowsNew)        
 
         # if not bar:
@@ -116,8 +116,8 @@ class IpMatrix:
         try:
             for j in range(len(topics)):
                 topic = topics[j].replace("_"," ")
-                foo = [d for d in self._mtxRowsNew if topic in d[self._volume]]
-                bar = Counter(c[categoryY] for c in foo)
+                foo = [d[categoryY] for d in self._mtxRowsNew if topic in d[self._volume] and d[categoryY]]
+                bar = frequency_count(foo)
                 matrixMax = max_val()
                 mlist.append(bar)
                 _yData = list(set().union(*mlist))

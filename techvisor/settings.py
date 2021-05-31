@@ -232,6 +232,8 @@ REST_FRAMEWORK = {
     # "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"]
     # "EXCEPTION_HANDLER": "techvisor.techvisor.custom_exception_handler",
 }
+# for django 3.2.3
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Additional options
 
@@ -253,6 +255,7 @@ NAVER = get_json("NAVER")
 CELERY = get_json("CELERY")
 CACHES = get_json('CACHES')
 TERMS = get_json('TERMS', "default")
+ENG_TERMS = get_json('ENG_TERMS', "default")
 IAMPORT_KEY = get_json("IAMPORT")['IMP_KEY']
 IAMPORT_SECRET = get_json("IAMPORT")['IMP_SECRET']
 IAMPORT_CODE = get_json("IAMPORT")['IMP_CODE']

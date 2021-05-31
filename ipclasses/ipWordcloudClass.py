@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-from ipclasses import NlpToken
+from ipclasses import IpNlpToken
 
 class IpWordcloud:
     
@@ -34,10 +34,20 @@ class IpWordcloud:
         foo = self._subParams['menuOptions']['wordcloudOptions']
         self._output = foo.get('output',50)  
         return
+
+    def load_instance_variable_first(self, name):
+        try:
+            getattr(self, '_%s' % name)
+        except AttributeError:
+            print(f'❤ run def {name} because _{name} not exist')           
+            return getattr(self, name)()
+        else:
+            print(f'❤ _{name} exist')
+            return getattr(self, '_%s' % name)           
      
 
     def wordcloud_extract(self):
-        foo = NlpToken(self._request, menu='wordcloud')
+        foo = IpNlpToken(self._request, menu='wordcloud')
         bar = foo.nlp_token(self._nlpRows)
 
         return frequency_count(bar, self._output)
@@ -47,8 +57,8 @@ class IpWordcloud:
             try:
                 return { 'name' : list(foo.keys()), 'value' : list(foo.values())}
             except AttributeError:
-                return self._wordcloudEmpty    
-        foo = self.wordcloud_extract()
+                return self._wordcloudEmpty
+        foo = self.load_instance_variable_first('wordcloud_extract')    
         result = []
         result.append(make_dic_to_list_of_dic())
         cache.set(self._menuKey, result , CACHE_TTL)

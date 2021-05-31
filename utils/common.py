@@ -2,7 +2,6 @@ import json
 import re
 from itertools import islice
 
-from konlpy.tag import Mecab
 from django.conf import settings
 from collections import Counter
 from django.core.cache import cache

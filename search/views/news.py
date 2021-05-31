@@ -7,6 +7,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 from ipclasses import IpNews
+from usclasses import UsNews
 
 def get_news(request):
     params, _ = request_data(request)
@@ -20,7 +21,9 @@ def kr_news(request):
     return foo.news() 
 
 def us_news(request):
-    return
+    foo = UsNews(request, mode="news")
+    return foo.news()
+
 def jp_news(request):
     return
 def cn_news(request):
@@ -42,7 +45,9 @@ def kr_news_sa(request):
     return foo.news_sa() 
 
 def us_news_sa(request):
-    return
+    foo = UsNews(request, mode="news_sa")
+    return foo.news_sa() 
+
 def jp_news_sa(request):
     return
 def cn_news_sa(request):
@@ -64,7 +69,9 @@ def kr_related_company(request):
     return foo.related_company() 
 
 def us_related_company(request):
-    return
+    foo = UsNews(request, mode="related_company")
+    return foo.related_company()
+    
 def jp_related_company(request):
     return
 def cn_related_company(request):
