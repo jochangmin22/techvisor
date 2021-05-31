@@ -31,3 +31,7 @@ conda_env.txt
 
 */migrations/*
 !*/migrations/__init__.py
+
+celerybeat-schedule.*
+dump.rdb
+claim_number.txt

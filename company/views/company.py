@@ -11,22 +11,14 @@ import json
 import os
 from konlpy.tag import Mecab
 
+from utils import dictfetchall
+
 # caching with redis
 from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-
-# from urllib.parse import unquote
-# pynori python 3.6과 호환되는지 확인해야함
-# from pynori.korean_analyzer import KoreanAnalyzer
-
-# for api {
-# import urllib.parse
-# from collections import OrderedDict
-# from itertools import repeat
-# for api }
 
 def get_company(request, companyId=""):
     """ searchDetails용 검색 """
@@ -662,11 +654,6 @@ def replace_with_newlines(element):
         elif elem.name == 'br':
             result += '\n'
     return result                
-
-def dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
-    columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 def tokenizer( raw, pos=["NNG", "NNP", "SL", "SH", "UNKNOWN"]): # NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
     mecab = Mecab()

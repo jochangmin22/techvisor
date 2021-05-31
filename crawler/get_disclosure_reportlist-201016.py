@@ -37,8 +37,8 @@ DART = {
 DATABASES = {
     "default": {
         "ENGINE": "postgresql",
-        "NAME": "ipgrim",
-        "USER": "ipgrim",
+        "NAME": "techvisor",
+        "USER": "postgres",
         "PASSWORD": "btw*0302",
         "HOST": "localhost",
         "PORT": "5433"
@@ -47,7 +47,7 @@ DATABASES = {
 
 def connect():
     connection = psycopg2.connect(
-        host="localhost", database="ipgrim", user="postgres", password="btw*0302", port="5433"
+        host="localhost", database="techvisor", user="postgres", password="btw*0302", port="5433"
     )
     return connection    
 

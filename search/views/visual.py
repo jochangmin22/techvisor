@@ -1,43 +1,65 @@
-from django.http import HttpResponse
 from django.http import JsonResponse
-from .searchs import get_searchs
-from ..utils import get_redis_key
-import json
+from utils import request_data
 
-# caching with redis
-from django.core.cache import cache
-from django.conf import settings
-from django.core.cache.backends.base import DEFAULT_TIMEOUT
-
-CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
+from ipclasses import IpSearchs, IpVisual, IpIndicator
+from usclasses import UsSearchs, UsVisual, UsIndicator
 
 def get_visual(request):
-    ''' application_number, applicant_classify, ipc, related_person '''
-    _, subKey, _, subParams = get_redis_key(request)
-
-    # Redis {
-    sub_context = cache.get(subKey)
-
-    key = subParams['mode'] # vis_num, vis_cla, vis_ipc, vis_per
-
-    try:
-        if sub_context[key]:        
-            return HttpResponse(json.dumps(sub_context[key], ensure_ascii=False))
-    except:
-        pass
-    # Redis }    
-
-    result = get_searchs(request, mode=key)
-
-    if not result:
-        return HttpResponse(json.dumps(result, ensure_ascii=False))
-        
-    # Redis {
-    try:
-        sub_context[key] = result
-        cache.set(subKey, sub_context, CACHE_TTL)
-    except:
-        pass        
-    # Redis }
-
+    params, _ = request_data(request)
+    patentOffice = params.get('patentOffice','KR') or 'KR'
+    command = { 'KR': kr_visual, 'US': us_visual, 'JP' : jp_visual, 'CN' : cn_visual, 'EP' : ep_visual, 'PCT' : pct_visual}
+    result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
+
+def kr_visual(request):
+    foo = IpVisual(request)
+    return foo.visual()
+
+def us_visual(request):
+    foo = IpVisual(request)
+    return foo.visual()
+
+def jp_visual(request):
+    return
+
+def cn_visual(request):
+    return
+
+def ep_visual(request):
+    return
+
+def pct_visual(request):
+    return
+
+def get_indicator(request):
+    params, _ = request_data(request)
+    patentOffice = params.get('patentOffice','KR') or 'KR'
+    command = { 'KR': kr_indicator, 'US': us_indicator, 'JP' : jp_indicator, 'CN' : cn_indicator, 'EP' : ep_indicator, 'PCT' : pct_indicator}
+    result = command[patentOffice](request)
+    return JsonResponse(result, safe=False)   
+   
+def kr_indicator(request):
+    foo = IpSearchs(request, mode='indicator')
+    indRow = foo.vis_ind()
+
+    bar = IpIndicator(request, indRow)
+    return bar.indicator()
+
+def us_indicator(request):
+    foo = UsSearchs(request, mode='indicator')
+    indRow = foo.vis_ind()
+
+    bar = UsIndicator(request, indRow)
+    return bar.indicator()
+
+def jp_indicator(request):
+    return 
+
+def cn_indicator(request):
+    return 
+
+def ep_indicator(request):
+    return 
+
+def pct_indicator(request):
+    return 
