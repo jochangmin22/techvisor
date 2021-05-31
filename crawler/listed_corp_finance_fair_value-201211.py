@@ -168,7 +168,7 @@ def duplicateInfo(data):
     finally:
         if(connection):
             cursor.close()
-            connection.close()  
+            connection.close()
 
 def updateInfo(data, res):
     res = json.dumps(res)
@@ -195,8 +195,8 @@ def insertTable(no, stockcode, info, financial_res, name, upjong, product, liste
     try:
         with connect() as connection:
             with connection.cursor() as cursor:      
-        
-                postgres_insert_query = """ INSERT INTO listed_corp (회사명, 종목코드, 업종, 주요제품, 상장일, 결산월, 대표자명, 홈페이지, 지역, 정보, 재무) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                ## 테이블명 listed_corp_copy1으로 변경
+                postgres_insert_query = """ INSERT INTO listed_corp_copy1 (회사명, 종목코드, 업종, 주요제품, 상장일, 결산월, 대표자명, 홈페이지, 지역, 정보, 재무) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
                 record_to_insert = (name, stockcode, upjong, product, listed_date, settlemonth, representive, homepage, area, info, financial_res)
                 cursor.execute(postgres_insert_query, record_to_insert)
                 

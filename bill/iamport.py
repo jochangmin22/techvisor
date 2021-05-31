@@ -46,7 +46,7 @@ def payments_prepare(request):
     if user_data.data['first_pay']:
         amount = 10
     else:
-        amount = data['amount']    
+        amount = data['amount']
 
     if access_token:
         access_data = {
@@ -97,7 +97,7 @@ def payments_schedule(**kwargs):
         
         # 아래줄이 실제 서비스 할때 실행되어야 할 로직임
         # next_payments_date = datetime.datetime.fromtimestamp(kwargs['paid_at']) + relativedelta(months = int(product_data.name))
-        print('time test : ', datetime.datetime.fromtimestamp(kwargs['paid_at']) + relativedelta(months = int(product_data.name)))
+        # print('time test : ', datetime.datetime.fromtimestamp(kwargs['paid_at']) + relativedelta(months = int(product_data.name)))
         new_paymet_day = int(time.mktime(next_payments_date.timetuple()))
         
         order_transaction = OrderTransaction.objects.get(merchant_uid = kwargs['merchant_uid'])
@@ -199,15 +199,19 @@ def payments_unschedule(request):
     try:
         data = json.loads(request.body)
 
-        last_order = Order.objects.get(id = data['user_id'])
+        user_data = Users.objects.get(id = data['user_id'])
+        last_order = Order.objects.filter(user_id = data['user_id']).first()
         last_transaction = OrderTransaction.objects.get(order_id = last_order.id)
+
         if last_transaction.transaction_status == 'paid':
             payload = {
                 'customer_uid' : data['user_id'],
-                'merchant_uid' : last_transaction.merchant_uid
+                'merchant_uid' : user_data.merchant_uid
             }
     
         response = iamport.pay_unschedule(**payload)
+        user_data.merchant_uid = ''
+        user_data.save()
         return JsonResponse({ 'Message' : '정기 결제 취소' },status = 200)        
 
     except KeyError:

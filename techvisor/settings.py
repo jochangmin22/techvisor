@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     # 3rd party
     "rest_framework",
     "corsheaders",
+    "django_elasticsearch_dsl",
     # "django_extensions",
 
     # app
@@ -111,7 +112,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'django_user_agents.middleware.UserAgentMiddleware',
+    'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 ROOT_URLCONF = 'techvisor.urls'
@@ -234,6 +235,13 @@ REST_FRAMEWORK = {
 }
 # for django 3.2.3
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+# Elasticsearch 구현준비
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'elasticsearch:9200'
+    },
+}
 
 # Additional options
 
