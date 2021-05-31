@@ -169,14 +169,15 @@ def update_today_crawl_mdcline():
                 cn.execute(sql) 
     return                                            
 
-def get_stock_search_top(request):
+def stock_search_top(request):
     ''' 네이버 금융 > 국내증시 > 검색상위 종목'''
     df = pd.read_html(NAVER['stock_search_top_url'], match = '종목명', header=0, encoding = 'euc-kr')[0]
 
     # remove null row
     df = df.iloc[1:]
     # convert values to numeric
-    df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']] = df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
+    itemNames = ['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']
+    df[itemNames] = df[itemNames].fillna("0").astype(int)
     df[['PER', 'ROE']] = df[['PER', 'ROE']].fillna("0").astype(float).round(2)
     df['검색비율'] = df['검색비율'].str.replace('%', '').fillna("0").astype(float).round(2)
     df['등락률'] = df['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
@@ -194,109 +195,7 @@ def get_stock_search_top(request):
 
     return JsonResponse(result, safe=False)
 
-
-def get_stock_theme(request):
-    
-    response = requests.get(NAVER['stock_theme_url'])    
-    html = response.text
-    soup = BeautifulSoup(html, 'html.parser')
-
-    stock_theme_list = soup.select('div#contentarea_left > table.type_1.theme td.col_type1 > a[href]')
-
-    df = pd.read_html(NAVER['stock_theme_url'], match = '테마명', header = 0, encoding = 'euc-kr')[0]
-    
-    df = df.iloc[1:]
-    df.rename(
-        columns = {
-        '전일대비 등락현황' : '상승',
-        '전일대비 등락현황.1' : '보합',
-        '전일대비 등락현황.2' : '하락',
-        '주도주' : '주도주1',
-        '주도주.1' : '주도주2'
-        }, inplace = True)
-
-    df['전일대비'] = df['전일대비'].str.replace('%', '').fillna("0").astype(float).round(2)
-    df['최근3일등락률(평균)'] = df['최근3일등락률(평균)'].str.replace('%', '').fillna("0").astype(float).round(2)
-
-    df = df[df.전일대비 != 0]    
-
-    rows = df.to_dict('records')
-    result = { 'rowsCount' : 30, 'rows' : rows[:30] }
-    
-    for i in range(0,30):
-        theme_num = stock_theme_list[i]['href'].split('=')[-1]
-        rows[i]['theme_url'] = theme_num
-
-    return JsonResponse(result, safe=False)
-
-
-def get_theme_detail(request):
-    data = json.loads(request.body)
-    url =  'https://finance.naver.com/sise/sise_group_detail.nhn?type=theme&no=' + data['theme_url']
-
-    df = pd.read_html(url, match = '종목명', header = 0, encoding = 'euc-kr')[0]
-    df = df[['종목명','현재가','전일비','등락률','매수호가','매도호가','거래량','거래대금','전일거래량']]
-    
-    df[['현재가', '전일비', '매수호가', '매도호가', '거래량', '거래대금', '전일거래량']] = df[['현재가', '전일비', '매수호가', '매도호가', '거래량', '거래대금', '전일거래량']].fillna('0').astype(int)
-    df['등락률'] = df['등락률'].str.replace('%', '').fillna('0').astype(float).round(2)
-
-    df = df[df.현재가 != 0]
-    rows = df.to_dict('records')
-
-    return JsonResponse(rows, safe=False)
-
-
-def get_stock_group(request):
-
-    response = requests.get(NAVER['stock_group_url'])
-    html = response.text
-    soup = BeautifulSoup(html, 'html.parser')
-
-    stock_group_list = soup.select('div#contentarea_left > table tr > td > a[href]')
-
-    df = pd.read_html(NAVER['stock_group_url'], match = '업종명', header = 0, encoding = 'euc-kr')[0]
-    df = df.iloc[1:]
-
-    df.rename(
-        columns = {
-            '전일대비 등락현황' : '전체',
-            '전일대비 등락현황.1' : '상승',
-            '전일대비 등락현황.2' : '보합',
-            '전일대비 등락현황.3' : '하락',
-        }, inplace = True)
-    
-    df = df[['업종명', '전일대비', '전체', '상승', '보합', '하락']]
-    df['전일대비'] = df['전일대비'].str.replace('%', '').fillna('0').astype(float).round(2)
-    df['전체'] = df['전체'].fillna('0').astype(int)
-
-    df = df[df.전체 != 0]
-    rows = df.to_dict('records')
-
-    for i in range(0, len(rows)):
-        group_num = stock_group_list[i]['href'].split('=')[-1]
-        rows[i]['group_num'] = group_num
-
-    return JsonResponse(rows, safe=False)
-
-
-def get_group_detail(request):
-    
-    data = json.loads(request.body)
-    url = 'https://finance.naver.com/sise/sise_group_detail.nhn?type=upjong&no=' + data['group_num']
-
-    df = pd.read_html(url, match = '종목명', header = 0, encoding = 'euc-kr')[0]
-    df = df[['종목명','현재가','전일비','등락률','매수호가','매도호가','거래량','거래대금','전일거래량']]
-
-    df[['현재가', '전일비', '매수호가', '매도호가', '거래량', '거래대금', '전일거래량']] = df[['현재가', '전일비', '매수호가', '매도호가', '거래량', '거래대금', '전일거래량']].fillna('0').astype(int)
-    df['등락률'] = df['등락률'].str.replace('%', '').fillna('0').astype(float).round(2)
-
-    df = df[df.현재가 != 0]
-    rows = df.to_dict('records')
-
-    return JsonResponse(rows, safe=False)
-
-
-def get_stock_upper(request):
+def stock_upper(request):
     ''' 네이버 금융 > 국내증시 > 상한가  + 상승'''
     rows = []
     # 상한가
@@ -308,7 +207,8 @@ def get_stock_upper(request):
         mydf = mydf.iloc[1:,[3,4,5,6,7,11]]
 
         # convert values to numeric
-        mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+        itemNames = ['현재가', '전일비', '거래량']
+        mydf[itemNames] = mydf[itemNames].fillna("0").astype(int)
         mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
         mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
 
@@ -330,7 +230,8 @@ def get_stock_upper(request):
     mydf = mydf.iloc[0:30,[1,2,3,4,5,10]]
 
     # convert values to numeric
-    mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+    itemNames = ['현재가', '전일비', '거래량']
+    mydf[itemNames] = mydf[itemNames].fillna("0").astype(int)
     mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
     mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
 
@@ -351,7 +252,8 @@ def get_stock_upper(request):
     mydf = mydf.iloc[0:30,[1,2,3,4,5,10]]
 
     # convert values to numeric
-    mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+    itemNames = ['현재가', '전일비', '거래량']
+    mydf[itemNames] = mydf[itemNames].fillna("0").astype(int)
     mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
     mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
 
@@ -370,7 +272,7 @@ def get_stock_upper(request):
     result = { "rowsCount" : len(rows) , "rows": rows}
     return JsonResponse(result, safe=False)    
 
-def get_stock_lower(request):
+def stock_lower(request):
     ''' 네이버 금융 > 국내증시 > 하한가  + 하락'''
     rows = []
     # 하한가
@@ -382,7 +284,8 @@ def get_stock_lower(request):
         mydf = mydf.iloc[1:,[3,4,5,6,7,11]]
 
         # convert values to numeric
-        mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+        itemNames = ['현재가', '전일비', '거래량']
+        mydf[itemNames] = mydf[itemNames].fillna("0").astype(int)
         mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
         mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
 
@@ -423,7 +326,8 @@ def get_stock_lower(request):
     mydf = mydf.iloc[0:30,[1,2,3,4,5,10]]
 
     # convert values to numeric
-    mydf[['현재가', '전일비', '거래량']] = mydf[['현재가', '전일비', '거래량']].fillna("0").astype(int)
+    itemNames = ['현재가', '전일비', '거래량']
+    mydf[itemNames] = mydf[itemNames].fillna("0").astype(int)
     mydf[['PER']] = mydf[['PER']].fillna("0").astype(float).round(2)
     mydf['등락률'] = mydf['등락률'].astype(str).str.replace('%', '').fillna("0").astype(float).round(2)
 
@@ -443,53 +347,113 @@ def get_stock_lower(request):
     result = { "rowsCount" : len(rows) , "rows": rows}
     return JsonResponse(result, safe=False)
 
-def get_stock_sector(request):
-    ''' 네이버 금융 > 국내증시 > 검색상위 종목'''
-    df = pd.read_html(NAVER['stock_search_top_url'], match = '종목명', header=0, encoding = 'euc-kr')[0]
+def stock_sector(request):
+    response = requests.get(NAVER['stock_sector_url'])
+    html = response.text
+    soup = BeautifulSoup(html, 'html.parser')
 
-    # remove null row
+    stock_group_list = soup.select('div#contentarea_left > table tr > td > a[href]')
+
+    df = pd.read_html(NAVER['stock_sector_url'], match = '업종명', header = 0, encoding = 'euc-kr')[0]
     df = df.iloc[1:]
+
+    df.rename(
+        columns = {
+            '전일대비' : '전일비',
+            '전일대비 등락현황' : '전체',
+            '전일대비 등락현황.1' : '상승',
+            '전일대비 등락현황.2' : '보합',
+            '전일대비 등락현황.3' : '하락',
+        }, inplace = True)
     
-    # convert values to numeric
-    df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']] = df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
-    df[['PER', 'ROE']] = df[['PER', 'ROE']].fillna("0").astype(float).round(2)
-    df['검색비율'] = df['검색비율'].str.replace('%', '').fillna("0").astype(float).round(2)
-    df['등락률'] = df['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
+    df = df[['업종명', '전일비', '전체', '상승', '보합', '하락']]
+    df['전일비'] = df['전일비'].str.replace('%', '').fillna('0').astype(float).round(2)
+    df['전체'] = df['전체'].fillna('0').astype(int)
 
-    # remove null row
-    df = df[df.순위 != 0]
-
-    # add stockCode from model
-    df['종목코드'] = [get_stockCode(corpName) for corpName in df['종목명']]
-    df['회사명'] = [get_commonCorpName(corpName) for corpName in df['종목명']]
-      
+    df = df[df.전체 != 0]
     rows = df.to_dict('records')
-    result = { "rowsCount" : 30 , "rows": rows}
+
+    for i in range(0, len(rows)):
+        rows[i]['no'] = stock_group_list[i]['href'].split('=')[-1]
+
+    result = { "rowsCount" : len(rows) , "rows": rows}        
+
     return JsonResponse(result, safe=False)
 
-def get_stock_theme(request):
-    ''' 네이버 금융 > 국내증시 > 검색상위 종목'''
-    df = pd.read_html(NAVER['stock_search_top_url'], match = '종목명', header=0, encoding = 'euc-kr')[0]
 
-    # remove null row
-    df = df.iloc[1:]
-    
-    # convert values to numeric
-    df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']] = df[['순위','현재가', '전일비', '거래량', '시가', '고가', '저가']].fillna("0").astype(int)
-    df[['PER', 'ROE']] = df[['PER', 'ROE']].fillna("0").astype(float).round(2)
-    df['검색비율'] = df['검색비율'].str.replace('%', '').fillna("0").astype(float).round(2)
-    df['등락률'] = df['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
-
-    # remove null row
-    df = df[df.순위 != 0]
+def stock_sector_detail(request):
+    data = json.loads(request.body)
+    url = NAVER['stock_sector_detail_url'] + data['no']
+    df = pd.read_html(url, match = '종목명', header = 0, encoding = 'euc-kr')[0]
+    df = df[['종목명','현재가','전일비','등락률','매수호가','매도호가','거래량','거래대금','전일거래량']]
+    itemNames = ['현재가', '전일비', '매수호가', '매도호가', '거래량', '거래대금', '전일거래량']
+    df[itemNames] = df[itemNames].fillna('0').astype(int)
+    df['등락률'] = df['등락률'].str.replace('%', '').fillna('0').astype(float).round(2)
 
     # add stockCode from model
     df['종목코드'] = [get_stockCode(corpName) for corpName in df['종목명']]
     df['회사명'] = [get_commonCorpName(corpName) for corpName in df['종목명']]
-      
+
+    df = df[df.현재가 != 0]
     rows = df.to_dict('records')
-    result = { "rowsCount" : 30 , "rows": rows}
-    return JsonResponse(result, safe=False)             
+
+    result = { "rowsCount" : len(rows) , "rows": rows}        
+
+    return JsonResponse(result, safe=False)        
+
+def stock_theme(request):
+    
+    response = requests.get(NAVER['stock_theme_url'])    
+    html = response.text
+    soup = BeautifulSoup(html, 'html.parser')
+
+    stock_theme_list = soup.select('div#contentarea_left > table.type_1.theme td.col_type1 > a[href]')
+
+    df = pd.read_html(NAVER['stock_theme_url'], match = '테마명', header = 0, encoding = 'euc-kr')[0]
+    
+    df = df.iloc[1:]
+    df.rename(
+        columns = {
+        '전일대비' : '전일비',
+        '최근3일등락률(평균)' : '등락률',
+        '전일대비 등락현황' : '상승',
+        '전일대비 등락현황.1' : '보합',
+        '전일대비 등락현황.2' : '하락',
+        '주도주' : '주도주1',
+        '주도주.1' : '주도주2'
+        }, inplace = True)
+
+    df['전일비'] = df['전일비'].str.replace('%', '').fillna("0").astype(float).round(2)
+    df['등락률'] = df['등락률'].str.replace('%', '').fillna("0").astype(float).round(2)
+    df = df[df.전일비 != 0]    
+
+    rows = df.to_dict('records')
+    for i in range(len(rows)):
+        rows[i]['no'] = stock_theme_list[i]['href'].split('=')[-1]
+
+    result = { 'rowsCount' : len(rows), 'rows' : rows }
+    return JsonResponse(result, safe=False)
+
+def stock_theme_detail(request):
+    data = json.loads(request.body)
+    url = NAVER['stock_theme_detail_url'] + data['no']
+    df = pd.read_html(url, match = '종목명', header = 0, encoding = 'euc-kr')[0]
+    df = df[['종목명','현재가','전일비','등락률','매수호가','매도호가','거래량','거래대금','전일거래량']]
+    itemNames = ['현재가', '전일비', '매수호가', '매도호가', '거래량', '거래대금', '전일거래량']
+    df[itemNames] = df[itemNames].fillna('0').astype(int)
+    df['등락률'] = df['등락률'].str.replace('%', '').fillna('0').astype(float).round(2)
+
+    df = df[df.현재가 != 0]
+
+    # add stockCode from model
+    df['종목코드'] = [get_stockCode(corpName) for corpName in df['종목명']]
+    df['회사명'] = [get_commonCorpName(corpName) for corpName in df['종목명']]
+    
+    rows = df.to_dict('records')
+
+    result = { "rowsCount" : len(rows) , "rows": rows}        
+
+    return JsonResponse(result, safe=False)
 
 def get_stockCode(corpName):
     listed = Listed_corp.objects.filter(회사명=corpName)
@@ -556,7 +520,8 @@ def crawl_stock(request):
             del df['전일비']
 
             # convert values to numeric or date
-            df[['종가','시가', '고가', '저가','거래량']] = df[['종가','시가', '고가', '저가','거래량']].fillna("0").astype(int)
+            itemNames = ['종가','시가', '고가', '저가','거래량']
+            df[itemNames] = df[itemNames].fillna("0").astype(int)
             df[['날짜']] = df[['날짜']].astype('datetime64[ns]')
 
             #remove all NaT values
@@ -575,8 +540,8 @@ def crawl_stock(request):
                 del df['날짜']
 
                 # Change the order of df columns according to the recordset 종,시,고,저,거래량 => 시,종,저,고,거래량
-                columnsTitles = ['시가','종가','저가','고가','거래량']
-                df = df.reindex(columns=columnsTitles)
+                columnTitle = ['시가','종가','저가','고가','거래량']
+                df = df.reindex(columns=columnTitle)
 
                 for (index, price_date) in enumerate(datelist):
                     newStock = {

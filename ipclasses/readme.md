@@ -11,3 +11,13 @@ matrix : matrix.py -> IpMatrix -> IpSearchs('matrix') -> \_mtx_rows = mtx_rows()
 keyword : nlp.py -> IpKeyword -> self.\_nlpToken = NlpToken(menu='keywords') -> keywords_extract() -> sentence_similarity() -> self.\_keywords
 
 wordcloud : nlp.py -> IpWordcloud -> self.\_nlpToken = NlpToken(menu='wordcloud') -> wordcloud_extract() -> wordcloud_output() -> self.\_wordcloud
+
+# Redis Handle
+
+## Check Redis Key
+
+if exists load to Instance variable return
+or
+execute method and save Redis and assign Instance variable
+
+TODO : 래디스 처리 단순화 필요

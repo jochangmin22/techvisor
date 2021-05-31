@@ -23,13 +23,13 @@ urlpatterns = [
     re_path(URL+ "searchs/visual$", csrf_exempt(views.visual.get_visual), name='get_visual' ),
 
     # crawler
-    re_path(URL+ "searchs/stocksearchtop$", csrf_exempt(views.crawler.get_stock_search_top), name='get_stock_search_top'),
-    re_path(URL+ "searchs/stockupper$", csrf_exempt(views.crawler.get_stock_upper), name='get_stock_upper'),
-    re_path(URL+ "searchs/stocklower$", csrf_exempt(views.crawler.get_stock_lower), name='get_stock_lower'),
-    re_path(URL+ "searchs/stocktheme$", csrf_exempt(views.crawler.get_stock_theme), name='get_stock_theme'),
-    re_path(URL+ "searchs/stockthemedetail$", csrf_exempt(views.crawler.get_theme_detail), name='get_theme_detail'),
-    re_path(URL+ "searchs/stockgroup$", csrf_exempt(views.crawler.get_stock_group), name='get_stock_group'),
-    re_path(URL+ "searchs/stockgroupdetail$", csrf_exempt(views.crawler.get_group_detail), name='get_group_detail'),
+    re_path(URL+ "searchs/stocksearchtop$", csrf_exempt(views.crawler.stock_search_top), name='stock_search_top'),
+    re_path(URL+ "searchs/stockupper$", csrf_exempt(views.crawler.stock_upper), name='stock_upper'),
+    re_path(URL+ "searchs/stocklower$", csrf_exempt(views.crawler.stock_lower), name='stock_lower'),
+    re_path(URL+ "searchs/stocksector$", csrf_exempt(views.crawler.stock_sector), name='stock_sector'),
+    re_path(URL+ "searchs/stocksectordetail$", csrf_exempt(views.crawler.stock_sector_detail), name='stock_sector_detail'),
+    re_path(URL+ "searchs/stocktheme$", csrf_exempt(views.crawler.stock_theme), name='stock_theme'),
+    re_path(URL+ "searchs/stockthemedetail$", csrf_exempt(views.crawler.stock_theme_detail), name='stock_theme_detail'),
 
     # favorite
     re_path(URL+ "toggle-starred$", csrf_exempt(views.favorite.toggle_searchs_starred), name='toggle_searchs_starred'),
