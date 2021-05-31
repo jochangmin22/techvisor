@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     # 3rd party
     "rest_framework",
     "corsheaders",
+    "django_elasticsearch_dsl",
     # "django_extensions",
 
     # app
@@ -232,6 +233,13 @@ REST_FRAMEWORK = {
     ]
     # "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"]
     # "EXCEPTION_HANDLER": "techvisor.techvisor.custom_exception_handler",
+}
+
+# Elasticsearch 구현준비
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'elasticsearch:9200'
+    },
 }
 
 # Additional options
