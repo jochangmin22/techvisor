@@ -2,31 +2,18 @@ from utils import request_data, redis_key, remove_tail, dictfetchall, sampling, 
 from django.core.cache import cache
 from django.db import connection
 from django.conf import settings
-from django.core.cache.backends.base import DEFAULT_TIMEOUT
-CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
 
 import json
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
 
-import os
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+COMPANY_ASSIGNE_MATCHING = settings.TERMS['COMPANY_ASSIGNE_MATCHING']
 
 class IpSearch:
-
     def __init__(self, request, mode):
         self._request = request
         self._mode = mode
         self._emptyRows = []
         
         self.set_up()
-
-        # self._executor = ThreadPoolExecutor(1)
-        # self.loop = asyncio.new_event_loop()
-        # asyncio.set_event_loop(self.loop)
-        # result = self.loop.run_until_complete(self.run_query())
-        # self.loop.close()
 
     def set_up(self):
         self._params, self._subParams = request_data(self._request)
@@ -59,15 +46,6 @@ class IpSearch:
                 return res
         except (KeyError, NameError, UnboundLocalError):
             pass
-
-    # async def run_query(self):
-    #     try:
-    #         getattr(self, '_rows')
-    #     except AttributeError:
-    #         await self.loop.run_in_executor(self._executor, self.query_execute)
-    #         return 
-    #     else:
-    #         return  
     
     def query_execute(self, key):
         query = self.query_chioce(key)
@@ -85,7 +63,7 @@ class IpSearch:
                 result = rows    
         else:
             result = rows
-        cache.set(self._mainKey, result, CACHE_TTL)
+        cache.set(self._mainKey, result)
         setattr(self, '_%s' % key, result)
         print('query execute: ', key)
         return result
@@ -119,11 +97,8 @@ class IpSearch:
 
         for i in range(len(result)):
             result[i]['출원일'] = str(result[i]['출원일'])[:-4]
-
             result[i]['등록일'] = str(result[i]['등록일'])[:-4]
-
             result[i]['구분'] = str(result[i]['출원번호'])[0]
-
 
         def make_each_category_dict(flag):
             if flag:
@@ -179,8 +154,20 @@ class IpSearch:
             rows = self.query_execute(key)
 
         result = self.make_paging_rows(rows)
-        cache.set(self._subKey, result, CACHE_TTL)
+        cache.set(self._subKey, result)
         return result
+
+    def table_options(self):
+        mode = snake_to_camel(self._mode)
+        foo = self._subParams["menuOptions"]["tableOptions"][mode]
+        pageIndex = foo.get('pageIndex', 0)
+        pageSize = foo.get('pageSize', 10)
+        self._sortBy = foo.get('sortBy', [])    
+
+        # Add offset limit
+        self._offset = pageIndex * pageSize
+        self._limit = pageSize        
+        return        
 
     def make_paging_rows(self, result):
         try:
@@ -188,19 +175,9 @@ class IpSearch:
         except IndexError:        
             rowsCount = 0
 
-        mode = snake_to_camel(self._mode)
+        self.table_options()
 
-        foo = self._subParams["menuOptions"]["tableOptions"][mode]
-        self._pageIndex = foo.get('pageIndex', 0)
-        self._pageSize = foo.get('pageSize', 10)
-        self._sortBy = foo.get('sortBy', [])            
-
-
-        # Add offset limit
-        offset = self._pageIndex * self._pageSize
-        limit = self._pageSize
-
-        return { 'rowsCount': rowsCount, 'rows': sampling(result, offset, limit)}
+        return { 'rowsCount': rowsCount, 'rows': sampling(result, self._offset, self._limit)}
        
     def query_chioce(self, key):
         command = { 'search': self.search_query, 'quote': self.quote_query, 'family' : self.family_query, 'legal' : self.legal_query, 'rnd' : self.rnd_query, 'application_number' : self.application_number_query, 'ipc' : self.ipc_query, 'right_holder' : self.right_holder_query, 'register_fee' : self.register_fee_query, 'rightfull_order' : self.rightfull_order_query, 'associate_corp' : self.associate_corp_query}

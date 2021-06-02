@@ -1,12 +1,12 @@
+from utils import request_data
 from django.http import JsonResponse
 
 from ipclasses import IpSearch, IpSpecification, IpSimilar
 from usclasses import UsSearch, UsSpecification, UsSimilar
 
 def get_search(request):
-    # params, _ = request_data(request)    
-    # patentOffice = params.get('patentOffice','KR') or 'KR'
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_search, 'US': us_search, 'JP' : jp_search, 'CN' : cn_search, 'EP' : ep_search, 'PCT' : pct_search}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)

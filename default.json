@@ -870,6 +870,17 @@
   },
   "ENG_TERMS": {
     "STOPWORDS": ["herein", "wherein"],
-    "STOPWORDS_PHRASE": ["Step_A", "Step_B", "Step_C", "U.S._Pat"]
+    "STOPWORDS_PHRASE": [
+      "Step_A",
+      "Step_B",
+      "Step_C",
+      "Step_D",
+      "Step_E",
+      "Step_F",
+      "Step_G",
+      "Step_H",
+      "Step_I",
+      "U.S._Pat"
+    ]
   }
 }

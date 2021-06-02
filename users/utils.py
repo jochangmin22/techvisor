@@ -62,7 +62,7 @@ def generate_token(foo=None):
     if foo:
         payload.update(foo)
 
-    return jwt.encode(payload, secret_key, algorithm=algorithm).decode('utf-8')
+    return jwt.encode(payload, secret_key, algorithm=algorithm)
 
 def get_payload_from_token(token, name)    :
     ''' get payload from jwt token '''
