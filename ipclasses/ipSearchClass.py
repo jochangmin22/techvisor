@@ -409,7 +409,7 @@ class IpSearch:
 						
         SELECT
             B4.국가코드, B4.패밀리번호, B4.패밀리출원번호, B4.문헌코드, B4.문헌번호,
-						A4.명칭,	A4.일자, A4."IPC코드" AS "IPC" 	
+						A4.명칭,	A4.일자, A4.ipc코드 AS "IPC" 	
         FROM
             (
             SELECT
@@ -419,9 +419,9 @@ class IpSearch:
                 특허패밀리 {self._whereAppNo} AND 패밀리국가코드 = 'US'
             ) B4
 						CROSS JOIN ( 
-						SELECT C4.*, D4."IPC코드" FROM (SELECT 문헌번호, 발명의명칭 AS 명칭,
+						SELECT C4.*, D4.ipc코드 FROM (SELECT 문헌번호, 발명의명칭 AS 명칭,
 						등록일 AS 일자 FROM "US_BIBLIO") C4 
-						INNER JOIN ( SELECT 문헌번호, "IPC코드" FROM "US_IPC" WHERE 일련번호 = 1
+						INNER JOIN ( SELECT 문헌번호, ipc코드 FROM "US_IPC" WHERE 일련번호 = 1
 						) D4 ON C4.문헌번호 = D4.문헌번호
 						) A4
 						WHERE B4.문헌번호 = A4.문헌번호			
