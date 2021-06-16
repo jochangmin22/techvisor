@@ -1,34 +1,35 @@
-import nltk
-# from nltk.corpus import stopwords
+import spacy
+
+nlp = spacy.load("en_core_web_sm", exclude=['parser','ner','entitiy_linker','entity_ruler','textcat','textcat_multilabel','lemmatizer','morphologizer','attribute_ruler','senter','tok2vec','transformer'])
+# nlp = spacy.load("en_core_web_sm")
+
+# spacy_stopwords = spacy.lang.en.stop_words.STOP_WORDS
 
 from django.conf import settings
 raw_len_limit = 50000
 STOPWORDS = settings.ENG_TERMS['STOPWORDS']
 STOPWORDS_PHRASE = settings.ENG_TERMS['STOPWORDS_PHRASE']
 
-# stop_words = set(stopwords.words('english')) 
 
-# nltk_data (stopwords, punkt) mannually installed /home/miniconda/nltk_data
-# nltk.download('punkt')
+# def filtered_sentence(raw):
+#     result = []
+#     for word in raw:
+#         lexeme = nlp.vocab[word]
+#         if lexeme.is_stop == False:
+#             result.append(word)
+#     return result
 
-# NNG,NNP명사, SY기호, SL외국어, SH한자, UNKNOW (외래어일 가능성있음)
-def eng_tokenizer(raw, pos=["NN", "NNG", "NNP", "NNPS"]):
-    ''' raw token화 (raw_len_limit 단어 길이로 제한; 넘으면 mecab error)'''    
+def eng_tokenizer(raw, pos=["NN", "NNP", "NNPS", "NNS"]):
    
-    # raw = remove_punc(remove_brackets(remove_tags(raw)))    
+    doc = nlp(raw[:raw_len_limit])
+    # doc = list(nlp.pipe(raw))[0]
     try:
-        return [
-            word
-            for word, tag in nltk.tag.pos_tag(nltk.tokenize.word_tokenize(raw[:raw_len_limit])) if tag in pos and word not in STOPWORDS # and len(word) > 1
-            # if len(word) > 1 and tag in pos and word not in stopword
-            # if tag in pos
-            # and not type(word) == float
-        ]
+        return [ w.text for w in doc if w.tag_ in pos and not w.is_stop and w.text not in STOPWORDS]
     except:
         return []
 
-def eng_tokenizer_phrase(raw, pos=["NN", "NNG", "NNP", "NNPS"]):
-    ''' raw token화 (raw_len_limit 단어 길이로 분할 token화)'''
+def eng_tokenizer_phrase(raw, pos=["NN", "NNP", "NNPS", "NNS"]):
+    # [nsubj, nsubjpass, dobj, iobj, pobj]
     if not raw:
         return []
 
@@ -36,9 +37,9 @@ def eng_tokenizer_phrase(raw, pos=["NN", "NNG", "NNP", "NNPS"]):
         def collected_exist():
             return True if '_' in saving and saving not in STOPWORDS_PHRASE else False
         def not_belong_to_stopword():
-            return True if word not in STOPWORDS else False   
+            return True if word.text not in STOPWORDS and not word.is_stop else False   
         def pos_kind_continues():
-            return '_' + word if saving and close else word
+            return '_' + word.text if saving and close else word.text
         def belong_to_stopword_phrase(word):
             return True if word in STOPWORDS_PHRASE else False              
         # def rejoin_by_index(arr, alist):
@@ -97,8 +98,11 @@ def eng_tokenizer_phrase(raw, pos=["NN", "NNG", "NNP", "NNPS"]):
         saving = ''
         close = None
         result = []
-        for word, tag in nltk.tag.pos_tag(nltk.tokenize.word_tokenize(raw)):
-            if tag in pos:
+
+        doc = nlp(raw[:raw_len_limit])
+        # doc = list(nlp.pipe(raw))[0]
+        for word in doc:
+            if word.tag_ in pos:
                 if not_belong_to_stopword():
                     saving += pos_kind_continues()
                     close=True
@@ -124,14 +128,15 @@ def eng_tokenizer_phrase(raw, pos=["NN", "NNG", "NNP", "NNPS"]):
         result.extend(foo)
     return result
 
-def eng_tokenizer_sa(raw, pos=['NN', 'NNS', 'NNP', 'NNPS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'JJ', 'JJR', 'JJS']):
+def eng_tokenizer_sa(raw, pos=['NN', 'NNP', 'NNPS', 'NNS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'JJ', 'JJR', 'JJS']):
     # 명사, 동사, 형용사
     # 품사사용 참고 https://wikidocs.net/77166
-
+    doc = nlp(raw[:raw_len_limit])
+    # doc = list(nlp.pipe(raw))[0]
     try:
         return [
             word
-            for word, tag in nltk.tag.pos_tag(nltk.tokenize.word_tokenize(raw[:raw_len_limit])) if tag in pos and word not in STOPWORDS # and len(word) > 1
+            for word in doc if word.tag_ in pos and not word.is_stop and word.text not in STOPWORDS
         ]
     except:
         return []    

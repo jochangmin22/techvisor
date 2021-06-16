@@ -77,7 +77,7 @@ class ClaimJson:
     def bulk_data_execute(self):
         with self.connect() as connection:
             with connection.cursor() as cursor:
-                query = "select 출원번호, 청구항 from 공개청구항 WHERE 출원번호 > " + str(self._appno) + "ORDER BY 출원번호 ASC LIMIT " + str(self._limit_block) + " OFFSET 0"
+                query = f"""select 출원번호, 청구항 from 공개청구항 WHERE 출원번호 > {str(self._appno)} ORDER BY 출원번호 ASC LIMIT {str(self._limit_block)} OFFSET 0"""
                 cursor.execute(query)
                 self._rowdata = cursor.fetchall()
  
@@ -284,8 +284,9 @@ class ClaimJson:
 
         def dict_to_str(result):
             return json.dumps(result, ensure_ascii = False)
+
         # caller start                
-        
+      
         newStr = parse_typo(xmlStr) # typo
         bs = BeautifulSoup(newStr, "lxml")  # case-insensitive
 

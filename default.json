@@ -869,7 +869,7 @@
     "004365": { "004360": "세방우" }
   },
   "ENG_TERMS": {
-    "STOPWORDS": ["herein", "wherein"],
+    "STOPWORDS": ["herein", "wherein", "thereof"],
     "STOPWORDS_PHRASE": [
       "Step_A",
       "Step_B",

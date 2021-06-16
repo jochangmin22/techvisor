@@ -29,8 +29,8 @@ def pct_search(request):
     return    
 
 def get_quote(request):
-    # patentOffice = params.get('patentOffice','KR') or 'KR'
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_quote, 'US': us_quote, 'JP' : jp_quote, 'CN' : cn_quote, 'EP' : ep_quote, 'PCT' : pct_quote}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -53,7 +53,8 @@ def pct_quote(request):
     return   
 
 def get_family(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_family, 'US': us_family, 'JP' : jp_family, 'CN' : cn_family, 'EP' : ep_family, 'PCT' : pct_family}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -76,7 +77,8 @@ def pct_family(request):
     return         
 
 def get_legal(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_legal, 'US': us_legal, 'JP' : jp_legal, 'CN' : cn_legal, 'EP' : ep_legal, 'PCT' : pct_legal}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -99,7 +101,8 @@ def pct_legal(request):
     return  
 
 def get_rnd(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_rnd, 'US': us_rnd, 'JP' : jp_rnd, 'CN' : cn_rnd, 'EP' : ep_rnd, 'PCT' : pct_rnd}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -122,7 +125,8 @@ def pct_rnd(request):
     return
 
 def get_description(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_description, 'US': us_description, 'JP' : jp_description, 'CN' : cn_description, 'EP' : ep_description, 'PCT' : pct_description}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -145,7 +149,8 @@ def pct_description(request):
     return    
 
 def get_wordcloud(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_wordcloud, 'US': us_wordcloud, 'JP' : jp_wordcloud, 'CN' : cn_wordcloud, 'EP' : ep_wordcloud, 'PCT' : pct_wordcloud}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -168,7 +173,8 @@ def pct_wordcloud(request):
     return    
 
 def get_applicant(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_applicant, 'US': us_applicant, 'JP' : jp_applicant, 'CN' : cn_applicant, 'EP' : ep_applicant, 'PCT' : pct_applicant}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -191,7 +197,8 @@ def pct_applicant(request):
     return      
 
 def application_number(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_application_number, 'US': us_application_number, 'JP' : jp_application_number, 'CN' : cn_application_number, 'EP' : ep_application_number, 'PCT' : pct_application_number}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -214,7 +221,8 @@ def pct_application_number(request):
     return    
 
 def get_ipc(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_ipc, 'US': us_ipc, 'JP' : jp_ipc, 'CN' : cn_ipc, 'EP' : ep_ipc, 'PCT' : pct_ipc}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -237,7 +245,8 @@ def pct_ipc(request):
     return    
 
 def get_similar(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_similar, 'US': us_similar, 'JP' : jp_similar, 'CN' : cn_similar, 'EP' : ep_similar, 'PCT' : pct_similar}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -260,7 +269,8 @@ def pct_similar(request):
     return 
 
 def right_holder(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_right_holder, 'US': us_right_holder, 'JP' : jp_right_holder, 'CN' : cn_right_holder, 'EP' : ep_right_holder, 'PCT' : pct_right_holder}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -283,7 +293,8 @@ def pct_right_holder(request):
     return 
 
 def register_fee(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_register_fee, 'US': us_register_fee, 'JP' : jp_register_fee, 'CN' : cn_register_fee, 'EP' : ep_register_fee, 'PCT' : pct_register_fee}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -306,7 +317,8 @@ def pct_register_fee(request):
     return     
 
 def rightfull_order(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_rightfull_order, 'US': us_rightfull_order, 'JP' : jp_rightfull_order, 'CN' : cn_rightfull_order, 'EP' : ep_rightfull_order, 'PCT' : pct_rightfull_order}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)
@@ -329,7 +341,8 @@ def pct_rightfull_order(request):
     return     
 
 def associate_corp(request):
-    patentOffice = 'KR'
+    params, _ = request_data(request)    
+    patentOffice = params.get('patentOffice','KR') or 'KR'
     command = { 'KR': kr_associate_corp, 'US': us_associate_corp, 'JP' : jp_associate_corp, 'CN' : cn_associate_corp, 'EP' : ep_associate_corp, 'PCT' : pct_associate_corp}
     result = command[patentOffice](request)
     return JsonResponse(result, safe=False)

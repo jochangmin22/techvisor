@@ -1,5 +1,8 @@
-from utils import remove_tail
+from utils import remove_tail, sampling
 from django.core.cache import cache
+from django.conf import settings
+NAVER = settings.NAVER
+import requests
 
 from ipclasses import IpSearchs
 
@@ -98,6 +101,54 @@ class UsSearchs(IpSearchs):
         print('💙 us query :', query)
         return query
 
+    def make_paging_rows(self, result):
+        try:
+            rowsCount = self._rows[0]["cnt"]
+        except (KeyError, IndexError):        
+            rowsCount = 0
+
+        for i in range(len(result)):
+            result[i]['id'] = self._rows[i]['출원번호'] # add id key for FE's ids
+            for key in ['문헌번호','문헌번호enrich', '문헌일','출원번호','출원일','존속기간만료일','등록사항','발명의명칭','출원인1','ipc코드']:
+                result[i][key] = self._rows[i][key]
+
+        rows = sampling(result, self._offset, self._limit)
+
+        # foo = '.¶'.join(d['발명의명칭'] for d in rows)
+        # bar = self.list_to_string_with_delimiter(foo)
+        # rows.update('발명의명칭', bar.split('.¶'))
+
+        return { 'rowsCount': rowsCount, 'rows': rows}    
+
+    def list_to_string_with_delimiter(self, myList):
+        result = ''
+        for i in range(len(myList)):
+            result += f'''{myList[i]}.¶'''
+        return result
+
+    def get_translate(text):
+        client_id = NAVER['papago_client_id']
+        client_secret = NAVER['papago_client_secret']
+
+        data = {'text' : text,
+                'source' : 'en',
+                'target': 'ko'}
+                
+        url = NAVER['papago_url']
+
+        header = {"X-Naver-Client-Id":client_id,
+                "X-Naver-Client-Secret":client_secret}
+
+        response = requests.post(url, headers=header, data=data)
+        rescode = response.status_code
+
+        if(rescode==200):
+            send_data = response.json()
+            trans_data = (send_data['message']['result']['translatedText'])
+            return trans_data
+        else:
+            print("Error Code:" , rescode)        
+
     def searchs_query(self, queryTextTerms):
         ''' 특허문헌코드 B only ; 'Live' '''
         return f"""
@@ -105,6 +156,24 @@ class UsSearchs(IpSearchs):
         A.출원번호,
         'Live' AS 등록사항,
         A.문헌번호,
+        CONCAT('US ', TRIM (
+		LEADING '0'
+		FROM
+			CAST (concat_ws(' ',
+                 left(A.문헌번호, 12),
+                 right(A.문헌번호,2)
+                ) AS TEXT)
+	    )) 문헌번호enrich,
+        CASE
+            WHEN A.등록일 IS NULL
+            THEN A.공개일
+            ELSE A.등록일
+        END 문헌일,
+        CASE
+            WHEN A.등록일 IS NULL
+            THEN NULL
+            ELSE to_char(A.출원일::text::date + INTERVAL '20 year', 'yyyymmdd')
+        END 존속기간만료일,
         A.출원일,
         A.등록일,
         A.공개일,
@@ -114,7 +183,7 @@ class UsSearchs(IpSearchs):
         trim(regexp_replace(regexp_replace(regexp_replace(regexp_replace(C.청구항, '<[^>]+>', '', 'g'), '[\(\[].*?[\)\]]','', 'g'), '[^[:alnum:],/.;:]',' ','g'),'\s+',' ','g')) AS 청구항,
         D."출원인1", D."출원인국가코드1", '1' AS "출원인코드1",
         F."발명자1", F."발명자국가코드1", 
-        H.ipc코드,
+        H."ipc코드",
         concat_ws(' ', A.문헌번호, A.공보번호,  A.등록번호, A.공개번호, A.출원번호,  A.국제공개번호, K.우번1, L.우번2) AS NUM_SEARCH
         FROM
            ( select 문헌번호 from us_view WHERE "search" @@ to_tsquery(\'{queryTextTerms}\') and 문헌번호 like '____________B_' GROUP BY 문헌번호) Z 

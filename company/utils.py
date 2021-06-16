@@ -1,10 +1,8 @@
 import json
 import re
-from itertools import permutations
+from itertools import islice
 from konlpy.tag import Mecab
-
 from django.conf import settings
-from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 doubleKeyword = {
     '시가총액': 'MC',
